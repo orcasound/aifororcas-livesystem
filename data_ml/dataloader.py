@@ -1,80 +1,183 @@
+import librosa
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
+from pathlib import Path
+from math import ceil
+from torch.utils.data import Dataset
 
-# TODO: Add option to shuffle
-# TODO: Extend this class to deal with a list of wav files
-class WavMasterFile:
+def s_to_samples(duration,sr):
+    return int(duration*sr)
+
+class AudioFile:
     """
-    Given a wav file and sorted annotations (start_times, durations), splits it into windows of postive and negative examples. Object is indexable i.e. wav_master_file[11] returns the relevant window of the wav file and 1/0 label for positive/negative.  
-    Internally maintains list of segments and windows used to index into the loaded wav file. 
+    Attributes:
+        sr (int)
+        nsamples (int)
+        audio (float32 array)
     """
-    def __init__(self,wav_path,start_times,durations,window_duration):
+    def __init__(self,file_path,target_sr):
+        file_path = Path(file_path) 
+        self.name = file_path.name
+        if file_path.suffix == '.wav':
+            sr, audio = wavfile.read(file_path)
+            if audio.dtype=="int16":
+                audio = audio.astype('float32') / (2 ** 15)
+            elif audio.dtype=="float32":
+                pass
+            else:
+                raise Exception("Error, wav format {} not supported for {}".format(audio.dtype,self.name)) 
+            if sr != target_sr: # convert to a common sampling rate
+                print("Warning: Overwriting file {} with SR: {}, dtype: {}".format(file_path,target_sr, audio.dtype))
+                audio = librosa.core.resample(audio,sr,target_sr) 
+                wavfile.write(file_path,target_sr,audio)
+            self.sr, self.audio = target_sr, audio
+        self.nsamples = len(self.audio)
+    
+    def extend(self,target_duration_s):
+        target_nsamples = s_to_samples(target_duration_s,self.sr)
+        if target_nsamples > self.nsamples:
+            audio_tiled = np.tile(self.audio,ceil(target_nsamples/self.nsamples))
+            self.audio = audio_tiled
+            self.nsamples = len(self.audio)
+    
+    def get_window(self,start_idx,end_idx,mode='mel_spec'):
+        # HACK: hard-coded a lot of values here, should probably remove them
+        audio_window = self.audio[start_idx:end_idx]
+        if mode=='audio':
+            return audio_window 
+        elif mode=='spec':
+            spec = np.abs(librosa.core.stft(audio_window,n_fft=2048)) # ok with defaults n_fft=2048, hop 1/4th
+            return np.log(spec)
+        elif mode=='mel_spec':
+            spec = np.abs(librosa.core.stft(audio_window)) # ok with defaults n_fft=2048, hop 1/4th
+            # roughly trying out some params based on https://seaworld.org/animals/all-about/killer-whale/communication/
+            mel_fbank = librosa.filters.mel(self.sr,n_fft=2048,n_mels=80,fmin=200,fmax=10000)
+            mel_spec = np.dot(mel_fbank,spec)
+            return np.log(mel_spec)
+
+
+class AudioFileDataset(Dataset):
+    """
+    Given a tsv with (wav_file,start_time,duration) loads audio and indexes it into windows.
+    AudioFileDataset[index] returns (window,label), where window can be audio, spectrogram, or mel_spectrum depending on get_mode.  
+
+    Internally indexes AudioFiles and maintains list of segments and windows used to index into them. Also extends audio files < min_window_s by repeating them. 
+    """
+    def __init__(self,wav_dir,tsv_file,min_window_s,max_window_s,sr=20000,get_mode='mel_spec'):
+        # wav_dir, tsv_file, max_window_s
         """
-        passed annotations as sorted iterables of start_times, durations 
-        parse into negative, positive segments [ segment is a tuple (start_idx,end_idx,label) ]
-        split each segment into windows for each
+        load all wavfiles into memory (data is not too large so can get away with this)
         """
-        self.sr, self.wav = wavfile.read(wav_path)
-        if self.wav.dtype=="int16":
-            self.wav = self.wav.astype('float32') / (2 ** 15)
-        self.length = len(self.wav)
-        self.start_idxs = [self._s_to_samples(t) for t in start_times]
-        self.durations = [ self._s_to_samples(t) for t in durations ]
-        self.window_size = self._s_to_samples(window_duration)
+        self.df = pd.read_csv(tsv_file,sep='\t')
+        self.max_window_s = max_window_s
+        self.min_window_s = min_window_s
+        assert get_mode in ['audio','spec','mel_spec']
+        self.sr, self.get_mode = sr, get_mode
+        self.audio_files, self.segments, self.windows = {}, [], []
+        for wav_filename in self.df.wav_filename.unique():
+            wav_df = self.df[self.df['wav_filename']==wav_filename]
+            wav_path = Path(wav_dir)/wav_filename
+            print("Loading file:",wav_filename)
+            audio_file = AudioFile(wav_path,self.sr)
+            audio_file.extend(self.min_window_s)
+            start_times, durations = wav_df['start_time_s'], wav_df['duration_s']
+            wav_segments, wav_windows = self.index_audio_file(
+                audio_file,start_times,durations,
+                self.min_window_s, self.max_window_s
+                )
+            self.segments.extend(wav_segments)
+            self.windows.extend(wav_windows)
+            self.audio_files[wav_filename] = audio_file 
+    
+    def index_audio_file(self,audio_file,start_times,durations,min_window_s,max_window_s):
+        """
+        Given an audio_file and sorted annotations (start_times, durations), creates sequential segments and windows of postive and negative examples.
+        First, create sequential segments of min_window_s
+        [ segment: a tuple (start_idx,end_idx,label,audio_file) ]
+        Then split each segment into windows with max_window_s 
+
+        Arguments:
+            audio_file (AudioFile)
+            start_times (iterable)
+            durations (iterable)
+            min_window_s (float)
+            max_window_s (float)
+        Returns:
+            segments (list)
+            windows (list)
+        """
         
         # segments on and between annotations
-        self.segments = self.segments_from_annotations(self.start_idxs,self.durations,self.window_size)
-        
+        segments = self.segments_from_annotations(
+            audio_file,start_times,durations,min_window_s
+            )
         # split each segment into windows
-        self.windows = []
-        for segment in self.segments:
-            self.windows.extend(self.split_segment_in_windows(segment,self.window_size))
+        windows = []
+        for segment in segments:
+            windows.extend(self.split_segment_in_windows(audio_file,segment,max_window_s))
+        
+        return segments, windows
     
     def __len__(self):
         return len(self.windows)
     
     def __getitem__(self,index):
-        start_idx, end_idx, label = self.windows[index]
-        return self.wav[start_idx:end_idx], label
+        start_idx, end_idx, label, audio_file = self.windows[index]
+        return audio_file.get_window(start_idx,end_idx,self.get_mode), label
     
-    def _s_to_samples(self,duration):
-        return int(duration*self.sr)
-    
-    def segments_from_annotations(self,start_idxs,durations,window_size):
+    def segments_from_annotations(self,audio_file,start_times,durations,min_window_s):
+        sr = audio_file.sr
+        start_idxs = [s_to_samples(t,sr) for t in start_times]
+        duration_idxs = [s_to_samples(t,sr) for t in durations ]
+        min_window_idx = s_to_samples(min_window_s,sr)
+
         # iterate through the annotations in order. if we find a jump
         # add a negative segment. can deal with overlapping segments
-        segments, curr_idx = [], 0
+        segments, curr_idx, nsamples = [], 0, audio_file.nsamples 
         for i in range(len(start_idxs)):
-            si, di = start_idxs[i], durations[i]
-            if si<self.length: # prevent some errors
-                if si-curr_idx>window_size: # add negative segment if gap is large enough 
-                    segments.append((curr_idx,si,0)) # use zero for negative
-                # add the current annotation 
-                segments.append((si,si+di,1)) # use one for positive
-                curr_idx = si+di
-        if self.length-curr_idx>window_size:
-            segments.append((curr_idx,self.length,0)) 
+            si, di = start_idxs[i], duration_idxs[i]
+            ei = si+di # end of segment
+
+            if si < nsamples: # prevent some errors
+
+                if (si-curr_idx) >= min_window_idx: # add negative segment if gap is large enough 
+                    segments.append((curr_idx,si,0,audio_file)) # use zero for negative
+
+                # add annotation directly if it's a minimum size 
+                if di >= min_window_idx: 
+                    segments.append((si,ei,1,audio_file)) # use one for positive
+                # extend annotation if possible (segment from master tape)
+                elif (si+min_window_idx) < nsamples: 
+                    ei = si+min_window_idx
+                    segments.append((si,ei,1,audio_file)) # use one for positive
+
+                curr_idx = ei
+
+        if (nsamples-curr_idx) >= min_window_idx: # adding empty segment at end
+            segments.append((curr_idx,nsamples,0,audio_file)) 
         return segments
     
-    def split_segment_in_windows(self,segment,window_size):
-        c0, c1, label = segment
-        w = window_size
-        num_windows = len(range(c0,c1))//w
-        if num_windows == 0: return [ segment ]
-        else: return [ (c0+i*w,c0+(i+1)*w,label) for i in range(num_windows) ]
+    def split_segment_in_windows(self,audio_file,segment,max_window_s):
+        # splits a segment (start,end,label,wav) into non-overlapping chunks of window_size
+        w = s_to_samples(max_window_s,audio_file.sr) 
+        si, ei, label, audio_file = segment
+        num_windows = len(range(si,ei))//w
+        if num_windows == 0: return [ segment ] # smaller than max
+        else: return [ (si+i*w,si+(i+1)*w,label,audio_file) for i in range(num_windows) ]
     
-    def plot_for_debug(self,mode='windows'):
-        plot_chunks, yi = [], 0
+    def plot_for_debug(self,audio_fname,mode='windows'):
+        plot_chunks, yi, sr = [], 0, self.audio_files[audio_fname].sr
         if mode=='windows':
-            chunks = self.windows
+            chunks = [ w for w in self.windows if w[-1].name == audio_fname ]
         else: 
-            chunks = self.segments
+            chunks = [ s for s in self.segments if s[-1].name == audio_fname ]
         for c in chunks: # create line segments for each window
-            plot_chunks.append((c[0]/self.sr,c[1]/self.sr)) # convert index to time
+            plot_chunks.append((c[0]/sr,c[1]/sr)) # convert index to time
             plot_chunks.append((yi,yi))
             plot_chunks.append('g' if c[2]==1 else 'r')
             yi += 0.1      
-        segplot = plt.plot(*plot_chunks)
+        _ = plt.plot(*plot_chunks)
         plt.show()
         
