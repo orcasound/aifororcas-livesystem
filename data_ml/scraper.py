@@ -109,12 +109,12 @@ def fetch_all_metadata(save_dir,whale):
 
 def download_from_url(dl_url,dl_dir):
     # download only if not already exists
-    wav_id = os.path.basename(dl_url)
-    dl_path = os.path.join(dl_dir,wav_id)
+    file_name = os.path.basename(dl_url)
+    dl_path = os.path.join(dl_dir,file_name)
     if os.path.isfile(dl_path):
-        print("Skipping",wav_id,"as it already exists.")
+        print("Skipping",file_name,"as it already exists.")
     else:
-        print("Downloading",wav_id)
+        print("Downloading",file_name)
         with TqdmUpTo(unit='B', unit_scale=True, miniters=1,
                     desc=dl_url.split('/')[-1]) as t:  # all optional kwargs
             urllib.request.urlretrieve(dl_url, filename=dl_path,
