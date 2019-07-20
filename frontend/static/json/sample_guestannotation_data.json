@@ -1,0 +1,7 @@
+{
+    "task": {
+        "visualization": "spectrogram",
+        "annotationSolutionsUrl": "/static/json/candidate_annotations.json",
+        "url": "/static/wav/spectrogram_demo_doorknock_mono.wav"
+    }
+}

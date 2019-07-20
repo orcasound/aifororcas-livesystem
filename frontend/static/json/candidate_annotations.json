@@ -1,0 +1,14 @@
+{
+    "60012.wav": [
+        {
+            "absolute_time": "00:00:34.126000",
+            "start_time_s": 2,
+            "duration_s": 5
+        },
+        {
+            "absolute_time": "00:00:36.816000",
+            "start_time_s": 6,
+            "duration_s": 5
+        }
+    ]
+}
