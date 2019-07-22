@@ -5,11 +5,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 import torch.nn.functional as F
+import params
 
 from pathlib import Path
 from torch.utils.data import DataLoader
 from dataloader import AudioFileDataset
-from model import ResNet_slim, AverageMeter, PredScorer, set_logger, get_model_or_checkpoint
+from model import ResNet_slim, AverageMeter, PredScorer, set_logger, get_model_or_checkpoint, get_finetune_model
+from augment import SpecAug
 
 # train() 
 #TODO: Refactor a bit and remove any custom/internal references
@@ -27,7 +29,7 @@ def train(iteration, dataloader, model, optimizer, records, print_freq, epoch, b
 
         # forward - data:(b x 1 x N x d), target:(b), pred:(b x C)
         data, target = data.unsqueeze(1).float().cuda(), target.cuda()  
-        pred = model(data)
+        pred, embed = model(data)
 
         # compute classification error
         pred_id = torch.argmax(pred, dim=1)
@@ -72,34 +74,37 @@ if __name__ == "__main__":
     parser.add_argument('-modelPath', default=None, type=str, required=True)
     parser.add_argument('-dataPath', default=None, type=str, required=True)
     parser.add_argument('-logPath', default=None, type=str, required=True)
+    parser.add_argument('-model', default='AudioSet_fc_all', type=str, required=True)
     # select model, lr, lr plateau params
-    parser.add_argument('-model', default='ResNet', type=str, required=False)
     parser.add_argument('-lr', default=0.001, type=float, required=False)
     parser.add_argument('-lrPlateauSchedule', default="3,0.05,0.5", type=str, required=False)
     parser.add_argument('-batchSize', default=32, type=int, required=False)
-    parser.add_argument('-minWindowS', default=2.0, type=float, required=False)
-    parser.add_argument('-maxWindowS', default=2.0, type=float, required=False)
+    parser.add_argument('-minWindowS', default=params.WINDOW_S, type=float, required=False)
+    parser.add_argument('-maxWindowS', default=params.WINDOW_S, type=float, required=False)
     parser.add_argument('--preTrainedModelDir', default=None, type=str, required=False)
 
-    parser.add_argument('-inputDim', default=80, type=int, required=False)
-    parser.add_argument('-nGPU', default=1, type=int, required=False)
     parser.add_argument('-printFreq', default=100, type=int, required=False)
     parser.add_argument('-numEpochs', default=30, type=int, required=False)
     parser.add_argument('-dataloadWorkers', default=0, type=int, required=False)
     args = parser.parse_args()
 
     ## initialize dataloader
+    specaug = SpecAug(2,6,2,6)
+    print("Doing augmentation with specaug..")
     data_path = Path(args.dataPath)
     wav_dir_path, tsv_path = data_path/"wav", data_path/"train.tsv"
-    mean, invstd = data_path/"mean.txt", data_path/"invstd.txt"
+    mean, invstd = data_path/params.MEAN_FILE, data_path/params.INVSTD_FILE
     audio_file_dataset = AudioFileDataset(
-        wav_dir_path,tsv_path,args.minWindowS,args.maxWindowS,mean=mean,invstd=invstd
+        wav_dir_path,tsv_path,mean=mean,invstd=invstd, transform=specaug
         )
     dataloader = DataLoader(audio_file_dataset, batch_size=args.batchSize, shuffle=True, drop_last=True, num_workers=args.dataloadWorkers,pin_memory=True)
 
     ## initialize model 
-    num_classes, model_name = 2, "ResNet_slim"
-    model, curr_epoch = get_model_or_checkpoint(model_name,args.modelPath,args.nGPU) 
+    num_classes, model_name = 2, args.model 
+    if "ResNet" in model_name:
+        model, curr_epoch = get_model_or_checkpoint(model_name,args.modelPath) 
+    elif "AudioSet" in model_name:
+        model, curr_epoch = get_finetune_model(model_name,args.modelPath,args.preTrainedModelDir) 
     model.train()
 
     ## initialize optimizers 

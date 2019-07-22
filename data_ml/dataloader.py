@@ -1,6 +1,7 @@
 import librosa
 import pandas as pd
 import numpy as np
+import params
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from pathlib import Path
@@ -43,17 +44,18 @@ class AudioFile:
             self.nsamples = len(self.audio)
     
     def get_window(self,start_idx,end_idx,mode='mel_spec'):
-        # HACK: hard-coded a lot of values here, should probably remove them
         audio_window = self.audio[start_idx:end_idx]
         if mode=='audio':
             return audio_window 
         elif mode=='spec':
-            spec = np.abs(librosa.core.stft(audio_window,n_fft=2048)) # ok with defaults n_fft=2048, hop 1/4th
+            spec = np.abs(librosa.core.stft(audio_window,n_fft=params.N_FFT)) # ok with defaults n_fft=2048, hop 1/4th
             return np.log(spec).T # dimension: T x F
         elif mode=='mel_spec':
-            spec = np.abs(librosa.core.stft(audio_window,n_fft=2048)) # ok with defaults n_fft=2048, hop 1/4th
+            spec = np.abs(librosa.core.stft(audio_window,n_fft=params.N_FFT)) # ok with defaults n_fft=2048, hop 1/4th
             # roughly trying out some params based on https://seaworld.org/animals/all-about/killer-whale/communication/
-            mel_fbank = librosa.filters.mel(self.sr,n_fft=2048,n_mels=80,fmin=200,fmax=10000)
+            mel_fbank = librosa.filters.mel(
+                self.sr,n_fft=params.N_FFT,n_mels=params.N_MELS,
+                fmin=params.MEL_MIN_FREQ,fmax=params.MEL_MAX_FREQ)
             mel_spec = np.dot(mel_fbank,spec)
             return np.log(mel_spec).T # dimension: T x F
 
@@ -65,8 +67,9 @@ class AudioFileDataset(Dataset):
 
     Internally indexes AudioFiles and maintains list of segments and windows used to index into them. Also extends audio files < min_window_s by repeating them. 
     """
-    def __init__(self,wav_dir,tsv_file,min_window_s,max_window_s,mean=None,invstd=None,
-    sr=20000,get_mode='mel_spec'):
+    def __init__(
+        self,wav_dir,tsv_file,min_window_s=params.WINDOW_S,max_window_s=params.WINDOW_S,
+        mean=None,invstd=None,sr=params.SAMPLE_RATE,get_mode='mel_spec',transform=None):
         # wav_dir, tsv_file, max_window_s
         """
         load all wavfiles into memory (data is not too large so can get away with this)
@@ -74,6 +77,7 @@ class AudioFileDataset(Dataset):
         self.df = pd.read_csv(tsv_file,sep='\t')
         self.max_window_s = max_window_s
         self.min_window_s = min_window_s
+        self.transform = transform
         if (mean is not None) and (invstd is not None):
             self.mean, self.invstd = np.loadtxt(mean), np.loadtxt(invstd)
             print("Loaded mean and invstd from:",mean,invstd)
@@ -132,9 +136,11 @@ class AudioFileDataset(Dataset):
     def __getitem__(self,index):
         start_idx, end_idx, label, audio_file = self.windows[index]
         data = audio_file.get_window(start_idx,end_idx,self.get_mode)
-        if (self.mean is not None) and (self.invstd is not None):
+        if (self.mean is not None) and (self.invstd is not None) and self.get_mode != 'audio':
             data -= self.mean
             data *= self.invstd 
+        if self.transform is not None:
+            data = self.transform(data)
         return data, label
     
     def segments_from_annotations(self,audio_file,start_times,durations,min_window_s):
