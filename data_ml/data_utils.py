@@ -7,7 +7,7 @@ import uuid
 import urllib.request
 import pdb
 from pathlib import Path # TODO: make path usage a bit more consistent
-from scraper import download_from_url
+from src.scraper import download_from_url
 
 make_osl_url = lambda x: "https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab/hls/{}/live.m3u8".format(x)
 

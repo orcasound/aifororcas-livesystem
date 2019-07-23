@@ -5,13 +5,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 import torch.nn.functional as F
-import params
+import src.params as params
 
 from pathlib import Path
 from torch.utils.data import DataLoader
-from dataloader import AudioFileDataset
-from model import ResNet_slim, AverageMeter, PredScorer, set_logger, get_model_or_checkpoint, get_finetune_model
-from augment import SpecAug
+from src.dataloader import AudioFileDataset
+from src.model import ResNet_slim, AverageMeter, PredScorer, set_logger, get_model_or_checkpoint, get_finetune_model
+from src.augment import SpecAug
 
 # train() 
 #TODO: Refactor a bit and remove any custom/internal references
@@ -71,9 +71,8 @@ def train(iteration, dataloader, model, optimizer, records, print_freq, epoch, b
 # main
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-modelPath', default=None, type=str, required=True)
+    parser.add_argument('-runRootPath', default=None, type=str, required=True)
     parser.add_argument('-dataPath', default=None, type=str, required=True)
-    parser.add_argument('-logPath', default=None, type=str, required=True)
     parser.add_argument('-model', default='AudioSet_fc_all', type=str, required=True)
     # select model, lr, lr plateau params
     parser.add_argument('-lr', default=0.001, type=float, required=False)
@@ -81,12 +80,19 @@ if __name__ == "__main__":
     parser.add_argument('-batchSize', default=32, type=int, required=False)
     parser.add_argument('-minWindowS', default=params.WINDOW_S, type=float, required=False)
     parser.add_argument('-maxWindowS', default=params.WINDOW_S, type=float, required=False)
-    parser.add_argument('--preTrainedModelDir', default=None, type=str, required=False)
+    parser.add_argument('--preTrainedModelPath', default=None, type=str, required=False)
 
     parser.add_argument('-printFreq', default=100, type=int, required=False)
     parser.add_argument('-numEpochs', default=30, type=int, required=False)
     parser.add_argument('-dataloadWorkers', default=0, type=int, required=False)
     args = parser.parse_args()
+
+    # Create / check all directories
+    num_classes, model_name = 2, args.model 
+    runPath = Path(args.runRootPath) / ("{}_lr{}_run1".format(model_name,args.lr))
+    if runPath.exists:
+        runid = int(runPath.name.split("run")[-1]) + 1
+        runPath = Path(args.runRootPath) / ("{}_lr{}_run{}".format(model_name,args.lr,runid))
 
     ## initialize dataloader
     specaug = SpecAug(2,6,2,6)
@@ -102,9 +108,9 @@ if __name__ == "__main__":
     ## initialize model 
     num_classes, model_name = 2, args.model 
     if "ResNet" in model_name:
-        model, curr_epoch = get_model_or_checkpoint(model_name,args.modelPath) 
+        model, curr_epoch = get_model_or_checkpoint(model_name,runPath) 
     elif "AudioSet" in model_name:
-        model, curr_epoch = get_finetune_model(model_name,args.modelPath,args.preTrainedModelDir) 
+        model, curr_epoch = get_finetune_model(model_name,runPath,args.preTrainedModelPath) 
     model.train()
 
     ## initialize optimizers 
@@ -121,7 +127,7 @@ if __name__ == "__main__":
     epoch_loss = records[-1] 
 
     # training
-    iteration, logger = 0, set_logger(args.logPath)
+    iteration, logger = 0, set_logger(runPath)
     for epoch in range(curr_epoch,args.numEpochs):
         iteration = train(iteration, dataloader, model,
                             optimizer, records, print_freq, epoch, args.batchSize, logger)
@@ -129,6 +135,6 @@ if __name__ == "__main__":
         message = "\n### Epoch {}, Avg loss: {} ###\n".format(epoch,epoch_loss.avg)
         logger.info(message)
         if epoch % 2 == 0:
-            torch.save(model.state_dict(), args.modelPath + model_name + '_Iter_' + str(epoch))
+            torch.save(model.state_dict(), runPath / (model_name + '_Iter_' + str(epoch)) )
         epoch_loss.reset()
-    torch.save(model.state_dict(), args.modelPath + model_name + '_Iter_' + str(args.numEpochs))
+    torch.save(model.state_dict(), runPath / (model_name + '_Iter_' + str(args.numEpochs)) )

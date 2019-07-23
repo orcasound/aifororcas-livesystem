@@ -1,12 +1,12 @@
 import librosa
 import pandas as pd
 import numpy as np
-import params
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from pathlib import Path
 from math import ceil
 from torch.utils.data import Dataset
+from . import params
 
 def s_to_samples(duration,sr):
     return int(duration*sr)
