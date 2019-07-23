@@ -16,7 +16,9 @@ class AudioFile:
     Attributes:
         sr (int)
         nsamples (int)
+        duration (float)
         audio (float32 array)
+        name (str)
     """
     def __init__(self,file_path,target_sr):
         file_path = Path(file_path) 
@@ -35,6 +37,7 @@ class AudioFile:
                 wavfile.write(file_path,target_sr,audio)
             self.sr, self.audio = target_sr, audio
         self.nsamples = len(self.audio)
+        self.duration = self.nsamples/self.sr
     
     def extend(self,target_duration_s):
         target_nsamples = s_to_samples(target_duration_s,self.sr)
@@ -42,6 +45,7 @@ class AudioFile:
             audio_tiled = np.tile(self.audio,ceil(target_nsamples/self.nsamples))
             self.audio = audio_tiled
             self.nsamples = len(self.audio)
+            self.duration = self.nsamples/self.sr
     
     def get_window(self,start_idx,end_idx,mode='mel_spec'):
         audio_window = self.audio[start_idx:end_idx]
@@ -72,7 +76,7 @@ class AudioFileDataset(Dataset):
         mean=None,invstd=None,sr=params.SAMPLE_RATE,get_mode='mel_spec',transform=None):
         # wav_dir, tsv_file, max_window_s
         """
-        load all wavfiles into memory (data is not too large so can get away with this)
+        load all wavfiles into memory (data is not too large so can get away with this, else use memmap option while reading wavfiles)
         """
         self.df = pd.read_csv(tsv_file,sep='\t')
         self.max_window_s = max_window_s
@@ -196,8 +200,40 @@ class AudioFileDataset(Dataset):
             yi += 0.1      
         _ = plt.plot(*plot_chunks)
         plt.show()
-        
-if __name__ == "__main__":
+
+
+class AudioFileWindower(AudioFileDataset):
+    def __init__(self,
+        audio_file_paths,window_s=params.WINDOW_S,mean=None,invstd=None,sr=params.SAMPLE_RATE,get_mode='mel_spec',transform=None):
+        """
+        load all wavfiles into memory (data is not too large so can get away with this, else use memmap option while reading wavfiles)
+        """
+        # 
+        self.audio_file_paths = [ Path(p) for p in audio_file_paths ]
+        self.window_s = window_s
+        self.transform = transform
+        if (mean is not None) and (invstd is not None):
+            self.mean, self.invstd = np.loadtxt(mean), np.loadtxt(invstd)
+            print("Loaded mean and invstd from:",mean,invstd)
+        else:
+            self.mean, self.invstd = None, None
+        assert get_mode in ['audio','spec','mel_spec']
+        self.sr, self.get_mode = sr, get_mode
+        self.audio_files, self.segments, self.windows = {}, [], []
+        for audio_file_path in self.audio_file_paths:
+            print("Loading file:",audio_file_path.name)
+            audio_file = AudioFile(audio_file_path,self.sr)
+            audio_file.extend(self.window_s)
+            start_times, durations = [0.], [audio_file.duration]
+            wav_segments, wav_windows = self.index_audio_file(
+                audio_file,start_times,durations,
+                self.window_s, self.window_s
+                )
+            self.segments.extend(wav_segments)
+            self.windows.extend(wav_windows)
+            self.audio_files[audio_file_path.name] = audio_file 
+
+def debug_error_with_indexing():
     dataset = AudioFileDataset("../train_data/wav","../train_data/train.tsv",2,2)
     spec_shapes = []
     error_idxs = []
@@ -205,3 +241,7 @@ if __name__ == "__main__":
         spec_shapes.append(dataset[i][0].shape)
         if spec_shapes[i] != (79,80):
             error_idxs.append(i)
+    return spec_shapes, error_idxs
+        
+if __name__ == "__main__":
+    debug_error_with_indexing()
