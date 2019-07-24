@@ -18,7 +18,7 @@ def inference_and_write_chunks(
 
     # initialize model from checkpoint
     model, _ = get_model_or_checkpoint(params.MODEL_NAME,model_path,use_cuda=True)
-    blob_root = "https://podcaststorage.blob.core.windows.net/dummydata/wavmaster_chunks"
+    blob_root = "https://podcaststorage.blob.core.windows.net/whoismasterchunked"
 
     # iterate through windows in dataloader, store current chunk windows and length
     curr_chunk, curr_chunk_duration, curr_chunk_json = [], 0, {}
@@ -51,7 +51,7 @@ def inference_and_write_chunks(
         pred_id = torch.argmax(pred, dim=1).item()
 
         # trigger and write JSON if positive prediction 
-        if pred_id==1: # #TODO: maybe confidence-based filtering?
+        if confidence[:,1]>0.4:  
             if len(curr_chunk_json)==0:
                 # add the header fields (uri, absolute_time, source_guid, annotations)
                 curr_chunk_json["uri"] = blob_uri
@@ -67,11 +67,14 @@ def inference_and_write_chunks(
             # write out the chunk and reset
             print("Writing out chunk:",output_file_path.name)
             wavfile.write(output_file_path,af.sr,np.concatenate(curr_chunk))
-            # write JSON to file and clear
-            with open(predictions_dir/(Path(chunk_file_name).stem+".json"),'w') as fp:
-                json.dump(curr_chunk_json,fp)
+
+            # if there are predictions, write JSON to file and clear
+            if len(curr_chunk_json)!=0:
+                with open(predictions_dir/(Path(chunk_file_name).stem+".json"),'w') as fp:
+                    json.dump(curr_chunk_json,fp)
+                curr_chunk_json = {}
+
             # clearing up this chunk
-            curr_chunk_json = {}
             curr_chunk, curr_chunk_duration = [], 0.
             file_chunk_counts[af.name] += 1
 

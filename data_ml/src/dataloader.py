@@ -222,16 +222,19 @@ class AudioFileWindower(AudioFileDataset):
         self.audio_files, self.segments, self.windows = {}, [], []
         for audio_file_path in self.audio_file_paths:
             print("Loading file:",audio_file_path.name)
-            audio_file = AudioFile(audio_file_path,self.sr)
-            audio_file.extend(self.window_s)
-            start_times, durations = [0.], [audio_file.duration]
-            wav_segments, wav_windows = self.index_audio_file(
-                audio_file,start_times,durations,
-                self.window_s, self.window_s
-                )
-            self.segments.extend(wav_segments)
-            self.windows.extend(wav_windows)
-            self.audio_files[audio_file_path.name] = audio_file 
+            try:
+                audio_file = AudioFile(audio_file_path,self.sr)
+                audio_file.extend(self.window_s)
+                start_times, durations = [0.], [audio_file.duration]
+                wav_segments, wav_windows = self.index_audio_file(
+                    audio_file,start_times,durations,
+                    self.window_s, self.window_s
+                    )
+                self.segments.extend(wav_segments)
+                self.windows.extend(wav_windows)
+                self.audio_files[audio_file_path.name] = audio_file 
+            except:
+                print("Error with file:",audio_file_path.name)
 
 def debug_error_with_indexing():
     dataset = AudioFileDataset("../train_data/wav","../train_data/train.tsv",2,2)
