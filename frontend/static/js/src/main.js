@@ -163,10 +163,12 @@ Annotator.prototype = {
         $.getJSON(dataUrl)
         .done(function(data) {
             my.currentTask = data;
-            my.update();
+            my.update()
+            ;
         })
         .fail(function() {
             alert('Error: Unable to retrieve JSON from Azure blob storage');
+            loadNextTask();
         });
     },
 
@@ -203,9 +205,10 @@ Annotator.prototype = {
     // Make POST request, passing back the content data. On success load in the next task
     post: function (content) {
         var my = this;
+        console.log(content.uri);
         $.ajax({
             type: 'POST',
-            url: $.getJSON(postUrl),
+            url: postUrl,
             contentType: 'application/json',
             data: JSON.stringify(content)
         })
@@ -214,6 +217,7 @@ Annotator.prototype = {
         })
         .fail(function() {
             alert('Error: Unable to Submit Annotations');
+            my.loadNextTask();
         })
         .always(function() {
             // No longer sending response
