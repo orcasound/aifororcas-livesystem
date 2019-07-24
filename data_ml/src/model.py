@@ -119,13 +119,14 @@ class VGGish(nn.Module):
 
 
 # load_model()
-def get_model_or_checkpoint(model_name,model_path,num_classes=2,epoch=None,nGPU=params.N_GPU):
+def get_model_or_checkpoint(model_name,model_path,num_classes=2,epoch=None,nGPU=params.N_GPU,use_cuda=True):
     if model_name=="ResNet_slim":
         model = ResNet_slim(1, 32, 32, 64, 128, 64, num_classes)
     elif "AudioSet" in model_name:
         model = VGGish()
     model = nn.DataParallel(model, device_ids=[k for k in range(nGPU)])
-    model = model.cuda()
+    if use_cuda:
+        model = model.cuda()
 
     # check for latest existing checkpoint and load
     checkpoints = sorted(
@@ -152,7 +153,7 @@ def _unfreeze_nn_params(module):
     for p in module.parameters():
         p.requires_grad = True
 
-def get_finetune_model(model_name,model_path,finetune_checkpoint,nGPU=params.N_GPU):
+def get_finetune_model(model_name,model_path,finetune_checkpoint,nGPU=params.N_GPU,use_cuda=True):
     # initialize model
     net, curr_epoch = get_model_or_checkpoint(model_name,model_path,nGPU)
 
@@ -173,7 +174,8 @@ def get_finetune_model(model_name,model_path,finetune_checkpoint,nGPU=params.N_G
         for m in [net.module.fc,net.module.fc_class]:
             _unfreeze_nn_params(m)
 
-    net = net.cuda()
+    if use_cuda:
+        net = net.cuda()
     return net, curr_epoch
 
 
