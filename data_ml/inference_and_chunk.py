@@ -2,7 +2,7 @@ import os, json
 import torch
 import numpy as np
 import src.params as params
-import pdb
+import argparse
 
 from src.model import get_model_or_checkpoint
 from scipy.io import wavfile
@@ -80,10 +80,27 @@ def inference_and_write_chunks(
 
 
 if __name__ == "__main__":
-    wavmaster_path = Path("../data/wavmaster")
-    output_chunk_dir = Path("../data/wavmaster_chunked")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-wavMasterPath', default=None, type=str, required=True)
+    parser.add_argument('-outputChunkDir', default=None, type=str, required=True)
+    parser.add_argument('-modelPath', default='AudioSet_fc_all', type=str, required=True)
+    # select model, lr, lr plateau params
+    parser.add_argument('-lr', default=0.001, type=float, required=False)
+    parser.add_argument('-lrPlateauSchedule', default="3,0.05,0.5", type=str, required=False)
+    parser.add_argument('-batchSize', default=32, type=int, required=False)
+    parser.add_argument('-minWindowS', default=params.WINDOW_S, type=float, required=False)
+    parser.add_argument('-maxWindowS', default=params.WINDOW_S, type=float, required=False)
+    parser.add_argument('--preTrainedModelPath', default=None, type=str, required=False)
+
+    parser.add_argument('-printFreq', default=100, type=int, required=False)
+    parser.add_argument('-numEpochs', default=30, type=int, required=False)
+    parser.add_argument('-dataloadWorkers', default=0, type=int, required=False)
+    args = parser.parse_args()
+
+    wavmaster_path = Path(args.wavMasterPath)
+    output_chunk_dir = Path(args.outputChunkDir)
+    model_path = Path(args.modelPath)
     preds_dir = Path("../data/wavmaster_chunked_preds")
-    model_path = Path("../models/AudioSet_fc_all")
     mean, invstd = model_path/params.MEAN_FILE, model_path/params.INVSTD_FILE 
     wav_file_paths = [ wavmaster_path/p for p in os.listdir(wavmaster_path) ]
     windower = AudioFileWindower(wav_file_paths,mean=mean,invstd=invstd)
