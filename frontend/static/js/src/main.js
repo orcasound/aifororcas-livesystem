@@ -130,19 +130,9 @@ Annotator.prototype = {
             // Update the visualization type and the feedback type and load in the new audio clip
             my.wavesurfer.params.visualization = "spectrogram"; // invisible, spectrogram, waveform            my.wavesurfer.params.feedback = my.currentTask.feedback; // hiddenImage, silent, notify, none 
             my.wavesurfer.load(my.currentTask.uri);
-
-            // my.wavesurfer.on('ready', function () {
-            //     $.getJSON(my.currentTask.annotationSolutionsUrl)
-            //     .done(function(data) {
-            //         my.annotatortool.displayRegions(data);
-            //     })
-            //     .fail(function() {
-            //         alert('Error: Unable to retrieve annotation solution set');
-            //     });
-
-            // });
-
+            my.wavesurfer.regions.clear();
             my.wavesurfer.on('ready', function () {
+                    my.wavesurfer.regions.clear();
                     my.annotatortool.displayRegions(my.currentTask.annotations);
             });
 
@@ -163,8 +153,7 @@ Annotator.prototype = {
         $.getJSON(dataUrl)
         .done(function(data) {
             my.currentTask = data;
-            my.update()
-            ;
+            my.update();
         })
         .fail(function() {
             alert('Error: Unable to retrieve JSON from Azure blob storage');
@@ -200,6 +189,7 @@ Annotator.prototype = {
             };
 
             this.post(content);
+            this.annotatortool.clear();
     },
 
     // Make POST request, passing back the content data. On success load in the next task
