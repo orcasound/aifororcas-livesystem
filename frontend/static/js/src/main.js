@@ -25,6 +25,7 @@ function Annotator() {
     // Boolean, true if currently sending http post request 
     this.sendingResponse = false;
 
+    this.dataUrl = null;
     // Create color map for spectrogram
     var spectrogramColorMap = colormap({
         colormap: magma,
@@ -45,8 +46,7 @@ function Annotator() {
         // For the spectrogram the height is half the number of fftSamples
         fftSamples: height * 2,
         height: height,
-        colorMap: spectrogramColorMap,
-        backend: 'MediaElement'
+        colorMap: spectrogramColorMap
     });
 
     // Create labels (labels that appear above each region)
@@ -122,34 +122,39 @@ Annotator.prototype = {
     // Update the task specific data of the interfaces components
     update: function() {
         var my = this;
-        var mainUpdate = function(annotationSolutions) {
+        var mainUpdate = function() {
 
             // Update the different tags the user can use to annotate, also update the solutions to the
             // annotation task if the user is suppose to recieve feedback
 
             // Update the visualization type and the feedback type and load in the new audio clip
-            my.wavesurfer.params.visualization = my.currentTask.visualization; // invisible, spectrogram, waveform            my.wavesurfer.params.feedback = my.currentTask.feedback; // hiddenImage, silent, notify, none 
-            my.wavesurfer.load(my.currentTask.url);
+            my.wavesurfer.params.visualization = "spectrogram"; // invisible, spectrogram, waveform            my.wavesurfer.params.feedback = my.currentTask.feedback; // hiddenImage, silent, notify, none 
+            my.wavesurfer.load(my.currentTask.uri);
+
+            // my.wavesurfer.on('ready', function () {
+            //     $.getJSON(my.currentTask.annotationSolutionsUrl)
+            //     .done(function(data) {
+            //         my.annotatortool.displayRegions(data);
+            //     })
+            //     .fail(function() {
+            //         alert('Error: Unable to retrieve annotation solution set');
+            //     });
+
+            // });
 
             my.wavesurfer.on('ready', function () {
-                $.getJSON(my.currentTask.annotationSolutionsUrl)
-                .done(function(data) {
-                    my.annotatortool.displayRegions(data);
-                })
-                .fail(function() {
-                    alert('Error: Unable to retrieve annotation solution set');
-                });
-
+                    my.annotatortool.displayRegions(my.currentTask.annotations);
             });
+
         };
 
-        $.getJSON(this.currentTask.annotationSolutionsUrl)
-        .done(function(data) {
-            mainUpdate(data);
-        })
-        .fail(function() {
-            alert('Error: Unable to retrieve annotation solution set');
-        });
+        // $.getJSON(this.currentTask.annotationSolutionsUrl)
+        // .done(function(data) {
+        mainUpdate();
+        // })
+        // .fail(function() {
+        //     alert('Error: Unable to retrieve annotation solution set');
+        // });
     },
 
     // Update the interface with the next task's data
@@ -157,8 +162,11 @@ Annotator.prototype = {
         var my = this;
         $.getJSON(dataUrl)
         .done(function(data) {
-            my.currentTask = data.task;
+            my.currentTask = data;
             my.update();
+        })
+        .fail(function() {
+            alert('Error: Unable to retrieve JSON from Azure blob storage');
         });
     },
 
@@ -172,18 +180,24 @@ Annotator.prototype = {
             }
             this.sendingResponse = true;
             // Get data about the annotations the user has created
-            var content = {
-                task_start_time: this.taskStartTime,
-                task_end_time: new Date().getTime(),
-                visualization: this.wavesurfer.params.visualization,
-                annotations: this.annotatortool.getAnnotations(),
-                deleted_annotations: this.annotatortool.getDeletedAnnotations(),
-                // List of actions the user took to play and pause the audio
-                play_events: this.playBar.getEvents(),
-            };
+            // var content = {
+            //     task_start_time: this.taskStartTime,
+            //     task_end_time: new Date().getTime(),
+            //     visualization: this.wavesurfer.params.visualization,
+            //     annotations: this.annotatortool.getAnnotations(),
+            //     deleted_annotations: this.annotatortool.getDeletedAnnotations(),
+            //     // List of actions the user took to play and pause the audio
+            //     play_events: this.playBar.getEvents(),
+            // };
             
+            var content = {
+                uri: this.currentTask.uri,
+                absolute_time: this.currentTask.absolute_time,
+                source_guid: this.currentTask.source_guid,
+                annotations: this.annotatortool.getPodCastAnnotations(),
+            };
+
             this.post(content);
-        // }
     },
 
     // Make POST request, passing back the content data. On success load in the next task

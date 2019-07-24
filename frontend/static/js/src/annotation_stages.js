@@ -307,6 +307,26 @@ AnnotationStages.prototype = {
         return annotationData;
     },
 
+    getPodCastAnnotationData: function(region) {
+        var regionData = {
+            'start_s': region.start,
+            'duration_s': region.end - region.start
+        };
+        return regionData;
+    },
+    
+    // Return an array of all the annotations the user has made for this clip
+    getPodCastAnnotations: function() {
+        var annotationData = [];
+        if (this.wavesurfer.regions) {
+            for (var region_id in this.wavesurfer.regions.list) {
+                var region = this.wavesurfer.regions.list[region_id];
+                annotationData.push(this.getPodCastAnnotationData(region));
+            }
+        }
+        return annotationData;
+    },
+    
     // Return an array of all the annotations the user has created and then deleted for this clip
     getDeletedAnnotations: function() {
         var annotationData = [];
@@ -903,6 +923,26 @@ AnnotationReveal.prototype = {
         return annotationData;
     },
 
+    getPodCastAnnotationData: function(region) {
+        var regionData = {
+            'start_s': region.start,
+            'duration_s': region.end - region.start
+        };
+        return regionData;
+    },
+    
+    // Return an array of all the annotations the user has made for this clip
+    getPodCastAnnotations: function() {
+        var annotationData = [];
+        if (this.wavesurfer.regions) {
+            for (var region_id in this.wavesurfer.regions.list) {
+                var region = this.wavesurfer.regions.list[region_id];
+                annotationData.push(this.getPodCastAnnotationData(region));
+            }
+        }
+        return annotationData;
+    },
+
     // Return an array of all the annotations the user has created and then deleted for this clip
     getDeletedAnnotations: function() {
         var annotationData = [];
@@ -968,21 +1008,33 @@ AnnotationReveal.prototype = {
     displayRegions: function(candidateAnnotations) 
     {
         // Read annotation data from the data url and create wavesurfer regions on the spectrogram
-        for(var waveFile in candidateAnnotations)
-        {
-            for(var num in candidateAnnotations[waveFile])
-            {
-                var annotation = candidateAnnotations[waveFile][num];
-                var endTime = annotation.start_time_s + annotation.duration_s;
-                this.wavesurfer.addRegion(
-                    {
-                        start: annotation.start_time_s,
-                        end: endTime,
-                        color: 'hsla(100, 100%, 30%, 0.1)'
-                    });
-            }
-        }
+        // for(var waveFile in candidateAnnotations)
+        // {
+        //     for(var num in candidateAnnotations[waveFile])
+        //     {
+        //         var annotation = candidateAnnotations[waveFile][num];
+        //         var endTime = annotation.start_time_s + annotation.duration_s;
+        //         this.wavesurfer.addRegion(
+        //             {
+        //                 start: annotation.start_time_s,
+        //                 end: endTime,
+        //                 color: 'hsla(100, 100%, 30%, 0.1)'
+        //             });
+        //     }
+        // }
 
+        var arrayLength = candidateAnnotations.length;
+        for (var i = 0; i < arrayLength; i++) {
+            var annotation = candidateAnnotations[i];
+            console.log(candidateAnnotations[i]);
+            var endTime = annotation.start_time_s + annotation.duration_s;
+            this.wavesurfer.addRegion(
+                {
+                    start: annotation.start_time_s,
+                    end: endTime,
+                    color: 'hsla(100, 100%, 30%, 0.1)'
+                });
+        }
     },
 
     // DONT UNDERSTAND
