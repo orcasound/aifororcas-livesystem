@@ -9,19 +9,33 @@ from scipy.io import wavfile
 from collections import defaultdict
 from src.dataloader import AudioFileWindower 
 from pathlib import Path
-# inputs: model, mean invstd, input_wav, output_chunk_dir, output_json_dir
 
-# iterate through windows and save audio chunks
-def inference_and_write_chunks(
-    audio_file_windower,output_chunk_dir,predictions_dir,model_path,
-    chunk_duration=params.INFERENCE_CHUNK_S):
+
+# iterate through windows and save audio chunks and prediction candidates
+def inference_and_write_chunks(args):
+
+    # load dataset object used to iterate windows of audio
+    chunk_duration=params.INFERENCE_CHUNK_S
+    wav_file_paths = [ Path(p) for p in glob.glob(args.wavMasterPath+"/*.wav") ]
+    model_path = Path(args.modelPath)
+    mean, invstd = model_path/params.MEAN_FILE, model_path/params.INVSTD_FILE 
+    audio_file_windower = AudioFileWindower(wav_file_paths,mean=mean,invstd=invstd)
 
     # initialize model from checkpoint
     model, _ = get_model_or_checkpoint(params.MODEL_NAME,model_path,use_cuda=True)
-    blob_root = "https://podcaststorage.blob.core.windows.net/orcasoundlabchunked"
+
+    # various output locations
+    blob_root = "https://podcaststorage.blob.core.windows.net/{}".format(args.relativeBlobPath)
+    pos_chunk_dir = Path(args.positiveChunkDir)
+    pos_preds_dir = Path(args.positiveCandidatePredsDir)
+    neg_chunk_dir = Path(args.negativeChunkDir)
+    os.makedirs(pos_chunk_dir,exist_ok=True)
+    os.makedirs(pos_preds_dir,exist_ok=True)
+    os.makedirs(neg_chunk_dir,exist_ok=True)
 
     # iterate through windows in dataloader, store current chunk windows and length
-    curr_chunk, curr_chunk_duration, curr_chunk_json = [], 0, {}
+    curr_chunk, curr_chunk_json = [], {}
+    curr_chunk_duration, curr_chunk_all_negative = 0, 1
     file_chunk_counts = defaultdict(int)
 
     for i in range(len(audio_file_windower)):
@@ -34,8 +48,9 @@ def inference_and_write_chunks(
         # details for the current chunk
         postfix = '_'+format(file_chunk_counts[af.name],'04x')
         chunk_file_name = (Path(af.name).stem+postfix+'.wav')
-        absolute_time = Path(af.name).stem  # NOTE: assumes orcasound data
-        output_file_path = output_chunk_dir / chunk_file_name 
+        absolute_time = Path(af.name).stem  # NOTE: assumes filename is the absolute time 
+        pos_chunk_path = pos_chunk_dir / chunk_file_name 
+        neg_chunk_path = neg_chunk_dir / chunk_file_name 
         blob_uri = blob_root+'/'+chunk_file_name
 
         # add window to current chunk
@@ -53,7 +68,9 @@ def inference_and_write_chunks(
         confidence = round(float(posterior[0,1]),3)
 
         # trigger and update JSON for current chunk if positive prediction 
-        if confidence>0.9:  
+        # chunk is considered negative if there are no positive candidates and 
+        # all windows had confidence < negativeThreshold
+        if confidence>args.positiveThreshold:  
             if len(curr_chunk_json)==0:
                 # add the header fields (uri, absolute_time, source_guid, annotations)
                 curr_chunk_json["uri"] = blob_uri
@@ -69,41 +86,62 @@ def inference_and_write_chunks(
                     }
                 )
             print("Positive prediction at {:.2f}, Confidence {:.3f}!".format(start_s,confidence))
+            curr_chunk_all_negative *= 0
+        elif confidence>args.negativeThreshold:
+            curr_chunk_all_negative *= 0
 
         # if exceeds chunk_duration, write chunk and JSON and reset
         if curr_chunk_duration > chunk_duration:
-            # write out the chunk and reset
-            print("Writing out chunk:",output_file_path.name)
-            wavfile.write(output_file_path,af.sr,np.concatenate(curr_chunk))
 
-            # if there are predictions, write JSON to file and clear
+            # if there are predictions, write JSON and positive chunk to file and clear
             if len(curr_chunk_json)!=0:
-                with open(predictions_dir/(Path(chunk_file_name).stem+".json"),'w') as fp:
+                with open(pos_preds_dir/(Path(chunk_file_name).stem+".json"),'w') as fp:
                     json.dump(curr_chunk_json,fp)
                 curr_chunk_json = {}
+                print("Writing out positive candidate chunk:",pos_chunk_path.name)
+                wavfile.write(pos_chunk_path,af.sr,np.concatenate(curr_chunk))
+            elif curr_chunk_all_negative: 
+                print("Writing out negative chunk:",neg_chunk_path.name)
+                wavfile.write(neg_chunk_path,af.sr,np.concatenate(curr_chunk))
 
             # clearing up this chunk
             curr_chunk, curr_chunk_duration = [], 0.
+            curr_chunk_all_negative = 1
             file_chunk_counts[af.name] += 1
 
 
 if __name__ == "__main__":
+    """
+    Processes unlabelled data using a classifier with two operating points/thresholds.
+    1. Generating positive annotation candidates for Pod.Cast UI. Use a threshold here that favors high recall (>85% ish) of positive examples over precision (>65% ish). 
+    2. Generating negative examples from this distribution. Use a threshold here that's high precision (>90%) as we don't want positive examples incorrectly labelled negative. 
+
+    These values above are approximate and will likely evolve as the classifier keeps improving. 
+    NOTE: The wavfile names are assumed to be the "absolute_time" below. 
+
+    Outputs:
+    1. For positive candidates: corresponding 60s chunks of wavfiles and JSON with schema:
+    {
+        "uri": "https://podcaststorage.blob.core.windows.net/[RELATIVE BLOB PATH]/[WAVCHUNK NAME],
+                e.g. https://podcaststorage.blob.core.windows.net/orcasoundlabchunked/1562337136_000f.wav
+        "absolute_time": UNIX time of corresponding Orcasound S3 bucket e.g. 1562337136,
+        "source_guid": Orcasound lab hydrophone id e.g. rpi_orcasound_lab, 
+        "annotations": [
+            {"start_time_s","duration_s","confidence"}
+        ]
+    }
+    2. For negative examples: corresponding 60s chunks of wavfiles that are labelled as all negative with high confidence. 
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('-wavMasterPath', default=None, type=str, required=True)
+    parser.add_argument('-sourceGuid', default=None, type=str, required=True)
     parser.add_argument('-modelPath', default='AudioSet_fc_all', type=str, required=True)
-    parser.add_argument('-outputChunkDir', default=None, type=str, required=True)
-    parser.add_argument('-outputPredsDir', default=None, type=str, required=True)
+    parser.add_argument('-positiveChunkDir', default=None, type=str, required=True)
+    parser.add_argument('-positiveCandidatePredsDir', default=None, type=str, required=True)
+    parser.add_argument('-positiveThreshold', default=None, type=float, required=True)
+    parser.add_argument('-relativeBlobPath', default=None, type=str, required=True)
+    parser.add_argument('-negativeChunkDir', default=None, type=str, required=True)
+    parser.add_argument('-negativeThreshold', default=None, type=float, required=True)
 
     args = parser.parse_args()
-    wavmaster_path = Path(args.wavMasterPath)
-    output_chunk_dir = Path(args.outputChunkDir)
-    model_path = Path(args.modelPath)
-    preds_dir = Path(args.outputPredsDir)
-    os.makedirs(output_chunk_dir,exist_ok=True)
-    os.makedirs(preds_dir,exist_ok=True)
-
-    mean, invstd = model_path/params.MEAN_FILE, model_path/params.INVSTD_FILE 
-    wav_file_paths = [ Path(p) for p in glob.glob(args.wavMasterPath+"/*.wav") ]
-    # wav_file_paths = [ wavmaster_path/p for p in os.listdir(wavmaster_path) ]
-    windower = AudioFileWindower(wav_file_paths,mean=mean,invstd=invstd)
-    inference_and_write_chunks(windower,output_chunk_dir,preds_dir,model_path)
+    inference_and_write_chunks(args)
