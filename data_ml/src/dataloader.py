@@ -23,6 +23,7 @@ class AudioFile:
     def __init__(self,file_path,target_sr):
         file_path = Path(file_path) 
         self.name = file_path.name
+
         if file_path.suffix == '.wav':
             sr, audio = wavfile.read(file_path)
             if audio.dtype=="int16":
@@ -31,6 +32,10 @@ class AudioFile:
                 pass
             else:
                 raise Exception("Error, wav format {} not supported for {}".format(audio.dtype,self.name)) 
+            # if multichannel wav recordings, use the first channel
+            if len(audio.shape)>1:
+                audio = audio[:,0]
+
             if sr != target_sr: # convert to a common sampling rate
                 print("Warning: Overwriting file {} with SR: {}, dtype: {}".format(file_path,target_sr, audio.dtype))
                 audio = librosa.core.resample(audio,sr,target_sr) 
@@ -233,8 +238,8 @@ class AudioFileWindower(AudioFileDataset):
                 self.segments.extend(wav_segments)
                 self.windows.extend(wav_windows)
                 self.audio_files[audio_file_path.name] = audio_file 
-            except:
-                print("Error with file:",audio_file_path.name)
+            except Exception as e:
+                print("Error with file:",audio_file_path.name,e)
 
 def debug_error_with_indexing():
     dataset = AudioFileDataset("../train_data/wav","../train_data/train.tsv",2,2)
