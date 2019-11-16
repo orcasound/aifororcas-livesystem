@@ -1,3 +1,14 @@
+# Working directories
+data/
+train_data/
+train_data*/
+test_data/
+runs/
+models/
+
+*.zip
+*.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
