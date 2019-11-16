@@ -5,6 +5,7 @@ train_data*/
 test_data/
 runs/
 models/
+podcast-venv/
 
 *.zip
 *.gz
