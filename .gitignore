@@ -12,7 +12,7 @@ podcast-venv/
 
 *.zip
 *.gz
-
+*.wav
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
