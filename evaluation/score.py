@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     wavFilePath = args.audioFilePath
     max_length = librosa.get_duration(filename=wavFilePath)
-    
+    print(max_length)
 
     ##load Ground truth
     testData = pd.read_csv(args.groundTruthFilePath, delimiter='\t')

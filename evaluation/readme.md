@@ -36,3 +36,11 @@ Evaluation
 ```bash
 python score.py -audioFilePath "./wav/OS_7_05_2019_08_24_00_.wav" -groundTruthFilePath "./groundTruth/test.tsv" -submissionFilePath "./sample_submission.csv"
 ```
+
+## Using Existing Model
+We used existing model saved [here](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/ErYhp5U7TvNLuEm_D1sGCfkBHxx_h9ACA4Yn7WbfK5dzlA?e=V5x9b5) built by Aakash in data_ml folder. We used ScoringUsingExistingModel.ipynb file to generate submision/predictionSubmission.csv and used score.py to evalute against test data.
+
+| File       | Model       | Recall    | Precision    | F-1 Score|    
+| :------------- | :----------: |  :----------: |  :----------: | :----------: | 
+|  sample_submission.csv | None | 0.7168674698795181 | 0.7168674698795181 | 0.7168674698795182 |
+| submission/predictionSubmission.csv | [AudioSet_fc_all_Iter_26](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/ErYhp5U7TvNLuEm_D1sGCfkBHxx_h9ACA4Yn7WbfK5dzlA?e=3bbeI9) | 0.4569707401032702 | 0.9448398576512456 | 0.6160092807424594| 
