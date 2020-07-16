@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+<nav class="navbar navbar-expand-sm orca-bg-purple orca-navbar">
+	<a class="navbar-brand orca-navbar-brand orca-header-text" href="/">OrcaHello</a>
+	<div class="collapse navbar-collapse">
+		<span class="navbar-nav mr-auto">
+		</span>
+		<span class="orca-nav-item">@DateTime.Now.ToLongTimeString() @DateTime.Now.ToShortDateString()</span>
+		<span class="orca-pipe">|</span>
+		<span class="orca-nav-item">Hello, Tom</span>
+		<div class="orca-bg-blue orca-nav-avatar" style="margin-right:-16px;">
+			<img src="../images/avatar.jpg" />
+		</div>
+	</div>
+</nav>
+
+<div class="container-fluid">
+	<div class="row h-100">
+		<div class="col-lg-1 orca-bg-gray orca-sidenav">
+			<div class="orca-sidenav-item">
+				<a class="orca-text-darkgray orca-text-active" href="#">Home</a>
+			</div>
+			<div class="orca-sidenav-item">
+				<a class="orca-sidenav-item orca-text-darkgray" href="#">Hydrophones</a>
+			</div>
+			<div class="orca-sidenav-item">
+				<a class="orca-sidenav-item orca-text-darkgray" href="#">Orca directory</a>
+			</div>
+			<div class="orca-sidenav-item">
+				<a class="orca-sidenav-item orca-text-darkgray" href="#">Get involved</a>
+			</div>
+			<div class="orca-sidenav-item">
+				<a class="orca-sidenav-item orca-text-darkgray" href="#">About OrcaHello</a>
+			</div>
+		</div>
+		<div class="col-lg-11 offset-lg-1" style="padding-top:12px;padding-left:25px;">
+@Body
+		</div>
+	</div>
+</div>
+

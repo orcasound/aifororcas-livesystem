@@ -1,0 +1,163 @@
+﻿@page "/"
+
+@inject ICandidateService CandidateService
+
+<head>
+	<meta charset="utf-8" />
+</head>
+<h1 class="orca-h1 orca-text-black">Candidates</h1>
+<form class="form-inline" action="#">
+	<input class="form-control mr-sm-2 orca-filter" style="width:500px" type="text" placeholder="Filter by resident whale type, node, or probability">
+	<button class="btn btn-success orca-btn" type="submit">Filter</button>
+</form>
+<div class="container-fluid" style="margin-top: 25px;">
+	<div class="row">
+		<div class="col-lg-6" style="height: calc(100vh - 200px); overflow-y: scroll">
+
+			@foreach(var candidate in candidates)
+			{
+			<div class="orca-data-strip container-fluid" @onclick="(() => FocusStrip(candidate))">
+				<div class="row" style="padding:7px">
+					<div class="col-lg-3" style="min-width:270px;">
+						<img src="../images/Sample.png">
+						<div>
+							<i class="oi oi-media-play"></i>
+							<i class="oi oi-media-pause"></i>
+							<i class="oi oi-media-stop"></i>&nbsp;&nbsp;
+							<i class="oi oi-media-step-backward"></i>
+							<i class="oi oi-media-skip-backward"></i>&nbsp;
+							<i class="oi oi-media-skip-forward"></i>
+							<i class="oi oi-media-step-forward"></i>
+						</div>
+					</div>
+					<div class="col-lg-7">
+						<p class="orca-data-strip-header">@String.Join(", ", @candidate.Tags)</p>
+						<p class="orca-data-strip-data"><i class="oi oi-compass"></i>&nbsp;@candidate.Node</p>
+						<p class="orca-data-strip-data"><i class="oi oi-clock"></i>&nbsp;@candidate.Timestamp</p>
+						<p class="orca-data-strip-data"><i class="oi oi-cog"></i>&nbsp;@candidate.Id</p>
+
+						@if (candidate.Source == "AI")
+							{
+						<p class="orca-data-strip-data"><i class="oi oi-dashboard"></i>&nbsp;@candidate.Probability%</p>
+							}
+							else
+							{
+						<p class="orca-data-strip-data"><i class="oi oi-person"></i>&nbsp;"@candidate.Description"</p>
+							}
+					</div>
+					<div class="col-lg-2" style="min-width:160px">
+						<button class="btn btn-primary orca-btn" type="submit" @onclick="@(() => ConfirmCandidate(candidate))">Approve</button>
+						<button class="btn btn-danger orca-btn" type="submit" @onclick="@(() => RejectCandidate(candidate))">Reject</button>
+						<button class="btn btn-warning orca-btn" type="submit" @onclick="@(() => AnalyzeCandidate(candidate))">Analyze</button>
+					</div>
+				</div>
+			</div>
+			}
+		</div>
+		<div class="col-lg-6">
+			<div class="track-order-map">
+				<Map Zoom="0" Markers="MapMarkers"></Map>
+			</div>
+			<!--
+			<p>"Though in many natural objects, whiteness refiningly enhances beauty, as if imparting some special virtue of its own, as in marbles, japonicas, and pearls; and though various nations have in some way recognised a certain royal preeminence in this hue; even the barbaric, grand old kings of Pegu placing the title ‘Lord of the White Elephants’ above all their other magniloquent ascriptions of dominion; and the modern kings of Siam unfurling the same snow-white quadruped in the royal standard; and the Hanoverian flag bearing the one figure of a snow-white charger; and the great Austrian Empire, Caesarian, heir to overlording Rome, having for the imperial colour the same imperial hue; and though this pre-eminence in it applies to the human race itself, giving the white man ideal mastership over every dusky tribe; and though, besides, all this, whiteness has been even made significant of gladness, for among the Romans a white stone marked a joyful day; and though in other mortal sympathies and symbolizings this same hue is made the emblem of many touching, noble things—the innocence of brides, the benignity of age; though among the Red Men of America the giving of the white belt of wampum was the deepest pledge of honour; though in many climes, whiteness typifies the majesty of Justice in the ermine of the Judge, and contributes to the daily state of kings and queens drawn by milk-white steeds; though even in the higher mysteries of the most august religions it has been made the symbol of the divine spotlessness and power; by the Persian fire worshippers, the white forked flame being held the holiest on the altar; and in the Greek mythologies, Great Jove himself being made incarnate in a snow-white bull; and though to the noble Iroquois, the midwinter sacrifice of the sacred White Dog was by far the holiest festival of their theology, that spotless, faithful creature being held the purest envoy they could send to the Great Spirit with the annual tidings of their own fidelity; and though directly from the Latin word for white, all Christian priests derive the name of one part of their sacred vesture, the alb or tunic, worn beneath the cassock; and though among the holy pomps of the Romish faith, white is specially employed in the celebration of the Passion of our Lord; though in the Vision of St. John, white robes are given to the redeemed, and the four-and-twenty elders stand clothed in white before the great-white throne, and the Holy One that sitteth there white like wool; yet for all these accumulated associations, with whatever is sweet, and honourable, and sublime, there yet lurks an elusive something in the innermost idea of this hue, which strikes more of panic to the soul than that redness which affrights in blood."</p>
+			-->
+		</div>
+	</div>
+</div>
+<ApproveCut Candidate="currentCandidate" DisplayModal="displayApproveModal" OnCancel="OnCancelApproveModal" OnConfirm="OnConfirmApproveModal" />
+<RejectCut Candidate="currentCandidate" DisplayModal="displayRejectModal" OnCancel="OnCancelRejectModal" OnConfirm="OnConfirmRejectModal"/>
+<AnalyzeCut Candidate="currentCandidate" DisplayModal="displayAnalyzeModal" OnCancel="OnCancelAnalyzeModal" OnConfirm="OnConfirmAnalyzeModal"/>
+
+
+@code {
+
+	private Candidate currentCandidate = new Candidate();
+	private bool displayApproveModal = false;
+	private bool displayRejectModal = false;
+	private bool displayAnalyzeModal = false;
+
+	public List<Marker> MapMarkers { get; set; } = new List<Marker>();
+
+	private List<Candidate> candidates;
+
+	protected override async Task OnInitializedAsync()
+	{
+		candidates = CandidateService.GetAll().ToList();
+
+		MapMarkers = new List<Marker>
+	{
+			new Marker{Description="Port Townsend", ShowPopup=false, Y = 48.088922, X = -122.762901},
+			new Marker{Description="Bush Point", ShowPopup=false, Y = 48.029424, X = -122.615434},
+			new Marker{Description="Haro Point", ShowPopup=false, Y = 48.579333, X = -123.178732},
+		};
+	}
+
+	private void FocusStrip(Candidate e)
+	{
+		var test = e;
+	}
+
+	private void AnalyzeCandidate(Candidate candidate)
+	{
+		displayAnalyzeModal = true;
+		currentCandidate = candidate;
+		StateHasChanged();
+	}
+
+	private void OnCancelAnalyzeModal()
+	{
+		displayAnalyzeModal = false;
+		StateHasChanged();
+	}
+
+	private void OnConfirmAnalyzeModal()
+	{
+		candidates.Remove(currentCandidate);
+		currentCandidate = null;
+		displayAnalyzeModal = false;
+		StateHasChanged();
+	}
+
+	private void ConfirmCandidate(Candidate candidate)
+	{
+		displayApproveModal = true;
+		currentCandidate = candidate;
+		StateHasChanged();
+	}
+
+	private void OnCancelApproveModal()
+	{
+		displayApproveModal = false;
+		StateHasChanged();
+	}
+
+	private void OnConfirmApproveModal()
+	{
+		candidates.Remove(currentCandidate);
+		currentCandidate = null;
+		displayApproveModal = false;
+		StateHasChanged();
+	}
+
+	private void RejectCandidate(Candidate candidate)
+	{
+		displayRejectModal = true;
+		currentCandidate = candidate;
+		StateHasChanged();
+	}
+
+	private void OnCancelRejectModal()
+	{
+		displayRejectModal = false;
+		StateHasChanged();
+	}
+
+	private void OnConfirmRejectModal()
+	{
+		candidates.Remove(currentCandidate);
+		currentCandidate = null;
+		displayRejectModal = false;
+		StateHasChanged();
+	}
+
+}

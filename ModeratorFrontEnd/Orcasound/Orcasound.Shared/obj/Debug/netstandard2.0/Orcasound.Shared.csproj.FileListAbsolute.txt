@@ -1,0 +1,9 @@
+D:\Code\Orcasound\Orcasound.Shared\bin\Debug\netstandard2.0\Orcasound.Shared.deps.json
+D:\Code\Orcasound\Orcasound.Shared\bin\Debug\netstandard2.0\Orcasound.Shared.dll
+D:\Code\Orcasound\Orcasound.Shared\bin\Debug\netstandard2.0\Orcasound.Shared.pdb
+D:\Code\Orcasound\Orcasound.Shared\obj\Debug\netstandard2.0\Orcasound.Shared.csprojAssemblyReference.cache
+D:\Code\Orcasound\Orcasound.Shared\obj\Debug\netstandard2.0\Orcasound.Shared.csproj.CoreCompileInputs.cache
+D:\Code\Orcasound\Orcasound.Shared\obj\Debug\netstandard2.0\Orcasound.Shared.AssemblyInfoInputs.cache
+D:\Code\Orcasound\Orcasound.Shared\obj\Debug\netstandard2.0\Orcasound.Shared.AssemblyInfo.cs
+D:\Code\Orcasound\Orcasound.Shared\obj\Debug\netstandard2.0\Orcasound.Shared.dll
+D:\Code\Orcasound\Orcasound.Shared\obj\Debug\netstandard2.0\Orcasound.Shared.pdb

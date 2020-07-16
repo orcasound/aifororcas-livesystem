@@ -1,0 +1,150 @@
+﻿.orca-bg-blue {
+	background-color: #0078D4;
+}
+.orca-bg-purple {
+	background-color: #2400FE;
+}
+
+.orca-bg-gray {
+	background-color: rgba(0, 120, 212, 0.1);
+}
+
+.orca-text-darkgray {
+	color: #323130;
+}
+
+.orca-text-black {
+	color: #000000;
+}
+
+.orca-text-active {
+	font-weight: bold;
+}
+
+.orca-h1 {
+	font-family: 'Segoe UI';
+	font-size: 32px;
+	line-height: 40px;
+}
+
+.orca-navbar {
+	height: 48px;
+	line-height: 21px;
+}
+
+.orca-navbar-brand {
+	font-weight: 600;
+	font-size: 18px;
+	font-style: normal;
+	font-family: 'Segoe UI';
+	color: white;
+}
+
+.orca-nav-item {
+	font-family: 'Segoe UI';
+	color: white;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: normal;
+}
+
+.orca-pipe {
+	content: "|";
+	padding-right: 10px;
+	padding-left: 10px;
+	color: white;
+}
+
+.orca-nav-avatar {
+	height: 48px;
+	width: 48px;
+	margin-right: -16px;
+	margin-left: 5px;
+	position: relative;
+}
+
+.orca-nav-avatar img {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.orca-sidenav {
+	height: 100%;
+	position: fixed;
+	z-index: 1;
+	top: 48px;
+	left: 0;
+	overflow-x: hidden;
+	padding-top: 29px;
+	padding-left: 18px;
+}
+
+.orca-sidenav-item {
+	margin-bottom: 16px;
+	font-family: Arial;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 14px;
+	line-height: 19px;
+}
+
+.orca-filter {
+	height: 32px;
+	width: 500px;
+	border: 1px solid #B3B0AD;
+	box-sizing: border-box;
+	border-radius: 2px;
+}
+
+.orca-data-strip {
+	background-color: #FFFFFF;
+	box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+	border-radius: 7px;
+	margin-bottom: 15px;
+	margin-left: -10px;
+	padding: 10px;
+}
+
+.orca-map {
+	width: 100%;
+	height: 500px;
+	background-color: grey;
+}
+
+.orca-btn {
+	height: 20px;
+	border-radius: 11px;
+	font-family: "Segoe UI";
+	font-size: 10px;
+	text-align: center;
+	text-transform: uppercase;
+	font-weight: bold;
+	padding-top: 1px;
+	width: 139px;
+}
+
+.orca-data-strip-header {
+	font-family: Arial;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 18px;
+	line-height: 24px;
+	color: #000000;
+	margin-top: 5px;
+	margin-bottom: 3px;
+}
+.orca-data-strip-data {
+	font-family: Arial;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 14px;
+	line-height: 20px;
+	color: #000000;
+	margin-bottom: 3px;
+}
+

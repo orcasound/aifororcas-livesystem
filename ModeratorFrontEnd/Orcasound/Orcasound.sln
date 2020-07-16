@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orcasound.UI", "Orcasound.UI\Orcasound.UI.csproj", "{CBCB63C4-2B6F-43DC-BBAE-0297A5D7BDF6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orcasound.ComponentsLibrary", "Orcasound.ComponentsLibrary\Orcasound.ComponentsLibrary.csproj", "{E224BA65-DE13-4036-B577-27DDAD440B51}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orcasound.Shared", "Orcasound.Shared\Orcasound.Shared.csproj", "{D62EAC21-B14D-42D9-A498-2D12ED541E2D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBCB63C4-2B6F-43DC-BBAE-0297A5D7BDF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBCB63C4-2B6F-43DC-BBAE-0297A5D7BDF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBCB63C4-2B6F-43DC-BBAE-0297A5D7BDF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBCB63C4-2B6F-43DC-BBAE-0297A5D7BDF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E224BA65-DE13-4036-B577-27DDAD440B51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E224BA65-DE13-4036-B577-27DDAD440B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E224BA65-DE13-4036-B577-27DDAD440B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E224BA65-DE13-4036-B577-27DDAD440B51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D62EAC21-B14D-42D9-A498-2D12ED541E2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D62EAC21-B14D-42D9-A498-2D12ED541E2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D62EAC21-B14D-42D9-A498-2D12ED541E2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D62EAC21-B14D-42D9-A498-2D12ED541E2D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B3008B8A-5005-4E87-9769-5B683A2D9CBB}
+	EndGlobalSection
+EndGlobal

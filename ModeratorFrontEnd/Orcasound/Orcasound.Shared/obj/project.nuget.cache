@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "1jICYKDQoPb0V6LCOy1OpbwV4Hf/gcebA0PfJ1Gwvh68PuQd04pv1nNhhNCxkFiUalS0sye1d1Y9Li1SxaNTzw==",
+  "success": true,
+  "projectFilePath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\Orcasound\\Orcasound.Shared\\Orcasound.Shared.csproj",
+  "expectedPackageFiles": [
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
