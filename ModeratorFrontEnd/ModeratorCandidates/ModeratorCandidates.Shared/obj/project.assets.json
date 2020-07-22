@@ -186,11 +186,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
+      "projectUniqueName": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
       "projectName": "ModeratorCandidates.Shared",
-      "projectPath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
+      "projectPath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
       "packagesPath": "C:\\Users\\catsk\\.nuget\\packages\\",
-      "outputPath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\obj\\",
+      "outputPath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Microsoft\\Xamarin\\NuGet\\",

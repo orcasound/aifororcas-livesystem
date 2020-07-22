@@ -2,9 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\frontend",
-    "\\ModeratorFrontEnd",
-    "\\ModeratorFrontEnd\\Orcasound"
+    "\\ModeratorFrontEnd"
   ],
-  "SelectedNode": "\\ModeratorFrontEnd\\Orcasound\\Orcasound.sln",
+  "SelectedNode": "\\ModeratorFrontEnd",
   "PreviewInSolutionExplorer": false
 }

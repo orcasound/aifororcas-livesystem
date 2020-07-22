@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "yiyYH2tcmuhq33Bf/4KwIxahpKFUHRbwufCOuk/FTF0Sja2bj74//CvZ9c4Jm6KmSTgKqFmeji78Rtih20yLiw==",
+  "dgSpecHash": "RuV/ijEcqESRykTFESGjWH6nBujJlj9wAM1PdilQYSF/NDY4B7UkR9khHk9PvgB0vW52B5uB7cZa8+WwnR05LA==",
   "success": true,
-  "projectFilePath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj",
+  "projectFilePath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.aspnetcore.html.abstractions\\2.2.0\\microsoft.aspnetcore.html.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.aspnetcore.razor\\2.2.0\\microsoft.aspnetcore.razor.2.2.0.nupkg.sha512",
@@ -30,7 +30,7 @@
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.visualstudio.web.codegenerators.mvc\\3.1.3\\microsoft.visualstudio.web.codegenerators.mvc.3.1.3.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\newtonsoft.json\\11.0.2\\newtonsoft.json.11.0.2.nupkg.sha512",
+    "C:\\Users\\catsk\\.nuget\\packages\\newtonsoft.json\\11.0.2\\newtonsoft.json.11.0.2.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\nuget.frameworks\\4.7.0\\nuget.frameworks.4.7.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",

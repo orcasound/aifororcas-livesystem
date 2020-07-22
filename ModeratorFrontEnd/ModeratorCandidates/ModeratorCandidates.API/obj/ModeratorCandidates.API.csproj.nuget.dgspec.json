@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj": {}
+    "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj": {}
   },
   "projects": {
-    "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj": {
+    "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj",
+        "projectUniqueName": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj",
         "projectName": "ModeratorCandidates.API",
-        "projectPath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj",
+        "projectPath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.API\\ModeratorCandidates.API.csproj",
         "packagesPath": "C:\\Users\\catsk\\.nuget\\packages\\",
-        "outputPath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.API\\obj\\",
+        "outputPath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\",
@@ -31,8 +31,8 @@
         "frameworks": {
           "netcoreapp3.1": {
             "projectReferences": {
-              "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj": {
-                "projectPath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj"
+              "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj": {
+                "projectPath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj"
               }
             }
           }
@@ -77,14 +77,14 @@
         }
       }
     },
-    "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj": {
+    "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
+        "projectUniqueName": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
         "projectName": "ModeratorCandidates.Shared",
-        "projectPath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
+        "projectPath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\ModeratorCandidates.Shared.csproj",
         "packagesPath": "C:\\Users\\catsk\\.nuget\\packages\\",
-        "outputPath": "D:\\OrcaCall\\ModeratorCandidates\\ModeratorCandidates.Shared\\obj\\",
+        "outputPath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\ModeratorCandidates\\ModeratorCandidates.Shared\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\",
