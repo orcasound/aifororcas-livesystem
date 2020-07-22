@@ -1,0 +1,9 @@
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\bin\Debug\netstandard2.0\ModeratorCandidates.Shared.deps.json
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\bin\Debug\netstandard2.0\ModeratorCandidates.Shared.dll
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\bin\Debug\netstandard2.0\ModeratorCandidates.Shared.pdb
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\obj\Debug\netstandard2.0\ModeratorCandidates.Shared.csprojAssemblyReference.cache
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\obj\Debug\netstandard2.0\ModeratorCandidates.Shared.AssemblyInfoInputs.cache
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\obj\Debug\netstandard2.0\ModeratorCandidates.Shared.AssemblyInfo.cs
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\obj\Debug\netstandard2.0\ModeratorCandidates.Shared.csproj.CoreCompileInputs.cache
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\obj\Debug\netstandard2.0\ModeratorCandidates.Shared.dll
+D:\OrcaCall\ModeratorCandidates\ModeratorCandidates.Shared\obj\Debug\netstandard2.0\ModeratorCandidates.Shared.pdb
