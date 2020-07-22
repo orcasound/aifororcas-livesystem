@@ -58,6 +58,15 @@ namespace ModeratorCandidates.API.Services
 			var urlHelper = new UrlHelper(contextAccessor);
 			var baseUrl = urlHelper.BaseURL();
 
+			var locationList = new List<AILocation>()
+			{
+				new AILocation() { name = "Port Townsend", latitude = 48.088922, longitude = -122.762901 },
+				new AILocation() { name = "Bush Point", latitude = 48.029424, longitude = -122.615434 },
+				new AILocation() { name = "Haro Point", latitude = 48.579333, longitude = -123.178732}
+			};
+
+			var rnd = new Random();
+
 			// iterate the candidates and build the data set
 			foreach (var fileName in fileNameList)
 			{
@@ -72,13 +81,10 @@ namespace ModeratorCandidates.API.Services
 				var timestamp = ConvertFileNameToTimeStamp(id);
 
 				// calculate lat/long
+				// randomly assigning them to locations for testing purposes
 				// TODO: update when we actually get sample data from other locations
-				var location = new AILocation
-				{
-					name = import.source_guid,
-					longitude = -122.615434,
-					latitude = 48.029424,
-				};
+
+				var location = locationList[rnd.Next(3)];
 
 				// use that object to build the new candidate object
 				// TODO: add reference to real image of candidate (this one is a fake for dev purposes)

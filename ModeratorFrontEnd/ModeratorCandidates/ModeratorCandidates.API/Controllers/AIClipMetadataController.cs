@@ -122,6 +122,9 @@ namespace ModeratorCandidates.API.Controllers
 
             record.comments = result.comments;
             record.status = result.status;
+            record.moderator = result.moderator;
+            record.dateModerated = result.dateModerated;
+            record.tags = result.tags;
 
             // TODO: Would assume additional workflow goes here if SRKW are found
             //       like kicking off email/push notification, etc.

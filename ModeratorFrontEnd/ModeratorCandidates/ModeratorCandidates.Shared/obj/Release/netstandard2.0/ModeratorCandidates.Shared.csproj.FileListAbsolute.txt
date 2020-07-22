@@ -1,0 +1,9 @@
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\bin\Release\netstandard2.0\ModeratorCandidates.Shared.deps.json
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\bin\Release\netstandard2.0\ModeratorCandidates.Shared.dll
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\bin\Release\netstandard2.0\ModeratorCandidates.Shared.pdb
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\obj\Release\netstandard2.0\ModeratorCandidates.Shared.csprojAssemblyReference.cache
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\obj\Release\netstandard2.0\ModeratorCandidates.Shared.AssemblyInfoInputs.cache
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\obj\Release\netstandard2.0\ModeratorCandidates.Shared.AssemblyInfo.cs
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\obj\Release\netstandard2.0\ModeratorCandidates.Shared.csproj.CoreCompileInputs.cache
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\obj\Release\netstandard2.0\ModeratorCandidates.Shared.dll
+D:\Repo\OrcaSound\ModeratorFrontEnd\ModeratorCandidates\ModeratorCandidates.Shared\obj\Release\netstandard2.0\ModeratorCandidates.Shared.pdb

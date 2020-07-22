@@ -30,6 +30,8 @@ namespace ModeratorCandidates.Shared.Models
 				return total / annotations.Count;
 			}
 		}
-
+		public string moderator { get; set; }
+		public DateTime dateModerated { get; set; }
+		public string tags { get; set; }
 	}
 }
