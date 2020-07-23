@@ -9,6 +9,7 @@ namespace ModeratorCandidates.Shared.Models
 		public string status { get; set; }
 		public string tags { get; set; }
 		public string moderator { get; set; }
+		public string found { get; set; }
 		public DateTime dateModerated { get; set; }
 	}
 }

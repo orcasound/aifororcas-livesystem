@@ -22,6 +22,7 @@ namespace ModeratorCandidates.Shared.Models
 		public DateTime timestamp { get; set; }
 		public List<AIAnnotation> annotations { get; set; }
 		public string status { get; set; }
+		public string found { get; set; }
 		public string comments { get; set; }
 		public decimal averageConfidence {
 			get

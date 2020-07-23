@@ -44,6 +44,7 @@ namespace ModeratorCandidates.API.Controllers
 
                 double totalAmountPages = Math.Ceiling(count / pagination.RecordsPerPage);
 
+                HttpContext.Response.Headers.Add("totalNumberRecords", count.ToString());
                 HttpContext.Response.Headers.Add("totalAmountPages", totalAmountPages.ToString());
 
                 return Ok(queryable.ToList());
@@ -76,6 +77,7 @@ namespace ModeratorCandidates.API.Controllers
 
                 double totalAmountPages = Math.Ceiling(count / pagination.RecordsPerPage);
 
+                HttpContext.Response.Headers.Add("totalNumberRecords", count.ToString());
                 HttpContext.Response.Headers.Add("totalAmountPages", totalAmountPages.ToString());
 
                 return Ok(queryable.ToList());
@@ -114,7 +116,7 @@ namespace ModeratorCandidates.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(string id, [FromForm] AIClipMetadataReviewResult result)
+        public IActionResult Put(string id, AIClipMetadataReviewResult result)
         {
             var record = service.GetById(id);
 
@@ -125,6 +127,7 @@ namespace ModeratorCandidates.API.Controllers
             record.moderator = result.moderator;
             record.dateModerated = result.dateModerated;
             record.tags = result.tags;
+            record.found = result.found;
 
             // TODO: Would assume additional workflow goes here if SRKW are found
             //       like kicking off email/push notification, etc.

@@ -31,6 +31,14 @@ namespace ModeratorCandidates.API
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "Moderator Candidates API", Version = "v1" });
 			});
 
+			// TODO: Will have to be tweeked down once security is addressed
+			services.AddCors(o =>
+			{
+				o.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin()
+				.AllowAnyMethod()
+				.AllowAnyHeader());
+			});
+
 			services.AddControllers();
 		}
 
