@@ -37,17 +37,16 @@
 						<div class="row" style="padding:7px">
 							<div class="col-4">
 								<img src="@candidate.ImageUri" class="img-responsive fit-image">
+								<audio id="@candidate.PlayerId" src="@candidate.AudioUri"/>
 								<div class="navbar m-0 p-0">
 									<div class="mr-auto">
-										<i class="oi oi-media-play"></i>
-										<i class="oi oi-media-pause"></i>
-										<i class="oi oi-media-stop"></i>
+										<i class="oi oi-media-play" onclick="document.getElementById('@candidate.PlayerId').play()"></i>
+										<i class="oi oi-media-stop" onclick="document.getElementById('@candidate.PlayerId').pause()"></i>
 									</div>
 									<div class="ml-auto">
-										<i class="oi oi-media-step-backward"></i>
-										<i class="oi oi-media-skip-backward"></i>
-										<i class="oi oi-media-skip-forward"></i>
-										<i class="oi oi-media-step-forward"></i>
+										<i class="oi oi-media-step-backward" onclick="document.getElementById('@candidate.PlayerId').currentTime=0"></i>
+										<i class="oi oi-media-skip-backward" onclick="document.getElementById('@candidate.PlayerId').currentTime-=5"></i>
+										<i class="oi oi-media-skip-forward" onclick="document.getElementById('@candidate.PlayerId').currentTime+=5"></i>
 									</div>
 								</div>
 								<div class="mt-2">

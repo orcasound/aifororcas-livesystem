@@ -7,3 +7,12 @@ D:\Code\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.A
 D:\Code\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.AssemblyInfo.cs
 D:\Code\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.dll
 D:\Code\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.pdb
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\bin\Release\netstandard2.0\Orcasound.Shared.deps.json
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\bin\Release\netstandard2.0\Orcasound.Shared.dll
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\bin\Release\netstandard2.0\Orcasound.Shared.pdb
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.csprojAssemblyReference.cache
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.AssemblyInfoInputs.cache
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.AssemblyInfo.cs
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.csproj.CoreCompileInputs.cache
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.dll
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.Shared\obj\Release\netstandard2.0\Orcasound.Shared.pdb

@@ -36,5 +36,13 @@ namespace Orcasound.Shared.Entities
 				return Annotations.Count;
 			}
 		}
+
+		public string PlayerId
+		{
+			get
+			{
+				return $"{Id}_player";
+			}
+		}
 	}
 }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/Ha+G6IsomM7leo2HFtcKHn9WblKC3snYaLQ8ZcjXTOxgiG6PWKRz06FaWe8G+B5mryKatMFpRpcDaMO+mzfMQ==",
+  "dgSpecHash": "z1StSxe5X3IHI1xxlLQPI70G2KYoe2nc/77haPDCXdvVdi0r2TUKYfnUsww45dji3Vkp8sQQkb7giBR6Mx7L6w==",
   "success": true,
-  "projectFilePath": "D:\\Code\\Orcasound\\Orcasound.UI\\Orcasound.UI.csproj",
+  "projectFilePath": "D:\\Repo\\OrcaSound\\ModeratorFrontEnd\\Orcasound\\Orcasound.UI\\Orcasound.UI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.aspnetcore.authorization\\3.0.0\\microsoft.aspnetcore.authorization.3.0.0.nupkg.sha512",
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.aspnetcore.components\\3.0.0\\microsoft.aspnetcore.components.3.0.0.nupkg.sha512",
@@ -16,9 +16,9 @@
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.extensions.options\\3.0.0\\microsoft.extensions.options.3.0.0.nupkg.sha512",
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.extensions.primitives\\3.0.0\\microsoft.extensions.primitives.3.0.0.nupkg.sha512",
     "C:\\Users\\catsk\\.nuget\\packages\\microsoft.jsinterop\\3.0.0\\microsoft.jsinterop.3.0.0.nupkg.sha512",
-    "C:\\Users\\catsk\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\3.1.3\\microsoft.netcore.app.runtime.win-x86.3.1.3.nupkg.sha512",
-    "C:\\Users\\catsk\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\3.1.3\\microsoft.windowsdesktop.app.runtime.win-x86.3.1.3.nupkg.sha512",
-    "C:\\Users\\catsk\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\3.1.3\\microsoft.aspnetcore.app.runtime.win-x86.3.1.3.nupkg.sha512"
+    "C:\\Users\\catsk\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\3.1.5\\microsoft.netcore.app.runtime.win-x86.3.1.5.nupkg.sha512",
+    "C:\\Users\\catsk\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\3.1.5\\microsoft.windowsdesktop.app.runtime.win-x86.3.1.5.nupkg.sha512",
+    "C:\\Users\\catsk\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\3.1.5\\microsoft.aspnetcore.app.runtime.win-x86.3.1.5.nupkg.sha512"
   ],
   "logs": []
 }
