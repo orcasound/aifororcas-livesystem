@@ -1,0 +1,182 @@
+﻿@page "/candidates"
+@page "/"
+
+@inject ICandidateService service
+
+<head>
+	<meta charset="utf-8" />
+</head>
+<div>
+	<h1 class="orca-h1 orca-text-black" style="display:inline-block">Candidates for Review</h1>
+	@if (candidates != null)
+	{
+		<span class="badge badge-secondary text-medium" style="vertical-align:top">@totalNumberRecords</span>
+	}
+</div>
+<form class="form-inline" action="#">
+	<input class="form-control mr-sm-2 orca-filter" style="width:500px" type="text" placeholder="Filter by resident whale type, node, or probability">
+	<button class="btn btn-success orca-btn" type="submit">Filter</button>
+</form>
+<div class="container-fluid" style="margin-top: 25px;">
+	<div class="row">
+		<div class="col-lg-6" style="height: calc(100vh - 200px); overflow-y: scroll">
+			@if (candidates == null)
+			{
+				<p>Loading...</p>
+			}
+			else
+			{
+				<div class="row">
+					<div class="col-12 text-left px-0">
+						<PaginationComponent CurrentPage="@pagination.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage" />
+					</div>
+				</div>
+				@foreach (var candidate in candidates)
+				{
+					<div class="orca-data-strip container-fluid" @onclick="(() => FocusStrip(candidate))">
+						<div class="row" style="padding:7px">
+							<div class="col-4">
+								<img src="@candidate.ImageUri" class="img-responsive fit-image">
+								<div class="navbar m-0 p-0">
+									<div class="mr-auto">
+										<i class="oi oi-media-play"></i>
+										<i class="oi oi-media-pause"></i>
+										<i class="oi oi-media-stop"></i>
+									</div>
+									<div class="ml-auto">
+										<i class="oi oi-media-step-backward"></i>
+										<i class="oi oi-media-skip-backward"></i>
+										<i class="oi oi-media-skip-forward"></i>
+										<i class="oi oi-media-step-forward"></i>
+									</div>
+								</div>
+								<div class="mt-2">
+									<p class="orca-data-strip-data"><i class="oi oi-clock"></i>&nbsp;@candidate.Timestamp</p>
+									<p class="orca-data-strip-data"><i class="oi oi-map-marker"></i>&nbsp;@candidate.Location.Name</p>
+									<p class="orca-data-strip-data"><i class="oi oi-dashboard"></i>&nbsp;@candidate.Detections detection(s)</p>
+									<p class="orca-data-strip-data"><i class="oi oi-graph"></i>&nbsp;@String.Format("{0:0.00}", candidate.AverageConfidence)% avg conf</p>
+								</div>
+							</div>
+							<div class="col-8">
+								<p class="orca-data-strip-header mt-0">@candidate.Id</p>
+								<EditForm Model="candidate">
+									<div class="form-group mt-3 mb-0">
+										<label class="mb-0">Was there a whale call in this clip?</label>
+										<div>
+											@foreach(var result in resultList)
+											{
+												<label>
+													<input type="radio"
+														   name="found"
+														   @onchange="(() => SetFoundValue(candidate, result))"/>
+													@result
+												</label>
+											}
+										</div>
+									</div>
+									<div class="form-group">
+										<label>Tags</label>
+										<div>
+											<InputText class="form-control" @bind-Value="@candidate.Tags" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label>Comments</label>
+										<div>
+											<InputTextArea class="form-control" @bind-Value="@candidate.Comments" />
+										</div>
+									</div>
+									<button class="btn btn-primary" type="submit" @onclick="(() => SubmitCandidate(candidate))">Submit</button>
+								</EditForm>
+							</div>
+						</div>
+					</div>
+				}
+				<div class="row">
+					<div class="col-12 text-left px-0">
+						<PaginationComponent CurrentPage="@pagination.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage" />
+					</div>
+				</div>
+			}
+		</div>
+		<div class="col-lg-6">
+			<div class="track-order-map">
+				<Map Zoom="0" Markers="MapMarkers"></Map>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+
+	private List<Candidate> candidates = new List<Candidate>();
+
+	Pagination pagination = new Pagination() { RecordsPerPage = 5 };
+	private int totalAmountPages;
+	private int totalNumberRecords;
+
+	private string[] resultList = new string[] { "Yes", "No", "Don't Know" };
+
+	public List<Marker> MapMarkers { get; set; } = new List<Marker>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		MapMarkers = new List<Marker>
+{
+			new Marker{Description="Port Townsend", ShowPopup=false, Y = 48.088922, X = -122.762901},
+			new Marker{Description="Bush Point", ShowPopup=false, Y = 48.029424, X = -122.615434},
+			new Marker{Description="Haro Point", ShowPopup=false, Y = 48.579333, X = -123.178732},
+		};
+
+		try
+		{
+			await LoadCandidates();
+		}
+		catch (Exception ex)
+		{
+
+		}
+	}
+
+	private async Task LoadCandidates()
+	{
+		var paginatedResponse = await service.GetUnreviewedCandidates(pagination);
+		candidates = paginatedResponse.Response;
+		totalAmountPages = paginatedResponse.TotalAmountPages;
+		totalNumberRecords = paginatedResponse.TotalNumberRecords;
+	}
+
+	private void SetFoundValue(Candidate candidate, string found)
+	{
+		candidate.Found = found;
+	}
+
+	private async Task SubmitCandidate(Candidate candidate)
+	{
+		var request = new UpdateRequest()
+		{
+			Moderator = "John Smith",
+			DateModerated = DateTime.Now,
+			Found = candidate.Found,
+			Tags = candidate.Tags,
+			Comments = candidate.Comments,
+			Id = candidate.Id,
+			Status = "Reviewed"
+		};
+
+		await service.UpdateCandidate(request);
+		pagination.Page = 1;
+		await LoadCandidates();
+	}
+
+	private async Task SelectedPage(int page)
+	{
+		pagination.Page = page;
+		await LoadCandidates();
+	}
+
+	private void FocusStrip(Candidate e)
+	{
+		var test = e;
+	}
+}

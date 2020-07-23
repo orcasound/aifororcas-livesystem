@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orcasound.UI.Services;
+using System;
 
 namespace Orcasound.UI
 {
@@ -28,9 +24,12 @@ namespace Orcasound.UI
 			services.AddRazorPages();
 			services.AddServerSideBlazor();
 
-			services.AddSingleton<ICandidateService, CandidateService>();
+			services.AddHttpClient<ICandidateService, APICandidateService>(client =>
+			{
+				client.BaseAddress = new Uri("https://localhost:44319/");
 
-
+				// client.BaseAddress = new Uri("https://moderatorcandidates.azurewebsites.net/");
+			});
 
 			// Optional for debugging
 			services.AddServerSideBlazor(o => o.DetailedErrors = true);

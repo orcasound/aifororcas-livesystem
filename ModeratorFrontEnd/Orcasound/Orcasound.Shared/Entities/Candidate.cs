@@ -1,27 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Orcasound.Shared.Entities
 {
 	public class Candidate
 	{
-		public int Id { get; set; }
+		public string Id { get; set; }
+		public string AudioUri { get; set; }
+		public string ImageUri { get; set; }
 		public DateTime Timestamp { get; set; }
-		public string Source { get; set; }
-		public string Node { get; set; }
-		public double Longitute { get; set; }
-		public double Latitude { get; set; }
-		public double Probability { get; set; }
-		public string Description { get; set; }
-		public string ApprovalComments { get; set; }
-		public string RejectionComments { get; set; }
-		public List<string> Tags { get; set; } = new List<string>();
+		public string Status { get; set; }
+		public string Found { get; set; }
+		public string Comments { get; set; }
+		public string Tags { get; set; }
+		public string Moderator { get; set;}
+		public DateTime DateModerated { get; set; }
+		public Location Location { get; set; }
 
-		public string TagString
+		public List<Annotation> Annotations { get; set; }
+
+		public decimal AverageConfidence
 		{
 			get
 			{
-				return string.Join(", ", Tags);
+				var total = Annotations.Select(a => a.Confidence).Sum();
+				return (total / Annotations.Count) * 100;
+			}
+		}
+
+		public int Detections
+		{
+			get
+			{
+				return Annotations.Count;
 			}
 		}
 	}
