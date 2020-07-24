@@ -820,3 +820,5 @@ D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Release\netcoreap
 D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Release\netcoreapp3.1\win-x86\Orcasound.UI.dll
 D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Release\netcoreapp3.1\win-x86\Orcasound.UI.pdb
 D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Release\netcoreapp3.1\win-x86\Orcasound.UI.genruntimeconfig.cache
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Release\netcoreapp3.1\win-x86\RazorDeclaration\Shared\CandidateComponent.razor.g.cs
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Release\netcoreapp3.1\win-x86\Razor\Shared\CandidateComponent.razor.g.cs

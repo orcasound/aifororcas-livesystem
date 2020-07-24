@@ -116,3 +116,5 @@ D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Debug\netcoreapp3
 D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Debug\netcoreapp3.1\RazorDeclaration\Shared\PaginationComponent.razor.g.cs
 D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Debug\netcoreapp3.1\Razor\Pages\Candidates.razor.g.cs
 D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Debug\netcoreapp3.1\Razor\Shared\PaginationComponent.razor.g.cs
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Debug\netcoreapp3.1\RazorDeclaration\Shared\CandidateComponent.razor.g.cs
+D:\Repo\OrcaSound\ModeratorFrontEnd\Orcasound\Orcasound.UI\obj\Debug\netcoreapp3.1\Razor\Shared\CandidateComponent.razor.g.cs

@@ -1,0 +1,87 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div tabindex="0" class="orca-data-strip container-fluid @background" @onfocus="OnFocus" @onblur="OnBlur">
+	<div class="row" style="padding:7px">
+		<div class="col-4">
+			<img src="@Candidate.ImageUri" class="img-responsive fit-image">
+			<audio id="@Candidate.PlayerId" src="@Candidate.AudioUri" />
+			<div class="navbar m-0 p-0">
+				<div class="mr-auto">
+					<i class="oi oi-media-play" onclick="document.getElementById('@Candidate.PlayerId').play()"></i>
+					<i class="oi oi-media-stop" onclick="document.getElementById('@Candidate.PlayerId').pause()"></i>
+				</div>
+				<div class="ml-auto">
+					<i class="oi oi-media-step-backward" onclick="document.getElementById('@Candidate.PlayerId').currentTime=0"></i>
+					<i class="oi oi-media-skip-backward" onclick="document.getElementById('@Candidate.PlayerId').currentTime-=5"></i>
+					<i class="oi oi-media-skip-forward" onclick="document.getElementById('@Candidate.PlayerId').currentTime+=5"></i>
+				</div>
+			</div>
+			<div class="mt-2">
+				<p class="orca-data-strip-data"><i class="oi oi-clock"></i>&nbsp;@Candidate.Timestamp</p>
+				<p class="orca-data-strip-data"><i class="oi oi-map-marker"></i>&nbsp;@Candidate.Location.Name</p>
+				<p class="orca-data-strip-data"><i class="oi oi-dashboard"></i>&nbsp;@Candidate.Detections detection(s)</p>
+				<p class="orca-data-strip-data"><i class="oi oi-graph"></i>&nbsp;@String.Format("{0:0.00}", Candidate.AverageConfidence)% avg conf</p>
+			</div>
+		</div>
+		<div class="col-8">
+			<p class="orca-data-strip-header mt-0">@Candidate.Id</p>
+			<EditForm Model="Candidate">
+				<div class="form-group mt-3 mb-0">
+					<label class="mb-0">Was there an SRKW call in this clip?</label>
+					<div>
+						@foreach (var result in resultList)
+						{
+						<label>
+							<input type="radio"
+								   name="found"
+								   @onchange="(() => SetFoundValue(Candidate, result))" @onfocus="OnFocus" />
+							@result
+						</label>
+						}
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Tags</label>
+					<div>
+						<InputText class="form-control" @bind-Value="@Candidate.Tags" @onfocus="OnFocus" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Comments</label>
+					<div>
+						<InputTextArea class="form-control" @bind-Value="@Candidate.Comments" @onfocus="OnFocus" />
+					</div>
+				</div>
+				<button class="btn btn-primary" type="submit" @onclick="(() => OnSubmitClick.InvokeAsync(Candidate))">Submit</button>
+			</EditForm>
+		</div>
+	</div>
+</div>
+
+@code {
+	private string[] resultList = new string[] { "Yes", "No", "Don't Know" };
+	private string background = "orca-data-strip-normal";
+
+	[Parameter]
+	public EventCallback<Candidate> OnSubmitClick { get; set; }
+
+	[Parameter]
+	public Candidate Candidate { get; set; }
+
+	private void SetFoundValue(Candidate candidate, string found)
+	{
+		candidate.Found = found;
+	}
+
+	private void OnFocus()
+	{
+		background = "orca-data-strip-focused";
+	}
+
+	private async Task OnBlur()
+	{
+		await JSRuntime.InvokeVoidAsync("StopPlaying", Candidate.PlayerId);
+		background = "orca-data-strip-normal";
+
+	}
+}

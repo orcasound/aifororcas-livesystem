@@ -135,8 +135,6 @@
 	font-size: 18px;
 	line-height: 24px;
 	color: #000000;
-	margin-top: 5px;
-	margin-bottom: 3px;
 }
 .orca-data-strip-data {
 	font-family: Arial;
@@ -146,5 +144,10 @@
 	line-height: 20px;
 	color: #000000;
 	margin-bottom: 3px;
+}
+
+.fit-image {
+	width: 100%;
+	object-fit: cover;
 }
 
