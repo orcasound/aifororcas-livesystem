@@ -2,6 +2,7 @@
 @page "/"
 
 @inject ICandidateService service
+@inject IJSRuntime JSRuntime
 
 <div>
 	<h1 class="orca-h1 orca-text-black" style="display:inline-block">Candidates for Review</h1>
@@ -48,6 +49,8 @@
 		</div>
 	</div>
 </div>
+
+<audio id="submitEffect" src="sounds/Various-01.wav" />
 
 @code {
 
@@ -100,6 +103,8 @@
 			Status = "Reviewed"
 		};
 
+		await JSRuntime.InvokeVoidAsync("PlaySubmit");
+
 		await service.UpdateCandidate(request);
 		pagination.Page = 1;
 		await LoadCandidates();
@@ -115,5 +120,8 @@
 <script suppress-error="BL9992">
 	window.StopPlaying = (id) => {
 		document.getElementById(id).pause();
+	}
+	window.PlaySubmit = () => {
+		document.getElementById("submitEffect").play();
 	}
 </script>

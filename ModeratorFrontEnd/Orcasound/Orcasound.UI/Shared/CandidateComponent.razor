@@ -52,7 +52,7 @@
 						<InputTextArea class="form-control" @bind-Value="@Candidate.Comments" @onfocus="OnFocus" />
 					</div>
 				</div>
-				<button class="btn btn-primary" type="submit" @onclick="(() => OnSubmitClick.InvokeAsync(Candidate))">Submit</button>
+				<button class="btn btn-primary" type="submit" @onclick="(() => SendIt(Candidate))">Submit</button>
 			</EditForm>
 		</div>
 	</div>
@@ -82,6 +82,11 @@
 	{
 		await JSRuntime.InvokeVoidAsync("StopPlaying", Candidate.PlayerId);
 		background = "orca-data-strip-normal";
+	}
 
+	private async Task SendIt(Candidate candidate)
+	{
+		OnBlur();
+		OnSubmitClick.InvokeAsync(candidate);
 	}
 }
