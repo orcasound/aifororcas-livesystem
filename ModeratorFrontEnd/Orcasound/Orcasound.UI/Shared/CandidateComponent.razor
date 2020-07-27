@@ -1,6 +1,6 @@
 ﻿@inject IJSRuntime JSRuntime
 
-<div tabindex="0" class="orca-data-strip container-fluid @background" @onfocus="OnFocus" @onblur="OnBlur">
+<div tabindex="0" class="orca-data-strip container-fluid @background" @onfocus="OnFocus" @onblur="OnBlur" @onfocus:preventDefault>
 	<div class="row" style="padding:7px">
 		<div class="col-4">
 			<img src="@Candidate.ImageUri" class="img-responsive fit-image">
@@ -82,11 +82,14 @@
         candidate.Found = found;
     }
 
-    private void OnFocus()
-    {
-        background = "orca-data-strip-focused";
-    }
-
+	private async void OnFocus()
+	{
+		background = "orca-data-strip-focused";
+		await JSRuntime.InvokeVoidAsync(
+            "deliveryMap.focusOnLocation", Candidate.Location.Latitude, Candidate.Location.Longitude);
+		
+	}
+    
     private async Task OnBlur()
     {
         await JSRuntime.InvokeVoidAsync("StopPlaying", Candidate.PlayerId);
