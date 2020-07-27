@@ -46,6 +46,17 @@
                         4000);
                 });
             }
+        },
+        focusOnLocation: function(lat, lng) {
+            const elem = document.querySelector(".track-order-map [id^='map']");
+            const latlng = L.latLng(lat, lng);
+            const map = elem.map;
+            for (let i = 0; i < map.addedMarkers.length; i++) {
+                if (latlng.equals(map.addedMarkers[i].getLatLng())) {
+                    map.addedMarkers[i].openPopup();
+                    map.setView([lat, lng], 10);
+                }
+            }
         }
     };
 
