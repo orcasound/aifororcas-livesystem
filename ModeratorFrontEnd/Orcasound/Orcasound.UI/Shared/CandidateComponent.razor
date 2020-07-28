@@ -26,20 +26,21 @@
 		<div class="col-8">
 			<p class="orca-data-strip-header mt-0">@Candidate.Id</p>
 			<EditForm Model="Candidate">
-				<div class="form-group mt-3 mb-0">
-					<label class="mb-0">Was there an SRKW call in this clip?</label>
-					<div>
-						@foreach (var result in resultList)
-						{
-						<label>
-							<input type="radio"
-								   name="found"
-								   @onchange="(() => SetFoundValue(Candidate, result))" @onfocus="OnFocus" />
-							@result
-						</label>
-						}
-					</div>
-				</div>
+                <div class="form-group mt-3 mb-0">
+                    <label class="mb-0">Was there an SRKW call in this clip?</label>
+                    <div id="react-test"></div>
+                    <div>
+                        @foreach (var result in resultList)
+                        {
+                            <label>
+                                <input type="radio"
+                                       name="found"
+                                       @onchange="(() => SetFoundValue(Candidate, result))" @onfocus="OnFocus" />
+                                @result
+                            </label>
+                        }
+                    </div>
+                </div>
 				<div class="form-group">
 					<label>Tags</label>
 					<div>
@@ -59,34 +60,42 @@
 </div>
 
 @code {
-	private string[] resultList = new string[] { "Yes", "No", "Don't Know" };
-	private string background = "orca-data-strip-normal";
+    private string[] resultList = new string[] { "Yes", "No", "Don't Know" };
+    private string background = "orca-data-strip-normal";
 
-	[Parameter]
-	public EventCallback<Candidate> OnSubmitClick { get; set; }
+    [Parameter]
+    public EventCallback<Candidate> OnSubmitClick { get; set; }
 
-	[Parameter]
-	public Candidate Candidate { get; set; }
+    [Parameter]
+    public Candidate Candidate { get; set; }
 
-	private void SetFoundValue(Candidate candidate, string found)
-	{
-		candidate.Found = found;
-	}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("ReactComponents.RenderTestComponent");
+        }
+    }
 
-	private void OnFocus()
-	{
-		background = "orca-data-strip-focused";
-	}
+    private void SetFoundValue(Candidate candidate, string found)
+    {
+        candidate.Found = found;
+    }
 
-	private async Task OnBlur()
-	{
-		await JSRuntime.InvokeVoidAsync("StopPlaying", Candidate.PlayerId);
-		background = "orca-data-strip-normal";
-	}
+    private void OnFocus()
+    {
+        background = "orca-data-strip-focused";
+    }
 
-	private async Task SendIt(Candidate candidate)
-	{
-		OnBlur();
-		OnSubmitClick.InvokeAsync(candidate);
-	}
+    private async Task OnBlur()
+    {
+        await JSRuntime.InvokeVoidAsync("StopPlaying", Candidate.PlayerId);
+        background = "orca-data-strip-normal";
+    }
+
+    private async Task SendIt(Candidate candidate)
+    {
+        OnBlur();
+        OnSubmitClick.InvokeAsync(candidate);
+    }
 }

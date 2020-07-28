@@ -138,3 +138,6 @@ bld/
 [Oo]bj/
 [Ll]og/
 
+# node modules
+node_modules/
+package-lock.json

@@ -2,11 +2,26 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <JsLibraryRoot>Typescript\</JsLibraryRoot>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibraryRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Orcasound.ComponentsLibrary\Orcasound.ComponentsLibrary.csproj" />
     <ProjectReference Include="..\Orcasound.Shared\Orcasound.Shared.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="$(JsLibraryRoot)**" />
+    <None Remove="$(JsLibraryRoot)**" />
+    <None Include="$(JsLibraryRoot)**" Exclude="$(JsLibraryRoot)node_modules\**" />
+  </ItemGroup>
+
+  <Target Name="PublishRunWebpack" AfterTargets="Build">
+    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+    <Exec WorkingDirectory="$(JsLibraryRoot)" Command="npm install" />
+    <Exec WorkingDirectory="$(JsLibraryRoot)" Command="npm run build" />
+  </Target>
 
 </Project>

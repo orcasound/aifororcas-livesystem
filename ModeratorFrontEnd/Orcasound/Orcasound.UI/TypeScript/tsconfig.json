@@ -1,0 +1,18 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "lib": ["dom"],
+        "allowSyntheticDefaultImports" : true,
+        "esModuleInterop": true,
+        "outDir": "./dist/",
+        "allowJs": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "target": "es5",
+        "jsx": "react"
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"],
+}

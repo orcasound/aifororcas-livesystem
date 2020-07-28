@@ -22,24 +22,19 @@
 		<div class="col-lg-6" style="height: calc(100vh - 200px); overflow-y: scroll">
 			@if (candidates == null)
 			{
-			<p>Loading...</p>
+				<p>Loading...</p>
 			}
 			else
 			{
-			<div class="row">
-				<div class="col-12 text-left px-0">
-					<PaginationComponent CurrentPage="@pagination.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage" />
-				</div>
-			</div>
-			@foreach (var candidate in candidates)
+				@foreach (var candidate in candidates)
 				{
-			<CandidateComponent Candidate="candidate" OnSubmitClick="SubmitCandidate" />
+					<CandidateComponent Candidate="candidate" OnSubmitClick="SubmitCandidate" />
 				}
-			<div class="row">
-				<div class="col-12 text-left px-0">
-					<PaginationComponent CurrentPage="@pagination.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage" />
+				<div class="row">
+					<div class="col-12 text-left px-0">
+						<PaginationComponent CurrentPage="@pagination.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage" />
+					</div>
 				</div>
-			</div>
 			}
 		</div>
 		<div class="col-lg-6">
@@ -54,67 +49,67 @@
 
 @code {
 
-	private List<Candidate> candidates = new List<Candidate>();
+    private List<Candidate> candidates = new List<Candidate>();
 
-	Pagination pagination = new Pagination() { RecordsPerPage = 5 };
-	private int totalAmountPages;
-	private int totalNumberRecords;
+    Pagination pagination = new Pagination() { RecordsPerPage = 5 };
+    private int totalAmountPages;
+    private int totalNumberRecords;
 
 
-	public List<Marker> MapMarkers { get; set; } = new List<Marker>();
+    public List<Marker> MapMarkers { get; set; } = new List<Marker>();
 
-	protected override async Task OnInitializedAsync()
-	{
-		MapMarkers = new List<Marker>
-{
-			new Marker{Description="Port Townsend", ShowPopup=false, Y = 48.088922, X = -122.762901},
-			new Marker{Description="Bush Point", ShowPopup=false, Y = 48.029424, X = -122.615434},
-			new Marker{Description="Haro Point", ShowPopup=false, Y = 48.579333, X = -123.178732},
-		};
+    protected override async Task OnInitializedAsync()
+    {
+        MapMarkers = new List<Marker>
+        {
+            new Marker{Description="Port Townsend", ShowPopup=false, Y = 48.088922, X = -122.762901},
+            new Marker{Description="Bush Point", ShowPopup=false, Y = 48.029424, X = -122.615434},
+            new Marker{Description="Haro Point", ShowPopup=false, Y = 48.579333, X = -123.178732},
+        };
 
-		try
-		{
-			await LoadCandidates();
-		}
-		catch (Exception ex)
-		{
+        try
+        {
+            await LoadCandidates();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
 
-		}
-	}
+    private async Task LoadCandidates()
+    {
+        var paginatedResponse = await service.GetUnreviewedCandidates(pagination);
+        candidates = paginatedResponse.Response;
+        totalAmountPages = paginatedResponse.TotalAmountPages;
+        totalNumberRecords = paginatedResponse.TotalNumberRecords;
+    }
 
-	private async Task LoadCandidates()
-	{
-		var paginatedResponse = await service.GetUnreviewedCandidates(pagination);
-		candidates = paginatedResponse.Response;
-		totalAmountPages = paginatedResponse.TotalAmountPages;
-		totalNumberRecords = paginatedResponse.TotalNumberRecords;
-	}
+    private async Task SubmitCandidate(Candidate candidate)
+    {
+        var request = new UpdateRequest()
+        {
+            Moderator = "John Smith",
+            DateModerated = DateTime.Now,
+            Found = candidate.Found,
+            Tags = candidate.Tags,
+            Comments = candidate.Comments,
+            Id = candidate.Id,
+            Status = "Reviewed"
+        };
 
-	private async Task SubmitCandidate(Candidate candidate)
-	{
-		var request = new UpdateRequest()
-		{
-			Moderator = "John Smith",
-			DateModerated = DateTime.Now,
-			Found = candidate.Found,
-			Tags = candidate.Tags,
-			Comments = candidate.Comments,
-			Id = candidate.Id,
-			Status = "Reviewed"
-		};
+        await JSRuntime.InvokeVoidAsync("PlaySubmit");
 
-		await JSRuntime.InvokeVoidAsync("PlaySubmit");
+        await service.UpdateCandidate(request);
+        pagination.Page = 1;
+        await LoadCandidates();
+    }
 
-		await service.UpdateCandidate(request);
-		pagination.Page = 1;
-		await LoadCandidates();
-	}
-
-	private async Task SelectedPage(int page)
-	{
-		pagination.Page = page;
-		await LoadCandidates();
-	}
+    private async Task SelectedPage(int page)
+    {
+        pagination.Page = page;
+        await LoadCandidates();
+    }
 }
 
 <script suppress-error="BL9992">
