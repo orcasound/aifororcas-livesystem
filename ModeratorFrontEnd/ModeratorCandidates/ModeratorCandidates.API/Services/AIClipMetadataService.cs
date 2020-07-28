@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Configuration;
 
 namespace ModeratorCandidates.API.Services
 {
@@ -60,9 +61,9 @@ namespace ModeratorCandidates.API.Services
 
 			var locationList = new List<AILocation>()
 			{
-				new AILocation() { name = "Port Townsend", latitude = 48.088922, longitude = -122.762901 },
-				new AILocation() { name = "Bush Point", latitude = 48.029424, longitude = -122.615434 },
-				new AILocation() { name = "Haro Point", latitude = 48.579333, longitude = -123.178732}
+				//new AILocation() { name = "Port Townsend", latitude = 48.088922, longitude = -122.762901 },
+				//new AILocation() { name = "Bush Point", latitude = 48.029424, longitude = -122.615434 },
+				//new AILocation() { name = "Haro Point", latitude = 48.579333, longitude = -123.178732}
 			};
 
 			var rnd = new Random();
@@ -100,16 +101,16 @@ namespace ModeratorCandidates.API.Services
 
 				int count = 0;
 
-				var annotations = import.annotations.Select(annotation => new AIAnnotation()
-				{
-					id = count++,
-					startTime = annotation.start_time_s,
-					duration = annotation.duration_s,
-					confidence = annotation.confidence,
-				})
-				.ToList();
+				//var annotations = import.annotations.Select(annotation => new AIAnnotation()
+				//{
+				//	id = count++,
+				//	startTime = annotation.start_time_s,
+				//	duration = annotation.duration_s,
+				//	confidence = annotation.confidence,
+				//})
+				//.ToList();
 
-				candidate.annotations = annotations;
+				//candidate.annotations = annotations;
 
 				// add the candidate to the results list
 				candidates.Add(candidate);

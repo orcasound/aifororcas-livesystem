@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,8 +24,18 @@ namespace ModeratorCandidates.API
 		{
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+			services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseCosmos(
+					accountEndpoint: Configuration["accountEndpoint"],
+					accountKey: Configuration["accountKey"],
+					databaseName: Configuration["databaseName"])
+			);
+
 			// Made this a singleton since serving from memory right now
-			services.AddSingleton<AIClipMetadataService>();
+			// services.AddSingleton<AIClipMetadataService>();
+
+			// This calls the cosmos db
+			services.AddTransient<MetadataRepository>();
 
 			services.AddSwaggerGen(c =>
 			{

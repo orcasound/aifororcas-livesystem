@@ -20,14 +20,7 @@ namespace Orcasound.Shared.Entities
 
 		public List<Annotation> Annotations { get; set; }
 
-		public decimal AverageConfidence
-		{
-			get
-			{
-				var total = Annotations.Select(a => a.Confidence).Sum();
-				return (total / Annotations.Count) * 100;
-			}
-		}
+		public decimal AverageConfidence { get; set; }
 
 		public int Detections
 		{
