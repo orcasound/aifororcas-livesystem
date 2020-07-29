@@ -84,7 +84,7 @@ namespace ModeratorCandidates.API.Controllers
 
                 double count = queryable.Count();
 
-                queryable = queryable.OrderBy(x => x.timestamp).ThenBy(x => x.id);
+                queryable = queryable.OrderByDescending(x => x.timestamp).ThenBy(x => x.id);
 
                 queryable = queryable
                     .Skip((pagination.Page - 1) * pagination.RecordsPerPage)
