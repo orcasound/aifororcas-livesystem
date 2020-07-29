@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
-    <TypeScriptLib>Typescript\</TypeScriptLib>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(TypeScriptLib)node_modules\**</DefaultItemExcludes>
+    <JsLibraryRoot>TypeScript\</JsLibraryRoot>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibraryRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
