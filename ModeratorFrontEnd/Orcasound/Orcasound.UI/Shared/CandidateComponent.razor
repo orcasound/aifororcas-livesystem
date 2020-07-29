@@ -80,10 +80,15 @@
 	private async void OnFocus()
 	{
 		background = "orca-data-strip-focused";
-		await JSRuntime.InvokeVoidAsync(
-            "deliveryMap.focusOnLocation", Candidate.Location.Latitude, Candidate.Location.Longitude);
-		
+		await JSRuntime.InvokeVoidAsync("deliveryMap.focusOnLocation", Candidate.Location.Latitude, Candidate.Location.Longitude, Candidate.Location.Name);
 	}
+
+    private async Task OnBlur()
+    {
+		await JSRuntime.InvokeVoidAsync("deliveryMap.unFocus");
+        await JSRuntime.InvokeVoidAsync("StopPlaying", Candidate.PlayerId);
+        background = "orca-data-strip-normal";
+    }
 
     private async Task SendIt(Candidate candidate)
     {

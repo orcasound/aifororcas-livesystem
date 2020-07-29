@@ -1,7 +1,7 @@
 ﻿(function () {
     var tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     var tileAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
-
+    let marker = {};
     // Global export
     window.deliveryMap = {
         showOrUpdate: function (elementId, markers) {
@@ -12,50 +12,34 @@
 
             // Initialize map if needed
             if (!elem.map) {
-                elem.map = L.map(elementId);
-                elem.map.addedMarkers = [];
+                elem.map = L.map(elementId, { attributionControl: false }).setView([48.360235, -122.747209], 7); // Set view in the salish sea
                 L.tileLayer(tileUrl, { attribution: tileAttribution }).addTo(elem.map);
             }
-
-            var map = elem.map;
-            if (map.addedMarkers.length !== markers.length) {
-                // Markers have changed, so reset
-                map.addedMarkers.forEach(marker => marker.removeFrom(map));
-                map.addedMarkers = markers.map(m => {
-                    return L.marker([m.y, m.x]).bindPopup(m.description).addTo(map);
-                });
-
-                // Auto-fit the view
-                var markersGroup = new L.featureGroup(map.addedMarkers);
-                map.fitBounds(markersGroup.getBounds().pad(0.3));
-
-                map.zoomOut(1);
-
-                // Show applicable popups. Can't do this until after the view was auto-fitted.
-                markers.forEach((marker, index) => {
-                    if (marker.showPopup) {
-                        map.addedMarkers[index].openPopup();
-                    }
-                });
-            } else {
-                // Same number of markers, so update positions/text without changing view bounds
-                markers.forEach((marker, index) => {
-                    animateMarkerMove(
-                        map.addedMarkers[index].setPopupContent(marker.description),
-                        marker,
-                        4000);
-                });
-            }
         },
-        focusOnLocation: function(lat, lng) {
-            const elem = document.querySelector(".track-order-map [id^='map']");
-            const latlng = L.latLng(lat, lng);
-            const map = elem.map;
-            for (let i = 0; i < map.addedMarkers.length; i++) {
-                if (latlng.equals(map.addedMarkers[i].getLatLng())) {
-                    map.addedMarkers[i].openPopup();
-                    map.setView([lat, lng], 10);
-                }
+        focusOnLocation: function(lat, lng, name) {
+            const map = document.querySelector(".track-order-map [id^='map']").map;
+
+            // Clear existing marker
+            if (marker !== undefined) {
+                map.removeLayer(marker);
+            }
+            const hydrophoneIcon = L.icon({
+                iconUrl: 'images/hydrophone.png',
+
+                iconSize: [40, 40], // size of the icon
+                popupAnchor: [0, -20] // point from which the popup should open relative to the iconAnchor
+            })
+            // Add a marker to show current selected location
+            marker = L.marker([lat, lng], { icon: hydrophoneIcon }).addTo(map);
+            marker.bindPopup(name).openPopup();
+            map.setView([lat, lng], 10);
+        },
+        unFocus: function () {
+            const map = document.querySelector(".track-order-map [id^='map']").map;
+
+            // Clear existing marker
+            if (marker !== undefined) {
+                map.removeLayer(marker);
             }
         }
     };
