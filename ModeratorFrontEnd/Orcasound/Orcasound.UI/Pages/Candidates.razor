@@ -5,7 +5,7 @@
 @inject IJSRuntime JSRuntime
 
 <div>
-	<h1 class="orca-h1 orca-text-black" style="display:inline-block">Candidates for Review</h1>
+	<h1 class="orca-h1 orca-text-black" style="display:inline-block">Candidates for review</h1>
 	@if (candidates != null)
 	{
 	<span class="badge badge-secondary text-medium" style="vertical-align:top">@totalNumberRecords</span>
@@ -44,6 +44,9 @@
 		</div>
 	</div>
 </div>
+
+@* Candidate details modal *@
+<div id="react-details"></div>
 
 <audio id="submitEffect" src="sounds/Various-01.wav" />
 

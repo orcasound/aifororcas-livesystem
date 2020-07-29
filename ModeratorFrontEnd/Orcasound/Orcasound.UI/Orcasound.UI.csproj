@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
-    <JsLibraryRoot>Typescript\</JsLibraryRoot>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibraryRoot)node_modules\**</DefaultItemExcludes>
+    <TypeScriptLib>Typescript\</TypeScriptLib>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(TypeScriptLib)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,15 +13,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="$(JsLibraryRoot)**" />
-    <None Remove="$(JsLibraryRoot)**" />
-    <None Include="$(JsLibraryRoot)**" Exclude="$(JsLibraryRoot)node_modules\**" />
+    <Content Remove="$(TypeScriptLib)**" />
+    <None Remove="$(TypeScriptLib)**" />
+    <None Include="$(TypeScriptLib)**" Exclude="$(TypeScriptLib)node_modules\**" />
   </ItemGroup>
 
   <Target Name="PublishRunWebpack" AfterTargets="Build">
-    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-    <Exec WorkingDirectory="$(JsLibraryRoot)" Command="npm install" />
-    <Exec WorkingDirectory="$(JsLibraryRoot)" Command="npm run build" />
+    <!-- As part of publishing, ensure the Ts resources are freshly built in production mode -->
+    <Exec WorkingDirectory="$(TypeScriptLib)" Command="npm install" />
+    <Exec WorkingDirectory="$(TypeScriptLib)" Command="npm run build" />
   </Target>
+
+  <ItemGroup>
+    <!-- extends watching group to include *.razor files -->
+    <Watch Include="**\*.razor" />
+  </ItemGroup>
 
 </Project>

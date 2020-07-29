@@ -109,9 +109,9 @@
 	padding: 10px;
 }
 
-	.orca-data-strip:focus {
-		outline: none;
-	}
+.orca-data-strip:focus {
+	outline: none;
+}
 
 .orca-data-strip-normal {
 	background-color: #FFFFFF;
@@ -147,6 +147,7 @@
 	line-height: 24px;
 	color: #000000;
 }
+
 .orca-data-strip-data {
 	font-family: Arial;
 	font-style: normal;
@@ -162,3 +163,68 @@
 	object-fit: cover;
 }
 
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.overlay .close {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	cursor: default;
+}
+
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 75px auto;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid rgb(100, 94, 94);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+  width: 70%;
+	min-height: 70%;
+}
+
+.popup h2 {
+  margin-top: 0;
+  margin-bottom: 30px;
+  color: rgb(100, 94, 94);
+  font-family: "Trebuchet MS", Tahoma, Arial, sans-serif;
+}
+
+.popup .close {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 20px;
+  right: 20px;
+  opacity: 0.8;
+  transition: all 200ms;
+  font-size: 24px;
+  font-weight: bold;
+  text-decoration: none;
+  color: rgb(100, 94, 94);
+}
+
+.popup .close:hover {
+  opacity: 1;
+}
+
+.popup p {
+  margin: 0 0 1em;
+}
+
+.popup p:last-child {
+  margin: 0;
+}
