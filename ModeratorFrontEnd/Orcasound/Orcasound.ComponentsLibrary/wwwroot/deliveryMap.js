@@ -24,7 +24,7 @@
                 map.removeLayer(marker);
             }
             const hydrophoneIcon = L.icon({
-                iconUrl: 'images/hydrophone.png',
+                iconUrl: 'images/hydrophone-blue.png',
 
                 iconSize: [40, 40], // size of the icon
                 popupAnchor: [0, -20] // point from which the popup should open relative to the iconAnchor
