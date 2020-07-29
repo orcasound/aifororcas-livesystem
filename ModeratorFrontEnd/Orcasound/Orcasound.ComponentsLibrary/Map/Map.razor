@@ -6,7 +6,7 @@
 @using Orcasound.ComponentsLibrary.Map
 @inject IJSRuntime JSRuntime
 
-<div id="@elementId" class="col-lg-12" style="height: calc(100vh - 200px); border:1px solid black"></div>
+<div id="@elementId" class="col-lg-12" style="z-index:0; height: calc(100vh - 200px); border:1px solid black"></div>
 
 @code {
     string elementId = $"map-{Guid.NewGuid().ToString("D")}";

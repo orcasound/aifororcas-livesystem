@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
+    "@recogito/annotorious": "^2.0.5",
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.1.0",
     "typescript": "^3.9.7",

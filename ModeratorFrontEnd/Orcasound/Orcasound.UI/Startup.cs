@@ -26,9 +26,9 @@ namespace Orcasound.UI
 
 			services.AddHttpClient<ICandidateService, APICandidateService>(client =>
 			{
-				// client.BaseAddress = new Uri("https://localhost:44319/");
+				client.BaseAddress = new Uri("https://localhost:44319/");
 
-				client.BaseAddress = new Uri("https://moderatorcandidates.azurewebsites.net/");
+				// client.BaseAddress = new Uri("https://moderatorcandidates.azurewebsites.net/");
 			});
 
 			// Optional for debugging
