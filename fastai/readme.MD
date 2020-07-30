@@ -1,7 +1,7 @@
 # Repo to explain FastAI modeling methodology
 - Author : Aayush Agrawal (aaagraw@microsoft.com)
 
-# Model data 
+## Model data 
 The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). In specific the model was  trained with the following dataset -
 
 - [WHOIS09222019_PodCastRound1](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#WHOIS_PodCastRound1) (~6hrs, open data source – Orca call around the planet, Good for generic models)
@@ -12,12 +12,12 @@ And testing in evaluation section of FastAI start script is done on this data -
 - [OrcasoundLab07052019_Test](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#OrcasoundLab07052019_Test) (~30min, very call-rich, good SNR conditions)
 - [OrcasoundLab09272017_Test](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#OrcasoundLab07052019_Test) (~21min, more typical distribution, good SNR conditions)
 
-# Data Directory structure in this folder(not uploaded on Git) -
+## Data Directory structure in this folder(not uploaded on Git) -
+
 ```
 fastai/data
-	- test
-	- train
-		- train_data_09222019
+    - train
+        - train_data_09222019
             - wav
             - train.tsv
         - Round2_OS_07_05
@@ -35,12 +35,15 @@ fastai/data
     - test
         - all
         - OrcasoundLab07052019_Test
-            - test2Sec [Created later]
+            - test2Sec
             - wav
             - test.tsv
         - OrcasoundLab09272017_Test
             - wav
             - test.csv
-    
-	
-```   
+```
+
+## End-To-End development Process
+### **Step 1**: Creating a more ML-ready dataset inline with other popular sound dataset - [1_DataCreation.ipynb notebook]()
+    - Extracting small audio segments for positive and negative label and store them in positive and negative folder
+    - Filtering any call with less than 1 second duration
