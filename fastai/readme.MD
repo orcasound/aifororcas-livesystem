@@ -57,8 +57,18 @@ fastai/data
 - Step 5: Running scoring for official evaluation
 
 
-All the files generated during process is on [Onedrive](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/EpK2FvtpbRBDt76EwoKPuHoB8ll9WSXNPGhRX63OTg-1Jw?e=APocpv)
+# All the files generated during process is on [Onedrive](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/EpK2FvtpbRBDt76EwoKPuHoB8ll9WSXNPGhRX63OTg-1Jw?e=550aE2)
 - **Models/stg2-rn18.pkl** - Trained ResNet18 model
 - **mldata.7z** is data used for training the model
 - **All.zip** is testing data for early evaluations
 - **test2Sec.zip** is data used for scoring for official evaluations
+
+
+## Dependencies -
+- [FastAIAudio](https://github.com/mogwai/fastai_audio)
+- [FastAI v1](https://github.com/fastai/fastai/blob/master/README.md#installation)
+- [Librosa] (https://github.com/librosa/librosa)
+- [Pandas] (https://github.com/pandas-dev/pandas)
+- [Pydub] (https://github.com/jiaaro/pydub/)
+- [tqdm] (https://github.com/tqdm/tqdm)
+- [sklearn](https://scikit-learn.org/stable/install.html)
