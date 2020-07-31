@@ -40,7 +40,8 @@ python score.py -audioFilePath "./wav/OS_7_05_2019_08_24_00_.wav" -groundTruthFi
 ## Using Existing Model
 We used existing model saved [here](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/ErYhp5U7TvNLuEm_D1sGCfkBHxx_h9ACA4Yn7WbfK5dzlA?e=V5x9b5) built by Aakash in data_ml folder. We used ScoringUsingExistingModel.ipynb file to generate submision/predictionSubmission.csv and used score.py to evalute against test data.
 
-| File       | Model       | Recall    | Precision    | F-1 Score|    
-| :------------- | :----------: |  :----------: |  :----------: | :----------: | 
-|  sample_submission.csv | None | 0.7168674698795181 | 0.7168674698795181 | 0.7168674698795182 |
-| submission/predictionSubmission.csv | [AudioSet_fc_all_Iter_26](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/ErYhp5U7TvNLuEm_D1sGCfkBHxx_h9ACA4Yn7WbfK5dzlA?e=3bbeI9) | 0.4569707401032702 | 0.9448398576512456 | 0.6160092807424594| 
+| File       | Model       | Recall    | Precision    | F-1 Score| Threshold |
+| :------------- | :----------: |  :----------: |  :----------: | :----------: | :----------: | 
+|  sample_submission.csv | None | 0.7168674698795181 | 0.7168674698795181 | 0.7168674698795182 | N/A |
+| submission/predictionSubmission.csv | [AudioSet_fc_all_Iter_26](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/ErYhp5U7TvNLuEm_D1sGCfkBHxx_h9ACA4Yn7WbfK5dzlA?e=3bbeI9) | 0.4569707401032702 | 0.9448398576512456 | 0.6160092807424594| 0.5 |
+|  submission/submission2SecFastAI.csv | [stg2-rn18.pkl](https://microsoft-my.sharepoint.com/:u:/p/aaagraw/EQBViKhKgUxPgEJMHZlVY2wBn_zyipowNxUL_VSzzEidRA?e=zfSqVe) | 0.9130808950086059 | 0.0.9381078691423519 | 0.9254252071522024 | 0.5|

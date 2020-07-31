@@ -28,7 +28,7 @@ fastai/data
             - train.tsv
         - mldata
             - all
-                - model
+                - models
                 - negative
                 - positive
 
@@ -44,6 +44,21 @@ fastai/data
 ```
 
 ## End-To-End development Process
+
 ### **Step 1**: Creating a more ML-ready dataset inline with other popular sound dataset - [1_DataCreation.ipynb notebook]()
-    - Extracting small audio segments for positive and negative label and store them in positive and negative folder
-    - Filtering any call with less than 1 second duration
+- Extracting small audio segments for positive and negative label and store them in positive and negative folder for training  (Filtering any call with less than 1 second duration)
+- Also create 2 sec audio sample from testing data for formal ML evaluation
+
+### **Step2**: Transfer leaning a ResNet18 model with on the fly spectogram creation with frequency masking for data augmentation - [2_FastAI_StarterScript.ipynb]()
+- Step 1: Create a Dataloader using FastAI library (Defining parameters to create a spectogram)
+- Step 2: Create a DataBunch by splitting training data in 80:20% for validation using training phase, also defining augmentation technique (Frequency transformation)
+- Step 3: Training a model using ResNet18 (pre-trained on ImageNet Data)
+- Step 4: Running evaluation on Test set
+- Step 5: Running scoring for official evaluation
+
+
+All the files generated during process is on [Onedrive](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/EpK2FvtpbRBDt76EwoKPuHoB8ll9WSXNPGhRX63OTg-1Jw?e=APocpv)
+- **Models/stg2-rn18.pkl** - Trained ResNet18 model
+- **mldata.7z** is data used for training the model
+- **All.zip** is testing data for early evaluations
+- **test2Sec.zip** is data used for scoring for official evaluations
