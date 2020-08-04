@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ModeratorCandidates.Shared.Models
+﻿namespace ModeratorCandidates.Shared.Models
 {
     public class Location
     {

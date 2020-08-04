@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace ModeratorCandidates.API.Services
 {
-    public class MetadataRepository
-    {
+	public class MetadataRepository
+	{
 		private readonly ApplicationDbContext _db;
 
 		public MetadataRepository(ApplicationDbContext db)
@@ -25,19 +25,6 @@ namespace ModeratorCandidates.API.Services
 			return await _db.Metadata.FirstOrDefaultAsync(x => x.id == id);
 		}
 
-		public async Task Update(Metadata updatedItem)
-		{
-			var existing = await GetById(updatedItem.id);
-			if (existing != null)
-			{
-				_db.Metadata.Remove(existing);
-				await Commit();
-
-				_db.Metadata.Add(updatedItem);
-				await Commit();
-			}
-		}
-
 		public async Task Commit()
 		{
 			try
@@ -46,7 +33,7 @@ namespace ModeratorCandidates.API.Services
 			}
 			catch (Exception ex)
 			{
-
+				// TODO: Figure out how we are handling exceptions here.
 			}
 		}
 	}

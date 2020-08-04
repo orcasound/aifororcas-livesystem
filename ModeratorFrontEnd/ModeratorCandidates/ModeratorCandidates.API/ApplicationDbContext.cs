@@ -3,8 +3,8 @@ using ModeratorCandidates.Shared.Models;
 
 namespace ModeratorCandidates.API
 {
-    public class ApplicationDbContext : DbContext
-    {
+	public class ApplicationDbContext : DbContext
+	{
 		public DbSet<Metadata> Metadata { get; set; }
 
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -14,6 +14,7 @@ namespace ModeratorCandidates.API
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Metadata>().ToContainer("metadata");
+			modelBuilder.Entity<Metadata>().HasPartitionKey(o => o.source_guid);
 			modelBuilder.Entity<Metadata>().OwnsOne(p => p.location);
 			modelBuilder.Entity<Metadata>().OwnsMany(p => p.predictions);
 			modelBuilder.Entity<Metadata>().HasNoDiscriminator();

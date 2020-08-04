@@ -141,19 +141,16 @@ namespace ModeratorCandidates.API.Controllers
             record.moderator = result.moderator;
             record.dateModerated = result.dateModerated.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
             record.reviewed = result.status.ToLower() == "reviewed" ? true : false;
-            record.SRKWFound = result.found;
+            record.SRKWFound = (string.IsNullOrWhiteSpace(result.found)) ? "no" : result.found.ToLower();
 
-            // TODO: This should probably be a little cleaner (i.e. making sure there are no leading, trailing spaces)
-            // record.tags = result.tags.Split(',').ToList();
+            if(!string.IsNullOrWhiteSpace(result.tags))
+            {
+                var tagList = new List<string>();
+                tagList.AddRange(result.tags.Split(',').ToList().Select(x => x.Trim()));
+                record.tags = string.Join(";", tagList);
+            }
 
             await repo.Commit();
-
-
-
-            // TODO: Would assume additional workflow goes here if SRKW are found
-            //       like kicking off email/push notification, etc.
-            //       Would also assume additional workflow if not found like
-            //       training the model
 
             return NoContent();
         }
@@ -165,8 +162,7 @@ namespace ModeratorCandidates.API.Controllers
             metadata.imageUri = string.IsNullOrWhiteSpace(item.imageUri) ? "Unavailable" : item.imageUri;
             metadata.audioUri = string.IsNullOrWhiteSpace(item.audioUri) ? "Unavailable" : item.audioUri;
             metadata.status = item.reviewed ? "Reviewed" : "Unreviewed";
-            /* AIClipMetadata.averageConfidence is read-only, shouldn't its value is determined by the annotations array set below? */
-            // metadata.averageConfidence = string.IsNullOrWhiteSpace(item.whaleFoundConfidence) ? Decimal.Zero : Convert.ToDecimal(item.whaleFoundConfidence);
+            metadata.averageConfidence = item.whaleFoundConfidence;
             metadata.found = string.IsNullOrWhiteSpace(item.SRKWFound) ? "No" : item.SRKWFound;
             metadata.timestamp = string.IsNullOrWhiteSpace(item.timestamp) ? DateTime.Now : DateTime.Parse(item.timestamp);
             metadata.location = new AILocation() { latitude = item.location.latitude, longitude = item.location.longitude, name = item.location.name };

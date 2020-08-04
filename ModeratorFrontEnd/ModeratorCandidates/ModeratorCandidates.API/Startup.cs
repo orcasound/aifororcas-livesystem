@@ -31,9 +31,6 @@ namespace ModeratorCandidates.API
 					databaseName: Configuration["databaseName"])
 			);
 
-			// Made this a singleton since serving from memory right now
-			// services.AddSingleton<AIClipMetadataService>();
-
 			// This calls the cosmos db
 			services.AddTransient<MetadataRepository>();
 
@@ -84,3 +81,4 @@ namespace ModeratorCandidates.API
 		}
 	}
 }
+

@@ -14,9 +14,5 @@
     <ProjectReference Include="..\ModeratorCandidates.Shared\ModeratorCandidates.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="wwwroot\Images\Sample.PNG" />
-  </ItemGroup>
-
 
 </Project>
