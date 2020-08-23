@@ -7,9 +7,10 @@ pandas
 matplotlib
 m3u8
 click
-librosa
+librosa==0.6.3 # downgraded librosa to avoid non-fortran contiguous array
 torch==1.2.0
 torchvision==0.4.2
 azure-cosmosdb-table
 sendgrid
+ffmpeg-python
 # ffmpeg windows build: https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-4.1.4-win64-static.zip

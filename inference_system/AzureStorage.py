@@ -11,7 +11,7 @@ DB_TABLE_NAME = "predictions"
 def dump2db(
         json_obj,
         partition_key = datetime.today().strftime("%Y-%m-%d"),
-        row_key = datetime.today().strftime("%H-%M")):
+        row_key = datetime.today().strftime("%H-%M-%S")):
     table_service = TableService(
         account_name=DB_ACCOUNT,
         account_key=DB_KEY)
