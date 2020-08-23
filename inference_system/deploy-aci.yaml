@@ -1,0 +1,32 @@
+additional_properties: {}
+apiVersion: '2018-10-01'
+identity: null
+location: westus2
+name: live-inference-system-aci
+properties:
+  containers:
+  - name: live-inference-system-aci
+    properties:
+      environmentVariables:
+      - name: AZURE_COSMOSDB_PRIMARY_KEY
+        secureValue: '<cosmos_primary_key>'
+      - name: AZURE_STORAGE_CONNECTION_STRING
+        secureValue: '<storage_connection_string>'
+      image: orcaconservancycr.azurecr.io/live-inference-system:v1.0.1
+      ports: []
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGB: 1.5
+  imageRegistryCredentials:
+  - server: orcaconservancycr.azurecr.io
+    username: orcaconservancycr
+    password: '<image_registry_password>'
+  osType: Linux
+  restartPolicy: Always
+tags:
+  creator: cbpodd
+  month_year: july_2020
+  product: livesrkwnotificationsystem
+  service: inferencesystem
+type: Microsoft.ContainerInstance/containerGroups

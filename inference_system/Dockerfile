@@ -1,8 +1,31 @@
-FROM python:3.7-alpine
+FROM ubuntu:18.04
 
-COPY ../ /app
+# Install sudo apt-get requirements
+RUN apt-get update && apt-get install -y \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+        libglib2.0-0 \
+        ffmpeg \
+        python3 \
+        python3-pip \
+        unzip
 
-WORKDIR /app
-RUN pip install -r inference_system/requirements.txt
+# Install pip requirements
+WORKDIR /usr/src/install
+COPY ./requirements.txt ./requirements.txt
+RUN python3 -m pip install --upgrade pip && pip install -r requirements.txt
 
-CMD ["python", "inference_system/predict_and_aggregate.py"]
+# From now on, we will be working in the app's running directory
+WORKDIR /usr/src/app
+
+# Put model in place at WORKDIR/model
+COPY ./model.zip ./model.zip
+RUN unzip ./model.zip
+RUN rm -rf ./__MACOSX
+RUN rm ./model.zip
+
+# Move source code to app working directory
+COPY ./src/ ./src
+
+CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py"]

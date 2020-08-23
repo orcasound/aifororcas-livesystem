@@ -14,6 +14,11 @@ podcast-venv/
 *.gz
 *.wav
 
+inference_system/live_feed2/
+inference_system/model/
+inference_system/wav_dir/
+inference_system/tmp_path/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

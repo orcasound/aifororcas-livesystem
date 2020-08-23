@@ -6,12 +6,12 @@ from threading import Thread
 import time
 from predict_and_aggregate import OrcaDetectionModel
 from pathlib import Path
-from src.scraper import download_from_url
+from model.scraper import download_from_url
 import m3u8
 
 from datetime import datetime
 logger = logging.getLogger(__name__)
-import src.params as params
+import model.params as params
 import math
 import ffmpeg #ffmpeg-python
 import shutil
