@@ -93,6 +93,7 @@ if __name__ == "__main__":
     if runPath.exists:
         runid = int(runPath.name.split("run")[-1]) + 1
         runPath = Path(args.runRootPath) / ("{}_lr{}_run{}".format(model_name,args.lr,runid))
+    os.makedirs(runPath, exist_ok=True)
 
     ## initialize dataloader
     specaug = SpecAug(2,6,2,6)

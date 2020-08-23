@@ -2,7 +2,7 @@ import os, json, glob
 import torch
 import numpy as np
 import src.params as params
-import argparse
+import argparse, pdb
 
 from src.model import get_model_or_checkpoint
 from scipy.io import wavfile
@@ -10,16 +10,18 @@ from collections import defaultdict
 from src.dataloader import AudioFileWindower 
 from pathlib import Path
 
+WAV_SR = 44100
+# WAV_SR = params.SAMPLE_RATE 
 
 # iterate through windows and save audio chunks and prediction candidates
 def inference_and_write_chunks(args):
 
     # load dataset object used to iterate windows of audio
     chunk_duration=params.INFERENCE_CHUNK_S
-    wav_file_paths = [ Path(p) for p in glob.glob(args.wavMasterPath+"/*.wav") ]
+    wav_file_paths = [ Path(p) for p in glob.glob(args.wavMasterPath+"/*.wav") ][:5]
     model_path = Path(args.modelPath)
     mean, invstd = model_path/params.MEAN_FILE, model_path/params.INVSTD_FILE 
-    audio_file_windower = AudioFileWindower(wav_file_paths,mean=mean,invstd=invstd)
+    audio_file_windower = AudioFileWindower(wav_file_paths, mean=mean, invstd=invstd)
 
     # initialize model from checkpoint
     model, _ = get_model_or_checkpoint(params.MODEL_NAME,model_path,use_cuda=True)
@@ -36,22 +38,62 @@ def inference_and_write_chunks(args):
     # iterate through windows in dataloader, store current chunk windows and length
     curr_chunk, curr_chunk_json = [], {}
     curr_chunk_duration, curr_chunk_all_negative = 0, 1
-    file_chunk_counts = defaultdict(int)
+    chunk_file_name = ""
+    pos_chunk_path = pos_chunk_dir / chunk_file_name 
+    neg_chunk_path = neg_chunk_dir / chunk_file_name 
+
+    # file_chunk_counts = defaultdict(int)
+    file_chunk_counts = {}
+    pdb.set_trace()
 
     for i in range(len(audio_file_windower)):
 
-        # first get an audio window 
-        audio_file_windower.get_mode = 'audio'
+        # iterate through windows 
+        # decide whether to create new chunk or not
+        # if making new chunk, write out current json, wav before that 
+        # get preds for chunk, add to things accordingly 
+
+        # get an audio window 
+        audio_file_windower.get_mode = 'audio_orig_sr'
         audio_window, _ = audio_file_windower[i]
         _, _, _, af = audio_file_windower.windows[i]
         window_s = audio_file_windower.window_s
-        # details for the current chunk
-        postfix = '_'+format(file_chunk_counts[af.name],'04x')
-        chunk_file_name = (Path(af.name).stem+postfix+'.wav')
-        absolute_time = Path(af.name).stem  # NOTE: assumes filename is the absolute time 
-        pos_chunk_path = pos_chunk_dir / chunk_file_name 
-        neg_chunk_path = neg_chunk_dir / chunk_file_name 
-        blob_uri = blob_root+'/'+chunk_file_name
+        src_wav_path = af.name 
+
+        # create new chunk if exceeds length or a new source wavfile has started 
+        is_first_chunk = len(file_chunk_counts)==0
+        is_new_chunk = (curr_chunk_duration) >= chunk_duration
+        # is_new_chunk = is_new_chunk or len(file_chunk_counts)==0
+        # is_new_chunk = is_new_chunk or ( len(file_chunk_counts)>0 and 
+                                # src_wav_path not in file_chunk_counts ) 
+        if is_new_chunk or is_first_chunk:
+
+            if not is_first_chunk:
+                # write JSON/wav if positive, wav if negative, else skip 
+                if len(curr_chunk_json)!=0: # tests if any positive 
+                    print("Writing out positive candidate chunk:", chunk_file_name)
+                    with open(pos_preds_dir/(Path(chunk_file_name).stem+".json"),'w') as fp:
+                        json.dump(curr_chunk_json,fp)
+                    wavfile.write(pos_chunk_path, WAV_SR, np.concatenate(curr_chunk))
+                elif curr_chunk_all_negative: # test if negative
+                    print("Writing out negative chunk:", chunk_file_name)
+                    wavfile.write(neg_chunk_path, WAV_SR, np.concatenate(curr_chunk))
+                else: 
+                    pass
+
+            # used while making a chunk to postfix a random guid  
+            src_wav_name = Path(src_wav_path).stem  # NOTE: assumes filename is the absolute time 
+            if src_wav_name in file_chunk_counts:
+                file_chunk_counts[src_wav_name] += 1
+            else:
+                file_chunk_counts[src_wav_name] = 0
+            postfix = '_'+format(file_chunk_counts[src_wav_name],'04x')
+            chunk_file_name = src_wav_name+postfix+'.wav'
+            curr_chunk, curr_chunk_json = [], {}
+            curr_chunk_duration, curr_chunk_all_negative = 0, 1
+            pos_chunk_path = pos_chunk_dir / chunk_file_name 
+            neg_chunk_path = neg_chunk_dir / chunk_file_name 
+            blob_uri = blob_root+'/'+chunk_file_name
 
         # add window to current chunk
         curr_chunk_duration += window_s
@@ -71,10 +113,10 @@ def inference_and_write_chunks(args):
         # chunk is considered negative if there are no positive candidates and 
         # all windows had confidence < negativeThreshold
         if confidence>args.positiveThreshold:  
-            if len(curr_chunk_json)==0:
+            if len(curr_chunk_json)==0: # adding the first prediction
                 # add the header fields (uri, absolute_time, source_guid, annotations)
                 curr_chunk_json["uri"] = blob_uri
-                curr_chunk_json["absolute_time"] = absolute_time 
+                curr_chunk_json["absolute_time"] = src_wav_name 
                 curr_chunk_json["source_guid"] = "rpi_orcasound_lab" 
                 curr_chunk_json["annotations"] = [] 
             start_s, duration_s = curr_chunk_duration-window_s, window_s 
@@ -89,25 +131,8 @@ def inference_and_write_chunks(args):
             curr_chunk_all_negative *= 0
         elif confidence>args.negativeThreshold:
             curr_chunk_all_negative *= 0
-
-        # if exceeds chunk_duration, write chunk and JSON and reset
-        if curr_chunk_duration > chunk_duration:
-
-            # if there are predictions, write JSON and positive chunk to file and clear
-            if len(curr_chunk_json)!=0:
-                with open(pos_preds_dir/(Path(chunk_file_name).stem+".json"),'w') as fp:
-                    json.dump(curr_chunk_json,fp)
-                curr_chunk_json = {}
-                print("Writing out positive candidate chunk:",pos_chunk_path.name)
-                wavfile.write(pos_chunk_path,af.sr,np.concatenate(curr_chunk))
-            elif curr_chunk_all_negative: 
-                print("Writing out negative chunk:",neg_chunk_path.name)
-                wavfile.write(neg_chunk_path,af.sr,np.concatenate(curr_chunk))
-
-            # clearing up this chunk
-            curr_chunk, curr_chunk_duration = [], 0.
-            curr_chunk_all_negative = 1
-            file_chunk_counts[af.name] += 1
+    
+    print("Completed writing files:", file_chunk_counts)
 
 
 if __name__ == "__main__":

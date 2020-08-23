@@ -10,4 +10,6 @@ click
 librosa
 torch==1.2.0
 torchvision==0.4.2
+azure-cosmosdb-table
+sendgrid
 # ffmpeg windows build: https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-4.1.4-win64-static.zip
