@@ -224,3 +224,30 @@ az container logs -g LiveSRKWNotificationSystem --name live-inference-system-aci
 # No changes made to deploy-aci.yaml?
 
 I purposefully told git to ignore all futher changes to the file with this command: `git update-index --assume-unchanged deploy-aci.yaml`.  This is to prevent people from thecking in their credentials into the repository.  If you want t a change to be tracked, you can turn off this feature with `git update-index --no-assume-unchanged deploy-aci.yaml`
+
+
+# Automatic annotation data upload script PrepareDataForPredictionExplorer.py
+
+Find the connection string for blob storage account mldevdatastorage and run the following 
+
+### Windows
+
+-------
+
+```
+setx PODCAST_AZURE_STORAGE_CONNECTION_STRING "<yourconnectionstring>"
+```
+
+### Mac or Linux
+
+-------
+
+```
+export PODCAST_AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
+```
+
+Call the script
+
+```
+python PrepareDataForPredictionExplorer.py --start_time "2020-07-25 19:15" --end_time "2020-07-25 20:15" --s3_stream https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab --model_path <folder> --annotation_threshold 0.4 --round_id round5 --dataset_folder <path-to-folder>
+```

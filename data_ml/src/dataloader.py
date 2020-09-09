@@ -7,6 +7,7 @@ from pathlib import Path
 from math import ceil
 from torch.utils.data import Dataset
 from . import params
+import os
 
 def s_to_samples(duration,sr):
     return int(duration*sr)
@@ -108,11 +109,7 @@ class AudioFileDataset(Dataset):
         self.max_window_s = max_window_s
         self.min_window_s = min_window_s
         self.transform = transform
-        if (mean is not None) and (invstd is not None):
-            self.mean, self.invstd = np.loadtxt(mean), np.loadtxt(invstd)
-            print("Loaded mean and invstd from:",mean,invstd)
-        else:
-            self.mean, self.invstd = None, None
+
         assert get_mode in ['audio','spec','mel_spec', 'audio_orig_sr']
         self.sr, self.get_mode = sr, get_mode
         self.audio_files, self.segments, self.windows = {}, [], []
@@ -130,7 +127,38 @@ class AudioFileDataset(Dataset):
             self.segments.extend(wav_segments)
             self.windows.extend(wav_windows)
             self.audio_files[wav_filename] = audio_file 
+
+        # if mean and invstd were not provided, calculate them
+        if os.path.exists(mean) and os.path.exists(invstd):
+            self.mean, self.invstd = np.loadtxt(mean), np.loadtxt(invstd)
+            print("Loaded mean and invstd from:",mean,invstd)
+        else:
+            # calculate the mean and invstd from data 
+            self.mean, self.invstd = self.calculate_mean_and_invstd()
+            np.savetxt(mean, self.mean)
+            np.savetxt(invstd, self.invstd)
     
+    def calculate_mean_and_invstd(self):
+        mean = np.zeros(params.N_MELS)
+        num_windows = len(self.windows)
+        for i in range(num_windows):
+            start_idx, end_idx, label, audio_file = self.windows[i]
+            data = audio_file.get_window(start_idx,end_idx,self.get_mode)
+            mean += data.mean(axis=0)
+
+        mean = mean/num_windows
+
+        variance = np.zeros(params.N_MELS)
+        for i in range(num_windows):
+            start_idx, end_idx, label, audio_file = self.windows[i]
+            data = audio_file.get_window(start_idx,end_idx,self.get_mode)
+            variance += ((data-mean)**2).mean(axis=0)
+        variance /= num_windows
+        invstd = 1/np.sqrt(variance)
+
+        return mean, invstd
+        
+
     def index_audio_file(self,audio_file,start_times,durations,min_window_s,max_window_s):
         """
         Given an audio_file and sorted annotations (start_times, durations), creates sequential segments and windows of postive and negative examples.
