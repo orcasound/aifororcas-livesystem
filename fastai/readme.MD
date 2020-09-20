@@ -56,12 +56,20 @@ fastai/data
 - Step 4: Running evaluation on Test set
 - Step 5: Running scoring for official evaluation
 
+### **Step3**: Inference Testing[3_InferenceTesting.ipynb]()
+Notebook showing how to use the inference.py to load the model and do predictions by defining a clip path.
+The inference.py returns a dictionary -
+- **local_predictions**: A list of predictions (1/0) for each second of wav file (list of integers)
+- **local_confidences**: A list of probability of the local prediction being a whale call or not (list of float)
+- **global_predictions**: A global prediction(1/0) for the clip containing a valid whale call (integer)
+- **global_confidences**: Probability of the prediction being a whale call or not(float)
 
 # All the files generated during process is on [Onedrive](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/EpK2FvtpbRBDt76EwoKPuHoB8ll9WSXNPGhRX63OTg-1Jw?e=550aE2)
 - **Models/stg2-rn18.pkl** - Trained ResNet18 model
 - **mldata.7z** is data used for training the model
 - **All.zip** is testing data for early evaluations
 - **test2Sec.zip** is data used for scoring for official evaluations
+
 
 
 ## Dependencies -
