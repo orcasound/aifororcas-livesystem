@@ -7,27 +7,28 @@
 			<div class="col-6">
 				<p class="orca-data-strip-data"><i class="oi oi-clock" style="width: 20px"></i>&nbsp;@Candidate.Timestamp</p>
 				<p class="orca-data-strip-data"><i class="oi oi-microphone" style="width: 20px"></i>&nbsp;@Candidate.Detections detection(s)</p>
-    	            <div class="form-group mt-3 mb-0">
-    	                <label class="mb-0">Was there an SRKW call in this clip?</label>
-    	                <div style="display: grid">
-    	                    @foreach (var option in optionList)
-    	                    {
-    	                        <label for=@(option + Candidate.Id)>
-    	                            <input type="radio"
-    	                                   name="found"
-										   id=@(option + Candidate.Id)
-    	                                   @onchange="(() => SetFoundValue(Candidate, option))" />
-    	                            @option
-    	                        </label>
-    	                    }
-    	                </div>
-    	            </div>
-					<div class="form-group">
-						<label for=@($"tags-{Candidate.Id}")>Tags</label>
-						<div>
-							<InputText class="form-control" placeholder="Add tags" id=@($"tags-{Candidate.Id}") @bind-Value="@Candidate.Tags" />
-						</div>
+				<div class="form-group mt-3 mb-0">
+					<label class="mb-0">Was there an SRKW call in this clip?</label>
+					<div style="display: grid">
+						@foreach (var option in optionList)
+						{
+							<label for=@(option + Candidate.Id)>
+								<input type="radio"
+									   name="found"
+									   id=@(option + Candidate.Id)
+									   @onchange="(() => SetFoundValue(Candidate, option))"
+									   @onfocus="OnFocus" @onblur="OnBlur" />
+								@option
+							</label>
+						}
 					</div>
+				</div>
+				<div class="form-group">
+					<label for=@($"tags-{Candidate.Id}")>Tags</label>
+					<div>
+						<InputText class="form-control" placeholder="Add tags" id=@($"tags-{Candidate.Id}") @bind-Value="@Candidate.Tags" @onfocus="OnFocus" @onblur="OnBlur" />
+					</div>
+				</div>
 			</div>
 			<div class="col-6">
 				<p class="orca-data-strip-data"><i class="oi oi-map-marker" style="width: 20px"></i>&nbsp;@Candidate.Location.Name</p>
@@ -43,35 +44,37 @@
 				</div>
 			</div>
 			<div class="col-6">
-				<button class="btn btn-primary" type="submit" @onclick="(() => SendIt(Candidate))">Submit</button>
-				<button class="btn btn-outline-primary" @onclick="ViewDetails">View Details</button>
-			</EditForm>
+				<button class="btn btn-primary" type="submit" @onclick="(() => SendIt(Candidate))" disabled="@submitDisabled">Submit</button>
+				<a class="btn btn-outline-primary" @onclick="(() => RenderReactDetails(Candidate))">View Details</a>
+				@* Uncomment the share button below when implemented *@
+				@* <div style="display: inline-block; margin-left: 30px;">
+						<i class="oi oi-share-boxed" style="color: gray;"></i><button class="btn btn-link" type="submit" disabled>Share</button>
+					</div> *@
+			</div>
 		</div>
 	</EditForm>
 </div>
 
 @code {
-    private string[] optionList = new string[] { "Yes", "No", "Don't Know" };
-    private string background = "orca-data-strip-normal";
+	private string[] optionList = new string[] { "Yes", "No", "Don't Know" };
+	private string background = "orca-data-strip-normal";
+	private bool submitDisabled = true;
 
-    [Parameter]
-    public EventCallback<Candidate> OnSubmitClick { get; set; }
+	[Parameter]
+	public EventCallback<Candidate> OnSubmitClick { get; set; }
 
-    [Parameter]
-    public Candidate Candidate { get; set; }
+	[Parameter]
+	public Candidate Candidate { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("ReactComponents.RenderReactPlayer", Candidate.ImageUri, Candidate.AudioUri, Candidate.PlayerId);
-        }
-    }
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		await JSRuntime.InvokeVoidAsync("ReactComponents.RenderReactPlayer", Candidate.ImageUri, Candidate.AudioUri, Candidate.PlayerId);
+	}
 
-    private void SetFoundValue(Candidate candidate, string found)
-    {
-        candidate.Found = found;
-    }
+	private void SetFoundValue(Candidate candidate, string found)
+	{
+		candidate.Found = found;
+	}
 
 	private async void OnFocus()
 	{
@@ -79,18 +82,18 @@
 		await JSRuntime.InvokeVoidAsync("deliveryMap.focusOnLocation", Candidate.Location.Latitude, Candidate.Location.Longitude, Candidate.Location.Name);
 	}
 
-    private async Task OnBlur()
-    {
-		await JSRuntime.InvokeVoidAsync("deliveryMap.unFocus");
-        await JSRuntime.InvokeVoidAsync("StopPlaying", Candidate.PlayerId);
-        background = "orca-data-strip-normal";
-    }
-
-    private async Task SendIt(Candidate candidate)
-    {
+	private async Task OnBlur()
+	{
 		background = "orca-data-strip-normal";
-        await OnSubmitClick.InvokeAsync(candidate);
-    }
+		submitDisabled = true;
+		await JSRuntime.InvokeVoidAsync("deliveryMap.unFocus");
+	}
+	private async Task SendIt(Candidate candidate)
+	{
+		background = "orca-data-strip-normal";
+		await JSRuntime.InvokeVoidAsync("deliveryMap.unFocus");
+		await OnSubmitClick.InvokeAsync(candidate);
+	}
 
 	private async void ViewDetails() {
 		await JSRuntime.InvokeVoidAsync("ReactComponents.RenderDetailsComponent", Candidate.ImageUri, Candidate.Annotations);
