@@ -23,8 +23,8 @@ namespace Orcasound.UI.Services
 		public async Task<PaginatedResponse<List<Candidate>>> GetCandidates(Pagination pagination)
 		{
 			var newURL = url.Contains("?") ?
-				$"{url}&page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}" :
-				$"{url}?page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}";
+				$"{url}&page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}&sortBy={pagination.SortBy}&sortOrder={pagination.SortOrder}&timeframe={pagination.Timeframe}" :
+				$"{url}?page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}&sortBy={pagination.SortBy}&sortOrder={pagination.SortOrder}&timeframe={pagination.Timeframe}";
 
 			var httpResponseMessage = await httpClient.GetAsync(newURL);
 
@@ -46,8 +46,8 @@ namespace Orcasound.UI.Services
 		public async Task<PaginatedResponse<List<Candidate>>> GetUnreviewedCandidates(Pagination pagination)
 		{
 			var newURL = url.Contains("?") ?
-				$"{url}/unreviewed&page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}" :
-				$"{url}/unreviewed?page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}";
+				$"{url}/unreviewed&page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}&sortBy={pagination.SortBy}&sortOrder={pagination.SortOrder}&timeframe={pagination.Timeframe}" :
+				$"{url}/unreviewed?page={pagination.Page}&recordsPerPage={pagination.RecordsPerPage}&sortBy={pagination.SortBy}&sortOrder={pagination.SortOrder}&timeframe={pagination.Timeframe}";
 
 			var httpResponseMessage = await httpClient.GetAsync(newURL);
 
