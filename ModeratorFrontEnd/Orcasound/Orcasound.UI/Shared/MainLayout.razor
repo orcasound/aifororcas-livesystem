@@ -4,7 +4,7 @@
 	<div class="collapse navbar-collapse">
 		<span class="navbar-nav mr-auto">
 		</span>
-		<span class="orca-nav-item">@DateTime.Now.ToLongTimeString() @DateTime.Now.ToShortDateString()</span>
+		<span class="orca-nav-item">@DateConverter.ToPDT(DateTime.Now)</span>
 		<span class="orca-pipe">|</span>
 		<span class="orca-nav-item">Hello, Tom</span>
 		<div class="orca-bg-blue orca-nav-avatar" style="margin-right:-16px;">

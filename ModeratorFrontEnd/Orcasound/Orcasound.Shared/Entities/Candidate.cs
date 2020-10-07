@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Orcasound.Shared.Helpers;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Orcasound.Shared.Entities
 {
@@ -35,6 +35,14 @@ namespace Orcasound.Shared.Entities
 			get
 			{
 				return $"{Id}_player";
+			}
+		}
+
+		public string WhaleTime
+		{
+			get
+			{
+				return DateConverter.ToPDT(Timestamp);
 			}
 		}
 	}

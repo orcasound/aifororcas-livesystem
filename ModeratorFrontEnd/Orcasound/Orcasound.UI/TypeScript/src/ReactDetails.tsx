@@ -25,6 +25,7 @@ export interface ICandidate {
 	status: string;
 	tags: string;
 	timestamp: string;
+	whaleTime: string;
 }
 
 export function renderReactDetails(candidate: ICandidate) {
@@ -43,7 +44,7 @@ export function renderReactDetails(candidate: ICandidate) {
 							<div className="col-3">
 								<p className="orca-data-strip-data">
 									<i className="oi oi-clock" style={{width: "20px"}}></i>&nbsp;
-									{candidate.timestamp}
+									{candidate.whaleTime}
 								</p>
 							</div>
 							<div className="col-3">
