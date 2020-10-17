@@ -6,10 +6,19 @@
 		</span>
 		<span class="orca-nav-item">@DateConverter.ToPDT(DateTime.Now)</span>
 		<span class="orca-pipe">|</span>
-		<span class="orca-nav-item">Hello, Tom</span>
-		<div class="orca-bg-blue orca-nav-avatar" style="margin-right:-16px;">
-			<img src="../images/avatar.jpg" />
-		</div>
+		<AuthorizeView>
+			<Authorized>
+				<span class="orca-nav-item">Hello, @context.User.Identity.Name</span>
+				<span class="orca-pipe">|</span>
+				<a class="orca-nav-item" href="AzureAD/Account/SignOut">Log out</a>
+				<div class="orca-nav-avatar" style="margin-right:-16px;">
+					<img src="../images/avatar.png" />
+				</div>
+			</Authorized>
+			<NotAuthorized>
+				<a class="orca-nav-item" href="AzureAD/Account/SignIn">Log in</a>
+			</NotAuthorized>
+		</AuthorizeView>
 	</div>
 </nav>
 

@@ -1,7 +1,15 @@
 ﻿@inject IJSRuntime JSRuntime
 
+<<<<<<< HEAD
 <div tabindex="0" class="orca-data-strip @background" @onfocus="OnFocus">
 	<EditForm Model="Candidate" class="container-fluid">
+=======
+<div tabindex="0" 
+	 class="orca-data-strip @background" 
+	 @onmouseover="OnFormFocus" 
+	 @onmouseout="OnFormBlur">
+	<EditForm Model="Candidate" class="container-fluid" >
+>>>>>>> ca69910... Merged PR 4835: UI authentication is done, default order put back to Timestamp, submit button...
 		<p class="orca-data-strip-header mt-0">@Candidate.Id</p>
 		<div class="row" style="padding:7px">
 			<div class="col-6">
@@ -16,8 +24,7 @@
 								<input type="radio"
 									   name="found"
 									   id=@(option + Candidate.Id)
-									   @onchange="(() => SetFoundValue(Candidate, option))"
-									   @onfocus="OnFocus" @onblur="OnBlur" />
+									   @onchange="(() => SetFoundValue(Candidate, option))" />
 								@option
 							</label>
 						}
@@ -26,7 +33,7 @@
 				<div class="form-group">
 					<label for=@($"tags-{Candidate.Id}")>Tags</label>
 					<div>
-						<InputText class="form-control" placeholder="Add tags" id=@($"tags-{Candidate.Id}") @bind-Value="@Candidate.Tags" @onfocus="OnFocus" @onblur="OnBlur" />
+						<InputText class="form-control" placeholder="Add tags" id=@($"tags-{Candidate.Id}") @bind-Value="@Candidate.Tags" />
 					</div>
 				</div>
 			</div>
@@ -40,16 +47,34 @@
 			<div class="col-11 form-group">
 				<label for=@($"comments-{Candidate.Id}")>Comments</label>
 				<div>
-					<InputTextArea class="form-control" placeholder="Add comments" id=@($"comments-{Candidate.Id}") @bind-Value="@Candidate.Comments" />
+					<InputTextArea class="form-control" placeholder="Add comments" id=@($"comments-{Candidate.Id}") @bind-Value="@Candidate.Comments"  />
 				</div>
 			</div>
 			<div class="col-6">
-				<button class="btn btn-primary" type="submit" @onclick="(() => SendIt(Candidate))" disabled="@submitDisabled">Submit</button>
-				<a class="btn btn-outline-primary" @onclick="(() => RenderReactDetails(Candidate))">View Details</a>
-				@* Uncomment the share button below when implemented *@
-				@* <div style="display: inline-block; margin-left: 30px;">
-						<i class="oi oi-share-boxed" style="color: gray;"></i><button class="btn btn-link" type="submit" disabled>Share</button>
-					</div> *@
+				<AuthorizeView Policy="ModeratorGroupRole">
+					<Authorized Context="Auth">
+						<button class="btn btn-primary"
+								id=@($"submit-{Candidate.PlayerId}")
+								type="submit"
+								@onclick="(() => SendIt(Candidate))"
+								disabled="@submitDisabled">
+							Submit
+						</button>
+					</Authorized>
+					<NotAuthorized Context="Auth">
+						<button class="btn btn-primary"
+								id=@($"submit-{Candidate.PlayerId}")
+								type="submit"
+								@onclick="(() => SignInPopup())"
+								disabled="@submitDisabled">
+							Submit
+						</button>
+					</NotAuthorized>
+				</AuthorizeView>
+				<a class="btn btn-outline-primary"
+				   @onclick="(() => RenderReactDetails(Candidate))">
+					View Details
+				</a>
 			</div>
 		</div>
 	</EditForm>
@@ -74,20 +99,21 @@
 	private void SetFoundValue(Candidate candidate, string found)
 	{
 		candidate.Found = found;
+		submitDisabled = false;
 	}
 
-	private async void OnFocus()
+	private async void OnFormFocus()
 	{
 		background = "orca-data-strip-focused";
 		await JSRuntime.InvokeVoidAsync("deliveryMap.focusOnLocation", Candidate.Location.Latitude, Candidate.Location.Longitude, Candidate.Location.Name);
 	}
 
-	private async Task OnBlur()
+	private async void OnFormBlur()
 	{
 		background = "orca-data-strip-normal";
-		submitDisabled = true;
 		await JSRuntime.InvokeVoidAsync("deliveryMap.unFocus");
 	}
+
 	private async Task SendIt(Candidate candidate)
 	{
 		background = "orca-data-strip-normal";
@@ -95,7 +121,13 @@
 		await OnSubmitClick.InvokeAsync(candidate);
 	}
 
-	private async void ViewDetails() {
-		await JSRuntime.InvokeVoidAsync("ReactComponents.RenderDetailsComponent", Candidate.ImageUri, Candidate.Annotations);
+	private async Task SignInPopup()
+	{
+		await JSRuntime.InvokeVoidAsync("alert", "You must Log In before you can Submit this entry.");
+	}
+
+	private async Task RenderReactDetails(Candidate candidate)
+	{
+		await JSRuntime.InvokeVoidAsync("ReactComponents.RenderReactDetails", candidate);
 	}
 }

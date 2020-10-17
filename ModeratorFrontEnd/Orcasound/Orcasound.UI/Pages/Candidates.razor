@@ -3,7 +3,7 @@
 
 @inject ICandidateService service
 @inject IJSRuntime JSRuntime
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
 <div>
 	<h1 class="orca-h1 orca-text-black" style="display:inline-block">Candidates for review</h1>
 	@if (candidates != null)
@@ -25,120 +25,127 @@
 	<InputCheckbox @bind-Value="shortTime" class="form-control mr-1" /><label class="mr-2">Last 30 minutes only</label>
 	<button class="btn btn-success orca-btn" type="submit" @onclick="(() => Filter())">Filter</button>
 </EditForm>
-	<div class="container-fluid" style="margin-top: 25px;">
-		<div class="row">
-			<div class="col-lg-6" style="height: calc(100vh - 200px); overflow-y: scroll">
-				@if (candidates == null)
+<div class="container-fluid" style="margin-top: 25px;">
+	<div class="row">
+		<div class="col-lg-6" style="height: calc(100vh - 200px); overflow-y: scroll">
+			@if (candidates == null)
+			{
+				<p>Loading...</p>
+			}
+			else
+			{
+				@foreach (var candidate in candidates)
 				{
-					<p>Loading...</p>
+					<CandidateComponent Candidate="candidate" OnSubmitClick="SubmitCandidate" />
 				}
-				else
-				{
-					@foreach (var candidate in candidates)
-					{
-						<CandidateComponent Candidate="candidate" OnSubmitClick="SubmitCandidate" />
-					}
-					<div class="row">
-						<div class="col-12 text-left px-0">
-							<PaginationComponent CurrentPage="@pagination.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage" />
-						</div>
+				<div class="row">
+					<div class="col-12 text-left px-0">
+						<PaginationComponent CurrentPage="@pagination.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage" />
 					</div>
-				}
-			</div>
-			<div class="col-lg-6">
-				<div class="track-order-map">
-					<Map Zoom="0" Markers="MapMarkers"></Map>
 				</div>
+			}
+		</div>
+		<div class="col-lg-6">
+			<div class="track-order-map">
+				<Map Zoom="0" Markers="MapMarkers"></Map>
 			</div>
 		</div>
 	</div>
+</div>
 
-	@* Candidate details modal *@
-	<div id="react-details"></div>
+@* Candidate details modal *@
+<div id="react-details"></div>
 
-	<audio id="submitEffect" src="sounds/Various-01.wav" />
+<audio id="submitEffect" src="sounds/Various-01.wav" />
 
-	@code {
+@code {
 
-		private List<Candidate> candidates = new List<Candidate>();
+	private List<Candidate> candidates = new List<Candidate>();
 
-		Pagination pagination = new Pagination() { RecordsPerPage = 5 };
-		private int totalAmountPages;
-		private int totalNumberRecords;
-		private string sortBy = "confidence";
-		private string sortOrder = "desc";
-		private bool shortTime = false;
+	Pagination pagination = new Pagination() { RecordsPerPage = 5 };
+	private int totalAmountPages;
+	private int totalNumberRecords;
+	private string sortBy = "timestamp";
+	private string sortOrder = "desc";
+	private bool shortTime = false;
 
 
-		public List<Marker> MapMarkers { get; set; } = new List<Marker>();
+	public List<Marker> MapMarkers { get; set; } = new List<Marker>();
 
-		protected override async Task OnInitializedAsync()
-		{
-			MapMarkers = new List<Marker>
-		{
+	protected override async Task OnInitializedAsync()
+	{
+		MapMarkers = new List<Marker>
+{
 			new Marker{Description="Port Townsend", ShowPopup=false, Y = 48.088922, X = -122.762901},
 			new Marker{Description="Bush Point", ShowPopup=false, Y = 48.029424, X = -122.615434},
 			new Marker{Description="Haro Point", ShowPopup=false, Y = 48.579333, X = -123.178732},
 		};
 
-			try
-			{
-				await LoadCandidates();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.ToString());
-			}
-		}
-
-		private async Task LoadCandidates()
+		try
 		{
-			var paginatedResponse = await service.GetUnreviewedCandidates(pagination);
-			candidates = paginatedResponse.Response;
-			totalAmountPages = paginatedResponse.TotalAmountPages;
-			totalNumberRecords = paginatedResponse.TotalNumberRecords;
-		}
-
-		private async Task SubmitCandidate(Candidate candidate)
-		{
-			var request = new UpdateRequest()
-			{
-				Moderator = "John Smith",
-				DateModerated = DateTime.Now,
-				Found = candidate.Found,
-				Tags = candidate.Tags,
-				Comments = candidate.Comments,
-				Id = candidate.Id,
-				Status = "Reviewed"
-			};
-
-			await JSRuntime.InvokeVoidAsync("PlaySubmit");
-
-			await service.UpdateCandidate(request);
-			pagination.Page = 1;
 			await LoadCandidates();
 		}
-
-		private async Task SelectedPage(int page)
+		catch (Exception ex)
 		{
-			pagination.Page = page;
-			await LoadCandidates();
-		}
-
-		private async Task Filter()
-		{
-			pagination.SortBy = sortBy;
-			pagination.SortOrder = sortOrder;
-			pagination.Timeframe = (shortTime) ? "30m" : "all";
-			await LoadCandidates();
+			Console.WriteLine(ex.ToString());
 		}
 	}
 
-	<script suppress-error="BL9992">
-		window.StopPlaying = (id) => {
-			document.getElementById(id).pause();
+	private async Task LoadCandidates()
+	{
+		var paginatedResponse = await service.GetUnreviewedCandidates(pagination);
+		candidates = paginatedResponse.Response;
+		totalAmountPages = paginatedResponse.TotalAmountPages;
+		totalNumberRecords = paginatedResponse.TotalNumberRecords;
+	}
+
+	private async Task SubmitCandidate(Candidate candidate)
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+		var request = new UpdateRequest()
+		{
+			Moderator = user.Identity.Name,
+			DateModerated = DateTime.Now,
+			Found = candidate.Found,
+			Tags = candidate.Tags,
+			Comments = candidate.Comments,
+			Id = candidate.Id,
+			Status = "Reviewed"
+		};
+
+		await JSRuntime.InvokeVoidAsync("PlaySubmit");
+
+		await service.UpdateCandidate(request);
+		pagination.Page = 1;
+		await LoadCandidates();
+	}
+
+	private async Task SelectedPage(int page)
+	{
+		pagination.Page = page;
+		candidates = null;
+		StateHasChanged();
+		await LoadCandidates();
+	}
+
+	private async Task Filter()
+	{
+		candidates = null;
+		StateHasChanged();
+		pagination.SortBy = sortBy;
+		pagination.SortOrder = sortOrder;
+		pagination.Timeframe = (shortTime) ? "30m" : "all";
+		await LoadCandidates();
+	}
 		}
-		window.PlaySubmit = () => {
-			document.getElementById("submitEffect").play();
-		}
-	</script>
+
+		<script suppress-error="BL9992">
+			window.StopPlaying = (id) => {
+				document.getElementById(id).pause();
+			}
+			window.PlaySubmit = () => {
+				document.getElementById("submitEffect").play();
+			}
+		</script>
