@@ -106,7 +106,7 @@ It will take a while (~2-3 minutes on macOS or Linux, ~10-20 minutes on Windows)
 should take a much shorter time in future builds.
 
 ```
-docker build . -t live-inference-system
+docker build . -t live-inference-system -f ./FastAIDocker/Dockerfile
 ```
 
 ## Running the docker container
@@ -193,7 +193,7 @@ docker push orcaconservancycr.azurecr.io/live-inference-system:v<Major>.<Minor>.
 Run the following command.  This will restart the container instance with the updated version of your container.
 
 ```
-az container restart -g LiveSRKWNotificationSystem --name live-inference-system-aci 
+az container restart -g LiveSRKWNotificationSystem --name live-inference-system-aci-3gb
 ```
 
 Edit the file `inference_system/deploy-aci.yaml`.  There are three sensitive strings that must be filled in before deployment can
@@ -218,7 +218,7 @@ az container create -g LiveSRKWNotificationSystem -f .\deploy-aci.yaml
 View the container logs with the following command.  The logs should be similar to the logs created when you run the container locally (above).
 
 ```
-az container logs -g LiveSRKWNotificationSystem --name live-inference-system-aci
+az container attach --resource-group LiveSRKWNotificationSystem --name live-inference-system-aci-3gb
 ```
 
 # No changes made to deploy-aci.yaml?

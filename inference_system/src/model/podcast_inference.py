@@ -10,10 +10,8 @@ from collections import defaultdict
 from model.dataloader import AudioFileWindower 
 from pathlib import Path
 
-import AzureStorage
 from datetime import datetime
 import numpy as np
-import spectrogram_visualizer
 
 """
 Input: wav file 
@@ -31,13 +29,13 @@ def write_json(result_json, output_path):
         json.dump(result_json, f)
 
 class OrcaDetectionModel():
-    def __init__(self, model_path, threshold=0.5, global_aggregation_percentile_threshold=80):
+    def __init__(self, model_path, threshold=0.7, min_num_positive_calls_threshold=3):
         #i initialize model
         self.model, _ = get_model_or_checkpoint(params.MODEL_NAME,model_path,use_cuda=False)
         self.mean = os.path.join(model_path, params.MEAN_FILE)
         self.invstd = os.path.join(model_path, params.INVSTD_FILE)
         self.threshold = threshold
-        self.global_aggregation_percentile_threshold = global_aggregation_percentile_threshold
+        self.min_num_positive_calls_threshold = min_num_positive_calls_threshold
 
     def split_and_predict(self, wav_file_path):
         """
@@ -68,10 +66,10 @@ class OrcaDetectionModel():
             input_data = torch.from_numpy(mel_spec_window).float().unsqueeze(0).unsqueeze(0)
             pred, embed = self.model(input_data)
             posterior = np.exp(pred.detach().cpu().numpy())
-            pred_id = 1 if posterior[0,1] > self.threshold else 0;
-            # pred_id = torch.argmax(pred, dim=1).item()
-            #TODO@Akash: correct these pred_ids to be created with a threshold.
-            # current argmax implies threshold of 0.5
+            pred_id = 0
+            if posterior[0,1] > self.threshold:
+                pred_id = 1
+            
             confidence = round(float(posterior[0,1]),3)
 
             result_json["local_predictions"].append(pred_id)
@@ -83,33 +81,29 @@ class OrcaDetectionModel():
     def aggregate_predictions(self, result_json):
         """
         Given N local window predictions Pi, aggregate into a global one.
-        Current logic is very scrappy. 
-
-        Global prediction = avg(Pi) > threshold
+        Currently we try to reduce false positives so have strict thresholds
         """
 
         # calculate nth percentile of result_json["local_confidences"], this is global confidence
         local_confidences = result_json["local_confidences"]
-        global_percentile = np.percentile(local_confidences, self.global_aggregation_percentile_threshold)
-        result_json["global_confidence"] = global_percentile
+        local_predictions = result_json["local_predictions"]
+
+        pred_array = np.array(local_predictions)
+        conf_array = np.array(local_confidences)
+        total_num_positive_predictions = sum(pred_array)
+
+        global_prediction = 0
+        if total_num_positive_predictions >= self.min_num_positive_calls_threshold:
+            global_prediction = 1
+        result_json["global_prediction"] = global_prediction
         
+        positive_predictions_conf = conf_array[pred_array == 1]
+        global_confidence = 0
+        if positive_predictions_conf.size > 0:
+            global_confidence = np.average(positive_predictions_conf)
+        result_json["global_confidence"] = global_confidence*100
+
         return result_json
-
-    def predict_and_aggregate(self, wav_file_path):
-        result_json = self.split_and_predict(wav_file_path)
-        result_json = self.aggregate_predictions(result_json)
-
-        clipname = os.path.basename(wav_file_path)
-        clipname_without_ext = clipname.split(".wav")[0]
-        tokens = clipname_without_ext.split('-')
-        partitionkey = "-".join(tokens[0:3])
-        rowkey = "-".join(tokens[3:])
-
-        annotations = result_json.copy()
-
-        # why does dump to db modify the object?
-        AzureStorage.dump2db(result_json, partitionkey, rowkey)
-        return annotations
 
     def predict(self, wav_file_path):
         result_json = self.split_and_predict(wav_file_path)

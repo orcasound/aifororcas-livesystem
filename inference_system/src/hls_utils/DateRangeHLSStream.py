@@ -1,11 +1,12 @@
-import s3_utils
+
+from . import s3_utils
 import boto3
 from botocore import UNSIGNED
 from botocore.config import Config
 
 import m3u8
 import math
-from model.scraper import download_from_url
+from . import scraper
 import ffmpeg
 import os
 from datetime import datetime
@@ -14,29 +15,15 @@ from pytz import timezone
 import time
 import sys
 from pathlib import Path
+from . import datetime_utils
 
-def get_clip_name_from_unix_time(source_guid, current_clip_start_time):
-    """
-
-    """
-
-    # convert unix time to 
-    readable_datetime = datetime.fromtimestamp(int(current_clip_start_time)).strftime('%Y_%m_%d_%H_%M_%S')
-    clipname = source_guid + "_" + readable_datetime
-    return clipname, readable_datetime
-
-def get_difference_between_times_in_seconds(unix_time1, unix_time2):
-    dt1 = datetime.fromtimestamp(int(unix_time1))
-    dt2 = datetime.fromtimestamp(int(unix_time2))
-
-    return (dt1-dt2).total_seconds()
-
-def add_interval_to_unix_time(unix_time, interval_in_seconds):
-    dt1 = datetime.fromtimestamp(int(unix_time)) + timedelta(0, interval_in_seconds)
-    dt1_aware = timezone('US/Pacific').localize(dt1)
-    end_time_unix = int(time.mktime(dt1_aware.timetuple()))
-
-    return end_time_unix
+def get_readable_clipname(hydrophone_id, cliptime_utc):
+    # cliptime is of the form 2020-09-27T00/16/55.677242Z
+    cliptime_utc = timezone('UTC').localize(cliptime_utc)
+    date = cliptime_utc.astimezone(timezone('US/Pacific'))
+    date_format='%Y_%m_%d_%H_%M_%S_%Z'
+    clipname = date.strftime(date_format)
+    return hydrophone_id + "_" + clipname, date
 
 #TODO: Handle date ranges that don't exist
 class DateRangeHLSStream():
@@ -46,9 +33,10 @@ class DateRangeHLSStream():
     start_unix_time
     end_unix_time
     wav_dir
+    real_time = if False, get data as soon as possible, if true wait for polling interval before pulling
     """
 
-    def __init__(self, stream_base, polling_interval, start_unix_time, end_unix_time, wav_dir):
+    def __init__(self, stream_base, polling_interval, start_unix_time, end_unix_time, wav_dir, real_time=False):
         """
 
         """
@@ -59,6 +47,7 @@ class DateRangeHLSStream():
         self.start_unix_time = start_unix_time
         self.end_unix_time = end_unix_time
         self.wav_dir = wav_dir
+        self.real_time = real_time
         self.is_end_of_stream = False
 
         # query the stream base for all m3u8 files between the timestamps
@@ -73,7 +62,8 @@ class DateRangeHLSStream():
         self.folder_name = tokens[1]
         prefix = self.folder_name + "/hls/"
 
-        # returns folder names corresponding to epochs
+        # returns folder names corresponding to epochs, this grows as more data is added, we should probably maintain a list of 
+        # hydrophone folders that exist
         all_hydrophone_folders = s3_utils.get_all_folders(self.s3_bucket, prefix=prefix)
         print("Found {} folders in all for hydrophone".format(len(all_hydrophone_folders)))
 
@@ -83,15 +73,28 @@ class DateRangeHLSStream():
         self.current_folder_index = 0
         self.current_clip_start_time = self.start_unix_time
 
-    def get_next_clip(self):
+    def get_next_clip(self, current_clip_name = None):
         """
 
         """
 
         # Get current folder
         current_folder = int(self.valid_folders[self.current_folder_index])
-        clipname, clip_start_time = get_clip_name_from_unix_time(self.folder_name.replace("_", "-"), self.current_clip_start_time)
+        clipname, clip_start_time = datetime_utils.get_clip_name_from_unix_time(self.folder_name.replace("_", "-"), self.current_clip_start_time)
 
+        # if real_time execution mode is specified
+        if self.real_time:
+            # sleep till enough time has elapsed
+
+            now = datetime.utcnow()
+            time_to_sleep = (current_clip_name-now).total_seconds()
+
+            if time_to_sleep < 0:
+                print("Issue with timing")
+
+            if time_to_sleep > 0:
+                time.sleep(time_to_sleep)
+        
         # read in current m3u8 file
         # stream_url for the current AWS folder
         stream_url = "{}/hls/{}/live.m3u8".format(
@@ -101,7 +104,7 @@ class DateRangeHLSStream():
         num_segments_in_wav_duration = math.ceil(self.polling_interval_in_seconds/stream_obj.target_duration)
 
         # calculate the start index by computing the current time - start of current folder
-        segment_start_index = math.ceil(get_difference_between_times_in_seconds(self.current_clip_start_time, current_folder)/stream_obj.target_duration)
+        segment_start_index = math.ceil(datetime_utils.get_difference_between_times_in_seconds(self.current_clip_start_time, current_folder)/stream_obj.target_duration)
         segment_end_index = segment_start_index + num_segments_in_wav_duration
 
         if segment_end_index > num_total_segments:
@@ -112,8 +115,7 @@ class DateRangeHLSStream():
 
         # Can get the whole segment so update the clip_start_time for the next clip
         # We do this before we actually do the pulling in case there is a problem with this clip
-        
-        self.current_clip_start_time = add_interval_to_unix_time(self.current_clip_start_time, self.polling_interval_in_seconds)
+        self.current_clip_start_time = datetime_utils.add_interval_to_unix_time(self.current_clip_start_time, self.polling_interval_in_seconds)
 
         # Create tmp path to hold .ts segments
         tmp_path = "tmp_path"
@@ -126,7 +128,7 @@ class DateRangeHLSStream():
             file_name = audio_segment.uri
             audio_url = base_path + file_name
             try:
-                download_from_url(audio_url,tmp_path)
+                scraper.download_from_url(audio_url,tmp_path)
                 file_names.append(file_name)
             except Exception:
                 print("Skipping",audio_url,": error.")
@@ -147,8 +149,20 @@ class DateRangeHLSStream():
         # clear the tmp_path
         os.system(f'rm -rf {tmp_path}')
 
+        # If we're in demo mode, we need to fake timestamps to make it seem like the date range is real-time
+        if current_clip_name:
+            clipname, _ = get_readable_clipname(self.folder_name.replace("_", "-"), current_clip_name)
+
+            # rename wav file
+            full_new_clip_path = os.path.join(self.wav_dir, clipname+".wav")
+            os.rename(wav_file_path, full_new_clip_path)
+            wav_file_path = full_new_clip_path
+
+            # change clip_start_time - this has to be in UTC so that the email can be in PDT
+            clip_start_time = current_clip_name.isoformat() + "Z"
+
         # Get new index
-        return wav_file_path, clip_start_time
+        return wav_file_path, clip_start_time, current_clip_name
 
     def is_stream_over(self):
         # returns true or false based on whether the stream is over

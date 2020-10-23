@@ -1,30 +1,22 @@
--f https://download.pytorch.org/whl/torch_stable.html
-fastai==1.0.61
-librosa==0.8.0
-pydub==0.24.1
-pandas
-numpy
-torchaudio==0.6.0
-git+https://github.com/fastaudio/fastai_audio@0.1
-ipython
-spacy
+#-f https://download.pytorch.org/whl/torch_stable.html
 awscli
 requests
 bs4
 tqdm
-pandas
-matplotlib
+#pandas
+#matplotlib
 m3u8
+click
 #librosa==0.6.3 # downgraded librosa to avoid non-fortran contiguous array
-torch
-torchvision
+#torch
+#torchvision
 azure-cosmos
 azure-cosmosdb-table
 azure-storage-blob
 sendgrid
 ffmpeg-python
-numpy
-numba==0.48
+#numpy
+#numba==0.48
 opencv-python
 boto3
 pytz

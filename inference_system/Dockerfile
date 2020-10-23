@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
         ffmpeg \
         python3 \
         python3-pip \
-        unzip
+        unzip \
+        git
 
 # Install pip requirements
 WORKDIR /usr/src/install
@@ -20,12 +21,13 @@ RUN python3 -m pip install --upgrade pip && pip install -r requirements.txt
 WORKDIR /usr/src/app
 
 # Put model in place at WORKDIR/model
-COPY ./model.zip ./model.zip
-RUN unzip ./model.zip
+COPY ./podcastmodel.zip ./podcastmodel.zip
+RUN unzip ./podcastmodel.zip
 RUN rm -rf ./__MACOSX
-RUN rm ./model.zip
+RUN rm ./podcastmodel.zip
 
 # Move source code to app working directory
 COPY ./src/ ./src
+COPY ./config/ ./config
 
-CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py"]
+CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py", "--config", "./config/AudioSet_LiveHLS_OrcasoundLab.yml"]
