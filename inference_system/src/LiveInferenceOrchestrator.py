@@ -32,6 +32,10 @@ COSMOSDB_CONTAINER_NAME = "metadata"
 
 # TODO(@prgogia) look up for real
 ORCASOUND_LAB_LOCATION = {"id": "rpi_orcasound_lab", "name": "Haro Strait", "longitude":  -123.2166658, "latitude": 48.5499978}
+PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.7604, "latitude": 48.1170}
+BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6068, "latitude": 48.0309}
+
+source_guid_to_location = {"rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION}
 
 def assemble_blob_uri(container_name, item_name):
 
@@ -45,7 +49,8 @@ def populate_metadata_json(
     result_json,
     timestamp_in_iso,
     hls_polling_interval,
-    model_type):
+    model_type,
+    source_guid):
 
     data = {}
     data["id"] = str(uuid.uuid4())
@@ -58,8 +63,8 @@ def populate_metadata_json(
     data["reviewed"]= False
     data["timestamp"] = timestamp_in_iso
     data["whaleFoundConfidence"] = result_json["global_confidence"]
-    data["location"] = ORCASOUND_LAB_LOCATION
-    data["source_guid"] = "rpi_orcasound_lab"
+    data["location"] = source_guid_to_location[source_guid]
+    data["source_guid"] = source_guid
 
     # whale call predictions
     local_predictions = result_json["local_predictions"]
@@ -183,7 +188,7 @@ if __name__ == "__main__":
                     print("Uploaded spectrogram to Azure Storage")
 
                     # Insert metadata into CosmosDB
-                    metadata = populate_metadata_json(audio_uri, spectrogram_uri, prediction_results, start_timestamp, hls_polling_interval, model_type)
+                    metadata = populate_metadata_json(audio_uri, spectrogram_uri, prediction_results, start_timestamp, hls_polling_interval, model_type, hls_hydrophone_id)
                     database = client.get_database_client(COSMOSDB_DATABASE_NAME)
                     container = database.get_container_client(COSMOSDB_CONTAINER_NAME)
                     container.create_item(body=metadata)
