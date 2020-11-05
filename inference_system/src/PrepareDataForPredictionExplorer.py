@@ -155,7 +155,7 @@ def create_dataset_from_unix_daterange(start_time_unix, end_time_unix, s3_stream
     while not hlsstream.is_stream_over():
 
         print("Trying to get next clip")
-        clip_path, clip_name = hlsstream.get_next_clip()
+        clip_path, _, clip_name = hlsstream.get_next_clip()
 
         # if this clip was at the end of a bucket, clip_duration_in_seconds < 60, if so we skip it
         if clip_path:
