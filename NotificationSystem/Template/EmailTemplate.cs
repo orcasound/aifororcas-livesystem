@@ -182,7 +182,7 @@ namespace NotificationSystem.Template
         private static string GetPDTTimestring(DateTime? timestamp)
         {
             var pacificTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-            return timestamp != null ? TimeZoneInfo.ConvertTimeFromUtc(timestamp.Value, pacificTimeZone).ToLongTimeString() : "unknown time";
+            return timestamp != null ? (TimeZoneInfo.ConvertTimeFromUtc(timestamp.Value, pacificTimeZone).ToShortDateString() + " " + TimeZoneInfo.ConvertTimeFromUtc(timestamp.Value, pacificTimeZone).ToLongTimeString()) : "unknown time";
         }
     }
 }
