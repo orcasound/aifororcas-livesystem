@@ -111,7 +111,7 @@ class DateRangeHLSStream():
             # move to the next folder and increment the current_clip_start_time to the new
             self.current_folder_index += 1
             self.current_clip_start_time = self.valid_folders[self.current_folder_index]
-            return None, None
+            return None, None, None
 
         # Can get the whole segment so update the clip_start_time for the next clip
         # We do this before we actually do the pulling in case there is a problem with this clip
