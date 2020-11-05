@@ -162,7 +162,7 @@ documentation is adapted from
 Login to the shared azure directory from the Azure CLI.
 
 ```
-az login --tenant orcaconservancy778.onmicrosoft.com
+az login --tenant ai4orcasoutlook.onmicrosoft.com
 ```
 
 We will be using the orcaconservancycr ACR in the LiveSRKWNotificationSystem Resource Group.
@@ -189,12 +189,6 @@ docker push orcaconservancycr.azurecr.io/live-inference-system:v<Major>.<Minor>.
 ```
 
 ## Deploying your updated container to Azure Container Instances
-
-Run the following command.  This will restart the container instance with the updated version of your container.
-
-```
-az container restart -g LiveSRKWNotificationSystem --name live-inference-system-aci-3gb
-```
 
 Edit the file `inference_system/deploy-aci.yaml`.  There are three sensitive strings that must be filled in before deployment can
 happen.

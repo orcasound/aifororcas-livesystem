@@ -5,7 +5,20 @@ location: westus2
 name: live-inference-system-aci-3gb
 properties:
   containers:
-  - name: live-inference-system-aci-3gb
+  - name: orcasound-lab-live
+    properties:
+      environmentVariables:
+      - name: AZURE_COSMOSDB_PRIMARY_KEY
+        secureValue: '<cosmos_primary_key>'
+      - name: AZURE_STORAGE_CONNECTION_STRING
+        secureValue: '<storage_connection_string>'
+      image: orcaconservancycr.azurecr.io/live-inference-system:10-1.AudioSet.R1-7.v2
+      ports: []
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGB: 3
+  - name: port-townsend-live
     properties:
       environmentVariables:
       - name: AZURE_COSMOSDB_PRIMARY_KEY
