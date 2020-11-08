@@ -30,10 +30,9 @@ COSMOSDB_ACCOUNT_NAME = "aifororcasmetadatastore"
 COSMOSDB_DATABASE_NAME = "predictions"
 COSMOSDB_CONTAINER_NAME = "metadata"
 
-# TODO(@prgogia) look up for real
-ORCASOUND_LAB_LOCATION = {"id": "rpi_orcasound_lab", "name": "Haro Strait", "longitude":  -123.2166658, "latitude": 48.5499978}
-PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.7604, "latitude": 48.1170}
-BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6068, "latitude": 48.0309}
+ORCASOUND_LAB_LOCATION = {"id": "rpi_orcasound_lab", "name": "Haro Strait", "longitude":  -123.17357, "latitude": 48.55833}
+PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.76045, "latitude": 48.13569}
+BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6039, "latitude": 48.03371}
 
 source_guid_to_location = {"rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION}
 
