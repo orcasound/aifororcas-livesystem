@@ -1,0 +1,36 @@
+﻿@page "/detections/unknown"
+
+<PageHeadingComponent Title="Unknown or Unconfirmed Detections" PillCount=@pagination.TotalNumberOfRecords />
+
+<!-- Filter -->
+<CandidateFilterComponent FilterOptions=@filterOptions
+						  ApplyFilterCallback="ActOnApplyFilterCallback" />
+
+@if (loadStatus != null)
+{
+	<h5 class="mt-5">@loadStatus</h5>
+}
+else
+{
+	<!-- Cards -->
+	@for (var i = 0; i < detections.Count(); i++)
+	{
+		<DetectionComponent SubmitCallback="ActOnSubmitCallback"
+							Detection=@detections[i] />
+	}
+}
+
+<!-- Pagination -->
+@if (detections != null && detections.Count > 0)
+{
+	<div class="col-12 text-left px-0">
+		<PaginationComponent PaginationOptions=@paginationOptions
+							 PaginationResults="@pagination"
+							 SelectPageCallback="ActOnSelectPageCallback" />
+	</div>
+}
+
+<LoginWarningComponent />
+
+<SubmitAudioComponent />
+

@@ -1,0 +1,32 @@
+﻿@page "/detections/falsepositives"
+
+<PageHeadingComponent Title="False Positive Detections" PillCount=@pagination.TotalNumberOfRecords />
+
+<!-- Filter -->
+<ReviewedFilterComponent FilterOptions=@filterOptions
+						 ApplyFilterCallback="ActOnApplyFilterCallback" />
+
+@if (loadStatus != null)
+{
+<h5 class="mt-5">@loadStatus</h5>
+}
+else
+{
+<!-- Cards -->
+@for (var i = 0; i < detections.Count(); i++)
+{
+	<DetectionComponent IsEditable=false
+						Detection=@detections[i] />
+}
+}
+
+
+<!-- Pagination -->
+@if (detections != null && detections.Count > 0)
+{
+	<div class="col-12 text-left px-0">
+		<PaginationComponent PaginationOptions=@paginationOptions
+							 PaginationResults="@pagination"
+							 SelectPageCallback="ActOnSelectPageCallback" />
+	</div>
+}

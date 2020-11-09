@@ -1,0 +1,20 @@
+﻿@page "/detections/detection/{id}"
+
+<PageHeadingComponent Title="Detection" />
+
+@if (detection == null)
+{
+	<h5 class="mt-5">Loading record...</h5>
+}
+else if (isFound)
+{
+	<DetectionComponent SubmitCallback="ActOnSubmitCallback" Detection=@detection IsEditable=@isEditable />
+}
+else
+{
+	<h5 class="mt-5">Requested Detection with ID '@Id' could not be found.</h5>
+}
+
+<LoginWarningComponent />
+
+<SubmitAudioComponent />

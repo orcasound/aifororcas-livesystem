@@ -1,0 +1,69 @@
+﻿/*
+ * Overrides of other CSS and new ones specific to this site
+*/
+
+.modal {
+	padding: 0 !important;
+	// override inline padding-right added from js
+}
+
+	.modal .modal-full {
+		width: 100%;
+		max-width: none;
+		height: 100%;
+		margin: 0;
+	}
+
+	.modal .modal-full .modal-content {
+		height: 100%;
+		border: 0;
+		border-radius: 0;
+	}
+
+	.modal .modal-full .modal-body {
+		overflow-y: auto;
+	}
+
+/* Make the play button spin */
+
+.spinner {
+	animation: spin 5s infinite;
+}
+
+@keyframes spin {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+
+	100% {
+		-webkit-transform: rotate(359deg);
+		transform: rotate(359deg);
+	}
+}
+
+/* Wavesurfer additions */
+
+.wavesurfer-region {
+	border: 1px solid white !important;
+}
+
+/* Not sure if these help or not */
+.custom-control {
+	position: relative;
+	display: block;
+}
+
+.custom-control-label {
+	position: relative;
+	vertical-align: top;
+	margin-bottom: 0;
+}
+
+label {
+	display: inline-block;
+}
+
+.comments {
+	color: #858796;
+}

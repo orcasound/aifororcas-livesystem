@@ -1,0 +1,53 @@
+﻿body {
+	background-color: #000 !important;
+	color: #fff !important;
+}
+
+#content-wrapper {
+	background-color: #000 !important;
+}
+
+.bg-white {
+	background-color: #000 !important;
+}
+
+.card-body {
+	background-color: #000 !important;
+}
+.card-header {
+	background-color: #000 !important;
+}
+
+.card-footer {
+	background-color: #000 !important;
+}
+
+.card {
+	border: 1px solid #fff !important;
+}
+
+.text-gray-800 {
+	color: #fff !important;
+}
+
+.text-gray-600 {
+	color: #fff !important;
+}
+
+.text-primary {
+	color: #fff !important;
+}
+
+.collapse-item {
+	color: #fff !important;
+}
+
+.modal-content {
+	background-color: #000 !important;
+	border: 1px solid #fff !important;
+}
+
+.close {
+	color: #fff !important;
+}
+

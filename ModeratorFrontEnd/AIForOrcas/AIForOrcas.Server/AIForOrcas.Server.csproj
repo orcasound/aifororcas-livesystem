@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<UserSecretsId>c62605fb-8f7f-41c0-9317-f7503ff3d569</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="3.1.9" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="3.1.4" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AIForOrcas.DTO\AIForOrcas.DTO.csproj" />
+		<ProjectReference Include="..\AIForOrcas.Server.BL\AIForOrcas.Server.BL.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="wwwroot\" />
+	</ItemGroup>
+
+</Project>

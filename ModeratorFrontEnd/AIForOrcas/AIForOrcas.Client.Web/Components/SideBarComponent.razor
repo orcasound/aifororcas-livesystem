@@ -1,0 +1,121 @@
+﻿<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+	<li>
+		<!-- Sidebar - Brand -->
+		<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+			<div class="sidebar-brand-icon">
+				<img src="img/orca-transparent.png"
+					 style="transform: scaleX(-1);"
+					 width="32">
+			</div>
+			<div class="sidebar-brand-text mx-3">AI for Orcas</div>
+		</a>
+	</li>
+
+	<!-- Nav Item - Dashboard -->
+	<li class="nav-item active">
+		<a class="nav-link" href="/Dashboard">
+			<i class="fas fa-fw fa-tachometer-alt"></i>
+			<span>Dashboard</span>
+		</a>
+	</li>
+
+	<li>
+		<!-- Divider -->
+		<hr class="sidebar-divider" />
+	</li>
+
+	<li>
+		<!-- Heading -->
+		<div class="sidebar-heading">
+			Whale Sound
+		</div>
+	</li>
+
+	<!-- Nav Item - Candidates for Review -->
+	<li class="nav-item">
+		<a class="nav-link" href="/detections/candidates">
+			<i class="fas fa-fw fa-headphones"></i>
+			<span>Candidates</span>
+		</a>
+	</li>
+
+	<!-- Nav Item - Unknown (needs additional review) -->
+	<li class="nav-item">
+		<a class="nav-link" href="/detections/unknown">
+			<i class="fas fa-fw fa-question"></i>
+			<span>Unknown or Unconfirmed</span>
+		</a>
+	</li>
+
+	<!-- Nav Item - Confirmed Detections -->
+	<li class="nav-item">
+		<a class="nav-link" href="/detections/confirmed">
+			<i class="fas fa-fw fa-check"></i>
+			<span>Confirmed</span>
+		</a>
+	</li>
+
+	<!-- Nav Item - False Positives -->
+	<li class="nav-item">
+		<a class="nav-link" href="/detections/falsepositives">
+			<i class="fas fa-fw fa-times"></i>
+			<span>False Positives</span>
+		</a>
+	</li>
+
+	<li>
+		<!-- Divider -->
+		<hr class="sidebar-divider">
+	</li>
+
+	<li>
+		<!-- Heading -->
+		<div class="sidebar-heading">
+			Explore
+		</div>
+	</li>
+
+	<!-- Nav Item - AI For Orcas -->
+	<li class="nav-item">
+		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#orcasoundCollapse" 
+		   aria-expanded="true" aria-controls="orcasoundCollapse">
+			<i class="fas fa-fw fa-folder"></i>
+			<span>Orcasound</span>
+		</a>
+		<div id="orcasoundCollapse" class="collapse" data-parent="#accordionSidebar">
+			<div class="bg-white py-2 collapse-inner rounded">
+
+				<a class="collapse-item" href="https://live.orcasound.net/"
+				   target="_blank">Listen Live</a>
+			</div>
+		</div>
+	</li>
+
+	<!-- Nav Item - Orca Concervancy -->
+	<li class="nav-item">
+		<a class="nav-link collapsed" href="#" data-toggle="collapse" 
+		   data-target="#conservancyCollapse" aria-expanded="true" aria-controls="conservancyCollapse">
+			<i class="fas fa-fw fa-folder"></i>
+			<span>Orca Conservancy</span>
+		</a>
+		<div id="conservancyCollapse" class="collapse" data-parent="#accordionSidebar">
+			<div class="bg-white py-2 collapse-inner rounded">
+				<a class="collapse-item"
+				   href="http://www.orcaconservancy.org"
+				   target="_blank">Home Page</a>
+			</div>
+		</div>
+	</li>
+
+	<li>
+		<!-- Divider -->
+		<hr class="sidebar-divider d-none d-md-block">
+	</li>
+
+	<!-- Sidebar Toggler (Sidebar) -->
+	<li class="text-center d-none d-md-inline">
+		<button class="rounded-circle border-0" id="sidebarToggle" @onclick="ToggleDisplay"></button>
+	</li>
+
+</ul>

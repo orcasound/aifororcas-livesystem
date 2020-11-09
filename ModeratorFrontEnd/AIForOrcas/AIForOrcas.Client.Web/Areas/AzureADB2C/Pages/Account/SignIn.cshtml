@@ -1,0 +1,20 @@
+﻿@page
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.AzureAD.UI
+
+@attribute [IgnoreAntiforgeryToken]
+@functions {
+	public IActionResult OnPost([FromRoute] string scheme)
+	{
+		scheme = AzureADDefaults.AuthenticationScheme;
+
+		var redirectUrl = HttpContext.Request.Query["RedirectTo"].ToString();
+
+		var current = Request.Query;
+
+
+		return Challenge(
+			new AuthenticationProperties { RedirectUri = redirectUrl },
+			scheme);
+	}
+}

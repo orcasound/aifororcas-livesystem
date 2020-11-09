@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="3.1.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AIForOrcas.DTO\AIForOrcas.DTO.csproj" />
+  </ItemGroup>
+
+</Project>

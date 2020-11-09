@@ -1,0 +1,59 @@
+﻿@page "/"
+@namespace AIForOrcas.Client.Web.Pages
+@using AIForOrcas.Client.Web
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>AIForOrcas</title>
+	<base href="~/" />
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
+
+	<link rel="stylesheet" href="vendor/fontawesome-free/css/all.min.css">
+	<link rel="stylesheet" href="css/sb-admin-2.css" />
+	<link rel="stylesheet" href="css/blazor.css" />
+	<link rel="stylesheet" href="css/ai-for-orcas.css" />
+
+</head>
+<body>
+	<app>
+		<component type="typeof(App)" render-mode="Server" />
+	</app>
+
+	<div id="blazor-error-ui">
+		<environment include="Staging,Production">
+			An error has occurred. This application may no longer respond until reloaded.
+		</environment>
+		<environment include="Development">
+			An unhandled exception has occurred. See browser dev tools for details.
+		</environment>
+		<a href="" class="reload">Reload</a>
+		<a class="dismiss">🗙</a>
+	</div>
+
+	<script src="_framework/blazor.server.js"></script>
+
+	<!-- Core JavaScript -->
+	<script src="vendor/jquery/jquery.min.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+	<!-- Wavesurfer -->
+	<script src="vendor/wavesurfer/wavesurfer.js"></script>
+	<script src="vendor/wavesurfer/wavesurfer.regions.min.js"></script>
+
+	<!-- Bing maps -->
+	<script src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AjPZqXS-Xf1kvUrAxtnogaAA9S1COo2L3md5YFDg7O7HJFOgWMzbprOnpp4epSbv' type='text/javascript'></script>
+
+	<!-- SB Admin JavaScript -->
+	<script src="js/sb-admin-2.js"></script>
+
+	<script src="js/ai-for-orcas.js"></script>
+
+</body>
+</html>

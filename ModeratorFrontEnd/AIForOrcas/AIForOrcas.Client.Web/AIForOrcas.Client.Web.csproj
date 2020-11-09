@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<UserSecretsId>777063ba-7078-463a-b11d-a527c4afbffe</UserSecretsId>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>1701;1702;TS6053</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="3.1.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.AzureADB2C.UI" Version="3.1.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="3.1.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AIForOrcas.Client.BL\AIForOrcas.Client.BL.csproj" />
+		<ProjectReference Include="..\AIForOrcas.DTO\AIForOrcas.DTO.csproj" />
+		<ProjectReference Include="..\AIForOrcas.Server.BL\AIForOrcas.Server.BL.csproj" />
+	</ItemGroup>
+
+</Project>
