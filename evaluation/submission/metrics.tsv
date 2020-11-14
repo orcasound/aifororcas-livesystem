@@ -1,0 +1,9 @@
+dataset	AUPRC	submission
+podcast_test_round1	0.949	Baseline-AudioSet-VGGish_R1to7
+podcast_test_round2	0.803	Baseline-AudioSet-VGGish_R1to7
+podcast_test_round3	0.09	Baseline-AudioSet-VGGish_R1to7
+OVERALL	0.614	Baseline-AudioSet-VGGish_R1to7
+podcast_test_round1	0.979	FastAI-ResNet50_R1to7
+podcast_test_round2	0.923	FastAI-ResNet50_R1to7
+podcast_test_round3	0.605	FastAI-ResNet50_R1to7
+OVERALL	0.836	FastAI-ResNet50_R1to7
