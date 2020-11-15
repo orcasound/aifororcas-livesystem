@@ -5,3 +5,4 @@ seaborn
 matplotlib
 tqdm
 scikit-learn
+tabulate

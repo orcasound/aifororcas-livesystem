@@ -56,13 +56,15 @@ If the optional `-threshold` argument, is provided, precision/recall/F1 scores a
 
 This the the current state-of-art for models on the repo :) 
 
-| dataset             |   [Baseline-AudioSet-VGGish_R1to7](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EWGJMz-YuRxNhn9US9h-3Y4B6HYJGQk8yjs_YNXpvtD4jg?e=GXKOX0) |   [FastAI-ResNet50_R1to7](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EYcGElFToGpHnFDI41iO5e8B2vu_GLTZP6aVhx3GII5sew?e=vd7FCl) |
-|:--------------------|---------------------------------:|------------------------:|
-| OVERALL             |                            0.614 |                   0.836 |
-| podcast_test_round1 |                            0.949 |                   0.979 |
-| podcast_test_round2 |                            0.803 |                   0.923 |
-| podcast_test_round3 |                            0.09  |                   0.605 |
+| dataset             |   [Baseline-AudioSet-VGGish_R1to7](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EWGJMz-YuRxNhn9US9h-3Y4B6HYJGQk8yjs_YNXpvtD4jg?e=GXKOX0) |   [FastAI-ResNet50_R1to7](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EYcGElFToGpHnFDI41iO5e8B2vu_GLTZP6aVhx3GII5sew?e=vd7FCl) |   [Baseline-AudioSet-VGGish_R1to12](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EcvUHjmVMmhPl6P9wTNi41oBx0NmhbgQ9hLbX08bbiiG2A?e=0vcoxu) |   [FastAI-ResNet50_R1to12](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EccXTDQB4FZMkZMFwsyueQQBIHLK4J_fBN5HxPeBClrg-w?e=VPMXTb) |
+|:--------------------|---------------------------------:|------------------------:|---------------------------------:|------------------------:|
+| OVERALL             |                            0.614 |                   0.836 |                            0.681 |                   0.872 |
+| podcast_test_round1 |                            0.949 |                   0.979 |                            0.939 |                   0.977 |
+| podcast_test_round2 |                            0.803 |                   0.923 |                            0.834 |                   0.938 |
+| podcast_test_round3 |                            0.09  |                   0.605 |                            0.269 |                   0.700 |
 
 ![Precision-Recall-plots](./submission/au_pr_curves.png)
 
 > **NOTE:** If you are deploying a new model (1) generate your submission file and score, comparing with existing files (2) update `/submission` and this README with your results (3) Upload your model (with similar naming convention) to [folder](https://microsoft.sharepoint.com/:f:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/ElW2pjtFsndMiE4C80kKuMMB_SqFbdDbWGl3WYN59UA31Q?e=o1NgAr) and update links in the README.
+
+> **NOTE:** The FastAI-ResNet50_R1to12 model was trained with extra false positive data from the live system apart from the Round 1-12 training dataset.
