@@ -1,10 +1,10 @@
-import { renderTestComponent } from './AudioPlayer';
-import { renderDetailsComponent } from './DetailsComponent';
+import { renderReactPlayer } from './ReactPlayer';
+import { renderReactDetails, ICandidate } from './ReactDetails';
 
-export function RenderTestComponent() {
-    return renderTestComponent();
+export function RenderReactPlayer(imgSrc: string, audioSrc: string, playerId: string) {
+    return renderReactPlayer(imgSrc, audioSrc, playerId);
 }
 
-export function RenderDetailsComponent(ImageUri: string, Annotations: any) {
-    return renderDetailsComponent(ImageUri, Annotations);
+export function RenderReactDetails(candidate: ICandidate) {
+    return renderReactDetails(candidate);
 }
