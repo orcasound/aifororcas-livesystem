@@ -7,6 +7,7 @@ from numpy import floor
 from audio.data import AudioConfig, SpectrogramConfig, AudioList
 import os
 import shutil
+import tempfile
 
 
 def load_model(mPath, mName="stg2-rn18.pkl"):
@@ -57,7 +58,8 @@ class FastAIModel():
         '''
 
         # Creates local directory to save 2 second clops
-        local_dir = "./fastai_dir/"
+        # local_dir = "./fastai_dir/"
+        local_dir = tempfile.mkdtemp()+"/"
         if os.path.exists(local_dir):
             shutil.rmtree(local_dir, ignore_errors=False, onerror=None)
             os.makedirs(local_dir)
@@ -86,7 +88,7 @@ class FastAIModel():
             local_dir,
             ""
         )
-
+        
         # Definining Audio config needed to create on the fly mel spectograms
         config = AudioConfig(standardize=False,
                              sg_cfg=SpectrogramConfig(
@@ -124,39 +126,51 @@ class FastAIModel():
         # Aggregating predictions
 
         # Creating a DataFrame
-        prediction = pd.DataFrame({'FilePath': pathList, 'pred': predictions})
+        prediction = pd.DataFrame({'FilePath': pathList, 'confidence': predictions})
 
         # Converting prediction to float
-        prediction['pred'] = prediction.pred.astype(float)
+        prediction['confidence'] = prediction.confidence.astype(float)
 
         # Extracting Starting time from file name
-        prediction['startTime'] = prediction.FilePath.apply(lambda x: int(x.split('_')[-2]))
+        prediction['start_time_s'] = prediction.FilePath.apply(lambda x: int(x.split('_')[-2]))
 
-        # Sorting the file based on startTime
+        # Sorting the file based on start_time_s
         prediction = prediction.sort_values(
-            ['startTime']).reset_index(drop=True)
+            ['start_time_s']).reset_index(drop=True)
 
         # Rolling Window (to average at per second level)
-        submission = pd.DataFrame({'pred': list(prediction.rolling(
-            2)['pred'].mean().values)}).reset_index().rename(columns={'index': 'StartTime'})
+        submission = pd.DataFrame(
+                {
+                    'wav_filename': Path(wav_file_path).name,
+                    'duration_s': 1.0,
+                    'confidence': list(prediction.rolling(2)['confidence'].mean().values)
+                }
+            ).reset_index().rename(columns={'index': 'start_time_s'})
 
         # Updating first row
-        submission.loc[0, 'pred'] = prediction.pred[0]
+        submission.loc[0, 'confidence'] = prediction.confidence[0]
 
         # Adding lastrow
-        lastLine = pd.DataFrame({'StartTime': [submission.StartTime.max(
-        )+1], 'pred': [prediction.pred[prediction.shape[0]-1]]})
+        lastLine = pd.DataFrame({
+            'wav_filename': Path(wav_file_path).name,
+            'start_time_s': [submission.start_time_s.max()+1],
+            'duration_s': 1.0,
+            'confidence': [prediction.confidence[prediction.shape[0]-1]]
+            })
         submission = submission.append(lastLine, ignore_index=True)
+        submission = submission[['wav_filename', 'start_time_s', 'duration_s', 'confidence']]
 
         # initialize output JSON
         result_json = {}
-        result_json["local_predictions"] = list(
-            (submission['pred'] > self.threshold).astype(int))
-        result_json["local_confidences"] = list(submission['pred'])
-        result_json["global_prediction"] = int(sum(
-            result_json["local_predictions"]) > self.min_num_positive_calls_threshold)
-        result_json["global_confidence"] = submission.loc[(
-            submission['pred'] > self.threshold), 'pred'].mean()*100
+        result_json = dict(
+            submission=submission,
+            local_predictions=list((submission['confidence'] > self.threshold).astype(int)),
+            local_confidences=list(submission['confidence'])
+        )
+
+        result_json['global_prediction'] = int(sum(result_json["local_predictions"]) > self.min_num_positive_calls_threshold)
+        result_json['global_confidence'] = submission.loc[(submission['confidence'] > self.threshold), 'confidence'].mean()*100
         if pd.isnull(result_json["global_confidence"]):
             result_json["global_confidence"] = 0
+
         return result_json

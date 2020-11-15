@@ -9,9 +9,11 @@ from scipy.io import wavfile
 from collections import defaultdict
 from model.dataloader import AudioFileWindower 
 from pathlib import Path
+from tqdm import tqdm
 
 from datetime import datetime
 import numpy as np
+import pandas as pd
 
 """
 Input: wav file 
@@ -29,13 +31,16 @@ def write_json(result_json, output_path):
         json.dump(result_json, f)
 
 class OrcaDetectionModel():
-    def __init__(self, model_path, threshold=0.7, min_num_positive_calls_threshold=3):
+    def __init__(self, model_path, threshold=0.7, min_num_positive_calls_threshold=3, hop_s=2.45, rolling_avg=False):
         #i initialize model
         self.model, _ = get_model_or_checkpoint(params.MODEL_NAME,model_path,use_cuda=False)
+        self.model.eval()
         self.mean = os.path.join(model_path, params.MEAN_FILE)
         self.invstd = os.path.join(model_path, params.INVSTD_FILE)
         self.threshold = threshold
         self.min_num_positive_calls_threshold = min_num_positive_calls_threshold
+        self.hop_s = hop_s
+        self.rolling_avg = rolling_avg
 
     def split_and_predict(self, wav_file_path):
         """
@@ -48,7 +53,9 @@ class OrcaDetectionModel():
         wavfile_path = wav_file_path
         chunk_duration=params.INFERENCE_CHUNK_S
 
-        audio_file_windower = AudioFileWindower([wavfile_path], mean=self.mean, invstd=self.invstd)
+        audio_file_windower = AudioFileWindower(
+                [wavfile_path], mean=self.mean, invstd=self.invstd, hop_s=self.hop_s
+            )
         window_s = audio_file_windower.window_s
 
         # initialize output JSON
@@ -58,22 +65,35 @@ class OrcaDetectionModel():
             }
 
         # iterate through dataloader and add accumulate predictions
-        for i in range(len(audio_file_windower)):
+        for i in tqdm(range(len(audio_file_windower))):
             # get a mel spec for the window 
             audio_file_windower.get_mode = 'mel_spec'
             mel_spec_window, _ = audio_file_windower[i]
             # run inference on window
             input_data = torch.from_numpy(mel_spec_window).float().unsqueeze(0).unsqueeze(0)
-            pred, embed = self.model(input_data)
+            pred, _ = self.model(input_data)
             posterior = np.exp(pred.detach().cpu().numpy())
+
             pred_id = 0
             if posterior[0,1] > self.threshold:
                 pred_id = 1
-            
             confidence = round(float(posterior[0,1]),3)
 
             result_json["local_predictions"].append(pred_id)
             result_json["local_confidences"].append(confidence)
+        
+        submission = pd.DataFrame(dict(
+            wav_filename=Path(wav_file_path).name,
+            start_time_s=[i*self.hop_s for i in range(len(audio_file_windower))],
+            duration_s=self.hop_s,
+            confidence=result_json['local_confidences']
+        ))
+        if self.rolling_avg:
+            rolling_scores = submission['confidence'].rolling(2).mean()
+            rolling_scores[0] = submission['confidence'][0]
+            submission['confidence'] = rolling_scores
+            result_json["local_confidences"] = submission['confidence'].tolist()
+        result_json['submission'] = submission
 
         return result_json
 

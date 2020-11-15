@@ -162,7 +162,11 @@ if __name__ == "__main__":
             spectrogram_path = spectrogram_visualizer.write_spectrogram(clip_path)
             prediction_results = whalecall_classification_model.predict(clip_path)
 
-            print(prediction_results)
+            print("\nlocal_confidences: {}\n".format(prediction_results["local_confidences"]))
+            print("local_predictions: {}\n".format(prediction_results["local_predictions"]))
+            print("global_confidence: {}\n".format(prediction_results["global_confidence"]))
+            print("global_prediction: {}".format(prediction_results["global_prediction"]))
+
 
             # only upload positive clip data
             if prediction_results["global_prediction"] == 1:
