@@ -93,9 +93,7 @@ All resources are located in resource group **LiveSRKWNotificationSystem**.
 ## Run Locally
 It is recommended to go to the "orcanotification" function app, then Settings > Configuration to find the app settings used. 
 
-1. Create a local.settings.json file with the settings found in the function app. See [documentation](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash#local-settings-file) here.
-    - Set all connection strings to be "UseDevelopmentStorage=true"
-2. You also need to start the azure storage emulator if you aren't using real connection strings. 
+Update local.settings.json with valid configuration strings.
 
 ## Run on Azure
 
