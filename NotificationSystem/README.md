@@ -93,7 +93,22 @@ All resources are located in resource group **LiveSRKWNotificationSystem**.
 ## Run Locally
 It is recommended to go to the "orcanotification" function app, then Settings > Configuration to find the app settings used. 
 
-Update local.settings.json with valid configuration strings.
+Create local.settings.json in the current directory (NotificationSystem) using the below template. Fill in with valid configuration strings.
+
+```json
+{
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+
+        "OrcaNotificationStorageSetting": "<storage account connection string>",
+        "aifororcasmetadatastore_DOCUMENTDB": "<cosmos db connection string>",
+        "SendGridKey": "<SendGrid API key>",
+        "SenderEmail": "<email address>"
+    }
+}
+```
 
 ## Run on Azure
 
