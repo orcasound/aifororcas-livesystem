@@ -22,4 +22,4 @@ Orca call validation and notification
 
 - [schema](schema): schema for metadata store
 - [ModeratorFrontEnd](ModeratorFrontEnd): moderator website
-- [NotificationSystem](NotificationSystem): email notifications when orca calls are detected
+- [NotificationSystem](NotificationSystem)
