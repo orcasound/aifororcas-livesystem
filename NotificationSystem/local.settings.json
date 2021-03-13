@@ -1,0 +1,12 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+
+        "OrcaNotificationStorageSetting": "<storage account connection string>",
+        "aifororcasmetadatastore_DOCUMENTDB": "<cosmos db connection string>",
+        "SendGridKey": "<SendGrid API key>",
+        "SenderEmail": "<email address>"
+    }
+}
