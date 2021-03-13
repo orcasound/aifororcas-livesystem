@@ -4,6 +4,34 @@ The notification system is a set of azure functions responsible for:
 - Facilitating adding/removing moderators and subscribers
 - Identifying changes in the database and sending alerts
 
+## Architecture
+
+![add email architecture](img/add-email.png)
+
+There are two Azure Functions that update the email list.
+
+- ModeratorEmail is a REST API that writes to the email list
+- SenderEmail is a REST API that writes to the email list
+- Email list is implemented using Azure Tables, using either "Moderator" or "Subscriber" as the partition key
+
+![send email architecture](img/send-email.png)
+
+There are three other Azure Functions that make up the email notification system.
+
+In the moderators flow:
+
+- A change in the Cosmos DB metadata store triggers the SendModeratorEmail function
+- If there is a newly detected orca call that requires a moderator to validate, the function fetches the relevant email list
+- The function then calls SendGrid to send emails to moderators
+
+In the subscribers flow:
+
+- A change in the Cosmos DB metadata store triggers the DbToQueue function
+- If there is a new orca call that the moderator has validated, the function sends a message to a queue
+- The SendSubscriberEmail function periodically checks the queue
+- If there are items in the queue, the function fetches the relevant email list
+- The function then calls SendGrid to send emails to subscribers
+
 ## Prerequisites
 
 - Access to the [Orca Conservancy azure subscription](https://portal.azure.com/#@b8a2e287-987e-47a2-8253-26017d3bef2c/resource/subscriptions/9ffa543e-3596-43aa-b82c-8f41dfbf03cc/resourceGroups)
