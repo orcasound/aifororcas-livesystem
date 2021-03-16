@@ -90,6 +90,7 @@ namespace AIForOrcas.Server.Controllers
 				metrics.ConfirmedComments = MetadataProcessors.GetComments(queryable, "yes");
 				metrics.UnconfirmedComments = MetadataProcessors.GetComments(queryable, "no");
 				metrics.UnconfirmedComments.AddRange(MetadataProcessors.GetComments(queryable, "don't know"));
+				metrics.UnconfirmedComments = metrics.UnconfirmedComments.OrderByDescending(x => x.Timestamp).ToList();
 
 				// Pull tags from queryable
 				metrics.Tags = MetadataProcessors.GetTags(queryable);
@@ -170,6 +171,7 @@ namespace AIForOrcas.Server.Controllers
 				metrics.ConfirmedComments = MetadataProcessors.GetComments(queryable, "yes");
 				metrics.UnconfirmedComments = MetadataProcessors.GetComments(queryable, "no");
 				metrics.UnconfirmedComments.AddRange(MetadataProcessors.GetComments(queryable, "don't know"));
+				metrics.UnconfirmedComments = metrics.UnconfirmedComments.OrderByDescending(x => x.Timestamp).ToList();
 
 				// Pull tags from queryable
 				metrics.Tags = MetadataProcessors.GetTags(queryable);

@@ -195,10 +195,7 @@ function InitializeModalSpectrogram(modalId, audioUrl, regionsJson) {
 		fillParent: true,
 		plugins: [
 			WaveSurfer.regions.create({
-				regions: JSON.parse(regionsJson),
-				dragSelection: {
-					slop: 5
-				}
+				regions: JSON.parse(regionsJson)
 			})
 		]
 	})

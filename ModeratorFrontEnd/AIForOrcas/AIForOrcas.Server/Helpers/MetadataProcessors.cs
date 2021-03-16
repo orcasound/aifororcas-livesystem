@@ -55,7 +55,7 @@ namespace AIForOrcas.Server.Helpers
 					});
 				});
 
-			return results;
+			return results.OrderByDescending(x => x.Timestamp).ToList();
 		}
 
 		public static List<MetricsTag> GetTags(IQueryable<Metadata> queryable)
@@ -70,7 +70,7 @@ namespace AIForOrcas.Server.Helpers
 					y.tags.Split(";")
 					.ToList().ForEach(z =>
 					{
-						var tag = results.Where(t => t.Tag == z).FirstOrDefault();
+						var tag = results.Where(t => t.Tag == z.ToUpper()).FirstOrDefault();
 						if (tag != null)
 						{
 							tag.Ids.Add(id);
@@ -79,7 +79,7 @@ namespace AIForOrcas.Server.Helpers
 						{
 							var newTag = new MetricsTag()
 							{
-								Tag = z
+								Tag = z.ToUpper()
 							};
 							newTag.Ids.Add(id);
 							results.Add(newTag);
@@ -87,7 +87,7 @@ namespace AIForOrcas.Server.Helpers
 					});
 				});
 
-			return results;
+			return results.OrderBy(x => x.Tag).ToList();
 		}
 
 		public static Detection ToDetection(Metadata metadata)

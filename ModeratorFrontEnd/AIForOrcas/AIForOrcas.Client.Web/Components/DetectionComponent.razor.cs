@@ -129,7 +129,8 @@ namespace AIForOrcas.Client.Web.Components
 			{
 				var entry = "{";
 				entry += $"\"start\":{annotation.StartTime}, ";
-				entry += $"\"end\":{annotation.EndTime}";
+				entry += $"\"end\":{annotation.EndTime},";
+				entry += "\"drag\": false";
 				entry += "}";
 				list.Add(entry);
 			}
