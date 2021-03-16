@@ -5,7 +5,8 @@
 		public string SortOrder { get; set; }
 		public string SortBy { get; set; }
 		public string Timeframe { get; set; }
+		public string Location { get; set; }
 
-		public string QueryString { get => $"sortBy={SortBy}&sortOrder={SortOrder}&timeframe={Timeframe}"; }
+		public string QueryString { get => $"sortBy={SortBy}&sortOrder={SortOrder}&timeframe={Timeframe}&location={Location}"; }
 	}
 }

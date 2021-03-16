@@ -23,7 +23,7 @@ namespace AIForOrcas.Client.Web.Pages.Detections
 			new PaginationOptionsDTO() { RecordsPerPage = 5, Page = 1 };
 
 		private CandidateFilterOptionsDTO filterOptions =
-			new CandidateFilterOptionsDTO() { SortBy = "timestamp", SortOrder = "desc", Timeframe = "24h" };
+			new CandidateFilterOptionsDTO() { SortBy = "timestamp", SortOrder = "desc", Timeframe = "24h", Location = "all" };
 
 		private PaginationResultsDTO pagination = new PaginationResultsDTO();
 

@@ -21,6 +21,12 @@ namespace AIForOrcas.Server.Helpers
 					if (timeframe == "30m")
 						now = now.AddMinutes(-30);
 
+					if (timeframe == "3h")
+						now = now.AddHours(-3);
+
+					if (timeframe == "6h")
+						now = now.AddHours(-6);
+
 					if (timeframe == "24h")
 						now = now.AddHours(-24);
 
@@ -40,6 +46,14 @@ namespace AIForOrcas.Server.Helpers
 			if (!string.IsNullOrWhiteSpace(moderator))
 			{
 				queryable = queryable.Where(x => x.moderator == moderator);
+			}
+		}
+
+		public static void ApplyLocationFilter(ref IQueryable<Metadata> queryable, string location)
+		{
+			if(!string.IsNullOrWhiteSpace(location))
+			{
+				queryable = queryable.Where(x => x.location.name == location);
 			}
 		}
 

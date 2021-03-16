@@ -62,6 +62,9 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.SortOrder))
 					throw new ArgumentNullException("SortOrder");
 
+				if (string.IsNullOrWhiteSpace(queryParameters.Location))
+					throw new ArgumentNullException("Location");
+
 				if (queryParameters.Page == 0)
 					throw new ArgumentNullException("Page");
 
@@ -73,6 +76,12 @@ namespace AIForOrcas.Server.Controllers
 
 				// apply timeframe filter
 				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
+
+				// apply location filter
+				if(queryParameters.Location.ToLower() != "all")
+				{
+					MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+				}
 
 				// If no detections found
 				if (queryable == null || queryable.Count() == 0)
@@ -194,6 +203,9 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.SortOrder))
 					throw new ArgumentNullException("SortOrder");
 
+				if (string.IsNullOrWhiteSpace(queryParameters.Location))
+					throw new ArgumentNullException("Location");
+
 				if (queryParameters.Page == 0)
 					throw new ArgumentNullException("Page");
 
@@ -208,6 +220,12 @@ namespace AIForOrcas.Server.Controllers
 
 				// apply timeframe filter
 				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
+
+				// apply location filter
+				if (queryParameters.Location.ToLower() != "all")
+				{
+					MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+				}
 
 				// If no detections found
 				if (queryable == null || queryable.Count() == 0)
@@ -282,6 +300,9 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.SortOrder))
 					throw new ArgumentNullException("SortOrder");
 
+				if (string.IsNullOrWhiteSpace(queryParameters.Location))
+					throw new ArgumentNullException("Location");
+
 				if (queryParameters.Page == 0)
 					throw new ArgumentNullException("Page");
 
@@ -299,6 +320,12 @@ namespace AIForOrcas.Server.Controllers
 
 				// apply timeframe filter
 				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
+
+				// apply location filter
+				if (queryParameters.Location.ToLower() != "all")
+				{
+					MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+				}
 
 				// If no detections found
 				if (queryable == null || queryable.Count() == 0)
@@ -373,6 +400,9 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.SortOrder))
 					throw new ArgumentNullException("SortOrder");
 
+				if (string.IsNullOrWhiteSpace(queryParameters.Location))
+					throw new ArgumentNullException("Location");
+
 				if (queryParameters.Page == 0)
 					throw new ArgumentNullException("Page");
 
@@ -390,6 +420,12 @@ namespace AIForOrcas.Server.Controllers
 
 				// apply timeframe filter
 				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
+
+				// apply location filter
+				if (queryParameters.Location.ToLower() != "all")
+				{
+					MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+				}
 
 				// If no detections found
 				if (queryable == null || queryable.Count() == 0)
@@ -464,6 +500,9 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.SortOrder))
 					throw new ArgumentNullException("SortOrder");
 
+				if (string.IsNullOrWhiteSpace(queryParameters.Location))
+					throw new ArgumentNullException("Location");
+
 				if (queryParameters.Page == 0)
 					throw new ArgumentNullException("Page");
 
@@ -481,6 +520,12 @@ namespace AIForOrcas.Server.Controllers
 
 				// apply timeframe filter
 				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
+
+				// apply location filter
+				if (queryParameters.Location.ToLower() != "all")
+				{
+					MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+				}
 
 				// If no detections found
 				if (queryable == null || queryable.Count() == 0)
