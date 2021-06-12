@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +22,15 @@ namespace NotificationSystem
             ILogger log)
         {
             return await EmailHelpers.UpdateEmailList<SubscriberEmailEntity>(req, cloudTable, log);
+        }
+
+        [FunctionName("ListSubscriberEmails")]
+        public static IEnumerable<string> List(
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
+            [Table("EmailList")] CloudTable cloudTable,
+            ILogger log)
+        {
+            return EmailHelpers.GetEmailEntities(cloudTable, "Subscriber").Select(e => e.Email);
         }
     }
 }
