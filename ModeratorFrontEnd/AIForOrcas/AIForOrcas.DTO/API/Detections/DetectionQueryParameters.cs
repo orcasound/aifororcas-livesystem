@@ -24,10 +24,16 @@
 		public string SortOrder { get; set; } = "desc";
 
 		/// <summary>
-		/// Timeframe for the record set (last 30m, 24h, 1w, 30d, all).
+		/// Timeframe for the record set (last 30m, 3h, 6h, 24h, 1w, 30d, all).
 		/// </summary>
 		/// <example>all</example>
 		public string Timeframe { get; set; } = "all";
+
+		/// <summary>
+		/// Location of the hydrophone (all, Haro Straight, Port Townsend, etc.).
+		/// </summary>
+		/// <example>all</example>
+		public string Location { get; set; } = "all";
 
 		/// <summary>
 		/// Number of records per page to retrieve.
