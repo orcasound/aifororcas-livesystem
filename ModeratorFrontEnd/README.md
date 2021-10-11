@@ -1,6 +1,6 @@
 ## AI For Orcas - Moderator Front End System
 
-The moderator front in is responsible for presenting the candidate whale calls to the designated moderators so they can confirm the calls as legitimate or as false positives.
+The moderator front end is responsible for presenting the candidate whale calls to the designated moderators so they can confirm the calls as legitimate or as false positives.
 
 The basic workflow is as follows:
 - The notification system sends designated moderators an email indicating there are one or more candidates to review.
