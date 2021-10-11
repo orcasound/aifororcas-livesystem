@@ -46,7 +46,6 @@ The remaining projects in the solution represent code that is shared between the
 
 **MetricsController**
 - Fixed bug related to capitalization differences and sorting problems in hand-entered Tags for GetSystemMetrics and GetModeratorMetrics endpoints
-- Fixed bug related to sorting error for 
 
 #### AIForOrcas.Client.BL
 **DateHelper**
