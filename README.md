@@ -1,55 +1,54 @@
 # OrcaHello: A real-time AI-assisted killer whale notification system 🎱 🐋
 
-Orcasound has set up hydrophones in the Puget Sound. Whales sometimes swim by these hydrophones and vocalize in the form of calls.
+[Orcasound](https://www.orcasound.net/) has set up a hydrophone network in the Puget Sound. Killer whales sometimes swim by these hydrophones and vocalize in the form of calls.
 
-We trained a deep learning model to detect these calls in the hydrophone audio. Each sub-segment is classified as whale call/ no-whale call.
+We trained a deep learning model to find these calls in hydrophone audio. Each overlapping 2 second sub-segment is classified as whale call/ no-whale call.
 Shown below is a 1-minute segment of hydrophone audio visualized as a spectrogram with whale calls detected by the model.
 
-Img - Detections
+![Detections](Detections.png)
 
-When whale-activity is detected by the model, it sends an email to our Moderators who are human killer whale experts. 
+When whale-activity is detected by the model, it sends an email to our Moderators who are killer whale experts. 
 
-Img - Eg. of a moderator email.
+![Moderator Email](ModeratorEmail.png)
 
-Once they receive this email, they can visit the Moderator Portal to confirm model detections and act as an oracle.
+Once they receive this email, they can visit the [Moderator Portal](https://aifororcas.azurewebsites.net/) shown below to confirm or reject model detections.
 
-Img - Eg. of the moderator portal.
+![Moderator Portal](ModeratorPortal.png)
 
-Most importantly, they tag detections with information if the whale call was a southern resident killer whale - a specific type found in the Puget Sound. If a SRKW is confirmed, an email is sent to subscribers.
+Most importantly, they tag detections with information if the whale call was emitted by a Southern Resident Killer Whale (SRKW) - an endangered ecotype found in the Puget Sound. If a SRKW is confirmed, an email is sent to subscribers.
 
-Img - Eg. of a subscriber email.
+![Subscriber Email](SubscriberEmail.png)
 
-This repository contains the implementations for the components
-- ModeratorFrontEnd - Frontend code for website - insert link.
-- NotificationSystem - Code to trigger emails on whale call detections.
-- InferenceSystem - Code to run forward inference with the trained model.
+This repository contains the implementations for the following  components that make up OrcaHello.
+- [ModeratorFrontEnd](ModeratorFrontEnd) - Frontend code for the [Moderator Portal](https://aifororcas.azurewebsites.net/).
+- [NotificationSystem](NotificationSystem) - Code to trigger email notifications.
+- [InferenceSystem](InferenceSystem) - Code to perform inference with the trained model.
+- [ModelTraining](ModelTraining) - Data preparation and model training.
+- [ModelEvaluation](ModelEvaluation) - Benchmarking trained models on test sets.
 
 
 ## System overview
 
-The diagram below describes the technologies used for various parts of the system
+The diagram below describes the flow of data through OrcaHello and the technologies used.
 
-
-## Installation
-
-
+![System Overview](SystemOverview.png)
 
 ## Contributing
 You can contribute by
-1. Create an issue to capture issues with the website, documentation.
+1. Creating an issue to capture problems with the Moderator Portal and documentation.
 2. Create a pull request to fix an issue or add documentation.
 
-To contribute a pull request for a specific subsystem, please read the corresponding contributing guidelines.
+To contribute a pull request for a specific subsystem, please read the corresponding contributing guidelines and READMEs. 
 
-ModeratorFrontEnd Contributing Guidelines
-NotificationSystem Contributing Guidelines
-MachineLearningModeling Contributing Guidelines
-MachineLearningInference Contributing Guidelines
+- ModeratorFrontEnd | [README](ModeratorFrontEnd/README.md)  | [Contributing Guidelines](ModeratorFrontEnd/CONTRIBUTING.md)
+- NotificationSystem | [README](NotificationSystem/README.md) | [Contributing Guidelines](NotificationSystem/CONTRIBUTING.md)
+- InferenceSystem | [README](InferenceSystem/README.md) | [Contributing Guidelines](InferenceSystem/CONTRIBUTING.md)
+- ModelTraining | [README](ModelTraining/README.md) | [Contributing Guidelines](ModelTraining/CONTRIBUTING.md)
 
 ## General Resources
-Project Page - contains information about the system, history of the project.
+[Project Page](https://ai4orcas.net/portfolio/orcahello-live-inference-system/) - contains information about the system and a brief history of the project.
 
 
-## Related projects
-- Pod.Cast - We built a tool to crowdsource whale call detections to train a model.
-- aifororcas-orcaml - Original machine learning and data preparation code.
+## Related Projects
+- [aifororcas-podcast](https://github.com/orcasound/aifororcas-podcast) - A tool to crowdsource labeling of whale calls in Orcasound's hydrophone data.
+- [aifororcas-orcaml](https://github.com/orcasound/aifororcas-orcaml) - Original baseline machine learning model and data preparation code.
