@@ -7,13 +7,13 @@ Using Python 3 specifically tested with Python version 3.7.4
 1. In your working directory, run `python -m venv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
 2. On Mac, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
     On Windows, activate with `.\inference-venv\Scripts\activate.bat` and `.\inference-venv\Scripts\deactivate.bat` when done
-3. In an active environment, cd to `/inference_system` and run `python -m pip install --upgrade pip && pip install -r requirements.txt` 
+3. In an active environment, cd to `/InferenceSystem` and run `python -m pip install --upgrade pip && pip install -r requirements.txt` 
 
 ## Model download
 
 1.  Download model from https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EV9IBJrfmOxKhWtZOaW3pB8Br5u3yF0K3L18eZDruw89jw?e=S8UyEC
-2.  Unzip model.zip and extract to `inference_system/model`
-3.  Check the contents of inference_system/model
+2.  Unzip model.zip and extract to `InferenceSystem/model`
+3.  Check the contents of InferenceSystem/model
 There should be 3 files
     Audioset_fc_all_*
     mean64.txt
@@ -67,7 +67,7 @@ export AZURE_COSMOSDB_PRIMARY_KEY="<yourprimarykey>"
 ## Run script
 
 ```
-cd inference_system
+cd InferenceSystem
 python LiveInferenceOrchestrator.py
 ```
 
@@ -86,7 +86,7 @@ environment on
 
 - **model.zip**: Download model from 
 [this link](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EV9IBJrfmOxKhWtZOaW3pB8Br5u3yF0K3L18eZDruw89jw?e=S8UyEC).
-Save the model to `inference_system/model.zip`.
+Save the model to `InferenceSystem/model.zip`.
 
 - **Environment Variable File**: Create/get an environment variable file.  This should be a file called `inference-system/.env`.
 This can be completed in two ways.
@@ -101,7 +101,7 @@ AZURE_STORAGE_CONNECTION_STRING=<string>
 
 ## Building the docker container
 
-From the `inference_system` directory, run the following command.
+From the `InferenceSystem` directory, run the following command.
 It will take a while (~2-3 minutes on macOS or Linux, ~10-20 minutes on Windows) the first time, but builds are cached, and it
 should take a much shorter time in future builds.
 
@@ -111,7 +111,7 @@ docker build . -t live-inference-system -f ./FastAIDocker/Dockerfile
 
 ## Running the docker container
 
-From the `inference_system` directory, run the following command.
+From the `InferenceSystem` directory, run the following command.
 
 ```
 docker run --rm -it --env-file .env live-inference-system
@@ -190,7 +190,7 @@ docker push orcaconservancycr.azurecr.io/live-inference-system:v<Major>.<Minor>.
 
 ## Deploying your updated container to Azure Container Instances
 
-Edit the file `inference_system/deploy-aci.yaml`.  There are three sensitive strings that must be filled in before deployment can
+Edit the file `InferenceSystem/deploy-aci.yaml`.  There are three sensitive strings that must be filled in before deployment can
 happen.
 
 **NOTE** - Make sure you change these back after running the build - don't commit them to the repository!
@@ -201,7 +201,7 @@ happen.
 [this link](https://portal.azure.com/#@OrcaConservancy778.onmicrosoft.com/resource/subscriptions/9ffa543e-3596-43aa-b82c-8f41dfbf03cc/resourcegroups/LiveSRKWNotificationSystem/providers/Microsoft.ContainerRegistry/registries/orcaconservancycr/accessKey)
 under the name `password`.
 
-Then, run this command from the `inference_system` directory.  It will take a while to complete.  Once complete, make sure to check your work below.
+Then, run this command from the `InferenceSystem` directory.  It will take a while to complete.  Once complete, make sure to check your work below.
 
 ```
 az container create -g LiveSRKWNotificationSystem -f .\deploy-aci.yaml

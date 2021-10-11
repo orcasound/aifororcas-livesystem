@@ -1,7 +1,0 @@
-{
-    "task": {
-        "visualization": "spectrogram",
-        "annotationSolutionsUrl": "/static/json/azure_candidate_annotations.json",
-        "url": "https://podcaststorage.blob.core.windows.net/dummydata/wavmaster_chunks/600120001.wav"
-    }
-}
