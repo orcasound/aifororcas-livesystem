@@ -1,10 +1,4 @@
-﻿/* Submit Button Effect */
-
-function PlaySubmitSound() {
-	document.getElementById("submitEffect").play();
-}
-
-/* Sidebar Toggler */
+﻿/* Sidebar Toggler */
 
 function ToggleSideBar() {
 

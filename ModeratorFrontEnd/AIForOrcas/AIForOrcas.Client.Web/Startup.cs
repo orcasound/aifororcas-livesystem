@@ -1,5 +1,6 @@
 using AIForOrcas.Client.BL.Helpers;
 using AIForOrcas.Client.BL.Services;
+using Blazored.Toast;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Builder;
@@ -35,6 +36,8 @@ namespace AIForOrcas.Client.Web
 				options.AddPolicy("ModeratorRole", policyBuilder =>
 					policyBuilder.RequireClaim("groups", Configuration["AzureADGroup:ModeratorGroupId"]));
 			});
+
+			services.AddBlazoredToast();
 
 			services.AddRazorPages();
 			services.AddServerSideBlazor();
