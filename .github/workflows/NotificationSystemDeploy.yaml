@@ -17,7 +17,7 @@ defaults:
 
 env:
   OUTPUT_DIRECTORY: output
-  AZURE_FUNCTIONAPP_NAME: micya-test
+  AZURE_FUNCTIONAPP_NAME: orcanotification
   AZURE_FUNCTIONAPP_PACKAGE_PATH: NotificationSystem
   DOTNET_VERSION: '3.1.x'
 
