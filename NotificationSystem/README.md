@@ -27,7 +27,7 @@ curl -X POST -d '{"email": "sample@email.com"}' '<SubscriberEmailEndpoint>'
 Delete email from subscribers list:
 
 ```bash
-curl -X POST -d '{"email": "sample@email.com"}' '<SubscriberEmailEndpoint>'
+curl -X DELETE -d '{"email": "sample@email.com"}' '<SubscriberEmailEndpoint>'
 ```
 
 Add email to moderators list:
@@ -39,7 +39,7 @@ curl -X POST -d '{"email": "sample@email.com"}' '<ModeratorEmailEndpoint>'
 Delete email from moderators list:
 
 ```bash
-curl -X POST -d '{"email": "sample@email.com"}' '<ModeratorEmailEndpoint>'
+curl -X DELETE -d '{"email": "sample@email.com"}' '<ModeratorEmailEndpoint>'
 ```
 
 ### Send email to moderators and subscribers
@@ -61,6 +61,29 @@ In the subscribers flow:
 - The SendSubscriberEmail function periodically checks the queue
 - If there are items in the queue, the function fetches the relevant email list
 - The function then calls SendGrid to send emails to subscribers
+
+## Get email list
+
+![list email architecture](img/list-email.png)
+
+There are two Azure Functions that query the email list.
+
+- ListModeratorEmails is a REST API that lists all saved moderator emails
+- ListSubscriberEmails is a REST API that lists all saved subscriber emails
+
+### Sample REST calls
+
+List all subscriber emails:
+
+```bash
+curl -X GET '<SubscriberEmailEndpoint>'
+```
+
+List all moderator emails:
+
+```bash
+curl -X GET '<ModeratorEmailEndpoint>'
+```
 
 ## Prerequisites
 

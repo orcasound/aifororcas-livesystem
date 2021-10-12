@@ -15,7 +15,7 @@ namespace NotificationSystem
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class SubscriberEmail
     {
-        [FunctionName("SubscriberEmail")]
+        [FunctionName("SubscribeToSubscriberEmail")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", "delete")] HttpRequest req,
             [Table("EmailList")] CloudTable cloudTable,
