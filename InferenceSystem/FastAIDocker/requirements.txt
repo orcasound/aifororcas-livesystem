@@ -1,0 +1,23 @@
+#-f https://download.pytorch.org/whl/torch_stable.html
+awscli
+requests
+bs4
+tqdm
+#pandas
+#matplotlib
+m3u8
+click
+#librosa==0.6.3 # downgraded librosa to avoid non-fortran contiguous array
+#torch
+#torchvision
+azure-cosmos
+azure-cosmosdb-table
+azure-storage-blob
+sendgrid
+ffmpeg-python
+#numpy
+#numba==0.48
+opencv-python
+boto3
+pytz
+# ffmpeg windows build: https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-4.1.4-win64-static.zip
