@@ -33,7 +33,7 @@ The diagram below describes the flow of data through OrcaHello and the technolog
 
 ## Contributing
 You can contribute by
-1. Creating an issue to capture problems with the Moderator Portal and documentation.
+1. Creating an issue to capture problems with the Moderator Portal and documentation [here](https://github.com/orcasound/aifororcas-livesystem/issues).
 2. Create a pull request to fix an issue or add documentation.
 
 To contribute a pull request for a specific subsystem, please read the corresponding contributing guidelines and READMEs. 
