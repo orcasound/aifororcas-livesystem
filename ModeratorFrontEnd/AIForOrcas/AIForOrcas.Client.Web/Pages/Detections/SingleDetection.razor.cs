@@ -1,6 +1,5 @@
 ﻿using AIForOrcas.Client.BL.Services;
 using AIForOrcas.DTO.API;
-using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AIForOrcas.Client.Web.Pages.Detections
 {
-	public partial class SingleDetection : IDisposable
+	public partial class SingleDetection : ComponentBase, IDisposable
 	{
 		[Parameter]
 		public string Id { get; set; }
@@ -18,9 +17,6 @@ namespace AIForOrcas.Client.Web.Pages.Detections
 
 		[Inject]
 		IDetectionService Service { get; set; }
-
-		[Inject]
-		IToastService ToastService { get; set; }
 
 		private Detection detection = null;
 		private bool isFound = true;
@@ -45,7 +41,7 @@ namespace AIForOrcas.Client.Web.Pages.Detections
 		{
 			await Service.UpdateRequestAsync(request);
 
-			ToastService.ShowSuccess("Detection successfully updated.");
+			await JSRuntime.InvokeVoidAsync("PlaySubmitSound");
 
 			await LoadDetection();
 		}
