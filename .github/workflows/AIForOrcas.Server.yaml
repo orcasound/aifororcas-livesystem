@@ -15,6 +15,7 @@ on:
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server.BL/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.DTO/**
+  workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:
   DOTNET_VERSION: 3.1.x
