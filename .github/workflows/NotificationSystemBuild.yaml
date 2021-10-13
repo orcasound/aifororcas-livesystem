@@ -1,0 +1,32 @@
+name: Notification System Build
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on pull request only
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "NotificationSystem/**"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: NotificationSystem
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup dotnet 3.1 Environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Dotnet Build
+        run: dotnet build
