@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AIForOrcas.Client.Web.Pages.Detections
 {
-	public partial class SingleDetection : IDisposable
+	public partial class SingleDetection : ComponentBase, IDisposable
 	{
 		[Parameter]
 		public string Id { get; set; }

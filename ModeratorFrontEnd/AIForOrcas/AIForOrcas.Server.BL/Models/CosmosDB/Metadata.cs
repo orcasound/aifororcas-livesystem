@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AIForOrcas.Server.BL.Models.CosmosDB
 {
@@ -9,7 +10,7 @@ namespace AIForOrcas.Server.BL.Models.CosmosDB
 		public string audioUri { get; set; }
 		public string imageUri { get; set; }
 		public bool reviewed { get; set; }
-		public string timestamp { get; set; }
+		public DateTime timestamp { get; set; }
 		public decimal whaleFoundConfidence { get; set; }
 		public Location location { get; set; }
 		public List<Prediction> predictions { get; set; } = new List<Prediction>();
