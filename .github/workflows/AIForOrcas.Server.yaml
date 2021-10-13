@@ -1,0 +1,30 @@
+name: AIForOrcas.Server
+
+on:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - ModeratorFrontEnd/AIForOrcas/**
+  push:
+    branches:
+    - main
+    paths:
+    - ModeratorFrontEnd/AIForOrcas/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+    - name: Dependencies
+      run: dotnet restore -r win-x86 ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server
+    - name: Build
+      run: dotnet build --no-restore -c Release -r win-x86 ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server
+    - name: Test
+      run: dotnet test --no-restore -r win-x86 ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server
