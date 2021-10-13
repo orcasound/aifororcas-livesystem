@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AIForOrcas.Server.BL.Services
@@ -17,10 +18,10 @@ namespace AIForOrcas.Server.BL.Services
 			_db = db;
 		}
 
-		public async Task<IEnumerable<Metadata>> GetAllAsync()
-		{
-			return await _db.Metadata.ToListAsync();
-		}
+		public IQueryable<Metadata> GetAll()
+        {
+			return _db.Metadata.AsQueryable();
+        }
 
 		public async Task<Metadata> GetByIdAsync(string id)
 		{

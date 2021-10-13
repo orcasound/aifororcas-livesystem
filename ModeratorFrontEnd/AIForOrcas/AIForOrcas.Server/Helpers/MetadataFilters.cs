@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AIForOrcas.Server.Helpers
 {
-	public static class MetadataFilters
+    public static class MetadataFilters
 	{
 		public static int DefaultRecordsPerPage = 5;
 
@@ -36,7 +36,8 @@ namespace AIForOrcas.Server.Helpers
 					if (timeframe == "1m")
 						now = now.AddDays(-30);
 
-					queryable = queryable.Where(x => DateTime.Parse(x.timestamp) >= now);
+					queryable = queryable.Where(x => x.timestamp >= now);
+
 				}
 			}
 		}
@@ -64,43 +65,7 @@ namespace AIForOrcas.Server.Helpers
 
 		public static void ApplyFoundFilter(ref IQueryable<Metadata> queryable, string foundState)
 		{
-			queryable = queryable.Where(x => x.SRKWFound.ToLower() == foundState.ToLower());
-		}
-
-		public static void ApplyConfidenceSortFilter(ref IQueryable<Metadata> queryable, string sortOrder)
-		{
-			if (sortOrder == "asc")
-				queryable = queryable.OrderBy(x => x.whaleFoundConfidence)
-					.ThenBy(x => x.timestamp)
-					.ThenBy(x => x.id);
-
-			if (sortOrder == "desc")
-				queryable = queryable.OrderByDescending(x => x.whaleFoundConfidence)
-					.ThenBy(x => x.timestamp)
-					.ThenBy(x => x.id);
-		}
-
-		public static void ApplyTimestampSortFilter(ref IQueryable<Metadata> queryable, string sortOrder)
-		{
-			if (sortOrder == "asc")
-				queryable = queryable.OrderBy(x => x.timestamp)
-					.ThenByDescending(x => x.whaleFoundConfidence)
-					.ThenBy(x => x.id);
-
-			if (sortOrder == "desc")
-				queryable = queryable.OrderByDescending(x => x.timestamp)
-					.ThenByDescending(x => x.whaleFoundConfidence)
-					.ThenBy(x => x.id);
-		}
-
-		public static void ApplyPaginationFilter(ref IQueryable<Metadata> queryable, int page, int take)
-		{
-			var skip = page > 0 ? page - 1 : 0;
-			var recordsPerPage = take > 0 ? take : DefaultRecordsPerPage;
-
-			queryable = queryable
-				.Skip(skip * recordsPerPage)
-				.Take(recordsPerPage);
+			queryable = queryable.Where(x => x.SRKWFound == foundState);
 		}
 	}
 }
