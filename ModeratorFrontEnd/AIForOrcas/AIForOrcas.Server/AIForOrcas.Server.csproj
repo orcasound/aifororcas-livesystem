@@ -11,6 +11,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="wwwroot\**" />
+	  <Content Remove="wwwroot\**" />
+	  <EmbeddedResource Remove="wwwroot\**" />
+	  <None Remove="wwwroot\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="3.1.9" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="3.1.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
@@ -19,10 +26,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AIForOrcas.DTO\AIForOrcas.DTO.csproj" />
 		<ProjectReference Include="..\AIForOrcas.Server.BL\AIForOrcas.Server.BL.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="wwwroot\" />
 	</ItemGroup>
 
 </Project>

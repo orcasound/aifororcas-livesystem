@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using Blazored.Toast.Configuration
 
 <link rel="stylesheet" href="@darkTheme" />
 
@@ -33,3 +34,10 @@
 
 	<LogoutComponent />
 </div>
+
+<BlazoredToasts Position="ToastPosition.BottomRight"
+                Timeout="2"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                SuccessIcon="fa fa-thumbs-up"
+                ErrorIcon="fa fa-bug" />
