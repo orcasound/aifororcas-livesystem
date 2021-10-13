@@ -24,3 +24,4 @@ numba==0.48
 opencv-python
 boto3
 pytz
+json
