@@ -21,13 +21,12 @@ RUN python3 -m pip install --upgrade pip && pip install -r requirements.txt
 WORKDIR /usr/src/app
 
 # Put model in place at WORKDIR/model
-COPY ./podcastmodel.zip ./podcastmodel.zip
-RUN unzip ./podcastmodel.zip
-RUN rm -rf ./__MACOSX
-RUN rm ./podcastmodel.zip
+COPY ./model.zip ./model.zip
+RUN unzip ./model.zip
+RUN rm ./model.zip
 
 # Move source code to app working directory
 COPY ./src/ ./src
 COPY ./config/ ./config
 
-CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py", "--config", "./config/AudioSet_LiveHLS_OrcasoundLab.yml"]
+CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py", "--config", "./config/Production/FastAI_LiveHLS_OrcasoundLab.yml"]

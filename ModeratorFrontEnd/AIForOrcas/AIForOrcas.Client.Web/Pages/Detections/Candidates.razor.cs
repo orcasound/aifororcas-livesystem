@@ -1,6 +1,7 @@
 ﻿using AIForOrcas.Client.BL.Services;
 using AIForOrcas.DTO;
 using AIForOrcas.DTO.API;
+using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
@@ -17,6 +18,9 @@ namespace AIForOrcas.Client.Web.Pages.Detections
 		[Inject]
 		IDetectionService Service { get; set; }
 
+		[Inject]
+		IToastService ToastService { get; set; }
+
 		private List<Detection> detections = null;
 
 		private PaginationOptionsDTO paginationOptions = 
@@ -32,6 +36,7 @@ namespace AIForOrcas.Client.Web.Pages.Detections
 		protected override async Task OnInitializedAsync()
 		{
 			await LoadDetections();
+
 		}
 
 		private async Task LoadDetections()
@@ -77,7 +82,7 @@ namespace AIForOrcas.Client.Web.Pages.Detections
 		{
 			await Service.UpdateRequestAsync(request);
 
-			await JSRuntime.InvokeVoidAsync("PlaySubmitSound");
+			ToastService.ShowSuccess("Detection successfully updated.");
 
 			paginationOptions.Page = 1;
 			await LoadDetections();

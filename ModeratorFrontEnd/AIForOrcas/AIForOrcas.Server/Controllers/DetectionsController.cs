@@ -49,7 +49,7 @@ namespace AIForOrcas.Server.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(500)]
-		public async Task<IActionResult> GetAsync([FromQuery] DetectionQueryParameters queryParameters)
+		public IActionResult Get([FromQuery] DetectionQueryParameters queryParameters)
 		{
 			try
 			{
@@ -72,7 +72,7 @@ namespace AIForOrcas.Server.Controllers
 					throw new ArgumentNullException("RecordsPerPage");
 
 				// start with all records
-				var queryable = (await _repository.GetAllAsync()).AsQueryable();
+				var queryable = _repository.GetAll();
 
 				// apply timeframe filter
 				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
@@ -92,15 +92,17 @@ namespace AIForOrcas.Server.Controllers
 				// total number of records
 				double recordCount = queryable.Count();
 
+				var results = queryable
+					.Select(x => DetectionProcessors.ToDetection(x)).ToList();
+
 				// apply sort filter
 				if (queryParameters.SortBy.ToLower() == "confidence")
-					MetadataFilters.ApplyConfidenceSortFilter(ref queryable, queryParameters.SortOrder);
-
+					DetectionFilters.ApplyConfidenceSortFilter(ref results, queryParameters.SortOrder);
 				else if (queryParameters.SortBy.ToLower() == "timestamp")
-					MetadataFilters.ApplyTimestampSortFilter(ref queryable, queryParameters.SortOrder);
+					DetectionFilters.ApplyTimestampSortFilter(ref results, queryParameters.SortOrder);
 
 				// apply pagination filter
-				MetadataFilters.ApplyPaginationFilter(ref queryable, queryParameters.Page, queryParameters.RecordsPerPage);
+				DetectionFilters.ApplyPaginationFilter(ref results, queryParameters.Page, queryParameters.RecordsPerPage);
 
 				// set page count headers
 				SetHeaderCounts(recordCount,
@@ -108,7 +110,7 @@ namespace AIForOrcas.Server.Controllers
 						MetadataFilters.DefaultRecordsPerPage));
 
 				// map to returnable data type and return
-				return Ok(queryable.Select(x => MetadataProcessors.ToDetection(x)).ToList());
+				return Ok(results);
 			}
 			catch (ArgumentNullException ex)
 			{
@@ -155,7 +157,7 @@ namespace AIForOrcas.Server.Controllers
 				if (metadata == null)
 					return NotFound();
 
-				return Ok(MetadataProcessors.ToDetection(metadata));
+				return Ok(DetectionProcessors.ToDetection(metadata));
 			}
 			catch (ArgumentNullException ex)
 			{
@@ -190,7 +192,7 @@ namespace AIForOrcas.Server.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(500)]
-		public async Task<IActionResult> GetUnreviewedAsync([FromQuery] DetectionQueryParameters queryParameters)
+		public IActionResult GetUnreviewed([FromQuery] DetectionQueryParameters queryParameters)
 		{
 			try
 			{
@@ -213,19 +215,19 @@ namespace AIForOrcas.Server.Controllers
 					throw new ArgumentNullException("RecordsPerPage");
 
 				// start with all records
-				var queryable = (await _repository.GetAllAsync()).AsQueryable();
+				var queryable = _repository.GetAll();
 
 				// apply reviewed status
 				MetadataFilters.ApplyReviewedFilter(ref queryable, false);
 
+                // apply location filter
+                if (queryParameters.Location.ToLower() != "all")
+                {
+                    MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+                }
+
 				// apply timeframe filter
 				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
-
-				// apply location filter
-				if (queryParameters.Location.ToLower() != "all")
-				{
-					MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
-				}
 
 				// If no detections found
 				if (queryable == null || queryable.Count() == 0)
@@ -236,23 +238,31 @@ namespace AIForOrcas.Server.Controllers
 				// total number of records
 				double recordCount = queryable.Count();
 
+				var results = queryable
+					.Select(x => DetectionProcessors.ToDetection(x)).ToList();
+
+				// NOTE: Have to apply SortBy timestamp and pagination filter after
+				//       executing the select because of how EF for Cosmos deals with DateTime.
+				//       Had to convert from string (how stored in Cosmos) to DateTime in order to apply the
+				//       select, but that messed up the SortBy since Cosmos is expecting a string.
+
 				// apply sort filter
 				if (queryParameters.SortBy.ToLower() == "confidence")
-					MetadataFilters.ApplyConfidenceSortFilter(ref queryable, queryParameters.SortOrder);
-
+					DetectionFilters.ApplyConfidenceSortFilter(ref results, queryParameters.SortOrder);
 				else if (queryParameters.SortBy.ToLower() == "timestamp")
-					MetadataFilters.ApplyTimestampSortFilter(ref queryable, queryParameters.SortOrder);
+					DetectionFilters.ApplyTimestampSortFilter(ref results, queryParameters.SortOrder);
 
 				// apply pagination filter
-				MetadataFilters.ApplyPaginationFilter(ref queryable, queryParameters.Page, queryParameters.RecordsPerPage);
+				DetectionFilters.ApplyPaginationFilter(ref results, queryParameters.Page, queryParameters.RecordsPerPage);
 
-				// set page count headers
-				SetHeaderCounts(recordCount,
+
+                // set page count headers
+                SetHeaderCounts(recordCount,
 					(queryParameters.RecordsPerPage > 0 ? queryParameters.RecordsPerPage :
 						MetadataFilters.DefaultRecordsPerPage));
 
 				// map to returnable data type and return
-				return Ok(queryable.Select(x => MetadataProcessors.ToDetection(x)).ToList());
+				return Ok(results);
 			}
 			catch (ArgumentNullException ex)
 			{
@@ -287,7 +297,7 @@ namespace AIForOrcas.Server.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(500)]
-		public async Task<IActionResult> GetConfirmedAsync([FromQuery] DetectionQueryParameters queryParameters)
+		public IActionResult GetConfirmed([FromQuery] DetectionQueryParameters queryParameters)
 		{
 			try
 			{
@@ -310,7 +320,7 @@ namespace AIForOrcas.Server.Controllers
 					throw new ArgumentNullException("RecordsPerPage");
 
 				// start with all records
-				var queryable = (await _repository.GetAllAsync()).AsQueryable();
+				var queryable = _repository.GetAll();
 
 				// apply desired status
 				MetadataFilters.ApplyReviewedFilter(ref queryable, true);
@@ -336,15 +346,17 @@ namespace AIForOrcas.Server.Controllers
 				// total number of records
 				double recordCount = queryable.Count();
 
+				var results = queryable
+					.Select(x => DetectionProcessors.ToDetection(x)).ToList();
+
 				// apply sort filter
 				if (queryParameters.SortBy.ToLower() == "confidence")
-					MetadataFilters.ApplyConfidenceSortFilter(ref queryable, queryParameters.SortOrder);
-
+					DetectionFilters.ApplyConfidenceSortFilter(ref results, queryParameters.SortOrder);
 				else if (queryParameters.SortBy.ToLower() == "timestamp")
-					MetadataFilters.ApplyTimestampSortFilter(ref queryable, queryParameters.SortOrder);
+					DetectionFilters.ApplyTimestampSortFilter(ref results, queryParameters.SortOrder);
 
 				// apply pagination filter
-				MetadataFilters.ApplyPaginationFilter(ref queryable, queryParameters.Page, queryParameters.RecordsPerPage);
+				DetectionFilters.ApplyPaginationFilter(ref results, queryParameters.Page, queryParameters.RecordsPerPage);
 
 				// set page count headers
 				SetHeaderCounts(recordCount,
@@ -352,7 +364,7 @@ namespace AIForOrcas.Server.Controllers
 						MetadataFilters.DefaultRecordsPerPage));
 
 				// map to returnable data type and return
-				return Ok(queryable.Select(x => MetadataProcessors.ToDetection(x)).ToList());
+				return Ok(results);
 			}
 			catch (ArgumentNullException ex)
 			{
@@ -387,7 +399,7 @@ namespace AIForOrcas.Server.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(500)]
-		public async Task<IActionResult> GetFalsePositivesAsync([FromQuery] DetectionQueryParameters queryParameters)
+		public IActionResult GetFalsePositives([FromQuery] DetectionQueryParameters queryParameters)
 		{
 			try
 			{
@@ -410,7 +422,7 @@ namespace AIForOrcas.Server.Controllers
 					throw new ArgumentNullException("RecordsPerPage");
 
 				// start with all records
-				var queryable = (await _repository.GetAllAsync()).AsQueryable();
+				var queryable = _repository.GetAll();
 
 				// apply desired status
 				MetadataFilters.ApplyReviewedFilter(ref queryable, true);
@@ -436,15 +448,17 @@ namespace AIForOrcas.Server.Controllers
 				// total number of records
 				double recordCount = queryable.Count();
 
+				var results = queryable
+					.Select(x => DetectionProcessors.ToDetection(x)).ToList();
+
 				// apply sort filter
 				if (queryParameters.SortBy.ToLower() == "confidence")
-					MetadataFilters.ApplyConfidenceSortFilter(ref queryable, queryParameters.SortOrder);
-
+					DetectionFilters.ApplyConfidenceSortFilter(ref results, queryParameters.SortOrder);
 				else if (queryParameters.SortBy.ToLower() == "timestamp")
-					MetadataFilters.ApplyTimestampSortFilter(ref queryable, queryParameters.SortOrder);
+					DetectionFilters.ApplyTimestampSortFilter(ref results, queryParameters.SortOrder);
 
 				// apply pagination filter
-				MetadataFilters.ApplyPaginationFilter(ref queryable, queryParameters.Page, queryParameters.RecordsPerPage);
+				DetectionFilters.ApplyPaginationFilter(ref results, queryParameters.Page, queryParameters.RecordsPerPage);
 
 				// set page count headers
 				SetHeaderCounts(recordCount,
@@ -452,7 +466,7 @@ namespace AIForOrcas.Server.Controllers
 						MetadataFilters.DefaultRecordsPerPage));
 
 				// map to returnable data type and return
-				return Ok(queryable.Select(x => MetadataProcessors.ToDetection(x)).ToList());
+				return Ok(results);
 			}
 			catch (ArgumentNullException ex)
 			{
@@ -487,7 +501,7 @@ namespace AIForOrcas.Server.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(500)]
-		public async Task<IActionResult> GetUnknownsAsync([FromQuery] DetectionQueryParameters queryParameters)
+		public IActionResult GetUnknowns([FromQuery] DetectionQueryParameters queryParameters)
 		{
 			try
 			{
@@ -510,7 +524,7 @@ namespace AIForOrcas.Server.Controllers
 					throw new ArgumentNullException("RecordsPerPage");
 
 				// start with all records
-				var queryable = (await _repository.GetAllAsync()).AsQueryable();
+				var queryable = _repository.GetAll();
 
 				// apply desired status
 				MetadataFilters.ApplyReviewedFilter(ref queryable, true);
@@ -536,15 +550,17 @@ namespace AIForOrcas.Server.Controllers
 				// total number of records
 				double recordCount = queryable.Count();
 
+				var results = queryable
+					.Select(x => DetectionProcessors.ToDetection(x)).ToList();
+
 				// apply sort filter
 				if (queryParameters.SortBy.ToLower() == "confidence")
-					MetadataFilters.ApplyConfidenceSortFilter(ref queryable, queryParameters.SortOrder);
-
+					DetectionFilters.ApplyConfidenceSortFilter(ref results, queryParameters.SortOrder);
 				else if (queryParameters.SortBy.ToLower() == "timestamp")
-					MetadataFilters.ApplyTimestampSortFilter(ref queryable, queryParameters.SortOrder);
+					DetectionFilters.ApplyTimestampSortFilter(ref results, queryParameters.SortOrder);
 
 				// apply pagination filter
-				MetadataFilters.ApplyPaginationFilter(ref queryable, queryParameters.Page, queryParameters.RecordsPerPage);
+				DetectionFilters.ApplyPaginationFilter(ref results, queryParameters.Page, queryParameters.RecordsPerPage);
 
 				// set page count headers
 				SetHeaderCounts(recordCount,
@@ -552,7 +568,7 @@ namespace AIForOrcas.Server.Controllers
 						MetadataFilters.DefaultRecordsPerPage));
 
 				// map to returnable data type and return
-				return Ok(queryable.Select(x => MetadataProcessors.ToDetection(x)).ToList());
+				return Ok(results);
 			}
 			catch (ArgumentNullException ex)
 			{
@@ -625,7 +641,7 @@ namespace AIForOrcas.Server.Controllers
 
 				await _repository.CommitAsync();
 
-				return Ok(MetadataProcessors.ToDetection(metadata));
+				return Ok(DetectionProcessors.ToDetection(metadata));
 			}
 			catch (ArgumentNullException ex)
 			{

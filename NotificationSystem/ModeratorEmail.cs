@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +15,22 @@ namespace NotificationSystem
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class ModeratorEmail
     {
-        [FunctionName("ModeratorEmail")]
+        [FunctionName("SubscribeToModeratorEmail")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", "delete")] HttpRequest req,
             [Table("EmailList")] CloudTable cloudTable,
             ILogger log)
         {
             return await EmailHelpers.UpdateEmailList<ModeratorEmailEntity>(req, cloudTable, log);
+        }
+
+        [FunctionName("ListModeratorEmails")]
+        public static IEnumerable<string> List(
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
+            [Table("EmailList")] CloudTable cloudTable,
+            ILogger log)
+        {
+            return EmailHelpers.GetEmailEntities(cloudTable, "Moderator").Select(e => e.Email);
         }
     }
 }

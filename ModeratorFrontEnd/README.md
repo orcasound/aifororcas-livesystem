@@ -12,7 +12,7 @@ The basic workflow is as follows:
 The moderator front end solution has two primary components that are both located in the /ModeratorFrontEnd/AIForOrcas folder:
 
 ### A Web API to Interact with the CosmosDB backend
-This is a standard .NET Core Web API found in the AIForOrcas.Server project and is published to Azure as https://aifororcasdetections.azurewebsites.net
+This is a standard .NET Core Web API found in the AIForOrcas.Server project and is published to Azure App Service as https://aifororcasdetections.azurewebsites.net
 
 #### Publish Settings
 - Site Url: https://aifororcasdetections.azurewebsites.net
@@ -23,7 +23,7 @@ This is a standard .NET Core Web API found in the AIForOrcas.Server project and 
 - Target runtime: win-x86
 
 ### A Web Fontend
-This is a .NET Core Blazor-based web site found in the AIForOrcas.Client.Web project and is published to Azure as https://aifororcas.azurewebsites.net
+This is a .NET Core Blazor-based web site found in the AIForOrcas.Client.Web project and is published to Azure App Service as https://aifororcas.azurewebsites.net
 
 #### Publish Settings
 - Site Url: https://aifororcas.azurewebsites.net
@@ -32,6 +32,11 @@ This is a .NET Core Blazor-based web site found in the AIForOrcas.Client.Web pro
 - Target framework: netcoreapp3.1
 - Deployment mode: Self-contained
 - Target runtime: win-x86
+
+### Deployment
+The AIForOrcas.Server and AIForOrcas.Client.Web projects are built and deployed using GitHub Actions workflows:
+* [AIForOrcas.Server.yaml](/.github/workflow/AIForOrcas.Server.yaml)
+* [AIForOrcas.Client.Web.yaml](/.github/workflow/AIForOrcas.Client.Web.yaml)
 
 ### Additional Projects
 The remaining projects in the solution represent code that is shared between the two projects (i.e. DTOs/Models, Business Logic, etc.)

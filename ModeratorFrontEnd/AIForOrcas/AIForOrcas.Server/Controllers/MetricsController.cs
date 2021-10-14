@@ -26,10 +26,10 @@ namespace AIForOrcas.Server.Controllers
 			_repository = repository;
 		}
 
-		private async Task<IQueryable<Metadata>> BuildQueryableAsync(string timeframe, string moderator = null)
+		private IQueryable<Metadata> BuildQueryableAsync(string timeframe, string moderator = null)
 		{
 			// start with all records
-			var queryable = (await _repository.GetAllAsync()).AsQueryable();
+			var queryable = _repository.GetAll();
 
 			// apply timeframe filter
 			MetadataFilters.ApplyTimeframeFilter(ref queryable, timeframe);
@@ -53,7 +53,7 @@ namespace AIForOrcas.Server.Controllers
 		[ProducesResponseType(400)]
 		[ProducesResponseType(500)]
 		[Route("system")]
-		public async Task<IActionResult> GetSystemMetrics([FromQuery] MetricsFilterDTO queryParameters)
+		public IActionResult GetSystemMetrics([FromQuery] MetricsFilterDTO queryParameters)
 		{
 			try
 			{
@@ -65,7 +65,7 @@ namespace AIForOrcas.Server.Controllers
 				metrics.Timeframe = queryParameters.Timeframe;
 
 				// Build base queryable
-				var queryable = await BuildQueryableAsync(queryParameters.Timeframe);
+				var queryable = BuildQueryableAsync(queryParameters.Timeframe);
 
 				// If not metrics to return
 				if (queryable == null || queryable.Count() == 0)
@@ -73,27 +73,30 @@ namespace AIForOrcas.Server.Controllers
 					return NoContent();
 				}
 
+				var results = queryable
+					.Select(x => DetectionProcessors.ToDetection(x)).ToList();
+
 				// Pull reviewed/unreviewed metrics from querable
-				var reviewed = MetadataProcessors.GetReviewed(queryable);
+				var reviewed = DetectionProcessors.GetReviewed(results);
 
 				metrics.Reviewed = reviewed.ReviewedCount;
 				metrics.Unreviewed = reviewed.UnreviewedCount;
 
 				// Pull results metrics from queryable
-				var results = MetadataProcessors.GetResults(queryable);
+				var detections = DetectionProcessors.GetResults(results);
 
-				metrics.ConfirmedDetection = results.ConfirmedCount;
-				metrics.FalseDetection = results.FalseCount;
-				metrics.UnknownDetection = results.UnknownCount;
+				metrics.ConfirmedDetection = detections.ConfirmedCount;
+				metrics.FalseDetection = detections.FalseCount;
+				metrics.UnknownDetection = detections.UnknownCount;
 
 				// Pull comments from queryable
-				metrics.ConfirmedComments = MetadataProcessors.GetComments(queryable, "yes");
-				metrics.UnconfirmedComments = MetadataProcessors.GetComments(queryable, "no");
-				metrics.UnconfirmedComments.AddRange(MetadataProcessors.GetComments(queryable, "don't know"));
+				metrics.ConfirmedComments = DetectionProcessors.GetComments(results, "yes");
+				metrics.UnconfirmedComments = DetectionProcessors.GetComments(results, "no");
+				metrics.UnconfirmedComments.AddRange(DetectionProcessors.GetComments(results, "don't know"));
 				metrics.UnconfirmedComments = metrics.UnconfirmedComments.OrderByDescending(x => x.Timestamp).ToList();
 
 				// Pull tags from queryable
-				metrics.Tags = MetadataProcessors.GetTags(queryable);
+				metrics.Tags = DetectionProcessors.GetTags(results);
 
 				return Ok(metrics);
 			}
@@ -130,7 +133,7 @@ namespace AIForOrcas.Server.Controllers
 		[ProducesResponseType(400)]
 		[ProducesResponseType(500)]
 		[Route("moderator")]
-		public async Task<IActionResult> GetModeratorMetrics([FromQuery] ModeratorMetricsFilterDTO queryParameters)
+		public IActionResult GetModeratorMetrics([FromQuery] ModeratorMetricsFilterDTO queryParameters)
 		{
 			try
 			{
@@ -146,7 +149,7 @@ namespace AIForOrcas.Server.Controllers
 				metrics.Moderator = queryParameters.Moderator;
 
 				// Build base queryable
-				var queryable = await BuildQueryableAsync(queryParameters.Timeframe, queryParameters.Moderator);
+				var queryable = BuildQueryableAsync(queryParameters.Timeframe, queryParameters.Moderator);
 
 				// If not metrics to return
 				if (queryable == null || queryable.Count() == 0)
@@ -154,27 +157,30 @@ namespace AIForOrcas.Server.Controllers
 					return NoContent();
 				}
 
-				// Pull reviewed/unreviewed metrics from querable
-				var reviewed = MetadataProcessors.GetReviewed(queryable);
+				var results = queryable
+					.Select(x => DetectionProcessors.ToDetection(x)).ToList();
+
+				//// Pull reviewed/unreviewed metrics from querable
+				var reviewed = DetectionProcessors.GetReviewed(results);
 
 				metrics.Reviewed = reviewed.ReviewedCount;
 				metrics.Unreviewed = reviewed.UnreviewedCount;
 
 				// Pull results metrics from queryable
-				var results = MetadataProcessors.GetResults(queryable);
+				var detections = DetectionProcessors.GetResults(results);
 
-				metrics.ConfirmedDetection = results.ConfirmedCount;
-				metrics.FalseDetection = results.FalseCount;
-				metrics.UnknownDetection = results.UnknownCount;
+				metrics.ConfirmedDetection = detections.ConfirmedCount;
+				metrics.FalseDetection = detections.FalseCount;
+				metrics.UnknownDetection = detections.UnknownCount;
 
 				// Pull comments from queryable
-				metrics.ConfirmedComments = MetadataProcessors.GetComments(queryable, "yes");
-				metrics.UnconfirmedComments = MetadataProcessors.GetComments(queryable, "no");
-				metrics.UnconfirmedComments.AddRange(MetadataProcessors.GetComments(queryable, "don't know"));
+				metrics.ConfirmedComments = DetectionProcessors.GetComments(results, "yes");
+				metrics.UnconfirmedComments = DetectionProcessors.GetComments(results, "no");
+				metrics.UnconfirmedComments.AddRange(DetectionProcessors.GetComments(results, "don't know"));
 				metrics.UnconfirmedComments = metrics.UnconfirmedComments.OrderByDescending(x => x.Timestamp).ToList();
 
 				// Pull tags from queryable
-				metrics.Tags = MetadataProcessors.GetTags(queryable);
+				metrics.Tags = DetectionProcessors.GetTags(results);
 
 				return Ok(metrics);
 			}
