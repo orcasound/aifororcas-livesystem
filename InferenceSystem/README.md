@@ -6,7 +6,7 @@ This document describes the following steps
 1. How to run the InferenceSystem locally.
 2. Deploying an updated docker build to Azure Container Instances.
 
-Note: We use Python 3 specifically tested with Python version 3.7.4
+Note: We use Python 3, specifically tested with Python 3.7.4
 
 # How to run the InferenceSystem locally
 ## Create a virtual environment
