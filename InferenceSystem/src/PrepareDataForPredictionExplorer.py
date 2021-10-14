@@ -7,6 +7,7 @@ from datetime import datetime
 from pytz import timezone
 from model.podcast_inference import OrcaDetectionModel
 from model.fastai_inference import FastAIModel
+import globals
 
 import json
 import os
@@ -215,12 +216,7 @@ def main():
 
     args = parser.parse_args()
 
-    s3_stream_urls = dict(
-        orcasound_lab = "https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab",
-        port_townsend = "https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_port_townsend",
-        bush_point = "https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_bush_point"
-    )
-    assert args.s3_stream in s3_stream_urls
+    assert args.s3_stream in globals.S3_STREAM_URLS
 
     # Writes the dataset to args.dataset_folder
     dataset_folder = Path(args.dataset_folder) / args.round_id
@@ -228,8 +224,8 @@ def main():
         os.makedirs(dataset_folder)
     
     create_prediction_explorer_dataset(
-        args.start_time, args.end_time, s3_stream_urls[args.s3_stream], 
-        args.model_path, args.annotation_threshold, 
+        args.start_time, args.end_time, globals.S3_STREAM_URLS[args.s3_stream],
+        args.model_path, args.annotation_threshold,
         args.round_id, dataset_folder
     )
 
