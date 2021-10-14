@@ -1,0 +1,55 @@
+﻿@page "/tags/curate"
+<!-- Page Header / Title -->
+<PageHeadingComponent Title="Curate Detection Tags" PillCount=@totalNumberOfTags />
+
+@if (loadStatus != null)
+{
+    <h5 class="mt-5">@loadStatus</h5>
+}
+else if (tags != null)
+{
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Action</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <!-- Tags -->
+                        @foreach (var tag in tags)
+                        {
+                            <tr>
+                                <td>@tag</td>
+                                <td>
+                                    <AuthorizeView>
+                                        <Authorized>
+                                            <button type="button"
+                                                    class="btn btn-primary">
+                                                <i class="fas fa-edit pr-2" aria-hidden="true"></i>Edit
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-danger">
+                                                <i class="fas fa-trash-alt pr-2" aria-hidden="true"></i>Delete
+                                            </button>
+                                        </Authorized>
+                                    </AuthorizeView>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+}

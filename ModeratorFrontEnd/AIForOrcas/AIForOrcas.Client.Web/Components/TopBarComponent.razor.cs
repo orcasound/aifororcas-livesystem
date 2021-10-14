@@ -33,9 +33,9 @@ namespace AIForOrcas.Client.Web.Components
 
 		private void SetDateTime()
 		{
-			var now = DateTime.Now;
-			DisplayDate = DateHelper.ToPDT(now);
-			ShortDisplayDate = DateHelper.ToPDT(now, true);
+			var now = DateTime.UtcNow;
+			DisplayDate = DateHelper.UTCToPDT(now);
+			ShortDisplayDate = DateHelper.UTCToPDT(now, true);
 		}
 
 		protected override async Task OnInitializedAsync()
