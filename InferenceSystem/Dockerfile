@@ -1,5 +1,4 @@
-# Specify base image
-FROM continuumio/miniconda3
+FROM ubuntu:18.04
 
 # Install sudo apt-get requirements
 RUN apt-get update && apt-get install -y \
@@ -8,15 +7,10 @@ RUN apt-get update && apt-get install -y \
         libxrender-dev \
         libglib2.0-0 \
         ffmpeg \
+        python3 \
+        python3-pip \
         unzip \
         git
-
-# Install packages
-RUN conda install -c pytorch -c fastai fastai=1.0.61 -y
-RUN pip install numba==0.42.0
-RUN pip install git+https://github.com/fastaudio/fastai_audio@0.1
-RUN conda install -c conda-forge librosa pydub -y
-RUN pip install ipython
 
 # Install pip requirements
 WORKDIR /usr/src/install
@@ -35,4 +29,4 @@ RUN rm ./model.zip
 COPY ./src/ ./src
 COPY ./config/ ./config
 
-CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py", "--config", "./config/Production/FastAI_LiveHLS_OrcasoundLab.yml"]
+CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py", "--config", "./config/FastAI_LiveHLS_OrcasoundLab.yml"]
