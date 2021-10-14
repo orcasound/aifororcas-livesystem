@@ -1,28 +1,34 @@
-# Run inference locally
+# Working with the InferenceSystem
 
-Using Python 3 specifically tested with Python version 3.7.4
+The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py).
 
+This document describes the following steps
+1. How to run the InferenceSystem locally.
+2. Deploying an updated docker build to Azure Container Instances.
+
+Note: We use Python 3, specifically tested with Python 3.7.4
+
+# How to run the InferenceSystem locally
 ## Create a virtual environment
 
 1. In your working directory, run `python -m venv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
 2. On Mac, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
+
     On Windows, activate with `.\inference-venv\Scripts\activate.bat` and `.\inference-venv\Scripts\deactivate.bat` when done
 3. In an active environment, cd to `/InferenceSystem` and run `python -m pip install --upgrade pip && pip install -r requirements.txt` 
 
 ## Model download
 
-1.  Download model from https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EV9IBJrfmOxKhWtZOaW3pB8Br5u3yF0K3L18eZDruw89jw?e=S8UyEC
-2.  Unzip model.zip and extract to `InferenceSystem/model`
-3.  Check the contents of InferenceSystem/model
-There should be 3 files
-    Audioset_fc_all_*
-    mean64.txt
-    invstd64.txt
+1.  Download the current production model from [this link.](https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip)
+2.  Unzip *.zip and extract to `InferenceSystem/model`.
+3.  Check the contents of `InferenceSystem/model`.
+There should be 1 file
+    * model.pkl
 
 ## Get connection string for interface with Azure Storage
+To be able to upload detections to Azure, you will need a connection string.
 
-1.  Go to the [Azure portal](https://portal.azure.com/)
-Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the "livemlaudiospecstorage" storage account. Refer to [this page](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#copy-your-credentials-from-the-azure-portal) to see how to get the connection string.
+Go to [Azure portal](https://portal.azure.com/) and find the `"LiveSRKWNotificationSystem"` resource group. Within that go to the `"livemlaudiospecstorage"` storage account. Refer to [this page](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#copy-your-credentials-from-the-azure-portal) to see how to get the connection string.
 
 ### Windows
 
@@ -43,7 +49,7 @@ export AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
 ## Get primary key for interface with CosmosDB
 
 Go to the [Azure portal](https://portal.azure.com/)
-Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the "aifororcasmetadatastore" cosmosdb account.
+Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"aifororcasmetadatastore"` CosmosDB account.
 
 Go to "Keys" and look up the primary key
 
@@ -64,17 +70,38 @@ export AZURE_COSMOSDB_PRIMARY_KEY="<yourprimarykey>"
 ```
 
 
-## Run script
+## Run live inference locally
 
 ```
 cd InferenceSystem
-python LiveInferenceOrchestrator.py
+python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
 ```
 
-You should see a bunch of .wav and .pngs written to the storage account.
-You should see entries in the CosmosDB.
+You should see the following logs in your terminal. Since this is a Test config, no audio is uploaded to Azure and no metadata is written to CosmosDB.
 
-# Running inference system in a local Docker container
+```
+Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
+Downloading live879.ts
+live879.ts: 205kB [00:00, 1.17MB/s]                                             
+Downloading live880.ts
+live880.ts: 205kB [00:00, 1.11MB/s]                                             
+Downloading live881.ts
+live881.ts: 205kB [00:00, 948kB/s]                                              
+Downloading live882.ts
+live882.ts: 205kB [00:00, 1.14MB/s]                                             
+Downloading live883.ts
+live883.ts: 205kB [00:00, 1.07MB/s]                                             
+Downloading live884.ts
+live884.ts: 205kB [00:00, 1.04MB/s]                                             
+rpi_orcasound_lab_2021_10_13_15_11_18_PDT.wav
+Length of Audio Clip:60.010666666666665
+Preprocessing: Downmixing to Mono
+Preprocessing: Resampling to 200009/59 00:00<00:00]
+```
+
+# Running inference system in a local docker container
+
+To deploy to production we use Azure Container Instances. To enable deploying to production, you need to first build the docker image for the inference system locally.
 
 ## Prerequisites
 
@@ -85,29 +112,34 @@ environment on
 [Linux](https://docs.docker.com/engine/installation/#supported-platforms).
 
 - **model.zip**: Download model from 
-[this link](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EV9IBJrfmOxKhWtZOaW3pB8Br5u3yF0K3L18eZDruw89jw?e=S8UyEC).
-Save the model to `InferenceSystem/model.zip`.
+[this link](https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip).
+Rename the `*.zip` to `model.zip` and place it in `InferenceSystem/model.zip`.
 
 - **Environment Variable File**: Create/get an environment variable file.  This should be a file called `inference-system/.env`.
 This can be completed in two ways.
-1.  Ask an existing contributor for their .env file.
-2.  Create one of your own.  This .env file should be created in the format below.
-`<key>` and `<string>` should be filled in with the Azure Storage Connection String and the Azure CosmosDB Primary Key above.
+    1.  Ask an existing contributor for their .env file.
+    2.  Create one of your own.  This .env file should be created in the format below.
 
-```
-AZURE_COSMOSDB_PRIMARY_KEY=<key>
-AZURE_STORAGE_CONNECTION_STRING=<string>
-```
+        `<key>` and `<string>` should be filled in with the Azure Storage Connection String and the Azure CosmosDB Primary Key above.
 
-## Building the docker container
+        ```
+        AZURE_COSMOSDB_PRIMARY_KEY=<key>
+        AZURE_STORAGE_CONNECTION_STRING=<string>
+        ```
+
+## Building the docker container for production
 
 From the `InferenceSystem` directory, run the following command.
 It will take a while (~2-3 minutes on macOS or Linux, ~10-20 minutes on Windows) the first time, but builds are cached, and it
 should take a much shorter time in future builds.
 
 ```
-docker build . -t live-inference-system -f ./FastAIDocker/Dockerfile
+docker build . -t live-inference-system -f ./Dockerfile
 ```
+
+Note: the config used in the Dockerfile is a Production config.
+
+TODO: fix. For now, you will have to manually create 3 different docker containers for the 3 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend).
 
 ## Running the docker container
 
@@ -117,39 +149,36 @@ From the `InferenceSystem` directory, run the following command.
 docker run --rm -it --env-file .env live-inference-system
 ```
 
-You should see some .wav and .png files written to the storage account, and entries in CosmosDB.
 In addition, you should see something similar to the following in your console.
 
 ```
-Loaded checkpoint: model/AudioSet_fc_all_Iter_22
 Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
-Downloading live982.ts
-live982.ts: 205kB [00:00, 653kB/s]
-Downloading live983.ts
-live983.ts: 205kB [00:00, 589kB/s]
-Downloading live984.ts
-live984.ts: 205kB [00:00, 664kB/s]
-Downloading live985.ts
-live985.ts: 205kB [00:00, 604kB/s]
-Downloading live986.ts
-live986.ts: 205kB [00:00, 641kB/s]
-Downloading live987.ts
-live987.ts: 205kB [00:00, 640kB/s]
-Loading file: 2020-07-27T16:14:54.322546.wav
-Uploaded audio to Azure
-Uploaded spectrogram to Azure
-Added metadata to cosmos db
-
+Downloading live879.ts
+live879.ts: 205kB [00:00, 1.17MB/s]                                             
+Downloading live880.ts
+live880.ts: 205kB [00:00, 1.11MB/s]                                             
+Downloading live881.ts
+live881.ts: 205kB [00:00, 948kB/s]                                              
+Downloading live882.ts
+live882.ts: 205kB [00:00, 1.14MB/s]                                             
+Downloading live883.ts
+live883.ts: 205kB [00:00, 1.07MB/s]                                             
+Downloading live884.ts
+live884.ts: 205kB [00:00, 1.04MB/s]                                             
+rpi_orcasound_lab_2021_10_13_15_11_18_PDT.wav
+Length of Audio Clip:60.010666666666665
+Preprocessing: Downmixing to Mono
+Preprocessing: Resampling to 200009/59 00:00<00:00]
 ```
 
 # Deploying an updated docker build to Azure Container Instances
 
 ## Prerequisites
 
-- You must have completed all of the steps above: Running inference system in a local Docker container.  You should have a 
+- You must have completed all of the steps above and should have a 
 container that is working locally that you wish to deploy live to production.
 
-- **Azure CLI**: You must have Azure CLI version 2.0.29 or later installed on your local computer. Run az --version to find the 
+- **Azure CLI**: You must have Azure CLI version 2.0.29 or later installed on your local computer. Run `az --version` to find the 
 version. If you need to install or upgrade, see 
 [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 
@@ -175,22 +204,28 @@ az acr login --name orcaconservancycr
 
 You should receive something similar to `Login succeeded`.
 
-Tag your docker container with the version number.  For information on what version number to use, see 
-[this article](https://semver.org/).
+Tag your docker container with the version number. We use the following versioning scheme.
 
 ```
-docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:v<Major>.<Minor>.<Patch>
+docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.<hydrophone-location>.v<Major>
 ```
 
-Lastly, push your image to Azure Container Registry.
+So, for example your command may look like
 
 ```
-docker push orcaconservancycr.azurecr.io/live-inference-system:v<Major>.<Minor>.<Patch>
+docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.OrcasoundLab.v0
+```
+
+Look at [deploy-aci.yaml](deploy-aci.yaml) for examples of how previous models were tagged.
+Lastly, push your image to Azure Container Registry for each Orcasound Hydrophone Location.
+
+```
+docker push orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.<hydrophone-location>.v<Major>
 ```
 
 ## Deploying your updated container to Azure Container Instances
 
-Edit the file `InferenceSystem/deploy-aci.yaml`.  There are three sensitive strings that must be filled in before deployment can
+Ask an existing maintainer for the file `deploy-aci-with-creds.yaml` or change strings in `deploy-aci.yaml`.  There are three sensitive strings that must be filled in before deployment can
 happen.
 
 **NOTE** - Make sure you change these back after running the build - don't commit them to the repository!
@@ -212,17 +247,19 @@ az container create -g LiveSRKWNotificationSystem -f .\deploy-aci.yaml
 View the container logs with the following command.  The logs should be similar to the logs created when you run the container locally (above).
 
 ```
-az container attach --resource-group LiveSRKWNotificationSystem --name live-inference-system-aci-3gb
+az container attach --resource-group LiveSRKWNotificationSystem --name live-inference-system-aci-3gb-new
 ```
 
 # No changes made to deploy-aci.yaml?
 
-I purposefully told git to ignore all futher changes to the file with this command: `git update-index --assume-unchanged deploy-aci.yaml`.  This is to prevent people from thecking in their credentials into the repository.  If you want t a change to be tracked, you can turn off this feature with `git update-index --no-assume-unchanged deploy-aci.yaml`
+I purposefully told git to ignore all futher changes to the file with this command: `git update-index --assume-unchanged deploy-aci.yaml`.  This is to prevent people from checking in their credentials into the repository.  If you want a change to be tracked, you can turn off this feature with `git update-index --no-assume-unchanged deploy-aci.yaml`
 
 
-# Automatic annotation data upload script PrepareDataForPredictionExplorer.py
+# Running the automatic annotation data upload script PrepareDataForPredictionExplorer.py
 
-Find the connection string for blob storage account mldevdatastorage and run the following 
+This script processes audio from a segment of data and uploads it to the annotation website [https://aifororcas-podcast.azurewebsites.net/](https://aifororcas-podcast.azurewebsites.net/).
+
+To run the script, find the connection string for blob storage account `"mldevdatastorage"` and run the following 
 
 ### Windows
 
@@ -240,7 +277,7 @@ setx PODCAST_AZURE_STORAGE_CONNECTION_STRING "<yourconnectionstring>"
 export PODCAST_AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
 ```
 
-Call the script
+Call the script as follows, substituting appropriate values.
 
 ```
 python PrepareDataForPredictionExplorer.py --start_time "2020-07-25 19:15" --end_time "2020-07-25 20:15" --s3_stream https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab --model_path <folder> --annotation_threshold 0.4 --round_id round5 --dataset_folder <path-to-folder>
