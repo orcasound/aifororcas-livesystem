@@ -1,4 +1,6 @@
-﻿namespace AIForOrcas.DTO.API
+﻿using System;
+
+namespace AIForOrcas.DTO.API
 {
 	/// <summary>
 	/// Query parameters to present to the detections endpoint.
@@ -28,6 +30,18 @@
 		/// </summary>
 		/// <example>all</example>
 		public string Timeframe { get; set; } = "all";
+
+		/// <summary>
+		/// Date range filter for from Date
+		/// </summary>
+		/// <example>all</example>
+		public DateTime? DateFrom { get; set; }
+
+		/// <summary>
+		/// Date range filter for To Date
+		/// </summary>
+		/// <example>all</example>
+		public DateTime? DateTo { get; set; }
 
 		/// <summary>
 		/// Location of the hydrophone (all, Haro Straight, Port Townsend, etc.).
