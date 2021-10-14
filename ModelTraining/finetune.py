@@ -17,16 +17,46 @@ import matplotlib.pyplot as plt
 data_folder = Path("./data/")
 
 
-'''
-download_newdata()
-'''
+
+def download_newdata():
+    pass
+# download_newdata() : TBA
 
 """
-Folder Structure - 
+Resulting Folder Structure - 
 ./data/   
     |-new_data/
-        -somefiles.wav
+        -somefiles0.wav
+        -somefiles1.wav
+        ...
 """
+
+
+def download_original_data():
+    """
+    Function to download the original training data from blob storage
+    """
+    pass
+
+## download_original_data() : TBA
+
+"""
+Resulting Folder Structure - 
+./data/   
+    |-positive/
+        - xyz1.wav
+        - xyz2.wav
+        ...
+    |-negative/
+        - abc1.wav
+        - abc2.wav
+        ...
+    |-new_data/
+        -somefiles0.wav
+        -somefiles1.wav
+        ...
+"""
+
 # Function to pre-process the new audio file
 def get_wave_file(wav_file):
     '''
@@ -58,58 +88,46 @@ def extract_segments(audioPath, sampleDict, destnPath, suffix):
             output_file_path = destnPath + output_file_name
             export_wave_file(audio_file, begin_time,
                              end_time, output_file_path)
-    def pre_process(dataPath=data_folder):
-        """
-        Function to convert new audio file containing False Negative into model-ready stream
-        Input -
-        dataPath: path to data folder
-        Output -
-        Will automatically put processed files in the 'filePath/new_samples/' folder
-        """
-
-        ## Create o/p folder 
-        local_dir = dataPath/"new_samples"
-        if os.path.exists(local_dir):
-            shutil.rmtree(local_dir)
-        os.makedirs(local_dir)
-
-        ## iterate over all wav files in new_data folder
-        four_sec_dict = {}
-        for item in (dataPath/"new_data/").glob("*.wav"):
-            max_length = get_duration(filename=item) - 1 
-            fourSecList = []
-            for i in range(int(max_length//4)):
-                fourSecList.append([i*4, (i+1)*4])
-
-            four_sec_dict[item.name] = fourSecList
-        
-        extract_segments(
-                str(dataPath/"new_data/"),
-                four_sec_dict,
-                str(local_dir)+'/',
-                "_Noise"
-            )
-        
-        shutil.rmtree(dataPath/"new_data/")
-        
-"""
-Folder Structure - 
-./data/   
-    |-new_samples/
-        - xas.wav
-        - asdfas.wav
-        ..
-"""
-
-def download_original_data(opPath=data_folder):
+def pre_process(dataPath=data_folder):
     """
-    Function to download the original training data from blob storage
+    Function to convert new audio file containing False Negative into model-ready stream
+    Input -
+    dataPath: path to data folder
+    Output -
+    Will automatically put processed files in the 'filePath/new_samples/' folder
     """
-    pass
 
+    ## Create o/p folder 
+    local_dir = dataPath/"new_samples"
+    if os.path.exists(local_dir):
+        shutil.rmtree(local_dir)
+    os.makedirs(local_dir)
+
+    ## iterate over all wav files in new_data folder
+    four_sec_dict = {}
+    for item in (dataPath/"new_data/").glob("*.wav"):
+        max_length = get_duration(filename=item) - 1 
+        fourSecList = []
+        for i in range(int(max_length//4)):
+            fourSecList.append([i*4, (i+1)*4])
+
+        four_sec_dict[item.name] = fourSecList
+    
+    ## get model ready data
+    extract_segments(
+            str(dataPath/"new_data/"),
+            four_sec_dict,
+            str(local_dir)+'/',
+            "_Noise"
+        )
+    
+    ## Remove the original data folder
+    shutil.rmtree(dataPath/"new_data/")
+
+pre_process(Path("./data/"))
 
 """
-Folder Structure - 
+Resulting Folder Structure - 
 ./data/   
     |-positive/
         - xyz1.wav
@@ -118,9 +136,9 @@ Folder Structure -
     |-negative/
         - abc1.wav
         - abc2.wav
-        ...
+        ..
     |-new_samples/
-        - xas.wav
+        - asdfas.wav
         - asdfas.wav
         ..
 """
@@ -154,9 +172,23 @@ def data_blender(dataPath):
         if str(item).split('/')[-1] not in new_neg_img_list:
             os.remove(item)
 
-'''
-download_model()
-'''
+data_blender()
+"""
+Resulting Folder Structure - 
+./data/   
+    |-positive/
+        - xyz1.wav
+        - xyz2.wav
+        ...
+    |-negative/
+        - abc1.wav
+        - abc2.wav
+"""
+
+def download_model():
+    pass
+# download_model()
+
 
 """
 Folder Structure - 
@@ -172,6 +204,7 @@ Folder Structure -
     |-models/
         -modelName.pkl
 """
+
 def finetune(dataPath=data_folder, modelName="rnd1to10_stg4-rn50.pkl", newModelName="rnd1to10_stg4-rn50.pkl"):
     """
     Function to do finetuning of the model
