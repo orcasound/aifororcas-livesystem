@@ -22,7 +22,7 @@ Note: We use Python 3 specifically tested with Python version 3.7.4
 2.  Unzip *.zip and extract to `InferenceSystem/model`.
 3.  Check the contents of `InferenceSystem/model`.
 There should be 1 file
-* model.pkl
+    * model.pkl
 
 ## Get connection string for interface with Azure Storage
 To be able to upload detections to Azure you will need a few strings.
