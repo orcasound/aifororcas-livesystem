@@ -250,7 +250,7 @@ az container attach --resource-group LiveSRKWNotificationSystem --name live-infe
 
 # No changes made to deploy-aci.yaml?
 
-I purposefully told git to ignore all futher changes to the file with this command: `git update-index --assume-unchanged deploy-aci.yaml`.  This is to prevent people from thecking in their credentials into the repository.  If you want t a change to be tracked, you can turn off this feature with `git update-index --no-assume-unchanged deploy-aci.yaml`
+I purposefully told git to ignore all futher changes to the file with this command: `git update-index --assume-unchanged deploy-aci.yaml`.  This is to prevent people from checking in their credentials into the repository.  If you want a change to be tracked, you can turn off this feature with `git update-index --no-assume-unchanged deploy-aci.yaml`
 
 
 # Running the automatic annotation data upload script PrepareDataForPredictionExplorer.py
