@@ -26,9 +26,9 @@ There should be 1 file
     * model.pkl
 
 ## Get connection string for interface with Azure Storage
-To be able to upload detections to Azure you will need a few strings.
-1.  Go to the [Azure portal](https://portal.azure.com/)
-Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the "livemlaudiospecstorage" storage account. Refer to [this page](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#copy-your-credentials-from-the-azure-portal) to see how to get the connection string.
+To be able to upload detections to Azure, you will need a connection string.
+
+Go to [Azure portal](https://portal.azure.com/) and find the `"LiveSRKWNotificationSystem"` resource group. Within that go to the `"livemlaudiospecstorage"` storage account. Refer to [this page](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#copy-your-credentials-from-the-azure-portal) to see how to get the connection string.
 
 ### Windows
 
@@ -49,7 +49,7 @@ export AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
 ## Get primary key for interface with CosmosDB
 
 Go to the [Azure portal](https://portal.azure.com/)
-Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the "aifororcasmetadatastore" cosmosdb account.
+Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"aifororcasmetadatastore"` CosmosDB account.
 
 Go to "Keys" and look up the primary key
 
@@ -70,7 +70,7 @@ export AZURE_COSMOSDB_PRIMARY_KEY="<yourprimarykey>"
 ```
 
 
-## Run script
+## Run live inference locally
 
 ```
 cd InferenceSystem
@@ -117,14 +117,15 @@ Rename the `*.zip` to `model.zip` and place it in `InferenceSystem/model.zip`.
 
 - **Environment Variable File**: Create/get an environment variable file.  This should be a file called `inference-system/.env`.
 This can be completed in two ways.
-1.  Ask an existing contributor for their .env file.
-2.  Create one of your own.  This .env file should be created in the format below.
-`<key>` and `<string>` should be filled in with the Azure Storage Connection String and the Azure CosmosDB Primary Key above.
+    1.  Ask an existing contributor for their .env file.
+    2.  Create one of your own.  This .env file should be created in the format below.
 
-```
-AZURE_COSMOSDB_PRIMARY_KEY=<key>
-AZURE_STORAGE_CONNECTION_STRING=<string>
-```
+        `<key>` and `<string>` should be filled in with the Azure Storage Connection String and the Azure CosmosDB Primary Key above.
+
+        ```
+        AZURE_COSMOSDB_PRIMARY_KEY=<key>
+        AZURE_STORAGE_CONNECTION_STRING=<string>
+        ```
 
 ## Building the docker container for production
 
@@ -136,7 +137,7 @@ should take a much shorter time in future builds.
 docker build . -t live-inference-system -f ./Dockerfile
 ```
 
-Note: the config used in Dockerfile is a Production config.
+Note: the config used in the Dockerfile is a Production config.
 
 TODO: fix. For now, you will have to manually create 3 different docker containers for the 3 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend).
 
@@ -174,10 +175,10 @@ Preprocessing: Resampling to 200009/59 00:00<00:00]
 
 ## Prerequisites
 
-- You must have completed all of the steps above: Running inference system in a local Docker container.  You should have a 
+- You must have completed all of the steps above and should have a 
 container that is working locally that you wish to deploy live to production.
 
-- **Azure CLI**: You must have Azure CLI version 2.0.29 or later installed on your local computer. Run az --version to find the 
+- **Azure CLI**: You must have Azure CLI version 2.0.29 or later installed on your local computer. Run `az --version` to find the 
 version. If you need to install or upgrade, see 
 [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 
@@ -258,8 +259,7 @@ I purposefully told git to ignore all futher changes to the file with this comma
 
 This script processes audio from a segment of data and uploads it to the annotation website [https://aifororcas-podcast.azurewebsites.net/](https://aifororcas-podcast.azurewebsites.net/).
 
-To run the script,
-Find the connection string for blob storage account mldevdatastorage and run the following 
+To run the script, find the connection string for blob storage account `"mldevdatastorage"` and run the following 
 
 ### Windows
 
