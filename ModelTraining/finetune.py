@@ -12,13 +12,11 @@ import os
 import shutil
 import matplotlib.pyplot as plt
 
-
-
+                          
 # Defining Path variable
 data_folder = Path("./data/")
 
 
-# Function to pre-process the new audio file
 '''
 download_newdata()
 '''
@@ -26,25 +24,74 @@ download_newdata()
 """
 Folder Structure - 
 ./data/   
-    |-newdata/
+    |-new_data/
         -somefiles.wav
 """
+# Function to pre-process the new audio file
+def get_wave_file(wav_file):
+    '''
+    Function to load a wav file
+    '''
+    return AudioSegment.from_wav(wav_file)
 
-def pre_process(filePath=data_folder):
-    """
-    Function to convert new audio file containing False Negative into model-ready stream
-    Input -
-    folderPath: filePath with file name to process from the root directory
-    Output -
-    Will automatically put processed files in the 'filePath/new_samples/' folder
-    """
-    local_dir = data_folder/"new_samples/"
-    if os.path.exists(local_dir):
-        shutil.rmtree(local_dir)
+
+def export_wave_file(audio, begin, end, dest):
+    '''
+    Function to extract a smaller wav file based start and end duration information
+    '''
+    sub_audio = audio[begin * 1000:end * 1000]
+    sub_audio.export(dest, format="wav")
+
+
+def extract_segments(audioPath, sampleDict, destnPath, suffix):
+    '''
+    Function to exctact segments given a audio path folder and proposal segments
+    '''
+    # Listing the local audio files
+    local_audio_files = str(audioPath) + '/'
+    for wav_file in sampleDict.keys():
+        audio_file = get_wave_file(local_audio_files + wav_file)
+        for begin_time, end_time in sampleDict[wav_file]:
+            output_file_name = wav_file.lower().replace(
+                '.wav', '') + '_' + str(begin_time) + '_' + str(
+                    end_time) + suffix + '.wav'
+            output_file_path = destnPath + output_file_name
+            export_wave_file(audio_file, begin_time,
+                             end_time, output_file_path)
+    def pre_process(dataPath=data_folder):
+        """
+        Function to convert new audio file containing False Negative into model-ready stream
+        Input -
+        dataPath: path to data folder
+        Output -
+        Will automatically put processed files in the 'filePath/new_samples/' folder
+        """
+
+        ## Create o/p folder 
+        local_dir = dataPath/"new_samples"
+        if os.path.exists(local_dir):
+            shutil.rmtree(local_dir)
         os.makedirs(local_dir)
 
-    pass
+        ## iterate over all wav files in new_data folder
+        four_sec_dict = {}
+        for item in (dataPath/"new_data/").glob("*.wav"):
+            max_length = get_duration(filename=item) - 1 
+            fourSecList = []
+            for i in range(int(max_length//4)):
+                fourSecList.append([i*4, (i+1)*4])
 
+            four_sec_dict[item.name] = fourSecList
+        
+        extract_segments(
+                str(dataPath/"new_data/"),
+                four_sec_dict,
+                str(local_dir)+'/',
+                "_Noise"
+            )
+        
+        shutil.rmtree(dataPath/"new_data/")
+        
 """
 Folder Structure - 
 ./data/   
