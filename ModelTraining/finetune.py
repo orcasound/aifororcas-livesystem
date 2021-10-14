@@ -91,7 +91,7 @@ def data_blender(dataPath):
     neg_img_list = pd.Series((dataPath/'negative').ls() + (dataPath/'new_samples').ls())
     
     ## Randomly selecting neg_samples for overall list
-    new_neg_img_list = neg_img_list.sample(n=1000, replace=False).values
+    new_neg_img_list = neg_img_list.sample(n=neg_samples, replace=False).values
     
     ## Get image name
     new_neg_img_list = [str(item).split('/')[-1] for item in new_neg_img_list]
