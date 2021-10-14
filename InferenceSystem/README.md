@@ -257,8 +257,7 @@ I purposefully told git to ignore all futher changes to the file with this comma
 
 This script processes audio from a segment of data and uploads it to the annotation website [https://aifororcas-podcast.azurewebsites.net/](https://aifororcas-podcast.azurewebsites.net/).
 
-To run the script,
-Find the connection string for blob storage account mldevdatastorage and run the following 
+To run the script, find the connection string for blob storage account mldevdatastorage and run the following 
 
 ### Windows
 
