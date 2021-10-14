@@ -2,3 +2,4 @@ inference-venv
 .env
 true_srkw/
 model/
+model.zip

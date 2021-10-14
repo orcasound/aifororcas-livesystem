@@ -1,6 +1,6 @@
 # Working with the InferenceSystem
 
-The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [LiveInferenceOrchestrator.py](LiveInferenceOrchestrator.py).
+The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py).
 
 This document describes the following steps
 1. How to run the InferenceSystem locally.
@@ -13,6 +13,7 @@ Note: We use Python 3, specifically tested with Python 3.7.4
 
 1. In your working directory, run `python -m venv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
 2. On Mac, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
+
     On Windows, activate with `.\inference-venv\Scripts\activate.bat` and `.\inference-venv\Scripts\deactivate.bat` when done
 3. In an active environment, cd to `/InferenceSystem` and run `python -m pip install --upgrade pip && pip install -r requirements.txt` 
 
@@ -73,10 +74,10 @@ export AZURE_COSMOSDB_PRIMARY_KEY="<yourprimarykey>"
 
 ```
 cd InferenceSystem
-python LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
+python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
 ```
 
-You should see the following logs in your terminal. Since this is a Test config, no audio is being uploaded to Azure and no metadata is being written to CosmosDB.
+You should see the following logs in your terminal. Since this is a Test config, no audio is uploaded to Azure and no metadata is writteb to CosmosDB.
 
 ```
 Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
@@ -98,7 +99,6 @@ Preprocessing: Downmixing to Mono
 Preprocessing: Resampling to 200009/59 00:00<00:00]
 ```
 
-
 # Running inference system in a local docker container
 
 To deploy to production we use Azure Container Instances. To enable deploying to production, you need to first build the docker image for the inference system locally.
@@ -112,7 +112,7 @@ environment on
 [Linux](https://docs.docker.com/engine/installation/#supported-platforms).
 
 - **model.zip**: Download model from 
-[this link]().
+[this link](https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip).
 Rename the `*.zip` to `model.zip` and place it in `InferenceSystem/model.zip`.
 
 - **Environment Variable File**: Create/get an environment variable file.  This should be a file called `inference-system/.env`.
@@ -133,10 +133,10 @@ It will take a while (~2-3 minutes on macOS or Linux, ~10-20 minutes on Windows)
 should take a much shorter time in future builds.
 
 ```
-docker build . -t live-inference-system -f ./FastAIDocker/Dockerfile
+docker build . -t live-inference-system -f ./Dockerfile
 ```
 
-Note: the config in FastAIDocker/Dockerfile is a Production config.
+Note: the config used in Dockerfile is a Production config.
 
 TODO: fix. For now, you will have to manually create 3 different docker containers for the 3 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend).
 
@@ -254,8 +254,11 @@ az container attach --resource-group LiveSRKWNotificationSystem --name live-infe
 I purposefully told git to ignore all futher changes to the file with this command: `git update-index --assume-unchanged deploy-aci.yaml`.  This is to prevent people from thecking in their credentials into the repository.  If you want t a change to be tracked, you can turn off this feature with `git update-index --no-assume-unchanged deploy-aci.yaml`
 
 
-# Automatic annotation data upload script PrepareDataForPredictionExplorer.py
+# Running the automatic annotation data upload script PrepareDataForPredictionExplorer.py
 
+This script processes audio from a segment of data and uploads it to the annotation website [https://aifororcas-podcast.azurewebsites.net/](https://aifororcas-podcast.azurewebsites.net/).
+
+To run the script,
 Find the connection string for blob storage account mldevdatastorage and run the following 
 
 ### Windows
@@ -274,7 +277,7 @@ setx PODCAST_AZURE_STORAGE_CONNECTION_STRING "<yourconnectionstring>"
 export PODCAST_AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
 ```
 
-Call the script
+Call the script as follows, substituting appropriate values.
 
 ```
 python PrepareDataForPredictionExplorer.py --start_time "2020-07-25 19:15" --end_time "2020-07-25 20:15" --s3_stream https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab --model_path <folder> --annotation_threshold 0.4 --round_id round5 --dataset_folder <path-to-folder>
