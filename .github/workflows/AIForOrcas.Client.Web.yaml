@@ -28,7 +28,7 @@ env:
 
 defaults:
   run:
-    working-directory: ${{ env.WORKING_DIR }}
+    working-directory: ModeratorFrontEnd/AIForOrcas/AIForOrcas.Client.Web
 
 jobs:
   build:
