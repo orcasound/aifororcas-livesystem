@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
         git
 
 # Install packages
-RUN  conda install -c pytorch -c fastai fastai=1.0.61 -y
+RUN conda install -c pytorch -c fastai fastai=1.0.61 -y
 RUN pip install numba==0.42.0
 RUN pip install git+https://github.com/fastaudio/fastai_audio@0.1
 RUN conda install -c conda-forge librosa pydub -y
