@@ -27,8 +27,7 @@ There should be 1 file
 
 ## Get connection string for interface with Azure Storage
 To be able to upload detections to Azure you will need a few strings.
-1.  Go to the [Azure portal](https://portal.azure.com/)
-Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the "livemlaudiospecstorage" storage account. Refer to [this page](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#copy-your-credentials-from-the-azure-portal) to see how to get the connection string.
+Go to the [Azure portal](https://portal.azure.com/). Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the "livemlaudiospecstorage" storage account. Refer to [this page](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python#copy-your-credentials-from-the-azure-portal) to see how to get the connection string.
 
 ### Windows
 
