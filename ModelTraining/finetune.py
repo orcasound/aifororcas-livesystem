@@ -1,4 +1,3 @@
-# Add dependencies
 from fastai.basic_train import load_learner
 import pandas as pd
 import numpy as np
@@ -8,44 +7,52 @@ from librosa import get_duration
 from pathlib import Path
 from numpy import floor
 from audio.data import AudioConfig, SpectrogramConfig, AudioList
+from audio.transform import get_spectro_transforms
 import os
 import shutil
 import matplotlib.pyplot as plt
 
 
-"""
-Folder Structure - 
-
-./data
-    |-train
-        |-positive
-            - xyz1.wav
-            - xyz2.wav
-            ...
-        |-negative
-            - abc1.wav
-            - abc2.wav
-            ...
-        | models
-            - modelName.pth
-"""
 
 # Defining Path variable
-data_folder = Path("./data/train/")
+data_folder = Path("./data/")
+
 
 # Function to pre-process the new audio file
+'''
+download_newdata()
+'''
 
+"""
+Folder Structure - 
+./data/   
+    |-newdata/
+        -somefiles.wav
+"""
 
-def pre_process(filePath):
+def pre_process(filePath=data_folder):
     """
     Function to convert new audio file containing False Negative into model-ready stream
     Input -
     folderPath: filePath with file name to process from the root directory
     Output -
-    Will automatically put processed files in the 'data_folder/new_samples/' folder
+    Will automatically put processed files in the 'filePath/new_samples/' folder
     """
+    local_dir = data_folder/"new_samples/"
+    if os.path.exists(local_dir):
+        shutil.rmtree(local_dir)
+        os.makedirs(local_dir)
+
     pass
 
+"""
+Folder Structure - 
+./data/   
+    |-new_samples/
+        - xas.wav
+        - asdfas.wav
+        ..
+"""
 
 def download_original_data(opPath=data_folder):
     """
@@ -54,12 +61,70 @@ def download_original_data(opPath=data_folder):
     pass
 
 
-def data_blender(dataPath=data_folder):
+"""
+Folder Structure - 
+./data/   
+    |-positive/
+        - xyz1.wav
+        - xyz2.wav
+        ...
+    |-negative/
+        - abc1.wav
+        - abc2.wav
+        ...
+    |-new_samples/
+        - xas.wav
+        - asdfas.wav
+        ..
+"""
+
+def data_blender(dataPath):
     """
     Function to blend the original data with new data
+    
     """
+    pos_samples  = len((dataPath/'positive').ls())
+    neg_samples  = len((dataPath/'negative').ls())
+    new_neg_samples  = len((dataPath/'new_samples').ls())
+    total_neg_samples = neg_samples + new_neg_samples
+    
+    neg_img_list = pd.Series((dataPath/'negative').ls() + (dataPath/'new_samples').ls())
+    
+    ## Randomly selecting neg_samples for overall list
+    new_neg_img_list = neg_img_list.sample(n=1000, replace=False).values
+    
+    ## Get image name
+    new_neg_img_list = [str(item).split('/')[-1] for item in new_neg_img_list]
+    
+    ## copying all data from new samples to negative
+    for item in (dataPath/'new_samples').ls():
+        shutil.move(src= str(item), dst = dataPath/'negative', copy_function = shutil.copy)
+        
+    ## removing new samples directory
+    shutil.rmtree(dataPath/'new_samples')
+        
+    for item in (dataPath/'negative').ls():
+        if str(item).split('/')[-1] not in new_neg_img_list:
+            os.remove(item)
 
+'''
+download_model()
+'''
 
+"""
+Folder Structure - 
+./data/   
+    |-positive/
+        - xyz1.wav
+        - xyz2.wav
+        ...
+    |-negative/
+        - abc1.wav
+        - abc2.wav
+        ...
+    |-models/
+        -modelName.pkl
+"""
 def finetune(dataPath=data_folder, modelName="rnd1to10_stg4-rn50.pkl", newModelName="rnd1to10_stg4-rn50.pkl"):
     """
     Function to do finetuning of the model
@@ -113,4 +178,28 @@ def finetune(dataPath=data_folder, modelName="rnd1to10_stg4-rn50.pkl", newModelN
 
     ## Outputting the new model weights
     learn.export(newModelName)
+
+"""
+Folder Structure - 
+./data/   
+    |-positive/
+        - xyz1.wav
+        - xyz2.wav
+        ...
+    |-negative/
+        - abc1.wav
+        - abc2.wav
+        ...
+    |-models/
+        -modelName(.pkl file)
+        -newModelName(.pkl file)
+"""
+
+'''
+Still need to write the function
+test_model()
+
+if test is looking good --
+    - upload_model(data_folder/'models/'+'newModelName')
+'''
 
