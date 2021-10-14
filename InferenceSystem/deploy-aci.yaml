@@ -2,7 +2,7 @@ additional_properties: {}
 apiVersion: '2018-10-01'
 identity: null
 location: westus2
-name: live-inference-system-aci-allhydrophones-3gb
+name: live-inference-system-aci-allhydrophones-3gb-new
 properties:
   containers:
   - name: orcasound-lab-live
