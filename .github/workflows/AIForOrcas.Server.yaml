@@ -22,7 +22,7 @@ env:
   DOTNET_RUNTIME: win-x86
   WORKING_DIR: ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server
   PUBLISH_DIR: output
-  AZURE_APP_NAME: AIForOrcas
+  AZURE_APP_NAME: AIForOrcasDetections
 
 defaults:
   run:
