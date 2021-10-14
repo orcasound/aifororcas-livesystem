@@ -77,7 +77,7 @@ cd InferenceSystem
 python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
 ```
 
-You should see the following logs in your terminal. Since this is a Test config, no audio is uploaded to Azure and no metadata is writteb to CosmosDB.
+You should see the following logs in your terminal. Since this is a Test config, no audio is uploaded to Azure and no metadata is written to CosmosDB.
 
 ```
 Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
