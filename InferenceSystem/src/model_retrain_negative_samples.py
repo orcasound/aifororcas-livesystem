@@ -6,7 +6,7 @@ import globals
 def main():
     """
     Example usage:
-    python3 PrepareDataForPredictionExplorer.py --start_time "2020-07-25 19:15:00" --end_time "2020-07-25 19:45:00"
+    python3 model_retrain_negative_samples.py --start_time "2020-07-25 19:15:00" --end_time "2020-07-25 19:45:00" --hydrophone "bush_point"
     """
 
     parser = argparse.ArgumentParser()
