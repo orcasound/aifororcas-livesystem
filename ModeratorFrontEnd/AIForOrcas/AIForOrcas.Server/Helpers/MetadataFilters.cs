@@ -14,46 +14,49 @@ namespace AIForOrcas.Server.Helpers
             {
                 timeframe = timeframe.ToLower();
 
-                if (timeframe == "all")
+                if (timeframe != "all")
                 {
-                    var now = DateTime.Now;
-
-                    switch (timeframe)
+                    if (timeframe == "range")
                     {
-                        case "30m":
-                            now = now.AddMinutes(-30);
-                            break;
-
-                        case "3h":
-                            now = now.AddHours(-3);
-                            break;
-
-                        case "6h":
-                            now = now.AddHours(-6);
-                            break;
-
-                        case "24h":
-                            now = now.AddHours(-24);
-                            break;
-
-                        case "1w":
-                            now = now.AddDays(-7);
-                            break;
-
-                        case "1m":
-                            now = now.AddDays(-30);
-                            break;
+                        if (dateFrom != null && dateTo != null)
+                            queryable = queryable.Where(x => x.timestamp >= dateFrom && x.timestamp <= dateTo);
+                        else if (dateFrom == null && dateTo != null)
+                            queryable = queryable.Where(x => x.timestamp <= dateTo);
+                        else if (dateFrom != null && dateTo == null)
+                            queryable = queryable.Where(x => x.timestamp >= dateFrom);
                     }
-                    queryable = queryable.Where(x => x.timestamp >= now);
-                }
-                else if (timeframe == "range")
-                {
-                    if (dateFrom != null && dateTo != null)
-                        queryable = queryable.Where(x => x.timestamp >= dateFrom && x.timestamp <= dateTo);
-                    else if (dateFrom == null && dateTo != null)
-                        queryable = queryable.Where(x => x.timestamp <= dateTo);
-                    else if (dateFrom != null && dateTo == null)
-                        queryable = queryable.Where(x => x.timestamp >= dateFrom);
+                    else
+                    {
+                        var now = DateTime.Now;
+
+                        switch (timeframe)
+                        {
+                            case "30m":
+                                now = now.AddMinutes(-30);
+                                break;
+
+                            case "3h":
+                                now = now.AddHours(-3);
+                                break;
+
+                            case "6h":
+                                now = now.AddHours(-6);
+                                break;
+
+                            case "24h":
+                                now = now.AddHours(-24);
+                                break;
+
+                            case "1w":
+                                now = now.AddDays(-7);
+                                break;
+
+                            case "1m":
+                                now = now.AddDays(-30);
+                                break;
+                        }
+                        queryable = queryable.Where(x => x.timestamp >= now);
+                    }
                 }
             }
         }
