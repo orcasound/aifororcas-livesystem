@@ -66,5 +66,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_APP_NAME }}
-        publish-profile: ${{ secrets.AZURE_AISFORORCAS_PUBLISH_PROFILE }}
+        publish-profile: ${{ secrets.AZURE_AISFORORCASDETECTIONS_PUBLISH_PROFILE }}
         package: ./${{ env.WORKING_DIR }}/${{ env.PUBLISH_DIR }}
