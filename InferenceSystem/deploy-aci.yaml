@@ -13,7 +13,7 @@ properties:
       - name: AZURE_STORAGE_CONNECTION_STRING
         secureValue: '<storage_connection_string>'
       - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
-        secureValue: '<instrumentation_key>'
+        secureValue: '<appinsights_connection_string>'
       image: orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.OrcasoundLab.v0
       ports: []
       resources:
@@ -28,7 +28,7 @@ properties:
       - name: AZURE_STORAGE_CONNECTION_STRING
         secureValue: '<storage_connection_string>'
       - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
-        secureValue: '<instrumentation_key>'
+        secureValue: '<appinsights_connection_string>'
       image: orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.PortTownsend.v0
       ports: []
       resources:
@@ -43,7 +43,7 @@ properties:
       - name: AZURE_STORAGE_CONNECTION_STRING
         secureValue: '<storage_connection_string>'
       - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
-        secureValue: '<instrumentation_key>'
+        secureValue: '<appinsights_connection_string>'
       image: orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.BushPoint.v0
       ports: []
       resources:
