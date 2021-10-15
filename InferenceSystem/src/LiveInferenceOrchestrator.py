@@ -3,8 +3,8 @@
 from model.podcast_inference import OrcaDetectionModel
 from model.fastai_inference import FastAIModel
 
-from hls_utils.DateRangeHLSStream import DateRangeHLSStream
-from hls_utils.HLSStream import HLSStream
+from orca_hls_utils.DateRangeHLSStream import DateRangeHLSStream
+from orca_hls_utils.HLSStream import HLSStream
 
 import spectrogram_visualizer
 from datetime import datetime
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     hls_polling_interval = config_params["hls_polling_interval"]
     hls_hydrophone_id = config_params["hls_hydrophone_id"]
     hydrophone_stream_url = 'https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/' + hls_hydrophone_id
-    
+
     if hls_stream_type == "LiveHLS":
         hls_stream = HLSStream(hydrophone_stream_url, hls_polling_interval, local_dir)
     elif hls_stream_type == "DateRangeHLS":
@@ -196,7 +196,7 @@ if __name__ == "__main__":
                     container = database.get_container_client(COSMOSDB_CONTAINER_NAME)
                     container.create_item(body=metadata)
                     print("Added metadata to Azure CosmosDB")
-                
+
             # delete local wav, spec, metadata
             if config_params["delete_local_wavs"]:
                 os.remove(clip_path)
@@ -204,4 +204,4 @@ if __name__ == "__main__":
 
         # get next current_clip_end_time by adding 60 seconds to current_clip_end_time
         current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
-        
+

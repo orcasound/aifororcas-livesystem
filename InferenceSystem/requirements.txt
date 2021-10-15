@@ -25,3 +25,4 @@ opencv-python
 boto3
 pytz
 json
+orca-hls-utils
