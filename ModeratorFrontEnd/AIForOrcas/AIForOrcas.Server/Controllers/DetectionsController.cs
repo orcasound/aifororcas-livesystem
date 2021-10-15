@@ -56,9 +56,6 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.Timeframe))
 					throw new ArgumentNullException("Timeframe");
 
-				if (queryParameters.DateFrom > queryParameters.DateTo)
-					throw new Exception("From Date should be less than To date");
-
 				if (string.IsNullOrWhiteSpace(queryParameters.SortBy))
 					throw new ArgumentNullException("SortBy");
 
@@ -78,7 +75,7 @@ namespace AIForOrcas.Server.Controllers
 				var queryable = _repository.GetAll();
 
 				// apply timeframe filter
-				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe, queryParameters.DateFrom,queryParameters.DateTo);
+				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
 
 				// apply location filter
 				if(queryParameters.Location.ToLower() != "all")
@@ -202,9 +199,6 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.Timeframe))
 					throw new ArgumentNullException("Timeframe");
 
-				if (queryParameters.DateFrom > queryParameters.DateTo)
-					throw new Exception("From Date should be less than To date");
-
 				if (string.IsNullOrWhiteSpace(queryParameters.SortBy))
 					throw new ArgumentNullException("SortBy");
 
@@ -213,7 +207,7 @@ namespace AIForOrcas.Server.Controllers
 
 				if (string.IsNullOrWhiteSpace(queryParameters.Location))
 					throw new ArgumentNullException("Location");
-				
+
 				if (queryParameters.Page == 0)
 					throw new ArgumentNullException("Page");
 
@@ -233,7 +227,7 @@ namespace AIForOrcas.Server.Controllers
                 }
 
 				// apply timeframe filter
-				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe, queryParameters.DateFrom, queryParameters.DateTo);
+				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
 
 				// If no detections found
 				if (queryable == null || queryable.Count() == 0)
@@ -310,9 +304,6 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.Timeframe))
 					throw new ArgumentNullException("Timeframe");
 
-				if (queryParameters.DateFrom > queryParameters.DateTo)
-					throw new Exception("From Date should be less than To date");
-
 				if (string.IsNullOrWhiteSpace(queryParameters.SortBy))
 					throw new ArgumentNullException("SortBy");
 
@@ -338,7 +329,7 @@ namespace AIForOrcas.Server.Controllers
 				MetadataFilters.ApplyFoundFilter(ref queryable, "yes");
 
 				// apply timeframe filter
-				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe, queryParameters.DateFrom, queryParameters.DateTo);
+				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
 
 				// apply location filter
 				if (queryParameters.Location.ToLower() != "all")
@@ -415,9 +406,6 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.Timeframe))
 					throw new ArgumentNullException("Timeframe");
 
-				if (queryParameters.DateFrom > queryParameters.DateTo)
-					throw new Exception("From Date should be less than To date");
-
 				if (string.IsNullOrWhiteSpace(queryParameters.SortBy))
 					throw new ArgumentNullException("SortBy");
 
@@ -443,7 +431,7 @@ namespace AIForOrcas.Server.Controllers
 				MetadataFilters.ApplyFoundFilter(ref queryable, "no");
 
 				// apply timeframe filter
-				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe, queryParameters.DateFrom, queryParameters.DateTo);
+				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
 
 				// apply location filter
 				if (queryParameters.Location.ToLower() != "all")
@@ -520,9 +508,6 @@ namespace AIForOrcas.Server.Controllers
 				if (string.IsNullOrWhiteSpace(queryParameters.Timeframe))
 					throw new ArgumentNullException("Timeframe");
 
-				if (queryParameters.DateFrom > queryParameters.DateTo)
-					throw new Exception("From Date should be less than To date");
-
 				if (string.IsNullOrWhiteSpace(queryParameters.SortBy))
 					throw new ArgumentNullException("SortBy");
 
@@ -548,7 +533,7 @@ namespace AIForOrcas.Server.Controllers
 				MetadataFilters.ApplyFoundFilter(ref queryable, "don't know");
 
 				// apply timeframe filter
-				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe, queryParameters.DateFrom, queryParameters.DateTo);
+				MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe);
 
 				// apply location filter
 				if (queryParameters.Location.ToLower() != "all")
