@@ -67,3 +67,7 @@ label {
 .comments {
 	color: #858796;
 }
+
+.validation-message {
+	color: red !important;
+}

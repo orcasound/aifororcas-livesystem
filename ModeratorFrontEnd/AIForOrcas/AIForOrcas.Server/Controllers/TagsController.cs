@@ -64,9 +64,9 @@ namespace AIForOrcas.Server.Controllers
         /// Updates all occurrences of the old Tag with the new Tag.
         /// </summary>
         /// <param name="tagUpdate">Tag update payload</param>
-        /// <response code="200">Returns the contents of the updated detection.</response>
+        /// <response code="200">Returns the number of records updated.</response>
         /// <response code="400">If the request was malformed (missing parameters or payload).</response>
-        /// <response code="404">Indicates the detection was not found to update.</response>
+        /// <response code="404">Indicates there were no matching records to update.</response>
         /// <response code="500">If there is an internal error updating or processing the data from CosmosDB.</response>
         [HttpPut]
         [ProducesResponseType(200)]
@@ -80,7 +80,10 @@ namespace AIForOrcas.Server.Controllers
                 if (tagUpdate == null)
                     throw new ArgumentNullException("tagUpdate");
 
-                var detectionsToUpdate = _repository.GetAllWithTag(tagUpdate.OldTag);
+                var detectionsToUpdate = _repository.GetAllWithTag(tagUpdate.OldTag).ToList();
+
+                if (detectionsToUpdate.Count() == 0)
+                    return NoContent();
 
                 foreach(var detection in detectionsToUpdate)
                 {
@@ -89,7 +92,63 @@ namespace AIForOrcas.Server.Controllers
 
                 await _repository.CommitAsync();
 
-                return Ok();
+                return Ok(detectionsToUpdate.Count());
+            }
+            catch (ArgumentNullException ex)
+            {
+                var details = new ProblemDetails()
+                {
+                    Detail = ex.Message
+                };
+                return BadRequest(details);
+            }
+            catch (Exception ex)
+            {
+                var details = new ProblemDetails()
+                {
+                    Title = ex.GetType().ToString(),
+                    Detail = ex.Message
+                };
+
+                return StatusCode(StatusCodes.Status500InternalServerError, details);
+            }
+        }
+
+        /// <summary>
+        /// Delete a tag from the database.
+        /// </summary>
+        /// <param name="tag">Tag to delete</param>
+        /// <response code="200">Returns the number of records updated.</response>
+        /// <response code="400">If the request was malformed (missing parameters or payload).</response>
+        /// <response code="404">Indicates there were no matching records to update.</response>
+        /// <response code="500">If there is an internal error updating or processing the data from CosmosDB.</response>
+        [HttpDelete]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> Delete(string tag)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(tag))
+                    throw new ArgumentNullException("tag");
+
+                var detectionsToUpdate = _repository.GetAllWithTag(tag).ToList();
+
+                if (detectionsToUpdate.Count() == 0)
+                    return NoContent();
+
+                foreach (var detection in detectionsToUpdate)
+                {
+                    var split = detection.tags.Split(";").ToList();
+                    split.Remove(tag);
+                    detection.tags = string.Join(";", split);
+                }
+
+                await _repository.CommitAsync();
+
+                return Ok(detectionsToUpdate.Count());
             }
             catch (ArgumentNullException ex)
             {
