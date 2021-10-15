@@ -109,7 +109,6 @@ if __name__ == "__main__":
 		logger.addHandler(AzureEventHandler(connection_string=con_string))
 		logger.setLevel(logging.INFO)
 
-
 	## Model Details
 	model_type = config_params["model_type"]
 	model_path = config_params["model_path"]
