@@ -49,6 +49,7 @@ export AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
 ## Get primary key for interface with CosmosDB
 
 Go to the [Azure portal](https://portal.azure.com/)
+
 Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"aifororcasmetadatastore"` CosmosDB account.
 
 Go to "Keys" and look up the primary key
@@ -69,6 +70,29 @@ setx AZURE_COSMOSDB_PRIMARY_KEY "<yourprimarykey>"
 export AZURE_COSMOSDB_PRIMARY_KEY="<yourprimarykey>"
 ```
 
+## Get connection string for interface with App Insights
+
+Go to the [Azure portal](https://portal.azure.com/)
+
+Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"orcanotification"` App Insights service
+
+Look up the connection key from 'Essentials'
+
+### Windows
+
+-------
+
+```
+setx INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING "<yourconnectionstring>"
+```
+
+### Mac or Linux
+
+-------
+
+```
+export INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING="<yourconnectionstring>"
+```
 
 ## Run live inference locally
 
