@@ -29,9 +29,27 @@
 					<option value="1w">Last Week</option>
 					<option value="1m">Last Month</option>
 					<option value="all">All</option>
+					<option value="range">Select Date Range</option>
 				</InputSelect>
 			</div>
 		</div>
+		 @if(FilterOptions.Timeframe=="range")
+        {
+        <div class="col-12 col-md-2 col-lg-2">
+            <div class="form-group mb-0">
+                <label class="col-form-label mb-0 py-0">From:</label>
+                <InputDate id="DateFrom" class="form-control" @bind-Value="FilterOptions.DateFrom">
+                </InputDate>
+            </div>
+        </div>
+        <div class="col-12 col-md-2 col-lg-2">
+            <div class="form-group mb-0">
+                <label class="col-form-label mb-0 py-0">To:</label>
+                <InputDate id="DateTo" class="form-control" @bind-Value="FilterOptions.DateTo">
+                </InputDate>
+            </div>
+        </div>
+        }
 		<div class="col-12 col-md-2 col-lg-2">
 			<div class="form-group mb-0">
 				<label class="col-form-label mb-0 py-0">Location:</label>

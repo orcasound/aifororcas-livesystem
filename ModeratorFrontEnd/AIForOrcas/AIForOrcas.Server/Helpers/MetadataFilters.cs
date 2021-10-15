@@ -8,41 +8,60 @@ namespace AIForOrcas.Server.Helpers
 	{
 		public static int DefaultRecordsPerPage = 5;
 
-		public static void ApplyTimeframeFilter(ref IQueryable<Metadata> queryable, string timeframe)
-		{
-			if (!string.IsNullOrWhiteSpace(timeframe))
-			{
-				timeframe = timeframe.ToLower();
+        public static void ApplyTimeframeFilter(ref IQueryable<Metadata> queryable, string timeframe, DateTime? dateFrom=null, DateTime? dateTo=null)
+        {
+            if (!string.IsNullOrWhiteSpace(timeframe))
+            {
+                timeframe = timeframe.ToLower();
 
-				if (timeframe != "all")
-				{
-					var now = DateTime.Now;
+                if (timeframe != "all")
+                {
+                    if (timeframe == "range")
+                    {
+                        if (dateFrom != null && dateTo != null)
+                            queryable = queryable.Where(x => x.timestamp >= dateFrom && x.timestamp <= dateTo);
+                        else if (dateFrom == null && dateTo != null)
+                            queryable = queryable.Where(x => x.timestamp <= dateTo);
+                        else if (dateFrom != null && dateTo == null)
+                            queryable = queryable.Where(x => x.timestamp >= dateFrom);
+                    }
+                    else
+                    {
+                        var now = DateTime.Now;
 
-					if (timeframe == "30m")
-						now = now.AddMinutes(-30);
+                        switch (timeframe)
+                        {
+                            case "30m":
+                                now = now.AddMinutes(-30);
+                                break;
 
-					if (timeframe == "3h")
-						now = now.AddHours(-3);
+                            case "3h":
+                                now = now.AddHours(-3);
+                                break;
 
-					if (timeframe == "6h")
-						now = now.AddHours(-6);
+                            case "6h":
+                                now = now.AddHours(-6);
+                                break;
 
-					if (timeframe == "24h")
-						now = now.AddHours(-24);
+                            case "24h":
+                                now = now.AddHours(-24);
+                                break;
 
-					if (timeframe == "1w")
-						now = now.AddDays(-7);
+                            case "1w":
+                                now = now.AddDays(-7);
+                                break;
 
-					if (timeframe == "1m")
-						now = now.AddDays(-30);
+                            case "1m":
+                                now = now.AddDays(-30);
+                                break;
+                        }
+                        queryable = queryable.Where(x => x.timestamp >= now);
+                    }
+                }
+            }
+        }
 
-					queryable = queryable.Where(x => x.timestamp >= now);
-
-				}
-			}
-		}
-
-		public static void ApplyModeratorFilter(ref IQueryable<Metadata> queryable, string moderator)
+        public static void ApplyModeratorFilter(ref IQueryable<Metadata> queryable, string moderator)
 		{
 			if (!string.IsNullOrWhiteSpace(moderator))
 			{
