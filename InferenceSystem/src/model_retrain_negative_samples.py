@@ -35,7 +35,9 @@ def main():
     start_datetime = datetime.datetime.strptime(args.start_time, datetime_format)
     end_datetime = datetime.datetime.strptime(args.end_time, datetime_format)
 
-    assert end_datetime - start_datetime <= globals.MAX_DATETIME_DELTA
+    assert (
+        end_datetime - start_datetime
+    ) <= globals.MAX_NEGATIVE_SAMPLE_RETRAIN_DATETIME_DELTA
 
     # CALL PreProcessor function
     # Param :: Stream
