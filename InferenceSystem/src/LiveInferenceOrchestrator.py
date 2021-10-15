@@ -22,6 +22,11 @@ from azure.cosmos import exceptions, CosmosClient, PartitionKey
 
 import sys
 
+from decouple import config
+import logging
+from opencensus.ext.azure.log_exporter import AzureLogHandler
+from opencensus.ext.azure.log_exporter import AzureEventHandler
+
 AZURE_STORAGE_ACCOUNT_NAME = "livemlaudiospecstorage"
 AZURE_STORAGE_AUDIO_CONTAINER_NAME = "audiowavs"
 AZURE_STORAGE_SPECTROGRAM_CONTAINER_NAME = "spectrogramspng"
@@ -95,6 +100,16 @@ if __name__ == "__main__":
     # read config
     with open(args.config) as f:
         config_params = yaml.load(f, Loader=yaml.FullLoader)
+
+    # logger to app insights
+    appInsightsKey = os.getenv('INFERENCESYSTEM_APPINSIGHTS_INSTRUMENTATIONKEY')
+    logger = logging.getLogger(__name__)
+    if appInsightsKey is not None:
+        logger.addHandler(AzureLogHandler(
+        connection_string=appInsightsKey))
+        logger.addHandler(AzureEventHandler(connection_string=appInsightsKey))
+        logger.setLevel(logging.INFO)
+
 
     ## Model Details
     model_type = config_params["model_type"]
@@ -172,6 +187,10 @@ if __name__ == "__main__":
             if prediction_results["global_prediction"] == 1:
                 print("FOUND!!!!")
 
+                # logging to app insights
+                properties = {'custom_dimensions': {'Hydrophone ID':  hls_hydrophone_id }}
+                logger.info('Orca Found: ', extra=properties)
+
                 if config_params["upload_to_azure"]:
 
                     # upload clip to Azure Blob Storage if specified
@@ -204,4 +223,3 @@ if __name__ == "__main__":
 
         # get next current_clip_end_time by adding 60 seconds to current_clip_end_time
         current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
-        
