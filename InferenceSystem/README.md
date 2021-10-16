@@ -74,7 +74,7 @@ export AZURE_COSMOSDB_PRIMARY_KEY="<yourprimarykey>"
 
 Go to the [Azure portal](https://portal.azure.com/)
 
-Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"orcanotification"` App Insights service
+Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"InferenceSystemInsights"` App Insights service
 
 Look up the connection key from 'Essentials'
 
