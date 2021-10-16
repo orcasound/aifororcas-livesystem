@@ -1,6 +1,6 @@
 ﻿<!-- Card -->
 
-<EditForm Model="Detection" div class="card shadow mb-4 ">
+<EditForm Model="Detection" class="card shadow mb-4 ">
 
 	<!-- Header -->
 	<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -64,7 +64,7 @@
 				<!-- Datetime & Location -->
 				<div class="row">
 					<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-						<p><i class="fas fa-clock pr-2"></i>@DateHelper.ToPDTFull(Detection.Timestamp)</p>
+						<p><i class="fas fa-clock pr-2"></i>@DateHelper.UTCToPDTFull(Detection.Timestamp)</p>
 					</div>
 					<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
 						<p><i class="fas fa-map-marked-alt pr-2"></i>@Detection.Location?.Name</p>
@@ -84,7 +84,7 @@
 				{
 					<div class="row">
 						<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-							<p><i class="fas fa-calendar-day pr-2"></i>@DateHelper.ToPDTFull(@Detection.Moderated)</p>
+							<p><i class="fas fa-calendar-day pr-2"></i>@DateHelper.UTCToPDTFull(@Detection.Moderated)</p>
 						</div>
 						<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
 							<p><i class="fas fa-user pr-2"></i>@EmailHelper.ExtractName(@Detection.Moderator)</p>

@@ -1,0 +1,126 @@
+﻿@page "/tags/curate"
+<!-- Page Header / Title -->
+<PageHeadingComponent Title="Curate Detection Tags" PillCount=@totalNumberOfTags />
+
+@if (loadStatus != null)
+{
+    <h5 class="mt-5">@loadStatus</h5>
+}
+else if (tags != null)
+{
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Action</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <!-- Tags -->
+                        @foreach (var tag in tags)
+                        {
+                            <tr>
+                                <td>@tag</td>
+                                <td>
+                                    <AuthorizeView>
+                                        <Authorized>
+                                            <button type="button"
+                                                    class="btn btn-primary"
+                                                     @onclick="() => OpenEditModal(tag)">
+                                                <i class="fas fa-edit pr-2" aria-hidden="true"></i>Edit
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-danger"
+                                                    @onclick="() => OpenDeleteModal(tag)">
+                                                <i class="fas fa-trash-alt pr-2" aria-hidden="true"></i>Delete
+                                            </button>
+                                        </Authorized>
+                                    </AuthorizeView>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+}
+
+@if (showDeleteModal)
+{
+    <div class="modal show" id="deleteModal" tabindex="-1" role="dialog"
+         aria-labelledby="deleteModal" style="display:block">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirm</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close"
+                            @onclick="() => CloseDeleteModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>'@tagToDelete' will be removed from every record where it occurs and cannot be undone. Click <strong>Delete</strong> below if you are sure you wish to continue.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseDeleteModal()">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-danger"
+                            @onclick="() => HandleDelete()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@if (showEditModal)
+{
+    <div class="modal show" id="deleteModal" tabindex="-1" role="dialog"
+         aria-labelledby="deleteModal" style="display:block">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Tag</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close"
+                            @onclick="() => CloseEditModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <EditForm Model="tagUpdate" class="modal-body" OnValidSubmit="@HandleValidEditSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <p>This will change all occurrences of '@tagUpdate.OldTag' to the new value you provide and cannot be undone. Enter the new tag below and click <strong>Update</strong> if you are sure you wish to continue.</p>
+                        <div class="form-group">
+                            <label for="newTag">New Tag</label>
+                            <InputText class="from-control" id="newTag" @bind-Value="tagUpdate.NewTag" />
+                            <ValidationMessage For="() => tagUpdate.NewTag" class="small form-text text-danger"/>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                @onclick="() => CloseEditModal()">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}

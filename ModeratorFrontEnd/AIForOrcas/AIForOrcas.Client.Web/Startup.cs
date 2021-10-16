@@ -54,6 +54,11 @@ namespace AIForOrcas.Client.Web
 				client.BaseAddress = new System.Uri(Configuration["APIUrl"]);
 			});
 
+			services.AddHttpClient<ITagService, TagService>(client =>
+			{
+				client.BaseAddress = new System.Uri(Configuration["APIUrl"]);
+			});
+
 			services.AddScoped<IdentityHelper>();
 		}
 
