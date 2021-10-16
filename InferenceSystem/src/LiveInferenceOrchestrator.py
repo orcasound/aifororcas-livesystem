@@ -22,8 +22,6 @@ from azure.cosmos import exceptions, CosmosClient, PartitionKey
 
 import sys
 
-from decouple import config
-import logging
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.log_exporter import AzureEventHandler
 
