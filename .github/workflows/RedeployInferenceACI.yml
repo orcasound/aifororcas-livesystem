@@ -1,0 +1,74 @@
+name: GitHub Actions Deploy AI4Orca ML ACI
+on:
+  # Triggers the workflow on merges only
+  push:
+    branches: [ main ]
+    paths:
+      - "InferenceSystem/configProduction/**"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Deploy AI4Orca to Azure Container Instances-orcasound-lab-live'
+        uses: 'azure/aci-deploy@v1'
+        with:
+          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/live-inference-system:11-15-20.FastAI.R1-12.OrcasoundLab.v0
+          registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          registry-username: ${{ secrets.REGISTRY_USERNAME }}
+          registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+          secure-environment-variables: AZURE_COSMOSDB_PRIMARY_KEY=${{secrets.COSMOS_PRIMARY_KEY}} AZURE_STORAGE_CONNECTION_STRING=${{secrets.STORAGE_CONNECTION_STRING}}
+          name: orcasound-lab-live
+          cpu: 1
+          memory: 3
+          location: 'WestUS2'
+          restart-policy: Always
+      - name: 'Deploy AI4Orca to Azure Container Instances-bush-point-live'
+        uses: 'azure/aci-deploy@v1'
+        with:
+          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/live-inference-system:11-15-20.FastAI.R1-12.BushPoint.v0
+          registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          registry-username: ${{ secrets.REGISTRY_USERNAME }}
+          registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+          secure-environment-variables: AZURE_COSMOSDB_PRIMARY_KEY=${{secrets.COSMOS_PRIMARY_KEY}} AZURE_STORAGE_CONNECTION_STRING=${{secrets.STORAGE_CONNECTION_STRING}}
+          name: bush-point-live
+          cpu: 1
+          memory: 3
+          location: 'WestUS2'
+          restart-policy: Always
+      - name: 'Deploy AI4Orca to Azure Container Instances-port-townsend-live'
+        uses: 'azure/aci-deploy@v1'
+        with:
+          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/live-inference-system:11-15-20.FastAI.R1-12.PortTownsend.v0
+          registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          registry-username: ${{ secrets.REGISTRY_USERNAME }}
+          registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+          secure-environment-variables: AZURE_COSMOSDB_PRIMARY_KEY=${{secrets.COSMOS_PRIMARY_KEY}} AZURE_STORAGE_CONNECTION_STRING=${{secrets.STORAGE_CONNECTION_STRING}}
+          name: port-townsend-live
+          cpu: 1
+          memory: 3
+          location: 'WestUS2'
+          restart-policy: Always
+      - run: echo "🍏 This job's status is ${{ job.status }}."
