@@ -49,6 +49,7 @@ export AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
 ## Get primary key for interface with CosmosDB
 
 Go to the [Azure portal](https://portal.azure.com/)
+
 Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"aifororcasmetadatastore"` CosmosDB account.
 
 Go to "Keys" and look up the primary key
@@ -69,6 +70,29 @@ setx AZURE_COSMOSDB_PRIMARY_KEY "<yourprimarykey>"
 export AZURE_COSMOSDB_PRIMARY_KEY="<yourprimarykey>"
 ```
 
+## Get connection string for interface with App Insights
+
+Go to the [Azure portal](https://portal.azure.com/)
+
+Go to the `"LiveSRKWNotificationSystem"` resource group and within that go to the `"InferenceSystemInsights"` App Insights service
+
+Look up the connection key from 'Essentials'
+
+### Windows
+
+-------
+
+```
+setx INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING "<yourconnectionstring>"
+```
+
+### Mac or Linux
+
+-------
+
+```
+export INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING="<yourconnectionstring>"
+```
 
 ## Run live inference locally
 
@@ -232,7 +256,8 @@ happen.
 
 1.  `<cosmos_primary_key>` - Replace this with the AZURE_COSMOSDB_PRIMARY_KEY from your .env file (or found above).
 2.  `<storage_connection_string>` - Replace this with the AZURE_STORAGE_CONNECTION_STRING from your .env file (or found above).
-3.  `<image_registry_password>` - Replace this with the password for the orcaconservancycr container registry.  It can be found at
+3.  `<appinsights_connection_string>` - Replace this with the INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING from your .env file (or found above).
+4.  `<image_registry_password>` - Replace this with the password for the orcaconservancycr container registry.  It can be found at
 [this link](https://portal.azure.com/#@OrcaConservancy778.onmicrosoft.com/resource/subscriptions/9ffa543e-3596-43aa-b82c-8f41dfbf03cc/resourcegroups/LiveSRKWNotificationSystem/providers/Microsoft.ContainerRegistry/registries/orcaconservancycr/accessKey)
 under the name `password`.
 
