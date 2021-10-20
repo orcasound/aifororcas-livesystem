@@ -39,5 +39,21 @@ namespace AIForOrcas.Server.BL.Services
 				throw new DataException(ex.Message);
 			}
 		}
+
+		public IQueryable<string> GetAllTags()
+		{
+			return _db.Metadata
+				.Where(x => x.tags != null && x.tags != "")
+				.Select(x => x.tags)
+				.Distinct();
+		}
+
+		public IQueryable<Metadata> GetAllWithTag(string tag)
+        {
+			return _db.Metadata.AsEnumerable()
+				.Where(x => x.tags != null && x.tags.Contains(tag))
+				.AsQueryable();
+
+        }
 	}
 }
