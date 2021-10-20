@@ -26,3 +26,4 @@ boto3
 pytz
 json
 opencensus-ext-azure
+orca-hls-utils

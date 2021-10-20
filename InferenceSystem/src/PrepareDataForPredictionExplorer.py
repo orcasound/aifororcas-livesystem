@@ -10,7 +10,7 @@ from model.fastai_inference import FastAIModel
 
 import json
 import os
-from hls_utils.DateRangeHLSStream import DateRangeHLSStream
+from orca_hls_utils.DateRangeHLSStream import DateRangeHLSStream
 from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
