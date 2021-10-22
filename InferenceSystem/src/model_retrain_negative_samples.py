@@ -16,11 +16,15 @@ def main():
         required=True,
         help="Start time in PST in following format 2020-07-25 19:15:00",
     )
+    td = globals.MAX_NEGATIVE_SAMPLE_RETRAIN_DATETIME_DELTA
+    max_timedelta_string = (
+        f"{td.seconds // 3600}H:{(td.seconds // 60) % 60}M{td.seconds % 60}S"
+    )
     parser.add_argument(
         "--end_time",
         type=str,
         required=True,
-        help="End time in PST in following format 2020-07-25 20:15:00. Cannot be greater than (start_time + 30 minutes)",
+        help=f"End time in PST in following format 2020-07-25 20:15:00. Cannot be greater than (start_time + {max_timedelta_string})",
     )
     parser.add_argument(
         "--hydrophone",
