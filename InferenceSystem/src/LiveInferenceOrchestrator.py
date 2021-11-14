@@ -3,8 +3,8 @@
 from model.podcast_inference import OrcaDetectionModel
 from model.fastai_inference import FastAIModel
 
-from orca_hls_utils.DateRangeHLSStream import DateRangeHLSStream
-from orca_hls_utils.HLSStream import HLSStream
+from hls_utils.DateRangeHLSStream import DateRangeHLSStream
+from hls_utils.HLSStream import HLSStream
 
 import spectrogram_visualizer
 from datetime import datetime
@@ -90,6 +90,7 @@ def populate_metadata_json(
 	return data
 
 if __name__ == "__main__":
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--config", type=str, help="config.yml", required=True)
 	args = parser.parse_args()

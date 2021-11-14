@@ -11,7 +11,7 @@ import globals
 
 import json
 import os
-from orca_hls_utils.DateRangeHLSStream import DateRangeHLSStream
+from hls_utils.DateRangeHLSStream import DateRangeHLSStream
 from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
