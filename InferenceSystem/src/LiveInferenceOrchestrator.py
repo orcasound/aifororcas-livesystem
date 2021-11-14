@@ -10,7 +10,7 @@ import spectrogram_visualizer
 from datetime import datetime
 from datetime import timedelta
 from pytz import timezone
-
+import logging
 import argparse
 import os
 import json
@@ -99,11 +99,11 @@ if __name__ == "__main__":
 		config_params = yaml.load(f, Loader=yaml.FullLoader)
 
 	# logger to app insights
-	con_string = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
+	appInsightsKey = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
 	logger = logging.getLogger(__name__)
 	if appInsightsKey is not None:
-		logger.addHandler(AzureLogHandler(connection_string=con_string))
-		logger.addHandler(AzureEventHandler(connection_string=con_string))
+		logger.addHandler(AzureLogHandler(connection_string=appInsightsKey))
+		logger.addHandler(AzureEventHandler(connection_string=appInsightsKey))
 		logger.setLevel(logging.INFO)
 
 	## Model Details
