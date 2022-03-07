@@ -18,7 +18,7 @@ namespace AIForOrcas.Client.Web.Pages
 		private Metrics metrics = null;
 
 		private MetricsFilterDTO filterOptions =
-			new MetricsFilterDTO() { Timeframe = "all" };
+			new MetricsFilterDTO() { Timeframe = "1m" };
 
 		private string messageStyle = "d-none";
 		private string message = string.Empty;
