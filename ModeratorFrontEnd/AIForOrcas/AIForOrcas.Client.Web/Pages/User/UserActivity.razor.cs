@@ -22,7 +22,7 @@ namespace AIForOrcas.Client.Web.Pages.User
 		private ModeratorMetrics metrics = null;
 
 		private ModeratorMetricsFilterDTO filterOptions =
-			new ModeratorMetricsFilterDTO() { Timeframe = "all" };
+			new ModeratorMetricsFilterDTO() { Timeframe = "1m" };
 
 		private string messageStyle = "d-none";
 		private string message = string.Empty;
