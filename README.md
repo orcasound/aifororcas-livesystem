@@ -6,10 +6,10 @@ Through annual Microsoft hackathons since 2019 and with the volunteer efforts of
 
 Learn more about OrcaHello via:
 
-- OrcaHello project summary page (for general public and context)
-- Deployed moderator UI (public access to detections, plus moderation features upon authentication)
-- OrcaHello wiki (for system administrators and moderators)
-- This README (for developers and data scientists) 
+- [OrcaHello project summary page](https://ai4orcas.net/portfolio/orcahello/) (for general public and context)
+- [Deployed public/moderator UI](https://aifororcas.azurewebsites.net/) (public access to detections, plus moderation features upon authentication)
+- [OrcaHello wiki](https://github.com/orcasound/aifororcas-livesystem/wiki) (for system administrators and moderators)
+- **This README** (for developers and data scientists) 
 
 This repository contains the implementations for the following  components that make up the OrcaHello real time inference system:
 - [ModeratorFrontEnd](ModeratorFrontEnd) - Frontend code for the [Moderator Portal](https://aifororcas.azurewebsites.net/).
@@ -24,10 +24,10 @@ The diagram below describes the flow of data through OrcaHello and the technolog
 ![System Overview](Docs/Images/SystemOverview.png)
 
 As of September, 2022, the data flow steps include:
-1. *Live streaming of audio data via AWS* (from Raspberry Pis running [orcanode code](https://github.com/orcasound/orcanode) to [Orcaound's S3 open data registry buckets](https://registry.opendata.aws/orcasound/))
-2. *Azure-based analysis* (via AKS in 2021-2, ICI 2019-2020; ingestion of 10-second segments from S3, inference on 2-second samples using the current OrcaHello binary call classifier, concatenation of raw audio into 60-second WAV files and spectrogram generation) 
-3. *Moderation* of model detections by orca call experts (moderator notification, authentication in moderator portal, annotation and validation)
-4. *Notification* of confirmed calls from endangered orcas for a wide range of subscribers (researchers, community scientists, managers, outreach/education network nodes, marine mammal observers, dynamic mitigation systems, oil spill response agencies, enforcement agencies, Naval POCs for sonar testing/training situational awareness, etc.)
+1. **Live streaming of audio data via AWS** (from Raspberry Pis running [orcanode code](https://github.com/orcasound/orcanode) to [Orcaound's S3 open data registry buckets](https://registry.opendata.aws/orcasound/))
+2. **Azure-based analysis** (via AKS in 2021-2, ICI 2019-2020; ingestion of 10-second segments from S3, inference on 2-second samples using the current OrcaHello binary call classifier, concatenation of raw audio into 60-second WAV files and spectrogram generation) 
+3. **Moderation** of model detections by orca call experts (moderator notification, authentication in moderator portal, annotation and validation)
+4. **Notification** of confirmed calls from endangered orcas for a wide range of subscribers (researchers, community scientists, managers, outreach/education network nodes, marine mammal observers, dynamic mitigation systems, oil spill response agencies, enforcement agencies, Naval POCs for sonar testing/training situational awareness, etc.)
 
 Each overlapping 2-second data segment is classified as a whale call or / not. Shown below is a 1-minute segment of hydrophone audio visualized as a spectrogram with whale calls detected by the model (delineated by white boundaries).
 
