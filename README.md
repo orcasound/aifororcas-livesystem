@@ -1,8 +1,35 @@
 # OrcaHello: A real-time AI-assisted killer whale notification system 🎱 🐋
 
-[Orcasound](https://www.orcasound.net/) has set up a hydrophone network in Puget Sound (near Seattle, WA, USA, Northeast Pacific). Killer whales, aka orcas, often swim by these hydrophones (underwater microphones) and vocalize with a wide range of calls.
+[Orcasound](https://www.orcasound.net/) maintains a hydrophone network in Puget Sound (near Seattle, WA, USA, Northeast Pacific). Killer whales (aka orcas) often swim by these hydrophones (underwater microphones) and vocalize with a wide range of calls.
 
-We trained a deep learning model to find these calls in hydrophone audio. Each overlapping 2-second data segment is classified as a whale call or / not. Shown below is a 1-minute segment of hydrophone audio visualized as a spectrogram with whale calls detected by the model (delineated by white boundaries).
+Through annual Microsoft hackathons since 2019 and with the volunteer efforts of many [heroic Orcasound open souce contributors](https://www.orcasound.net/hacker-hall-of-fame/), we have trained and continue to refine a deep learning model to find these calls in live hydrophone audio. The model is at the core of the real time inference system we call OrcaHello which aims to help recover the endangered population of Southern Resident Killer Whale (SRKW) - the iconic orcas that frequently seek salmon in Puget Sound, and also range annually from California to Alaska.
+
+Learn more about OrcaHello via:
+
+- OrcaHello project summary page (for general public and context)
+- Deployed moderator UI (public access to detections, plus moderation features upon authentication)
+- OrcaHello wiki (for system administrators and moderators)
+- This README (for developers and data scientists) 
+
+This repository contains the implementations for the following  components that make up the OrcaHello real time inference system:
+- [ModeratorFrontEnd](ModeratorFrontEnd) - Frontend code for the [Moderator Portal](https://aifororcas.azurewebsites.net/).
+- [NotificationSystem](NotificationSystem) - Code to trigger email notifications.
+- [InferenceSystem](InferenceSystem) - Code to perform inference with the trained model.
+- [ModelTraining](ModelTraining) - Data preparation and model training.
+- [ModelEvaluation](ModelEvaluation) - Benchmarking trained models on test sets.
+
+## System overview
+The diagram below describes the flow of data through OrcaHello and the technologies used. 
+
+![System Overview](Docs/Images/SystemOverview.png)
+
+As of September, 2022, the data flow steps include:
+1. *Live streaming of audio data via AWS* (from Raspberry Pis running [orcanode code](https://github.com/orcasound/orcanode) to [Orcaound's S3 open data registry buckets](https://registry.opendata.aws/orcasound/))
+2. *Azure-based analysis* (via AKS in 2021-2, ICI 2019-2020; ingestion of 10-second segments from S3, inference on 2-second samples using the current OrcaHello binary call classifier, concatenation of raw audio into 60-second WAV files and spectrogram generation) 
+3. *Moderation* of model detections by orca call experts (moderator notification, authentication in moderator portal, annotation and validation)
+4. *Notification* of confirmed calls from endangered orcas for a wide range of subscribers (researchers, community scientists, managers, outreach/education network nodes, marine mammal observers, dynamic mitigation systems, oil spill response agencies, enforcement agencies, Naval POCs for sonar testing/training situational awareness, etc.)
+
+Each overlapping 2-second data segment is classified as a whale call or / not. Shown below is a 1-minute segment of hydrophone audio visualized as a spectrogram with whale calls detected by the model (delineated by white boundaries).
 
 ![Detections](Docs/Images/Detections.png)
 
@@ -14,21 +41,9 @@ Once they receive this notification, they can visit the public [Moderator Portal
 
 ![Moderator Portal](Docs/Images/ModeratorPortal.png)
 
-Most importantly, they confirm whether or not the whale call was emitted by a Southern Resident Killer Whale (SRKW) - an endangered ecotype that frequents Puget Sound, and also ranges from California to Alaska. If a SRKW is confirmed, notifications are sent to subscribers, like this email message.
+Most importantly, they confirm whether or not the whale call was emitted by an endangered Southern Resident Killer Whale (SRKW). If a SRKW is confirmed, notifications are sent to subscribers, like this email message (2022 example):
 
 ![Subscriber Email](Docs/Images/SubscriberEmail.png)
-
-This repository contains the implementations for the following  components that make up the OrcaHello real time inference system:
-- [ModeratorFrontEnd](ModeratorFrontEnd) - Frontend code for the [Moderator Portal](https://aifororcas.azurewebsites.net/).
-- [NotificationSystem](NotificationSystem) - Code to trigger email notifications.
-- [InferenceSystem](InferenceSystem) - Code to perform inference with the trained model.
-- [ModelTraining](ModelTraining) - Data preparation and model training.
-- [ModelEvaluation](ModelEvaluation) - Benchmarking trained models on test sets.
-
-## System overview
-The diagram below describes the flow of data through OrcaHello and the technologies used.
-
-![System Overview](Docs/Images/SystemOverview.png)
 
 ## Contributing
 You can contribute by
