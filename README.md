@@ -6,9 +6,9 @@ Through annual Microsoft hackathons since 2019 and with the volunteer efforts of
 
 Learn more about OrcaHello via:
 
-- [OrcaHello project summary page](https://ai4orcas.net/portfolio/orcahello/) (for general public and context)
-- [Deployed public/moderator UI](https://aifororcas.azurewebsites.net/) (public access to detections, plus moderation features upon authentication)
-- [OrcaHello wiki](https://github.com/orcasound/aifororcas-livesystem/wiki) (for system administrators and moderators)
+- **[OrcaHello project summary page](https://ai4orcas.net/portfolio/orcahello/)** (for general public and context)
+- **[Deployed public/moderator UI](https://aifororcas.azurewebsites.net/)** (public access to detections, plus moderation features upon authentication)
+- **[OrcaHello wiki](https://github.com/orcasound/aifororcas-livesystem/wiki)** (for system administrators and moderators)
 - **This README** (for developers and data scientists) 
 
 This repository contains the implementations for the following  components that make up the OrcaHello real time inference system:
