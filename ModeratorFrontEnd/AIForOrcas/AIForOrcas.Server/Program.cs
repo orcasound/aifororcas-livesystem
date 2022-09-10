@@ -1,82 +1,67 @@
 using AIForOrcas.Server.BL.Context;
 using AIForOrcas.Server.BL.Services;
 using AIForOrcas.Server.Extensions;
+using AIForOrcas.Server.Models.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
 using System;
-using System.IO;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var appSettings = new AppSettings();
+builder.Configuration.GetSection("AppSettings").Bind(appSettings);
+builder.Services.AddSingleton<AppSettings>(appSettings);
+
 // Add authentication/authorization middleware (AuthMiddleWareExtensions)
 builder.ConfigureCors();
+builder.ConfigureJwtAuthentication(builder.Configuration.GetSection("AppSettings:AzureAd"));
+builder.ConfigureModeratorPolicy(appSettings);
+builder.ConfigureSwagger(appSettings);
 
+// Add needed dependency injections
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseCosmos(
-        accountEndpoint: builder.Configuration["AccountEndpoint"],
-        accountKey: builder.Configuration["AccountKey"],
-        databaseName: builder.Configuration["DatabaseName"])
+        accountEndpoint: appSettings.ProviderAccountEndpoint,
+        accountKey: appSettings.ProviderAccountKey,
+        databaseName: appSettings.DatabaseName)
 );
 
 builder.Services.AddTransient<MetadataRepository>();
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v2", new OpenApiInfo
-    {
-        Title = "AI For Orcas API",
-        Version = "v2",
-        Description = "REST API for interacting with the AI For Orcas CosmosDB."
-    });
-
-    // Set the comments path for the controllers.
-    var baseXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var baseXmlPath = Path.Combine(AppContext.BaseDirectory, baseXmlFile);
-    c.IncludeXmlComments(baseXmlPath);
-
-    // Set the comments path for the schemas.
-    var schemaXmlPath = Path.Combine(AppContext.BaseDirectory, "AIForOrcas.DTO.xml");
-    c.IncludeXmlComments(schemaXmlPath);
-});
-
-builder.Services.AddCors(o =>
-{
-    o.AddPolicy("CorsPolicy", policy => policy
-    .WithOrigins(builder.Configuration["AllowedOrigin"])
-    .AllowAnyMethod()
-    .AllowAnyHeader());
-});
-
-builder.Services.AddControllers();
+// Add built-in middleware
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(x => { x.SuppressMapClientErrors = true; });
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// This makes the contents of wwwroot available to be served
-app.UseStaticFiles();
+// Add Swagger to the HTTP request pipeline
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    var clientId = !string.IsNullOrWhiteSpace(appSettings.AzureAd.ClientId) ? 
+        appSettings.AzureAd.ClientId : Guid.NewGuid().ToString();
+
+    c.OAuthClientId(clientId);
+    c.OAuthUsePkce();
+    c.OAuthScopeSeparator(" ");
+    c.DefaultModelsExpandDepth(-1);
+});
 
 app.UseHttpsRedirection();
 
-app.UseRouting();
+// Add the CORS policy to the HTTP Request pipeline
+app.UseCors("AllowAnyOrigin");
 
+// Add authentication and authorization to the HTTP Request pipeline
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSwagger();
-
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v2/swagger.json", "AI For Orcas API");
-    c.RoutePrefix = string.Empty;
-});
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+// Add the API endpoint controllers to the HTTP Request pipeline
+app.MapControllers();
 
 app.Run();
