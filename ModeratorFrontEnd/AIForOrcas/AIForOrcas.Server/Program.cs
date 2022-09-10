@@ -1,28 +1,82 @@
+using AIForOrcas.Server.BL.Context;
+using AIForOrcas.Server.BL.Services;
+using AIForOrcas.Server.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System.Reflection;
 
-namespace AIForOrcas.Server
+var builder = WebApplication.CreateBuilder(args);
+
+// Add authentication/authorization middleware (AuthMiddleWareExtensions)
+builder.ConfigureCors();
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseCosmos(
+        accountEndpoint: builder.Configuration["AccountEndpoint"],
+        accountKey: builder.Configuration["AccountKey"],
+        databaseName: builder.Configuration["DatabaseName"])
+);
+
+builder.Services.AddTransient<MetadataRepository>();
+
+builder.Services.AddSwaggerGen(c =>
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			CreateHostBuilder(args).Build().Run();
-		}
+    c.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Title = "AI For Orcas API",
+        Version = "v2",
+        Description = "REST API for interacting with the AI For Orcas CosmosDB."
+    });
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				});
-	}
-}
+    // Set the comments path for the controllers.
+    var baseXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var baseXmlPath = Path.Combine(AppContext.BaseDirectory, baseXmlFile);
+    c.IncludeXmlComments(baseXmlPath);
+
+    // Set the comments path for the schemas.
+    var schemaXmlPath = Path.Combine(AppContext.BaseDirectory, "AIForOrcas.DTO.xml");
+    c.IncludeXmlComments(schemaXmlPath);
+});
+
+builder.Services.AddCors(o =>
+{
+    o.AddPolicy("CorsPolicy", policy => policy
+    .WithOrigins(builder.Configuration["AllowedOrigin"])
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+});
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// This makes the contents of wwwroot available to be served
+app.UseStaticFiles();
+
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v2/swagger.json", "AI For Orcas API");
+    c.RoutePrefix = string.Empty;
+});
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+app.Run();
