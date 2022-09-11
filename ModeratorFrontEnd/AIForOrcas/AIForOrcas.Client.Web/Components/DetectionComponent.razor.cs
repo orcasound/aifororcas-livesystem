@@ -1,165 +1,154 @@
-﻿using AIForOrcas.DTO.API;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace AIForOrcas.Client.Web.Components;
 
-namespace AIForOrcas.Client.Web.Components
+public partial class DetectionComponent
 {
-	public partial class DetectionComponent
+	private string _id;
+	private TextInfo _ti = new CultureInfo("en-US", false).TextInfo;
+
+	[Inject]
+	IJSRuntime JSRuntime { get; set; }
+
+	[Inject]
+	AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+	[Inject]
+	NavigationManager NavigationManager { get; set; }
+
+	[Parameter]
+	public Detection Detection { get; set; }
+
+	[Parameter]
+	public bool IsEditable { get; set; } = true;
+
+	[Parameter]
+	public EventCallback<DetectionUpdate> SubmitCallback { get; set; }
+
+	private string[] optionList = new string[] { "Yes", "No", "Don't Know" };
+
+	private string CardSpectrogramId { get => $"spectrogram-card-{_id}"; }
+	private string CardWaveformId { get => $"waveform-card-{_id}"; }
+	private string CardPlayButtonId { get => $"play-card-{_id}"; }
+	private string CardElapsedTimeId { get => $"elapsed-card-{_id}"; }
+	private string CardDurationTimeId { get => $"duration-card-{_id}"; }
+
+	private string ModalSpectrogramPanelId { get => $"spectrogram-panel-modal-{_id}"; }
+	private string ModalSpectrogramId { get => $"spectrogram-modal-{_id}"; }
+	private string ModalWaveformId { get => $"waveform-modal-{_id}"; }
+	private string ModalPlayButtonId { get => $"play-modal-{_id}"; }
+	private string ModalElapsedTimeId { get => $"elapsed-modal-{_id}"; }
+	private string ModalDurationTimeId { get => $"duration-modal-{_id}"; }
+
+	private string ModalMapPanelId { get => $"map-panel-modal-{_id}"; }
+	private string BingMapId { get => $"bingMap-modal-{_id}"; }
+
+	private string ModalLinkId { get => $"link-panel-modal-{_id}"; }
+
+	private string DetectionCount { get => (Detection.Annotations.Count == 1) ? "1 detection" : $"{Detection.Annotations.Count} detections"; }
+
+	private string AverageConfidence { get => $"{Detection.Confidence.ToString("00.##")}% average confidence"; }
+
+	private bool IsSubmitDisabled { get => string.IsNullOrWhiteSpace(Detection.Found); }
+
+	private string WasFound	{ get => _ti.ToTitleCase(Detection.Found); }
+
+	private string LinkUrl { get => $"{NavigationManager.BaseUri}detections/detection/{Detection.Id}"; }
+
+	protected override void OnParametersSet()
 	{
-		private string _id;
-		private TextInfo _ti = new CultureInfo("en-US", false).TextInfo;
+		_id = Detection.Id;
 
-		[Inject]
-		IJSRuntime JSRuntime { get; set; }
+		// Unreviewed detections are being initially populated in the database as "No"
+		// I am manually resetting it here when the reviewed status is false so that the record,
+		// can be unsubmittable until the user has changed Found to "Yes", "No", or "Don't Know"
 
-		[Inject]
-		AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+		// TODO: Determine whether or not we should change the initial Found state
+		//       from No to something other than the three options we give the user
 
-		[Inject]
-		NavigationManager NavigationManager { get; set; }
+		if (!Detection.Reviewed)
+			Detection.Found = string.Empty;
+	}
 
-		[Parameter]
-		public Detection Detection { get; set; }
+	private void SetFoundValue(string found)
+	{
+		Detection.Found = found;
+	}
 
-		[Parameter]
-		public bool IsEditable { get; set; } = true;
+	private async Task SubmitUpdate()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
 
-		[Parameter]
-		public EventCallback<DetectionUpdate> SubmitCallback { get; set; }
-
-		private string[] optionList = new string[] { "Yes", "No", "Don't Know" };
-
-		private string CardSpectrogramId { get => $"spectrogram-card-{_id}"; }
-		private string CardWaveformId { get => $"waveform-card-{_id}"; }
-		private string CardPlayButtonId { get => $"play-card-{_id}"; }
-		private string CardElapsedTimeId { get => $"elapsed-card-{_id}"; }
-		private string CardDurationTimeId { get => $"duration-card-{_id}"; }
-
-		private string ModalSpectrogramPanelId { get => $"spectrogram-panel-modal-{_id}"; }
-		private string ModalSpectrogramId { get => $"spectrogram-modal-{_id}"; }
-		private string ModalWaveformId { get => $"waveform-modal-{_id}"; }
-		private string ModalPlayButtonId { get => $"play-modal-{_id}"; }
-		private string ModalElapsedTimeId { get => $"elapsed-modal-{_id}"; }
-		private string ModalDurationTimeId { get => $"duration-modal-{_id}"; }
-
-		private string ModalMapPanelId { get => $"map-panel-modal-{_id}"; }
-		private string BingMapId { get => $"bingMap-modal-{_id}"; }
-
-		private string ModalLinkId { get => $"link-panel-modal-{_id}"; }
-
-		private string DetectionCount { get => (Detection.Annotations.Count == 1) ? "1 detection" : $"{Detection.Annotations.Count} detections"; }
-
-		private string AverageConfidence { get => $"{Detection.Confidence.ToString("00.##")}% average confidence"; }
-
-		private bool IsSubmitDisabled { get => string.IsNullOrWhiteSpace(Detection.Found); }
-
-		private string WasFound	{ get => _ti.ToTitleCase(Detection.Found); }
-
-		private string LinkUrl { get => $"{NavigationManager.BaseUri}detections/detection/{Detection.Id}"; }
-
-		protected override void OnParametersSet()
+		var request = new DetectionUpdate()
 		{
-			_id = Detection.Id;
+			Id = Detection.Id,
+			Comments = Detection.Comments,
+			Tags = Detection.Tags,
+			Moderator = user.Identity.Name,
+			Moderated = DateTime.Now,
+			Reviewed = true,
+			Found = Detection.Found
+		};
 
-			// Unreviewed detections are being initially populated in the database as "No"
-			// I am manually resetting it here when the reviewed status is false so that the record,
-			// can be unsubmittable until the user has changed Found to "Yes", "No", or "Don't Know"
+		await SubmitCallback.InvokeAsync(request);
+	}
 
-			// TODO: Determine whether or not we should change the initial Found state
-			//       from No to something other than the three options we give the user
+	private async Task ToggleCardPlayer()
+	{
+		await JSRuntime.InvokeVoidAsync("CardSpectrogram", _id, Detection.AudioUri);
+	}
 
-			if (!Detection.Reviewed)
-				Detection.Found = string.Empty;
+	private async Task ToggleModalPlayer()
+	{
+		var isPlaying = await JSRuntime.InvokeAsync<bool>("IsPlayerActive");
+
+		if (!isPlaying)
+		{
+			await InitializeModalPlayer();
 		}
 
-		private void SetFoundValue(string found)
+		await JSRuntime.InvokeVoidAsync("ToggleModalSpectrogram");
+	}
+
+	private async Task InitializeModalPlayer()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.Append("[");
+
+		var list = new List<string>();
+		foreach(var annotation in Detection.Annotations)
 		{
-			Detection.Found = found;
+			var entry = "{";
+			entry += $"\"start\":{annotation.StartTime}, ";
+			entry += $"\"end\":{annotation.EndTime},";
+			entry += "\"drag\": false";
+			entry += "}";
+			list.Add(entry);
 		}
+		sb.Append(string.Join(",", list));
 
-		private async Task SubmitUpdate()
-		{
-			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-			var user = authState.User;
+		sb.AppendLine("]");
 
-			var request = new DetectionUpdate()
-			{
-				Id = Detection.Id,
-				Comments = Detection.Comments,
-				Tags = Detection.Tags,
-				Moderator = user.Identity.Name,
-				Moderated = DateTime.Now,
-				Reviewed = true,
-				Found = Detection.Found
-			};
+		await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
+		await JSRuntime.InvokeVoidAsync("InitializeModalSpectrogram", _id, 
+			Detection.AudioUri, sb.ToString());
+	}
 
-			await SubmitCallback.InvokeAsync(request);
-		}
+	private async Task InitializeModalMap()
+	{
+		await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
+		await JSRuntime.InvokeVoidAsync("LoadBingMap", _id, 
+			Detection.Location?.Latitude, Detection.Location?.Longitude);
+	}
 
-		private async Task ToggleCardPlayer()
-		{
-			await JSRuntime.InvokeVoidAsync("CardSpectrogram", _id, Detection.AudioUri);
-		}
+	private async Task KillPlayer()
+	{
+		await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
+	}
 
-		private async Task ToggleModalPlayer()
-		{
-			var isPlaying = await JSRuntime.InvokeAsync<bool>("IsPlayerActive");
+	private async Task ActivateLink(string url)
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-			if (!isPlaying)
-			{
-				await InitializeModalPlayer();
-			}
-
-			await JSRuntime.InvokeVoidAsync("ToggleModalSpectrogram");
-		}
-
-		private async Task InitializeModalPlayer()
-		{
-			StringBuilder sb = new StringBuilder();
-			sb.Append("[");
-
-			var list = new List<string>();
-			foreach(var annotation in Detection.Annotations)
-			{
-				var entry = "{";
-				entry += $"\"start\":{annotation.StartTime}, ";
-				entry += $"\"end\":{annotation.EndTime},";
-				entry += "\"drag\": false";
-				entry += "}";
-				list.Add(entry);
-			}
-			sb.Append(string.Join(",", list));
-
-			sb.AppendLine("]");
-
-			await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
-			await JSRuntime.InvokeVoidAsync("InitializeModalSpectrogram", _id, 
-				Detection.AudioUri, sb.ToString());
-		}
-
-		private async Task InitializeModalMap()
-		{
-			await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
-			await JSRuntime.InvokeVoidAsync("LoadBingMap", _id, 
-				Detection.Location?.Latitude, Detection.Location?.Longitude);
-		}
-
-		private async Task KillPlayer()
-		{
-			await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
-		}
-
-		private async Task ActivateLink(string url)
-		{
-			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-			NavigationManager.NavigateTo(url, true);
-		}
+		NavigationManager.NavigateTo(url, true);
 	}
 }

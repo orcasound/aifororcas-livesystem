@@ -1,8 +1,10 @@
 ﻿global using AIForOrcas.DTO;
 global using AIForOrcas.DTO.API;
 global using AIForOrcas.DTO.API.Tags;
+global using AIForOrcas.Server.BL.Context;
 global using AIForOrcas.Server.BL.Models.CosmosDB;
 global using AIForOrcas.Server.BL.Services;
+global using AIForOrcas.Server.Extensions;
 global using AIForOrcas.Server.Helpers;
 global using AIForOrcas.Server.Models.Settings;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,6 +12,7 @@ global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Identity.Web;

@@ -1,14 +1,3 @@
-using AIForOrcas.Server.BL.Context;
-using AIForOrcas.Server.BL.Services;
-using AIForOrcas.Server.Extensions;
-using AIForOrcas.Server.Models.Settings;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-
 var builder = WebApplication.CreateBuilder(args);
 
 var appSettings = new AppSettings();

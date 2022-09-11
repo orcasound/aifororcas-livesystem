@@ -1,28 +1,67 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace AIForOrcas.Client.Web
+builder.Services.AddAuthentication(AzureADDefaults.AuthenticationScheme)
+    .AddAzureAD(options => builder.Configuration.Bind("AzureAd", options));
+
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddAuthorization(options =>
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			CreateHostBuilder(args).Build().Run();
-		}
+    options.AddPolicy("ModeratorRole", policyBuilder =>
+        policyBuilder.RequireClaim("groups", builder.Configuration["AzureADGroup:ModeratorGroupId"]));
+});
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				});
-	}
+builder.Services.AddBlazoredToast();
+
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient<IDetectionService, DetectionService>(client =>
+{
+    client.BaseAddress = new System.Uri(builder.Configuration["APIUrl"]);
+});
+
+builder.Services.AddHttpClient<IMetricsService, MetricsService>(client =>
+{
+    client.BaseAddress = new System.Uri(builder.Configuration["APIUrl"]);
+});
+
+builder.Services.AddHttpClient<ITagService, TagService>(client =>
+{
+    client.BaseAddress = new System.Uri(builder.Configuration["APIUrl"]);
+});
+
+builder.Services.AddScoped<IdentityHelper>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
 }
+else
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+    // MapControllers in needed to enable authentication/authorization through Azure AD
+    endpoints.MapControllers();
+    endpoints.MapBlazorHub();
+    endpoints.MapFallbackToPage("/_Host");
+});
+
+app.Run();
