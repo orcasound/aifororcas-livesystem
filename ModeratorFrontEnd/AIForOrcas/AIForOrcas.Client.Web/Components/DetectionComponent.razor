@@ -166,7 +166,7 @@
 		{
 			<AuthorizeView Policy="ModeratorRole">
 				<Authorized Context="Auth">
-					<button class="btn btn-primary"
+					<button class="btn btn-primary mr-1"
 							type="submit"
 							@onclick="(() => SubmitUpdate())"
 							disabled="@IsSubmitDisabled">
@@ -174,7 +174,7 @@
 					</button>
 				</Authorized>
 				<NotAuthorized Context="Auth">
-					<a class="btn btn-primary" href="#"
+					<a class="btn btn-primary mr-1" href="#"
 					   data-toggle="modal"
 					   data-target="#loginModal">Submit</a>
 				</NotAuthorized>

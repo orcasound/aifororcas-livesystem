@@ -1,39 +1,25 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthentication(AzureADDefaults.AuthenticationScheme)
-    .AddAzureAD(options => builder.Configuration.Bind("AzureAd", options));
+// Inject application settings
+var appSettings = new AppSettings();
+builder.Configuration.GetSection("AppSettings").Bind(appSettings);
+builder.Services.AddSingleton<AppSettings>(appSettings);
 
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("ModeratorRole", policyBuilder =>
-        policyBuilder.RequireClaim("groups", builder.Configuration["AzureADGroup:ModeratorGroupId"]));
-});
-
-builder.Services.AddBlazoredToast();
+// Inject external libraries (Extensions\External)
+builder.ConfigureExternalUtilities(appSettings);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddHttpContextAccessor();
+// Inject authentication services and access policies (Extensions\Authentication)
+builder.ConfigureAuthProviders();
+builder.ConfigureModeratorPolicy(appSettings);
 
-builder.Services.AddHttpClient<IDetectionService, DetectionService>(client =>
-{
-    client.BaseAddress = new System.Uri(builder.Configuration["APIUrl"]);
-});
+// Inject data services (Extensions\Services)
+builder.ConfigureDataServices();
 
-builder.Services.AddHttpClient<IMetricsService, MetricsService>(client =>
-{
-    client.BaseAddress = new System.Uri(builder.Configuration["APIUrl"]);
-});
-
-builder.Services.AddHttpClient<ITagService, TagService>(client =>
-{
-    client.BaseAddress = new System.Uri(builder.Configuration["APIUrl"]);
-});
-
-builder.Services.AddScoped<IdentityHelper>();
+// Inject web services (Extensions\Services)
+builder.ConfigureWebServices(appSettings);
 
 var app = builder.Build();
 
@@ -52,9 +38,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {

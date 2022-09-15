@@ -26,7 +26,6 @@ public partial class Candidates : IDisposable
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadDetections();
-
 	}
 
 	private async Task LoadDetections()

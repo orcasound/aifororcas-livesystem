@@ -9,13 +9,13 @@ public partial class ReviewedFilterComponent
 	public EventCallback<ReviewedFilterOptionsDTO> ApplyFilterCallback { get; set; }
 
 	[Inject]
-	public IConfiguration Configuration { get; set; }
+	public AppSettings AppSettings { get; set; }
 
 	private List<string> AllLocations = new List<string>();
 
 	protected override void OnInitialized()
 	{
-		AllLocations = Configuration.GetSection("Locations").Get<List<string>>();
+		AllLocations = AppSettings.Locations.ToList();
 	}
 
 	private async Task ApplyFilter()

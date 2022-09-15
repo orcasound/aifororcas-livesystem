@@ -10,13 +10,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="C:\Users\catsk\.nuget\packages\blazorade.msal\2.1.0\contentFiles\any\net6.0\Blazorade-Icon-128.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Blazorade.Msal" Version="2.1.0" />
+		<PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
 		<PackageReference Include="Blazored.Toast" Version="3.2.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="6.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.AzureADB2C.UI" Version="6.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.8" />
 	</ItemGroup>
 
 	<ItemGroup>

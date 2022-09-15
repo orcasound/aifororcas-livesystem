@@ -9,7 +9,8 @@ public partial class UserActivity
 	IJSRuntime JSRuntime { get; set; }
 
 	[Inject]
-	AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+	//AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+	IAccountService AccountService { get; set; }
 
 	private ModeratorMetrics metrics = null;
 
@@ -27,11 +28,7 @@ public partial class UserActivity
 
 	private async Task LoadMetrics()
 	{
-		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-		var user = authState.User;
-
-		filterOptions.Moderator = user.Identity.Name;
-
+		filterOptions.Moderator = await AccountService.GetUsername();
 
 		displayStyle = "d-none";
 		messageStyle = "";

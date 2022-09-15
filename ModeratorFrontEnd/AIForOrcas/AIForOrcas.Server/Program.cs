@@ -4,7 +4,7 @@ var appSettings = new AppSettings();
 builder.Configuration.GetSection("AppSettings").Bind(appSettings);
 builder.Services.AddSingleton<AppSettings>(appSettings);
 
-// Add authentication/authorization middleware (AuthMiddleWareExtensions)
+// Add authentication/authorization middleware (AuthenticationExtensions)
 builder.ConfigureCors();
 builder.ConfigureJwtAuthentication(builder.Configuration.GetSection("AppSettings:AzureAd"));
 builder.ConfigureModeratorPolicy(appSettings);

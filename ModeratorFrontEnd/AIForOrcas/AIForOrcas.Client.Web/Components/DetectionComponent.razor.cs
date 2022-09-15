@@ -8,7 +8,10 @@ public partial class DetectionComponent
 	[Inject]
 	IJSRuntime JSRuntime { get; set; }
 
-	[Inject]
+    [Inject]
+	IAccountService AccountService { get; set; }
+
+    [Inject]
 	AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 
 	[Inject]
@@ -75,15 +78,12 @@ public partial class DetectionComponent
 
 	private async Task SubmitUpdate()
 	{
-		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-		var user = authState.User;
-
 		var request = new DetectionUpdate()
 		{
 			Id = Detection.Id,
 			Comments = Detection.Comments,
 			Tags = Detection.Tags,
-			Moderator = user.Identity.Name,
+			Moderator = await AccountService.GetUsername(),
 			Moderated = DateTime.Now,
 			Reviewed = true,
 			Found = Detection.Found

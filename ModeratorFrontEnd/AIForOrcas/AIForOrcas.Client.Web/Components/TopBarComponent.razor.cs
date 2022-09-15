@@ -5,13 +5,13 @@ public partial class TopBarComponent
 	[Inject]
 	IJSRuntime JSRuntime { get; set; }
 
-	[Inject]
-	IdentityHelper IdentityHelper { get; set; }
+    [Inject]
+	IAccountService AccountService { get; set; }
 
 	[Parameter]
 	public string CurrentUrl { get; set; }
 
-	private string UserName { get; set; }
+	private string DisplayName { get; set; }
 
 	private string DisplayDate { get; set; }
 
@@ -33,7 +33,7 @@ public partial class TopBarComponent
 
 	protected override async Task OnInitializedAsync()
 	{
-		UserName = await IdentityHelper.GetName();
+		DisplayName = await AccountService.GetDisplayname();
 		SetDateTime();
 		CancellationTokenSource = new CancellationTokenSource();
 		await RealTimeUpdate(CancellationTokenSource.Token);
@@ -49,6 +49,11 @@ public partial class TopBarComponent
 	{
 		await JSRuntime.InvokeVoidAsync("ToggleSideBar");
 	}
+
+	private async Task Login()
+    {
+		await AccountService.Login();
+    }
 
 	public async Task RealTimeUpdate(CancellationToken cancellationToken)
 	{
