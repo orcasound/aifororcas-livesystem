@@ -20,7 +20,7 @@ on:
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:
-  DOTNET_VERSION: 3.1.x
+  DOTNET_VERSION: 6.0.x
   DOTNET_RUNTIME: win-x86
   WORKING_DIR: ModeratorFrontEnd/AIForOrcas/AIForOrcas.Client.Web
   PUBLISH_DIR: output
