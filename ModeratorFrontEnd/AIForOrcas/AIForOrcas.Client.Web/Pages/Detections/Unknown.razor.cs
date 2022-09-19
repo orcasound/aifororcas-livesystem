@@ -72,8 +72,6 @@ public partial class Unknown : IDisposable
 		await Service.UpdateRequestAsync(request);
 
 		ToastService.ShowSuccess("Detection successfully updated.");
-
-		paginationOptions.Page = 1;
 		await LoadDetections();
 	}
 

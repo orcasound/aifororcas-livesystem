@@ -8,6 +8,9 @@ public partial class Confirmed : IDisposable
 	[Inject]
 	IDetectionService Service { get; set; }
 
+	[Inject]
+	IToastService ToastService { get; set; }
+
 	private List<Detection> detections = null;
 
 	private PaginationOptionsDTO paginationOptions =
@@ -44,7 +47,6 @@ public partial class Confirmed : IDisposable
 			detections = paginatedResponse.Response;
 		}
 	}
-
 	private async Task ActOnSelectPageCallback(PaginationOptionsDTO returnedPaginationOptions)
 	{
 		paginationOptions = returnedPaginationOptions;
@@ -54,10 +56,19 @@ public partial class Confirmed : IDisposable
 		StateHasChanged();
 	}
 
+	private async Task ActOnSubmitCallback(DetectionUpdate request)
+	{
+		await Service.UpdateRequestAsync(request);
+
+		ToastService.ShowSuccess("Detection successfully updated.");
+
+		paginationOptions.Page = 1;
+		await LoadDetections();
+	}
+
 	private async Task ActOnApplyFilterCallback(ReviewedFilterOptionsDTO returnedFilterOptions)
 	{
 		filterOptions = returnedFilterOptions;
-		paginationOptions.Page = 1;
 		detections = null;
 		await LoadDetections();
 		await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
