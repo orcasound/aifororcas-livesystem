@@ -1,28 +1,50 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace AIForOrcas.Client.Web
+// Inject application settings
+var appSettings = new AppSettings();
+builder.Configuration.GetSection("AppSettings").Bind(appSettings);
+builder.Services.AddSingleton<AppSettings>(appSettings);
+
+// Inject external libraries (Extensions\External)
+builder.ConfigureExternalUtilities(appSettings);
+
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+
+// Inject authentication services and access policies (Extensions\Authentication)
+builder.ConfigureAuthProviders();
+builder.ConfigureModeratorPolicy(appSettings);
+
+// Inject data services (Extensions\Services)
+builder.ConfigureDataServices();
+
+// Inject web services (Extensions\Services)
+builder.ConfigureWebServices(appSettings);
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			CreateHostBuilder(args).Build().Run();
-		}
-
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				});
-	}
+    app.UseDeveloperExceptionPage();
 }
+else
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+    // MapControllers in needed to enable authentication/authorization through Azure AD
+    endpoints.MapControllers();
+    endpoints.MapBlazorHub();
+    endpoints.MapFallbackToPage("/_Host");
+});
+
+app.Run();

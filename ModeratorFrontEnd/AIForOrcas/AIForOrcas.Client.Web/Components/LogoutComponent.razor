@@ -12,9 +12,7 @@
 			<div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
 			<div class="modal-footer">
 				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-				<form method="post" action="AzureADB2C/Account/SignOut">
-					<button type="submit" class="btn btn-primary">Logout</button>
-				</form>
+				<button class="btn btn-primary" data-dismiss="modal" @onclick="Logout">Log Out</button>
 			</div>
 		</div>
 	</div>
