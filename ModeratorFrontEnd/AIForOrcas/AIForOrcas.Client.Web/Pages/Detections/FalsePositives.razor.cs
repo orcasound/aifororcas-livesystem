@@ -8,6 +8,9 @@ public partial class FalsePositives : IDisposable
 	[Inject]
 	IDetectionService Service { get; set; }
 
+	[Inject]
+	IToastService ToastService { get; set; }
+
 	private List<Detection> detections = null;
 
 	private PaginationOptionsDTO paginationOptions =
@@ -62,6 +65,15 @@ public partial class FalsePositives : IDisposable
 		await LoadDetections();
 		await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
 		StateHasChanged();
+	}
+
+	private async Task ActOnSubmitCallback(DetectionUpdate request)
+	{
+		await Service.UpdateRequestAsync(request);
+
+		ToastService.ShowSuccess("Detection successfully updated.");
+
+		await LoadDetections();
 	}
 
 	void IDisposable.Dispose()

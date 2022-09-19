@@ -21,9 +21,6 @@ public partial class DetectionComponent
 	public Detection Detection { get; set; }
 
 	[Parameter]
-	public bool IsEditable { get; set; } = true;
-
-	[Parameter]
 	public EventCallback<DetectionUpdate> SubmitCallback { get; set; }
 
 	private string[] optionList = new string[] { "Yes", "No", "Don't Know" };

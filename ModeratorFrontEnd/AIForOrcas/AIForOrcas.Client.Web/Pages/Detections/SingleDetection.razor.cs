@@ -16,7 +16,6 @@ public partial class SingleDetection : ComponentBase, IDisposable
 
 	private Detection detection = null;
 	private bool isFound = true;
-	private bool isEditable = false;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -28,9 +27,6 @@ public partial class SingleDetection : ComponentBase, IDisposable
 		detection = await Service.GetDetectionAsync(Id);
 		if(detection.Id == null)
 			isFound = false;
-
-		if(detection.Found.ToLower() == "don't know" || !detection.Reviewed)
-			isEditable = true;
 	}
 
 	private async Task ActOnSubmitCallback(DetectionUpdate request)
