@@ -65,6 +65,16 @@ The remaining projects in the solution represent code that is shared between the
 ** TagsController**
 - Set up policy-based authentication for PUT and DELETE endpoints
 
+#### AIForOrcas.Client.Web
+**Overall**
+- Migrated to .NET 6
+- NuGet packages updated to .NET 6 versions
+- Migrated Program.cs and Startup.cs to hosting in Program.cs (a new .NET 6 feature)
+- Created a global usings file and moved all the using reference into it (a new .NET 6 feature)
+- Dropped the namespace {} for all classes (a new .NET 6 feature)
+- Set up authentication against the API
+- Removed uneeded Azure B2C components
+
 ### 2021-03-15
 #### AIForOrcas.Server
 **DetectionsController**
