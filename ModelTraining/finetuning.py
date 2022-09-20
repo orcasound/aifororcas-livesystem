@@ -75,7 +75,7 @@ def export_wave_file(audio, begin, end, dest):
 
 def extract_segments(audioPath, sampleDict, destnPath, suffix):
     '''
-    Function to exctact segments given a audio path folder and proposal segments
+    Function to extract segments given an audio path folder and proposal segments
     '''
     # Listing the local audio files
     local_audio_files = str(audioPath) + '/'
@@ -88,6 +88,7 @@ def extract_segments(audioPath, sampleDict, destnPath, suffix):
             output_file_path = destnPath + output_file_name
             export_wave_file(audio_file, begin_time,
                              end_time, output_file_path)
+
 def pre_process(dataPath=data_folder):
     """
     Function to convert new audio file containing False Negative into model-ready stream
@@ -210,7 +211,7 @@ def finetune(dataPath=data_folder, modelName="rnd1to10_stg4-rn50.pkl", newModelN
     Function to do finetuning of the model
     """
 
-    # Definining Audio config needed to create on the fly mel spectograms
+    # Define AudioConfig needed to create on-the-fly mel spectograms.
     config = AudioConfig(
         standardize=False,
         sg_cfg=SpectrogramConfig(
@@ -230,7 +231,7 @@ def finetune(dataPath=data_folder, modelName="rnd1to10_stg4-rn50.pkl", newModelN
     config.resample_to = 20000  # Every sample at 20000 frequency
     config.downmix = True
 
-    # Creating Data Loader
+    # Create DataLoader and put 10% of randomly selected data in the validation set.
     audios = (
         AudioList.from_folder(data_folder, config=config)
         .split_by_rand_pct(0.1, seed=4)
