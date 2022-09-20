@@ -1,6 +1,6 @@
 import os
 import shutil
-import pandas as pd
+import random
 from pydub import AudioSegment
 from librosa import get_duration
 from pathlib import Path
@@ -150,34 +150,32 @@ Resulting Folder Structure -
 """
 
 
-def data_blender(data_path):
+def data_blender(data_path, random_seed=2):
     """
     Function to blend the original data with new data
 
     """
-    neg_samples = len((data_path / "negative").ls())
-    new_neg_samples = len((data_path / "new_samples").ls())
+    data_path = Path(data_path)
+    neg_samples = list((data_path / "negative").glob("*.wav"))
+    new_neg_samples = list((data_path / "new_samples").glob("*.wav"))
+    n_neg_samples = len(neg_samples)
 
-    neg_img_list = pd.Series(
-        (data_path / "negative").ls() + (data_path / "new_samples").ls()
+    # randomly blend neg_samples keeping the same total number as original
+    random.seed(random_seed)
+    blended_neg_samples = random.sample(
+        neg_samples + new_neg_samples,
+        k=n_neg_samples
     )
 
-    # Randomly selecting neg_samples for overall list
-    new_neg_img_list = neg_img_list.sample(n=neg_samples, replace=False).values
+    # copying all blended negative samples
+    os.makedirs(data_path / "blended_negative", exist_ok=True)
+    for item in blended_neg_samples:
+        shutil.copy(src=str(item), dst=str(data_path / "blended_negative"))
 
-    # Get image name
-    new_neg_img_list = [str(item).split("/")[-1] for item in new_neg_img_list]
-
-    # copying all data from new samples to negative
-    for item in (data_path / "new_samples").ls():
-        shutil.move(src=str(item), dst=data_path / "negative", copy_function=shutil.copy)
-
-    # removing new samples directory
-    shutil.rmtree(data_path / "new_samples")
-
-    for item in (data_path / "negative").ls():
-        if str(item).split("/")[-1] not in new_neg_img_list:
-            os.remove(item)
+    # cleanup directories
+    shutil.rmtree(str(data_path / "new_samples"))
+    shutil.rmtree(str(data_path / "negative"))
+    shutil.move(str(data_path / "blended_negative"), str(data_path / "negative"))
 
 
 data_blender()
@@ -248,7 +246,7 @@ def finetune(
 
     # Create DataLoader and put 10% of randomly selected data in the validation set.
     audios = (
-        AudioList.from_folder(data_folder, config=config)
+        AudioList.from_folder(data_path, config=config)
         .split_by_rand_pct(0.1, seed=4)
         .label_from_folder()
     )
@@ -261,17 +259,17 @@ def finetune(
     db = audios.transform(tfms).databunch(bs=64)
 
     # Load model and unfreezing layers to update
-    model = load_learner(data_folder / "models", model_name)
-    learn.unfreeze()
+    learner = load_learner(data_path / "models", model_name)
+    learner.unfreeze()
 
     # Assigning databunch to the model class
-    learn.data = db
+    learner.data = db
 
     # 1-cycle learning (10 epochs and variable learning rate)
-    learn.fit_one_cycle(10, 1e-3)
+    learner.fit_one_cycle(10, 1e-3)
 
     # Outputting the new model weights
-    learn.export(new_model_name)
+    learner.export(new_model_name)
 
 
 """
