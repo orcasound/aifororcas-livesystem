@@ -56,7 +56,7 @@ class FastAIModel():
         Function which generates local predictions using wavefile
         '''
 
-        # Creates local directory to save 2 second clops
+        # Creates local directory to save 2 second clips
         local_dir = "./fastai_dir/"
         if not os.path.exists(local_dir):
             os.makedirs(local_dir)
