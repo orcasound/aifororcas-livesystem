@@ -49,7 +49,18 @@ The remaining projects in the solution represent code that is shared between the
 - Migrated target framework to .NET 6
 - Updated NuGet packages to .NET 6 versions
 - Dropped the namespace {} for all classes (a new .NET 6 feature)
-
+- Migrated Program.cs and Startup.cs to hosting in Program.cs (a new .NET 6 feature)
+- Moved service injections and configurations into their own extension classes to shorten and cleanup Program.cs
+- Added Azure Active Directory authentication
+**Swagger**
+- Set up authentication for the Swagger documentation so protected endpoints could be accessed
+- Cleaned up the Swagger documentation for all the controllers
+- Finished descriptions for the classes used in the Swagger documentation
+- Removed the Schema list from the bottom the Swagger page
+**DetectionsController**
+- Set up policy-based authentication for PUT endpoint
+** TagsController**
+- Set up policy-based authentication for PUT and DELETE endpoints
 
 ### 2021-03-15
 #### AIForOrcas.Server
