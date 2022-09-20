@@ -44,7 +44,7 @@ The remaining projects in the solution represent code that is shared between the
 ## Release Notes
 
 ### 2022-09-21
-### AIForOrcas.Server
+#### AIForOrcas.Server
 **Overall**
 - Migrated target framework to .NET 6
 - Updated NuGet packages to .NET 6 versions
@@ -62,7 +62,7 @@ The remaining projects in the solution represent code that is shared between the
 **DetectionsController**
 - Set up policy-based authentication for PUT endpoint
 
-** TagsController**
+**TagsController**
 - Set up policy-based authentication for PUT and DELETE endpoints
 
 #### AIForOrcas.Client.Web
