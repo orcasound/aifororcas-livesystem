@@ -74,6 +74,20 @@ The remaining projects in the solution represent code that is shared between the
 - Dropped the namespace {} for all classes (a new .NET 6 feature)
 - Set up authentication against the API
 - Removed uneeded Azure B2C components
+- Moved Configuration settings into their own class and injected into various classes for use
+- Moved service injections and configurations into their own extension classes to shorten and cleanup Program.cs
+
+**Detections**
+- Tweaked style on Submit button to match spacing with other buttons
+- Changed the component so that modifyable content is only available when a user is logged in as a moderator
+- Changed the component so that the Submit button is only available when a user is logged in as a moderator
+
+**Confirmed, False Positive, Unknown Detections**
+- Changed the pages so that a detection's information (Tags, Comments, Results) can be updated after the initial moderator has reviewed
+
+**Dashboard/User Activity**
+- Changed so that clicking a detection link associated with a Tag opens it in a new tab so that
+  users don't have to reload the tag list when they close the detection link
 
 ### 2021-03-15
 #### AIForOrcas.Server
