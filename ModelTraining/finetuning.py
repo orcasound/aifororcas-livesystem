@@ -244,7 +244,7 @@ def finetune(
     config.resample_to = 20000  # Every sample at 20000 frequency.
     config.downmix = True
 
-    # Create DataLoader and put 10% of randomly selected data in the validation set.
+    # Create DataLoader and put 10% randomly selected data in validation set.
     audios = (
         AudioList.from_folder(data_path, config=config)
         .split_by_rand_pct(0.1, seed=4)
@@ -259,13 +259,15 @@ def finetune(
     db = audios.transform(tfms).databunch(bs=64)
 
     # Load model and unfreezing layers to update
-    learner = load_learner(data_path / "models", model_name)
+    # If cpu argument is set to false, will use GPUs if available
+    learner = load_learner(data_path / "models" / model_name, cpu=False)
     learner.unfreeze()
 
     # Assigning databunch to the model class
     learner.data = db
 
     # 1-cycle learning (10 epochs and variable learning rate)
+    # first described in (https://arxiv.org/abs/1708.07120)
     learner.fit_one_cycle(10, 1e-3)
 
     # Outputting the new model weights
