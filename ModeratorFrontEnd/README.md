@@ -43,6 +43,14 @@ The remaining projects in the solution represent code that is shared between the
 
 ## Release Notes
 
+### 2022-09-21
+### AIForOrcas.Server
+**Overall**
+- Migrated target framework to .NET 6
+- Updated NuGet packages to .NET 6 versions
+- Dropped the namespace {} for all classes (a new .NET 6 feature)
+
+
 ### 2021-03-15
 #### AIForOrcas.Server
 **DetectionsController**
