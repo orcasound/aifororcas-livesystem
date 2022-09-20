@@ -1,16 +1,11 @@
-from fastai.basic_train import load_learner
+import os
+import shutil
 import pandas as pd
-import numpy as np
-
 from pydub import AudioSegment
 from librosa import get_duration
 from pathlib import Path
-from numpy import floor
 from audio.data import AudioConfig, SpectrogramConfig, AudioList
 from audio.transform import get_spectro_transforms
-import os
-import shutil
-import matplotlib.pyplot as plt
 
                           
 # Defining Path variable
