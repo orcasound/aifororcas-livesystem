@@ -210,20 +210,20 @@ def finetune(dataPath=data_folder, modelName="rnd1to10_stg4-rn50.pkl", newModelN
     config = AudioConfig(
         standardize=False,
         sg_cfg=SpectrogramConfig(
-            f_min=0.0,  # Minimum frequency to Display
-            f_max=10000,  # Maximum Frequency to Display
+            f_min=0.0,  # Minimum frequency to display.
+            f_max=10000,  # Maximum frequency to display.
             hop_length=256,
-            n_fft=2560,  # Number of Samples for Fourier
-            n_mels=256,  # Mel bins
+            n_fft=2560,  # Number of samples for Fast Fourier Transform (FFT).
+            n_mels=256,  # Mel bins.
             pad=0,
-            to_db_scale=True,  # Converting to DB sclae
-            top_db=100,  # Top decible sound
+            to_db_scale=True,  # Converting to dB scale.
+            top_db=100,  # Top decibel sound.
             win_length=None,
             n_mfcc=20,
         ),
     )
-    config.duration = 4000  # 4 sec padding or snip
-    config.resample_to = 20000  # Every sample at 20000 frequency
+    config.duration = 4000  # 4 sec padding or snip.
+    config.resample_to = 20000  # Every sample at 20000 frequency.
     config.downmix = True
 
     # Create DataLoader and put 10% of randomly selected data in the validation set.
@@ -233,11 +233,11 @@ def finetune(dataPath=data_folder, modelName="rnd1to10_stg4-rn50.pkl", newModelN
         .label_from_folder()
     )
 
-    ## Defining Transformation
-    ## Frequency masking:ON
+    # Define transforms to be applied to the data.
+    # Frequency masking is enabled to augment data.
     tfms = get_spectro_transforms(mask_time=False, mask_freq=True, roll=False) 
 
-    ## Creating a databunch
+    # Create a databunch with batchsize = 64.
     db = audios.transform(tfms).databunch(bs=64)
 
 
