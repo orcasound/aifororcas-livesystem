@@ -12,13 +12,13 @@ The basic workflow is as follows:
 The moderator front end solution has two primary components that are both located in the /ModeratorFrontEnd/AIForOrcas folder:
 
 ### A Web API to Interact with the CosmosDB backend
-This is a standard .NET Core Web API found in the AIForOrcas.Server project and is published to Azure App Service as https://aifororcasdetections.azurewebsites.net
+This is a standard .NET Core Web API found in the AIForOrcas.Server project and is published to Azure App Service as https://aifororcasdetections.azurewebsites.net/swagger
 
 #### Publish Settings
-- Site Url: https://aifororcasdetections.azurewebsites.net
+- Site Url: https://aifororcasdetections.azurewebsites.net/swagger
 - Resource group: AIForOrcas
 - Configuration: Release
-- Target framework: netcoreapp3.1
+- Target framework: net6.0
 - Deployment mode: Self-contained
 - Target runtime: win-x86
 
@@ -29,7 +29,7 @@ This is a .NET Core Blazor-based web site found in the AIForOrcas.Client.Web pro
 - Site Url: https://aifororcas.azurewebsites.net
 - Resource group: AIForOrcas
 - Configuration: Release
-- Target framework: netcoreapp3.1
+- Target framework: net6.0
 - Deployment mode: Self-contained
 - Target runtime: win-x86
 
