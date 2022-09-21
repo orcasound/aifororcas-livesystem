@@ -15,8 +15,7 @@ else
 	<!-- Cards -->
 	@for (var i = 0; i < detections.Count(); i++)
 	{
-		<DetectionComponent IsEditable=false
-							Detection=@detections[i] />
+		<DetectionComponent SubmitCallback="ActOnSubmitCallback" Detection=@detections[i] />
 	}
 }
 

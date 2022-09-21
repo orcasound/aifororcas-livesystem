@@ -195,18 +195,7 @@ Preprocessing: Downmixing to Mono
 Preprocessing: Resampling to 200009/59 00:00<00:00]
 ```
 
-# Deploying an updated docker build to Azure Container Instances
-
-## Prerequisites
-
-- You must have completed all of the steps above and should have a 
-container that is working locally that you wish to deploy live to production.
-
-- **Azure CLI**: You must have Azure CLI version 2.0.29 or later installed on your local computer. Run `az --version` to find the 
-version. If you need to install or upgrade, see 
-[Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
-
-## Pushing your image to Azure Container Registry
+# Pushing your image to Azure Container Registry
 
 This step pushes your local container to the Azure Container Registry (ACR).  If you would like more information, this
 documentation is adapted from 
@@ -247,6 +236,80 @@ Lastly, push your image to Azure Container Registry for each Orcasound Hydrophon
 docker push orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.<hydrophone-location>.v<Major>
 ```
 
+# Deploying an updated docker build to Azure Kubernetes Service
+
+We are deploying one hydrophone per namespace. To deploy a hydrophone, the following Kubernetes resources need to be created:
+
+1. Namespace: used to group resources
+2. Secret: holds connection strings used by inference system
+3. Deployment: forces one instance of inference system to remain running at all times
+
+## Prerequisites
+
+- You must have completed all of the steps above and should have a working container image pushed to ACR.
+- az cli: installation instructions [here](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+- kubectl cli: if you don't have this, you can run `az aks install-cli` or install it using instructions [here](https://kubernetes.io/docs/tasks/tools/)
+
+1. Log into az cli
+
+```bash
+az login
+```
+
+2. Log into Kubernetes cluster. The current cluster is called inference-system-AKS in the micya-test resource group.
+
+```bash
+# replace "inference-system-AKS" with cluster name and "micya-test" with resource group
+az aks get-credentials -g micya-test -n inference-system-AKS
+```
+
+Verify it is successful. You should see a list of VM names and no error message.
+
+```bash
+kubectl get nodes
+```
+
+3. If deploying a new hydrophone, create a new namespace and secret. Skip this step if not bringing up a new hydrophone.
+
+```bash
+# replace "bush-point" with hydrophone identifier
+kubectl create namespace bush-point
+
+kubectl create secret generic inference-system -n bush-point \
+    --from-literal=AZURE_COSMOSDB_PRIMARY_KEY='<cosmos_primary_key>' \
+    --from-literal=AZURE_STORAGE_CONNECTION_STRING='<storage_connection_string>`' \
+    --from-literal=INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING='<appinsights_connection_string>'
+```
+
+4. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one.
+
+```bash
+kubectl apply -f bush-point.yaml
+```
+
+5. To verify that the container is running, check logs:
+
+```bash
+# get pod name
+kubectl get pods -n bush-point
+
+# replace pod name (likely will have different alphanumeric string at the end)
+kubectl logs -n bush-point inference-system-6d4845c5bc-tfsbw
+```
+
+<details>
+  <summary>Deployment to Azure Container Instances (deprecated)</summary>
+# Deploying an updated docker build to Azure Container Instances
+
+## Prerequisites
+
+- You must have completed all of the steps above and should have a 
+container that is working locally that you wish to deploy live to production.
+
+- **Azure CLI**: You must have Azure CLI version 2.0.29 or later installed on your local computer. Run `az --version` to find the 
+version. If you need to install or upgrade, see 
+[Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+
 ## Deploying your updated container to Azure Container Instances
 
 Ask an existing maintainer for the file `deploy-aci-with-creds.yaml` or change strings in `deploy-aci.yaml`.  There are three sensitive strings that must be filled in before deployment can
@@ -274,6 +337,8 @@ View the container logs with the following command.  The logs should be similar 
 ```
 az container attach --resource-group LiveSRKWNotificationSystem --name live-inference-system-aci-3gb-new
 ```
+
+</details>
 
 # No changes made to deploy-aci.yaml?
 
