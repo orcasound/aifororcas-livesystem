@@ -37,7 +37,7 @@ jobs:
     - name: Dependencies
       run: dotnet restore -r ${{ env.DOTNET_RUNTIME }}
     - name: Build
-      run: dotnet build --no-restore -c Release -r ${{ env.DOTNET_RUNTIME }}
+      run: dotnet build --no-restore -c Release -r ${{ env.DOTNET_RUNTIME }} --self-contained
 #    - name: Test
 #      run: dotnet test --no-restore -r ${{ env.DOTNET_RUNTIME }}
     - name: Publish
