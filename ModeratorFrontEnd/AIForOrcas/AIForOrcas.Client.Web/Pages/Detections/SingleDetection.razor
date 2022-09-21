@@ -1,5 +1,6 @@
 ﻿@page "/detections/detection/{id}"
 
+<PageTitle>Detection - @Id</PageTitle>
 <PageHeadingComponent Title="Detection" />
 
 @if (detection == null)
@@ -8,7 +9,7 @@
 }
 else if (isFound)
 {
-	<DetectionComponent SubmitCallback="ActOnSubmitCallback" Detection=@detection IsEditable=@isEditable />
+	<DetectionComponent SubmitCallback="ActOnSubmitCallback" Detection=@detection />
 }
 else
 {

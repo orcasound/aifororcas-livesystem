@@ -26,21 +26,21 @@ namespace AIForOrcas.DTO.API
 		public string SortOrder { get; set; } = "desc";
 
 		/// <summary>
-		/// Timeframe for the record set (last 30m, 3h, 6h, 24h, 1w, 30d, all).
+		/// Timeframe for the record set (last 30m, 3h, 6h, 24h, 1w, 30d, range, all).
 		/// </summary>
 		/// <example>all</example>
 		public string Timeframe { get; set; } = "all";
 
 		/// <summary>
-		/// Date range filter for from Date
+		/// Date range filter for from Date (mm/dd/yyyy)
 		/// </summary>
-		/// <example>all</example>
+		/// <example>12/01/2021</example>
 		public DateTime? DateFrom { get; set; }
 
 		/// <summary>
-		/// Date range filter for To Date
+		/// Date range filter for To Date (mm/dd/yyyy)
 		/// </summary>
-		/// <example>all</example>
+		/// <example>01/15/2022</example>
 		public DateTime? DateTo { get; set; }
 
 		/// <summary>

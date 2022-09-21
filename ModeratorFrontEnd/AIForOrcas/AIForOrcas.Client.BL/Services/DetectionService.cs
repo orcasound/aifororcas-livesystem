@@ -76,6 +76,8 @@ namespace AIForOrcas.Client.BL.Services
 			var dataJson = JsonSerializer.Serialize(request);
 			var stringContent = new StringContent(dataJson, Encoding.UTF8, "application/json");
 
+			// TODO: Catch authentication issues
+
 			var httpResponseMessage = await httpClient.PutAsync(url, stringContent);
 		}
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -18,14 +18,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="3.1.20" />
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="3.1.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.8" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="1.25.2" />
+		<PackageReference Include="Microsoft.Identity.Web.UI" Version="1.25.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\AIForOrcas.DTO\AIForOrcas.DTO.csproj" />
 		<ProjectReference Include="..\AIForOrcas.Server.BL\AIForOrcas.Server.BL.csproj" />
 	</ItemGroup>
+
+	<ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="https://geojson.org/schema/GeoJSON.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

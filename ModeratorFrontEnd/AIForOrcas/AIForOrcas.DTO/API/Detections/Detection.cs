@@ -11,16 +11,19 @@ namespace AIForOrcas.DTO.API
 		/// <summary>
 		/// The detection's generated unique Id.
 		/// </summary>
+		/// <example>00000000-0000-0000-0000-000000000000</example>
 		public string Id { get; set; }
 
 		/// <summary>
 		/// URI of the detection's audio file (.wav) in blob storage.
 		/// </summary>
+		/// <example>https://storagesite.blob.core.windows.net/audiowavs/audiofilename.wav</example>
 		public string AudioUri { get; set; }
 
 		/// <summary>
 		/// URI of the detection's image file (.png) in blob storage.
 		/// </summary>
+		/// <example>https://storagesite.blob.core.windows.net/spectrogramspng/imagefilename.png</example>
 		public string SpectrogramUri { get; set; }
 
 		/// <summary>
@@ -42,18 +45,19 @@ namespace AIForOrcas.DTO.API
 		/// <summary>
 		/// Flag indicating whether or not the dection has been reviewed by a human moderator.
 		/// </summary>
-		/// <example>true, false</example>
+		/// <example>true</example>
 		public bool Reviewed { get; set; }
 
 		/// <summary>
 		/// Flag indicating whether the human moderator heard whale sounds in the detection.
 		/// </summary>
-		/// <example>yes, no, don't know</example>
+		/// <example>yes</example>
 		public string Found { get; set; }
 
 		/// <summary>
 		/// Any text comments entered by the human moderator during review.
 		/// </summary>
+		/// <example>Clear whale sounds detected.</example> 
 		public string Comments { get; set; }
 
 		/// <summary>
@@ -65,6 +69,7 @@ namespace AIForOrcas.DTO.API
 		/// <summary>
 		/// Identity of the human moderator (User Principal Name for AzureAD) performing the review.
 		/// </summary>
+		/// <example>user@gmail.com</example>
 		public string Moderator { get; set; }
 
 		/// <summary>

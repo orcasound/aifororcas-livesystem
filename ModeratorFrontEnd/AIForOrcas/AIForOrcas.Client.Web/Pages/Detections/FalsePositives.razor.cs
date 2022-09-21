@@ -1,81 +1,83 @@
-﻿using AIForOrcas.Client.BL.Services;
-using AIForOrcas.DTO;
-using AIForOrcas.DTO.API;
-using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿namespace AIForOrcas.Client.Web.Pages.Detections;
 
-namespace AIForOrcas.Client.Web.Pages.Detections
+public partial class FalsePositives : IDisposable
 {
-	public partial class FalsePositives : IDisposable
+	[Inject]
+	IJSRuntime JSRuntime { get; set; }
+
+	[Inject]
+	IDetectionService Service { get; set; }
+
+	[Inject]
+	IToastService ToastService { get; set; }
+
+	private List<Detection> detections = null;
+
+	private PaginationOptionsDTO paginationOptions =
+		new PaginationOptionsDTO() { RecordsPerPage = 5, Page = 1 };
+
+	private ReviewedFilterOptionsDTO filterOptions =
+		new ReviewedFilterOptionsDTO() { SortBy = "timestamp", SortOrder = "desc", Timeframe = "24h", Location = "all" };
+
+	private PaginationResultsDTO pagination = new PaginationResultsDTO();
+
+	private string loadStatus = null;
+
+	protected override async Task OnInitializedAsync()
 	{
-		[Inject]
-		IJSRuntime JSRuntime { get; set; }
+		await LoadDetections();
+	}
 
-		[Inject]
-		IDetectionService Service { get; set; }
+	private async Task LoadDetections()
+	{
+		loadStatus = "Loading records...";
+		var paginatedResponse = await Service.GetFalseDetectionsAsync(paginationOptions, filterOptions);
 
-		private List<Detection> detections = null;
+		pagination.TotalNumberOfRecords = paginatedResponse.TotalNumberRecords;
+		pagination.TotalNumberOfPages = paginatedResponse.TotalAmountPages;
+		pagination.CurrentPage = paginationOptions.Page;
 
-		private PaginationOptionsDTO paginationOptions =
-			new PaginationOptionsDTO() { RecordsPerPage = 5, Page = 1 };
-
-		private ReviewedFilterOptionsDTO filterOptions =
-			new ReviewedFilterOptionsDTO() { SortBy = "timestamp", SortOrder = "desc", Timeframe = "24h", Location = "all" };
-
-		private PaginationResultsDTO pagination = new PaginationResultsDTO();
-
-		private string loadStatus = null;
-
-		protected override async Task OnInitializedAsync()
+		if (paginatedResponse.Response == null)
+			loadStatus = "An unknown error occurred while loading records...";
+		else if (paginatedResponse.Response.Count == 0)
+			loadStatus = "No records found for the selected filter options. Please select a different set of filter options...";
+		else
 		{
-			await LoadDetections();
+			loadStatus = null;
+			detections = paginatedResponse.Response;
 		}
+	}
 
-		private async Task LoadDetections()
-		{
-			loadStatus = "Loading records...";
-			var paginatedResponse = await Service.GetFalseDetectionsAsync(paginationOptions, filterOptions);
+	private async Task ActOnSelectPageCallback(PaginationOptionsDTO returnedPaginationOptions)
+	{
+		paginationOptions = returnedPaginationOptions;
+		detections = null;
+		await LoadDetections();
+		await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
+		StateHasChanged();
+	}
 
-			pagination.TotalNumberOfRecords = paginatedResponse.TotalNumberRecords;
-			pagination.TotalNumberOfPages = paginatedResponse.TotalAmountPages;
-			pagination.CurrentPage = paginationOptions.Page;
+	private async Task ActOnApplyFilterCallback(ReviewedFilterOptionsDTO returnedFilterOptions)
+	{
+		filterOptions = returnedFilterOptions;
+		paginationOptions.Page = 1;
+		detections = null;
+		await LoadDetections();
+		await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
+		StateHasChanged();
+	}
 
-			if (paginatedResponse.Response == null)
-				loadStatus = "An unknown error occurred while loading records...";
-			else if (paginatedResponse.Response.Count == 0)
-				loadStatus = "No records found for the selected filter options. Please select a different set of filter options...";
-			else
-			{
-				loadStatus = null;
-				detections = paginatedResponse.Response;
-			}
-		}
+	private async Task ActOnSubmitCallback(DetectionUpdate request)
+	{
+		await Service.UpdateRequestAsync(request);
 
-		private async Task ActOnSelectPageCallback(PaginationOptionsDTO returnedPaginationOptions)
-		{
-			paginationOptions = returnedPaginationOptions;
-			detections = null;
-			await LoadDetections();
-			await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
-			StateHasChanged();
-		}
+		ToastService.ShowSuccess("Detection successfully updated.");
 
-		private async Task ActOnApplyFilterCallback(ReviewedFilterOptionsDTO returnedFilterOptions)
-		{
-			filterOptions = returnedFilterOptions;
-			paginationOptions.Page = 1;
-			detections = null;
-			await LoadDetections();
-			await JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
-			StateHasChanged();
-		}
+		await LoadDetections();
+	}
 
-		void IDisposable.Dispose()
-		{
-			JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
-		}
+	void IDisposable.Dispose()
+	{
+		JSRuntime.InvokeVoidAsync("DestroyActivePlayer");
 	}
 }

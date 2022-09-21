@@ -1,27 +1,23 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.Threading.Tasks;
+﻿namespace AIForOrcas.Client.Web.Pages;
 
-namespace AIForOrcas.Client.Web.Pages
+public partial class MainLayout
 {
-	public partial class MainLayout
+	string darkTheme = string.Empty;
+
+	[Inject]
+	NavigationManager Nav { get; set; }
+
+	private string CurrentUrl;
+
+	public void ActOnToggleThemeCallback()
 	{
-		string darkTheme = string.Empty;
+		darkTheme = string.IsNullOrWhiteSpace(darkTheme) ? "css/sb-admin-2-dark.css" : "";
+		StateHasChanged();
+	}
 
-		[Inject]
-		NavigationManager Nav { get; set; }
-
-		private string CurrentUrl;
-
-		public void ActOnToggleThemeCallback()
-		{
-			darkTheme = string.IsNullOrWhiteSpace(darkTheme) ? "css/sb-admin-2-dark.css" : "";
-			StateHasChanged();
-		}
-
-		protected override void OnAfterRender(bool firstRender)
-		{
-			CurrentUrl = Nav.Uri;
-			StateHasChanged();
-		}
+	protected override void OnAfterRender(bool firstRender)
+	{
+		CurrentUrl = Nav.Uri;
+		StateHasChanged();
 	}
 }
