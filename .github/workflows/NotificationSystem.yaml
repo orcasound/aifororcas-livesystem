@@ -14,7 +14,7 @@ on:
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:
-  DOTNET_VERSION: 3.1.x
+  DOTNET_VERSION: 6.0.x
   DOTNET_RUNTIME: win-x86
   WORKING_DIR: NotificationSystem
   PUBLISH_DIR: output
@@ -37,7 +37,7 @@ jobs:
     - name: Dependencies
       run: dotnet restore -r ${{ env.DOTNET_RUNTIME }}
     - name: Build
-      run: dotnet build --no-restore -c Release -r ${{ env.DOTNET_RUNTIME }}
+      run: dotnet build --no-restore -c Release -r ${{ env.DOTNET_RUNTIME }} --self-contained
 #    - name: Test
 #      run: dotnet test --no-restore -r ${{ env.DOTNET_RUNTIME }}
     - name: Publish
