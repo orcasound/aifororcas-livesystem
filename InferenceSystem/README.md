@@ -256,11 +256,11 @@ We are deploying one hydrophone per namespace. To deploy a hydrophone, the follo
 az login
 ```
 
-2. Log into Kubernetes cluster. The current cluster is called inference-system-AKS in the micya-test resource group.
+2. Log into Kubernetes cluster. The current cluster is called inference-system-AKS in the LiveSRKWNotificationSystem resource group.
 
 ```bash
-# replace "inference-system-AKS" with cluster name and "micya-test" with resource group
-az aks get-credentials -g micya-test -n inference-system-AKS
+# replace "inference-system-AKS" with cluster name and "LiveSRKWNotificationSystem" with resource group
+az aks get-credentials -g LiveSRKWNotificationSystem -n inference-system-AKS
 ```
 
 Verify it is successful. You should see a list of VM names and no error message.
