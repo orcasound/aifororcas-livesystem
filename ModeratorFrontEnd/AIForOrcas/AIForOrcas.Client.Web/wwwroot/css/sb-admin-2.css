@@ -10206,7 +10206,7 @@ a:focus {
   font-weight: 800;
   padding: 1.5rem 1rem;
   text-align: center;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.05rem;
   z-index: 1;
 }
@@ -10223,11 +10223,18 @@ a:focus {
   margin: 0 1rem 1rem;
 }
 
-.sidebar .sidebar-heading {
+.sidebar-heading {
   text-align: center;
   padding: 0 1rem;
   font-weight: 800;
   font-size: 0.65rem;
+}
+
+.sidebar-subtitle {
+    text-align: left;
+    font-weight: 400;
+    font-size: smaller;
+    color: #858796;
 }
 
 @media (min-width: 768px) {
@@ -10356,8 +10363,8 @@ a:focus {
   border-top: 1px solid #eaecf4;
 }
 
-.sidebar-light .sidebar-heading {
-  color: #b7b9cc;
+.sidebar-light .sidebar-heading .sidebar-subtitle {
+    color: #b7b9cc;
 }
 
 .sidebar-light .nav-item .nav-link {
@@ -10408,8 +10415,8 @@ a:focus {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.sidebar-dark .sidebar-heading {
-  color: rgba(255, 255, 255, 0.4);
+.sidebar-dark .sidebar-heading .sidebar-subtitle {
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .sidebar-dark .nav-item .nav-link {
