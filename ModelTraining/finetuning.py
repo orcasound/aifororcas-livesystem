@@ -9,51 +9,18 @@ from audio.data import AudioConfig, SpectrogramConfig, AudioList
 from audio.transform import get_spectro_transforms
 
 
-# Defining Path variable
-data_folder = Path("./data/")
-
-
-def download_newdata():
-    pass
-
-
-# download_newdata() : TBA
-
-"""
-Resulting Folder Structure -
-./data/
-    |-new_data/
-        -somefiles0.wav
-        -somefiles1.wav
-        ...
-"""
-
-
-def download_original_data():
+def download_newdata(data_path):
     """
-    Function to download the original training data from blob storage
+    Download the OrcaHello false positives from blob after querying CosmosDB
     """
     pass
 
 
-# download_original_data() : TBA
-
-"""
-Resulting Folder Structure -
-./data/
-    |-positive/
-        - xyz1.wav
-        - xyz2.wav
-        ...
-    |-negative/
-        - abc1.wav
-        - abc2.wav
-        ...
-    |-new_data/
-        -somefiles0.wav
-        -somefiles1.wav
-        ...
-"""
+def download_original_data(data_path):
+    """
+    Download the original training data from blob storage
+    """
+    pass
 
 
 # Function to pre-process the new audio file
@@ -96,10 +63,20 @@ def extract_segments(audio_path, sample_dict, dest_path, suffix):
             )
 
 
-def pre_process(data_path=data_folder):
+def pre_process(data_path):
     """
-    Convert new audio file containing False Negative into model-ready stream
-    Will output processed files in the 'filePath/new_samples/' folder
+    Convert new audio files into 4s segments, all treated as negatives
+
+    Assumes this dir structure
+    ./data_path/
+        |-new_data/         (input)
+            -somefiles0.wav
+            -somefiles1.wav
+            ...
+        |-new_samples/      (output)
+            - asdfas.wav
+            - asdfas.wav
+            ..
 
     Args:
         `data_path`: path to data folder
@@ -121,7 +98,7 @@ def pre_process(data_path=data_folder):
 
         four_sec_dict[item.name] = four_sec_list
 
-    # get model ready data
+    # get model ready data, split into shorter segments
     extract_segments(
         str(data_path / "new_data/"), four_sec_dict, str(local_dir) + "/", "_Noise"
     )
@@ -130,30 +107,22 @@ def pre_process(data_path=data_folder):
     shutil.rmtree(data_path / "new_data/")
 
 
-pre_process(Path("./data/"))
-
-"""
-Resulting Folder Structure -
-./data/
-    |-positive/
-        - xyz1.wav
-        - xyz2.wav
-        ...
-    |-negative/
-        - abc1.wav
-        - abc2.wav
-    ..
-    |-new_samples/
-        - asdfas.wav
-        - asdfas.wav
-        ..
-"""
-
-
 def data_blender(data_path, random_seed=2):
     """
-    Function to blend the original data with new data
+    Function to blend the original data with new data such
+    that the total number is the same as the original
 
+    Assumes this dir structure
+    ./data_path/
+        |-new_samples/
+        |-negative/
+
+    After running, the contents of `negative` are overwritten
+    `new_samples` is deleted
+
+    Args:
+        `data_path`: path to data folder
+        `random_seed`: same seed with yield reproducible random samples
     """
     data_path = Path(data_path)
     neg_samples = list((data_path / "negative").glob("*.wav"))
@@ -178,50 +147,16 @@ def data_blender(data_path, random_seed=2):
     shutil.move(str(data_path / "blended_negative"), str(data_path / "negative"))
 
 
-data_blender()
-"""
-Resulting Folder Structure -
-./data/
-    |-positive/
-        - xyz1.wav
-        - xyz2.wav
-        ...
-    |-negative/
-        - abc1.wav
-        - abc2.wav
-"""
-
-
-def download_model():
+def download_model(data_path):
+    """
+    Downloaded the last deployed model checkpoint
+    """
     pass
 
 
-# download_model()
-
-
-"""
-Folder Structure -
-./data/
-    |-positive/
-        - xyz1.wav
-        - xyz2.wav
-        ...
-    |-negative/
-        - abc1.wav
-        - abc2.wav
-        ...
-    |-models/
-        -model_name.pkl
-"""
-
-
-def finetune(
-    data_path=data_folder,
-    model_name="rnd1to10_stg4-rn50.pkl",
-    new_model_name="rnd1to10_stg4-rn50.pkl",
-):
+def finetune(data_path, model_name, new_model_name):
     """
-    Function to do finetuning of the model
+    Finetune seed model on blended data with a standard fit_one_cycle LR recipe
     """
 
     # Define AudioConfig needed to create on-the-fly mel spectograms.
@@ -274,25 +209,54 @@ def finetune(
     learner.export(new_model_name)
 
 
-"""
-Folder Structure -
-./data/
-    |-positive/
-        - xyz1.wav
-        - xyz2.wav
-        ...
-    |-negative/
-        - abc1.wav
-        - abc2.wav
-        ...
-    |-models/
-        -model_name(.pkl file)
-        -new_model_name(.pkl file)
-"""
+if __name__ == "__main__":
 
-"""
-Still need to write the function
-test_model()
-if test is looking good --
-    - upload_model(data_folder/'models/'+'new_model_name')
-"""
+    # Defining Path variable
+    data_folder = Path("./data/")
+
+    # NOTE: not implemented yet, placeholders
+    # download_original_data(data_folder)
+    # download_newdata(data_folder)
+    """
+    Resulting Folder Structure -
+    ./data/
+        |-positive/
+            - xyz1.wav
+            - xyz2.wav
+            ...
+        |-negative/
+            - abc1.wav
+            - abc2.wav
+            ...
+        |-new_data/
+            -somefiles0.wav
+            -somefiles1.wav
+            ...
+    """
+
+    # pre_process(data_folder)
+    # data_blender(data_folder, random_seed=2)
+    # download_model(data_folder)  # NOTE: not implemented yet, placeholder
+    # finetune(data_folder, "rnd1to10_stg4-rn50.pkl", "rn50-finetuned.pkl")
+    """
+    Folder Structure -
+    ./data/
+        |-positive/
+            - xyz1.wav
+            - xyz2.wav
+            ...
+        |-negative/
+            - abc1.wav
+            - abc2.wav
+            ...
+        |-models/
+            -model_name(.pkl file)
+            -new_model_name(.pkl file)
+    """
+
+    # NOTE: not implemented yet, placeholder
+    """
+    test_model()
+    if test is looking good --
+        - upload_model(data_folder/'models/'+'new_model_name')
+    """
