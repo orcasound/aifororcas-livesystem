@@ -1,6 +1,8 @@
 from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 import json
+import requests
+from pathlib import Path
 
 COSMOS_DB_NAME = "predictions"
 COSMOS_CONTAINER_NAME = "metadata"
@@ -31,11 +33,20 @@ def get_false_positives(start_date, end_date, out_folder):
     for metadata_item in container.query_items(
         query=query, enable_cross_partition_query=True
     ):
-        print(json.dumps(metadata_item, indent=True))
+        _download_false_positive_samples(metadata_item, out_folder)
+
 
 def _download_false_positive_samples(metadata_item, out_folder):
-    pass
+    # print(json.dumps(metadata_item, indent=True))
+    Path(out_folder).mkdir(exist_ok=True)
+    for prediction in metadata_item["predictions"]:
+        dl_uri = metadata_item["audioUri"]
+        dl_filename = Path(dl_uri).name
+        out_filepath = Path(out_folder, f"{dl_filename}-{prediction['id']}")
+        print(f"Saving {dl_filename} to {out_filepath}")
+        with open(out_filepath, "wb") as f:
+            f.write(requests.get(dl_uri).content)
 
 
 if __name__ == "__main__":
-    get_false_positives('2022-05-05', '2022-09-20', 0)
+    get_false_positives("2022-05-05", "2022-09-22", "out")
