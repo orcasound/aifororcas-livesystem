@@ -1,4 +1,5 @@
 -f https://download.pytorch.org/whl/torch_stable.html
+azure-cosmos
 fastai==1.0.61
 librosa==0.8.0
 pydub==0.24.1
