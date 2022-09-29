@@ -21,7 +21,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from azure.cosmos import exceptions, CosmosClient, PartitionKey
 
 import sys
-
+import logging
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.log_exporter import AzureEventHandler
 
@@ -36,8 +36,9 @@ COSMOSDB_CONTAINER_NAME = "metadata"
 ORCASOUND_LAB_LOCATION = {"id": "rpi_orcasound_lab", "name": "Haro Strait", "longitude":  -123.17357, "latitude": 48.55833}
 PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.76045, "latitude": 48.13569}
 BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6039, "latitude": 48.03371}
+SUNSET_BAY_LOCATION = {"id": "rpi_sunset_bay", "name": "Sunset Bay", "longitude":  -122.3339, "latitude": 47.86497}
 
-source_guid_to_location = {"rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION}
+source_guid_to_location = {"rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION, "rpi_sunset_bay": SUNSET_BAY_LOCATION }
 
 def assemble_blob_uri(container_name, item_name):
 
@@ -101,7 +102,7 @@ if __name__ == "__main__":
 	# logger to app insights
 	con_string = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
 	logger = logging.getLogger(__name__)
-	if appInsightsKey is not None:
+	if con_string is not None:
 		logger.addHandler(AzureLogHandler(connection_string=con_string))
 		logger.addHandler(AzureEventHandler(connection_string=con_string))
 		logger.setLevel(logging.INFO)
