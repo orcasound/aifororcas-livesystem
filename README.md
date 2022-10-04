@@ -2,7 +2,7 @@
 
 [Orcasound](https://www.orcasound.net/) maintains a hydrophone network in Puget Sound (near Seattle, WA, USA, Northeast Pacific). Killer whales (aka orcas) often swim by these hydrophones (underwater microphones) and vocalize with a wide range of calls.
 
-Through annual Microsoft hackathons since 2019 and with the volunteer efforts of many [heroic Orcasound open souce contributors](https://www.orcasound.net/hacker-hall-of-fame/), we have trained and continue to refine a deep learning model to find these calls in live hydrophone audio. The model is at the core of the real time inference system we call OrcaHello which aims to help recover the endangered population of Southern Resident Killer Whale (SRKW) - the iconic orcas that frequently seek salmon in Puget Sound, and also range annually from California to Alaska.
+Through annual Microsoft hackathons since 2019 and with the volunteer efforts of many [heroic Orcasound open source contributors](https://www.orcasound.net/hacker-hall-of-fame/), we have trained and continue to refine a deep learning model to find these calls in live hydrophone audio. The model is at the core of the real time inference system we call OrcaHello which aims to help recover the endangered population of Southern Resident Killer Whale (SRKW) - the iconic orcas that frequently seek salmon in Puget Sound, and also range annually from California to Alaska. OrcaHello is a part of [ai4orcas.net](https://ai4orcas.net), an International effort to apply cutting-edge artificial intelligence to orca conservation.
 
 Learn more about OrcaHello via:
 
@@ -62,5 +62,6 @@ To contribute a pull request for a specific subsystem, please read the correspon
 [Project Page](https://ai4orcas.net/portfolio/orcahello-live-inference-system/) - contains information about the system and a brief history of the project.
 
 ## Related Projects
+- [ai4orcas.net](https://ai4orcas.net)
 - [aifororcas-podcast](https://github.com/orcasound/aifororcas-podcast) - A tool to crowdsource labeling of whale calls in Orcasound's hydrophone data.
 - [aifororcas-orcaml](https://github.com/orcasound/aifororcas-orcaml) - Original baseline machine learning model and data preparation code.
