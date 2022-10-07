@@ -58,7 +58,7 @@ namespace NotificationSystem
             log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))
             {
-                var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("Please validate new OrcaHello detection"),
+                var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email, "New Orca Call Identified", body);
                 await messageCollector.AddAsync(email);
             }
