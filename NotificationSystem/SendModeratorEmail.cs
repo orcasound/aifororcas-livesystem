@@ -59,7 +59,7 @@ namespace NotificationSystem
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))
             {
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
-                    emailEntity.Email, "New Orca Call Identified", body);
+                    emailEntity.Email, "Please validate new OrcaHello detection", body);
                 await messageCollector.AddAsync(email);
             }
         }
