@@ -1,0 +1,47 @@
+DetectionStatistics
+
+Itemized list in increasing size of scope
+
+> Be able to say - issued X number of alerts (or detected X events)
+    Metrics (#event alerts, moderator time, event hit rate)
+
+    ALERTS ISSUED:
+    computed by searching Gmail (66 without word 'clearing', 68 threads total)
+        2022: 23
+        2021: 19
+        2020: 24
+        total: 66
+    MODERATOR TIME:
+    overall ~3.5hrs/mo, 7min/day of moderator time (avg of 2021, 2022)
+        2022: 1771/30  (min/hrs)
+        2021: 3071/50  (min/hrs)
+        2020:  693/12  (min/hrs)
+        total: 5535/92 (min/hrs)
+    EVENT RATE:
+    overall 55%  (66%/40%/70% year-wise)
+        spreadsheet of known events (sheet: "summary stats")
+        https://docs.google.com/spreadsheets/d/1Js1CgbmK0Vbe3m0DfiFim1BE4lXMzC75S7GN-7QEE7Y/edit#gid=0
+        2022: 35    66%
+        2021: 50    40%
+        2020: 34    70%
+
+- Summarize metrics on homepage manually (#event alerts, moderator time, event hit rate)
+
+> Aggregate events info for analysis in Python (summarize_detections.py)
+    instead of direct SQL queries to DB, check if querying the API works
+    documentation: https://aifororcasdetections.azurewebsites.net/swagger/index.html
+    will need update to fetch event info, and perf metrics
+
+- Automatically keep aggregating detection events into Cosmos table
+    3 hr agg window = 8*365 = ~3k rows/hydrophone/yr
+    TODO add link reading on stored procedure new table thread
+
+- Interactive dashboard (PowerBI) to query, explore events
+    appears that Shahram likely did some powerbi setup (aifororcasmetadatasynapse) although i cannot find the dashboard
+        https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/powerbi-visualize
+    this Synapse thing appears to allow analysis on a prod/transaction DB without querying it directly, or needing an aggregation/ETL pipeline
+        https://learn.microsoft.com/en-us/azure/cosmos-db/synapse-link
+    (not read into details) seems a convenient nice-to-have if not too expensive
+    but still need event data in a DB for the homepage
+
+- Portal homepage to summarize & explore events (latest, last N time) and stats (FP rate, detection rate)
