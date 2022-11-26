@@ -40,6 +40,7 @@ class DateRangeHLSStream():
         """
 
         """
+        print("Downloading HLS data from start unix time : {start} to end unit time : {end}".format(start=start_unix_time, end=end_unix_time))
 
         # Get all necessary data and create index
         self.stream_base = stream_base
@@ -70,6 +71,7 @@ class DateRangeHLSStream():
         self.valid_folders = s3_utils.get_folders_between_timestamp(all_hydrophone_folders, self.start_unix_time, self.end_unix_time)
         print("Found {} folders in date range".format(len(self.valid_folders)))
 
+        self.hydrophone_id = self.folder_name.replace("_", "-")
         self.current_folder_index = 0
         self.current_clip_start_time = self.start_unix_time
 
@@ -80,10 +82,11 @@ class DateRangeHLSStream():
 
         # Get current folder
         current_folder = int(self.valid_folders[self.current_folder_index])
-        clipname, clip_start_time = datetime_utils.get_clip_name_from_unix_time(self.folder_name.replace("_", "-"), self.current_clip_start_time)
+        clipname, clip_start_time = datetime_utils.get_clip_name_in_pst_from_unix_time(self.hydrophone_id, self.current_clip_start_time)
 
+        print(clipname)
         # if real_time execution mode is specified
-        if self.real_time:
+        if None:
             # sleep till enough time has elapsed
 
             now = datetime.utcnow()
@@ -150,7 +153,7 @@ class DateRangeHLSStream():
         os.system(f'rm -rf {tmp_path}')
 
         # If we're in demo mode, we need to fake timestamps to make it seem like the date range is real-time
-        if current_clip_name:
+        if None:
             clipname, _ = get_readable_clipname(self.folder_name.replace("_", "-"), current_clip_name)
 
             # rename wav file
@@ -166,4 +169,6 @@ class DateRangeHLSStream():
 
     def is_stream_over(self):
         # returns true or false based on whether the stream is over
+        print(self.current_clip_start_time)
+        print(self.end_unix_time)
         return int(self.current_clip_start_time) >= int(self.end_unix_time)
