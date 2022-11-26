@@ -44,6 +44,8 @@ class HLSStream():
     # this function grabs audio from last_end_time to 
     def get_next_clip(self, current_clip_end_time):
 
+        print("Current clip end time at start " + current_clip_end_time)
+
         # if current time < current_clip_end_time, sleep for the difference
         now = datetime.utcnow()
 
@@ -62,6 +64,7 @@ class HLSStream():
             # the very first time, it's ~20 seconds
             time.sleep(time_to_sleep)
 
+        print("Current clip end time after sleep " + current_clip_end_time)
         current_clip_start_time = current_clip_end_time - timedelta(0,60)
         clip_start_time = current_clip_start_time.isoformat() + "Z"
         clipname, _ = get_readable_clipname(self.hydrophone_id, current_clip_start_time)
@@ -90,6 +93,12 @@ class HLSStream():
 
         # .m3u8 file exists so load it
         stream_obj = m3u8.load(stream_url)
+        if stream_obj is None:
+            return None, None, current_clip_end_time
+
+        if stream_obj.target_duration is None:
+            return None, None, current_clip_end_time
+
         num_total_segments = len(stream_obj.segments)
         num_segments_in_wav_duration = math.ceil(self.polling_interval/stream_obj.target_duration)
 
@@ -110,7 +119,7 @@ class HLSStream():
             return None, None, current_clip_end_time
 
         # Create tmp path to hold .ts segments
-        tmp_path = "tmp_path"
+        tmp_path = "tmp_path_" + self.hydrophone_id
         os.makedirs(tmp_path,exist_ok=True)
 
         file_names = []
