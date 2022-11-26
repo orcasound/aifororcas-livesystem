@@ -99,14 +99,6 @@ if __name__ == "__main__":
 	with open(args.config) as f:
 		config_params = yaml.load(f, Loader=yaml.FullLoader)
 
-	# logger to app insights
-	appInsightsKey = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
-	logger = logging.getLogger(__name__)
-	if appInsightsKey is not None:
-		logger.addHandler(AzureLogHandler(connection_string=appInsightsKey))
-		logger.addHandler(AzureEventHandler(connection_string=appInsightsKey))
-		logger.setLevel(logging.INFO)
-
 	## Model Details
 	model_type = config_params["model_type"]
 	model_path = config_params["model_path"]
@@ -131,9 +123,17 @@ if __name__ == "__main__":
 		cosmod_db_primary_key = os.getenv('AZURE_COSMOSDB_PRIMARY_KEY')
 		client = CosmosClient(cosmos_db_endpoint, cosmod_db_primary_key)
 
+		# logger to app insights
+		appInsightsKey = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
+		logger = logging.getLogger(__name__)
+		if appInsightsKey is not None:
+		    logger.addHandler(AzureLogHandler(connection_string=appInsightsKey))
+		    logger.addHandler(AzureEventHandler(connection_string=appInsightsKey))
+		    logger.setLevel(logging.INFO)
+
 	# create directory for wav files, metadata and spectrogram to be saved
 	# get script's current dir
-	local_dir = "wav_dir"
+	local_dir = "wav_dir_" + config_params["hls_hydrophone_id"]
 	if not os.path.exists(local_dir):
 		os.makedirs(local_dir)
 
@@ -165,14 +165,13 @@ if __name__ == "__main__":
 	current_clip_end_time = datetime.utcnow() + timedelta(0,10)
 
 	while not hls_stream.is_stream_over():
-		#TODO (@prgogia) prepend hydrophone friendly name to clip and remove slashes
 		clip_path, start_timestamp, current_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
 
 		# if this clip was at the end of a bucket, clip_duration_in_seconds < 60, if so we skip it
 		if clip_path:
 			spectrogram_path = spectrogram_visualizer.write_spectrogram(clip_path)
 			prediction_results = whalecall_classification_model.predict(clip_path)
-
+			
 			print("\nlocal_confidences: {}\n".format(prediction_results["local_confidences"]))
 			print("local_predictions: {}\n".format(prediction_results["local_predictions"]))
 			print("global_confidence: {}\n".format(prediction_results["global_confidence"]))
@@ -182,10 +181,6 @@ if __name__ == "__main__":
 			# only upload positive clip data
 			if prediction_results["global_prediction"] == 1:
 				print("FOUND!!!!")
-
-				# logging to app insights
-				properties = {'custom_dimensions': {'Hydrophone ID':  hls_hydrophone_id }}
-				logger.info('Orca Found: ', extra=properties)
 
 				if config_params["upload_to_azure"]:
 
@@ -211,11 +206,15 @@ if __name__ == "__main__":
 					container = database.get_container_client(COSMOSDB_CONTAINER_NAME)
 					container.create_item(body=metadata)
 					print("Added metadata to Azure CosmosDB")
-				
-			# delete local wav, spec, metadata
+					
+					# logging to app insights
+					properties = {'custom_dimensions': {'Hydrophone ID':  hls_hydrophone_id }}
+					logger.info('Orca Found: ', extra=properties)
+
+			# get next current_clip_end_time by adding 60 seconds to current_clip_end_time
+			current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
+
+			# delete wavs
 			if config_params["delete_local_wavs"]:
 				os.remove(clip_path)
 				os.remove(spectrogram_path)
-
-		# get next current_clip_end_time by adding 60 seconds to current_clip_end_time
-		current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
