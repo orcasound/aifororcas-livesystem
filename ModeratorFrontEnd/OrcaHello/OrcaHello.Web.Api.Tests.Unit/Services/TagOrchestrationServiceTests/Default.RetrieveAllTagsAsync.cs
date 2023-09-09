@@ -17,7 +17,7 @@
 
             TagListResponse result = await _orchestrationService.RetrieveAllTagsAsync();
 
-            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Tags.Count());
+            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Tags.Count);
 
             _metadataServiceMock.Verify(service =>
                 service.RetrieveAllTagsAsync(),

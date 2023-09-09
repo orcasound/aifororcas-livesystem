@@ -4,6 +4,8 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.Azure.Cosmos;
 global using Microsoft.Identity.Web;
 global using Microsoft.OpenApi.Models;
+global using Newtonsoft.Json;
+global using OrcaHello.Web.Api.Brokers.Hydrophones;
 global using OrcaHello.Web.Api.Brokers.Loggings;
 global using OrcaHello.Web.Api.Brokers.Storages;
 global using OrcaHello.Web.Api.Models;

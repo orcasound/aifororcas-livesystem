@@ -1,32 +1,29 @@
-﻿using Moq;
-using OrcaHello.Web.Api.Models.Configurations;
-using OrcaHello.Web.Shared.Models.Hydrophones;
-
-namespace OrcaHello.Web.Api.Tests.Unit.Services
+﻿namespace OrcaHello.Web.Api.Tests.Unit.Services
 {
     public partial class HydrophoneOrchestrationServiceTests
     {
         [TestMethod]
-        public void Default_RetrieveHydrophoneLocations_Expect()
+        public async Task Default_RetrieveHydrophoneLocations_Expect()
         {
-            HydrophoneLocation location = new HydrophoneLocation
+            var expectedResults = new QueryableHydrophoneData
             {
-                Name = "Test",
-                Id = "source_guid"
+                QueryableRecords = (new List<HydrophoneData> { new() { Attributes = new() { NodeName = "test_id", Name = "test" } } } ).AsQueryable(),
+                TotalCount = 1
             };
 
-            _appSettingsMock.Setup(g =>
-                g.HydrophoneLocations).
-                Returns(new List<HydrophoneLocation> { location });
+            _hydrophoneServiceMock.Setup(service =>
+                service.RetrieveAllHydrophonesAsync())
+                .ReturnsAsync(expectedResults);
 
-            HydrophoneListResponse result = _orchestrationService.
+            HydrophoneListResponse result = await _orchestrationService.
                 RetrieveHydrophoneLocations();
 
             Assert.AreEqual(1, result.Count);
 
-            _appSettingsMock.Verify(service =>
-                service.HydrophoneLocations,
-                Times.Exactly(2));
+            _hydrophoneServiceMock.Verify(service =>
+                service.RetrieveAllHydrophonesAsync(),
+                    Times.Once);
+
         }
     }
 }

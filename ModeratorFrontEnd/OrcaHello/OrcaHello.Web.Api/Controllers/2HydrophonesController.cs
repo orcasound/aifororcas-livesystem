@@ -20,17 +20,21 @@
         [SwaggerResponse(StatusCodes.Status400BadRequest, "If the request was malformed (missing parameters).")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
         [AllowAnonymous]
-        public ActionResult<HydrophoneListResponse> GetHydrophones()
+        public async ValueTask<ActionResult<HydrophoneListResponse>> GetHydrophones()
         {
             try
             {
-                var hydrophoneListResponse = _hydrophoneOrchestrationService.
+                var hydrophoneListResponse = await _hydrophoneOrchestrationService.
                     RetrieveHydrophoneLocations();
 
                 return Ok(hydrophoneListResponse);
             }
             catch (Exception exception)
             {
+                if (exception is HydrophoneOrchestrationValidationException &&
+                    exception.InnerException is InvalidHydrophoneException)
+                    return NotFound(ValidatorUtilities.GetInnerMessage(exception));
+
                 if (exception is HydrophoneOrchestrationValidationException ||
                     exception is HydrophoneOrchestrationDependencyValidationException)
                     return BadRequest(ValidatorUtilities.GetInnerMessage(exception));

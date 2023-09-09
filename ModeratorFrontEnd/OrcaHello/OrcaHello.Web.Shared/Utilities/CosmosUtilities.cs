@@ -13,9 +13,9 @@
             string message = ex.Message; // get the exception message
 
             var startIndex = message.IndexOf("{");
-            var reasonString = message.Substring(startIndex);
+            var reasonString = message[startIndex..];
             var endIndex = reasonString.IndexOf(")");
-            reasonString = reasonString.Substring(0, endIndex);
+            reasonString = reasonString[..endIndex];
 
             JObject reasonObject = JObject.Parse(reasonString);
 

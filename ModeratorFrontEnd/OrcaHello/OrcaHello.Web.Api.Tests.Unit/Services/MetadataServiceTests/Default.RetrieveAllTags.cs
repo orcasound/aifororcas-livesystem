@@ -18,7 +18,7 @@
             var result = await _metadataService.
                 RetrieveAllTagsAsync();
 
-            Assert.AreEqual(tags.Count(), result.QueryableRecords.Count());
+            Assert.AreEqual(tags.Count, result.QueryableRecords.Count());
 
             _storageBrokerMock.Verify(broker =>
             broker.GetAllTagList(),

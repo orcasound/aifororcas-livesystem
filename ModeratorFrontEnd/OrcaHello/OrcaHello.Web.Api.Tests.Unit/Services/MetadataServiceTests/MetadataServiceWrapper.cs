@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace OrcaHello.Web.Api.Tests.Unit.Services.Metadatas
+﻿namespace OrcaHello.Web.Api.Tests.Unit.Services.Metadatas
 {
     [ExcludeFromCodeCoverage]
     public class MetadataServiceWrapper : MetadataService

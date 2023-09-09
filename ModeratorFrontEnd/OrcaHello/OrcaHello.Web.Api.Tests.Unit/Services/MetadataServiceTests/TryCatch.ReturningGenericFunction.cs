@@ -1,9 +1,4 @@
-﻿using Microsoft.Azure.Cosmos;
-using Moq;
-using OrcaHello.Web.Api.Models;
-using OrcaHello.Web.Api.Tests.Unit.Services.Metadatas;
-using System.Net;
-using static OrcaHello.Web.Api.Services.MetadataService;
+﻿using static OrcaHello.Web.Api.Services.MetadataService;
 
 namespace OrcaHello.Web.Api.Tests.Unit.Services
 {

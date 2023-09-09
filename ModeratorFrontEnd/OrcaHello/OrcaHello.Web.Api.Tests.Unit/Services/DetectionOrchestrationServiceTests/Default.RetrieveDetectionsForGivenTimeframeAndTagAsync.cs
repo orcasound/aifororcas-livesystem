@@ -1,8 +1,4 @@
-﻿using Moq;
-using OrcaHello.Web.Api.Models;
-using OrcaHello.Web.Shared.Models.Detections;
-
-namespace OrcaHello.Web.Api.Tests.Unit.Services
+﻿namespace OrcaHello.Web.Api.Tests.Unit.Services
 {
     public partial class DetectionOrchestrationServiceTests
     {
@@ -10,7 +6,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
         public async Task Default_RetrieveDetectionsForGivenTimeframeAndTagAsync_Expect()
         {
             var nullModeratedMetadata = CreateRandomMetadata();
-            nullModeratedMetadata.DateModerated = null;
+            nullModeratedMetadata.DateModerated = null!;
 
             var expectedResults = new QueryableMetadataForTimeframeAndTag
             {
@@ -29,7 +25,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
 
             DetectionListForTagResponse result = await _orchestrationService.RetrieveDetectionsForGivenTimeframeAndTagAsync(DateTime.Now, DateTime.Now.AddDays(1), "tag", 1, 10);
 
-            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Detections.Count());
+            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Detections.Count);
 
             _metadataServiceMock.Verify(service =>
                 service.RetrieveMetadataForGivenTimeframeAndTagAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()),

@@ -34,7 +34,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
             _storageBrokerMock.VerifyNoOtherCalls();
         }
 
-        public Metadata CreateRandomMetadata()
+        public static Metadata CreateRandomMetadata()
         {
             return new Metadata
             {

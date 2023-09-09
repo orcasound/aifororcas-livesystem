@@ -2,6 +2,6 @@
 {
     public interface IHydrophoneOrchestrationService
     {
-        HydrophoneListResponse RetrieveHydrophoneLocations();
+        ValueTask<HydrophoneListResponse> RetrieveHydrophoneLocations();
     }
 }

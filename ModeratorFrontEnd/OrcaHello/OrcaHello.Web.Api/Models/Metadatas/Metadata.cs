@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace OrcaHello.Web.Api.Models
+﻿namespace OrcaHello.Web.Api.Models
 {
     /// <summary>
     /// Metadata collected from a hydrophone sampling that might contain whale sounds.

@@ -8,7 +8,7 @@
         public string DetectionsDatabaseName { get; set; }
         public string MetadataContainerName { get; set; }
         public string AllowedOrigin { get; set; }
+        public string HydrophoneFeedUrl { get; set; }
         public AzureAd AzureAd { get; set; }
-        public virtual List<HydrophoneLocation> HydrophoneLocations { get; set; }
     }
 }

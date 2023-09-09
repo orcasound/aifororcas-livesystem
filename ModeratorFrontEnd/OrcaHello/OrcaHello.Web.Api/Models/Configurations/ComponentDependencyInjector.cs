@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.Api.Models.Configurations
+﻿using OrcaHello.Web.Api.Brokers.Hydrophones;
+
+namespace OrcaHello.Web.Api.Models.Configurations
 {
     /// <summary>
     /// Static class for performing dependency injection of the various components
@@ -11,11 +13,13 @@
         {
             builder.Services.AddSingleton<IStorageBroker, StorageBroker>();
             builder.Services.AddTransient<ILoggingBroker, LoggingBroker>();
+            builder.Services.AddSingleton<IHydrophoneBroker, HydrophoneBroker>();
         }
 
         public static void AddFoundationServices(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<IMetadataService, MetadataService>();
+            builder.Services.AddTransient<IHydrophoneService, HydrophoneService>();
         }
 
         public static void AddOrchestrationServices(WebApplicationBuilder builder)

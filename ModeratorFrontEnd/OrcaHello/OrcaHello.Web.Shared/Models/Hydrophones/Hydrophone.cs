@@ -15,5 +15,12 @@
 
         [SwaggerSchema("The hydrophone's location latitude.")]
         public double Latitude { get; set; }
+
+        [SwaggerSchema("Link to an image showing the hydrophone location.")]
+        public string ImageUrl { get; set; }
+
+        [SwaggerSchema("HTML-formatted description of the hydrophone location.")]
+        public string IntroHtml { get; set; }
+
     }
 }

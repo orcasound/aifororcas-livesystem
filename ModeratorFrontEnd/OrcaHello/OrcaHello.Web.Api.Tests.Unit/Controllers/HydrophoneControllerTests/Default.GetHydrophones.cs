@@ -3,7 +3,7 @@
     public partial class HydrophonesControllerTests
     {
         [TestMethod]
-        public void Default_GetHydrophones_Expect_HydrophoneListResponse()
+        public async Task Default_GetHydrophones_Expect_HydrophoneListResponse()
         {
             HydrophoneListResponse response = new()
             {
@@ -19,10 +19,10 @@
 
             _orchestrationServiceMock.Setup(service =>
                 service.RetrieveHydrophoneLocations())
-            .Returns(response);
+            .ReturnsAsync(response);
 
             ActionResult<HydrophoneListResponse> actionResult =
-                _controller.GetHydrophones();
+                await _controller.GetHydrophones();
 
             var contentResult = actionResult.Result as ObjectResult;
             Assert.IsNotNull(contentResult);
