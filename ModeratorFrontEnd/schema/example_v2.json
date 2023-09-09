@@ -1,0 +1,51 @@
+ {
+        "id": "000000000-000000000-00000000-00000000000", // Guid
+        "state": "Unreviewed", // State of the review (Unreviewed, Positive, Negative, Unknown)
+        "locationName": "Haro Strait", // the name of the location (does duplicate name in location below)
+        "audioUri": "https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_orcasound_lab_2020_09_30_03_51_56_PDT.wav", // string
+        "imageUri": "https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_orcasound_lab_2020_09_30_03_51_56_PDT.png", // string
+        "timestamp": "2020-09-30T10:51:56.057346Z", // ISO format - UTC
+        "whaleFoundConfidence": 88.55000000000001, // double
+        "location": {
+            "id": "rpi_orcasound_lab",
+            "name": "Haro Strait",
+            "longitude": -123.2166658,
+            "latitude": 48.5499978
+        },
+        "predictions": [
+            {
+                "id": 0,
+                "startTime": 20,
+                "duration": 2.5,
+                "confidence": 0.828
+            },
+            {
+                "id": 1,
+                "startTime": 27.5,
+                "duration": 2.5,
+                "confidence": 0.942
+            },
+            {
+                "id": 2,
+                "startTime": 32.5,
+                "duration": 2.5,
+                "confidence": 0.917
+            },
+            {
+                "id": 3,
+                "startTime": 52.5,
+                "duration": 2.5,
+                "confidence": 0.855
+            }
+        ],
+        "comments": "moderator comments", // string - moderator comments if any
+        "dateModerated": "2020-09-30T11:55:31Z", ISO format - UTC
+        "moderator": "John Smith", // string - moderator name
+        "tags": [ "click", "pop", "multiple" ], // added as a way to standardize what was heard in case they want to filter later or for AI training
+	"interestLabel": "humpback", // added as way to highlight a specific detection for inclusion in the Summary page and other front-facing locations
+        "_rid": "pF8dANwj9mtNFwAAAAAAAA==",
+        "_self": "dbs/pF8dAA==/colls/pF8dANwj9ms=/docs/pF8dANwj9mtNFwAAAAAAAA==/",
+        "_etag": "\"00000000-0000-0000-e1cf-0db2d8c501d9\"",
+        "_attachments": "attachments/",
+        "_ts": 1694120738
+    }
