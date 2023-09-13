@@ -64,13 +64,11 @@ The inference.py returns a dictionary -
 - **global_predictions**: A global prediction(1/0) for the clip containing a valid whale call (integer)
 - **global_confidences**: Probability of the prediction being a whale call or not(float)
 
-# All the files generated during process is on [Onedrive](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/EpK2FvtpbRBDt76EwoKPuHoB8ll9WSXNPGhRX63OTg-1Jw?e=550aE2)
+# All the files generated or used during training are [here:](https://portal.azure.com/#@adminorcasound.onmicrosoft.com/resource/subscriptions/c65c3881-6d6b-4210-94db-5301ef484f17/resourceGroups/mldev/providers/Microsoft.Storage/storageAccounts/storagesnap/overview). NOTE: You must hold "Contributor" role assignment in the OrcaSound Azure tenant to access.
 - **Models/stg2-rn18.pkl** - Trained ResNet18 model
 - **mldata.7z** is data used for training the model
 - **All.zip** is testing data for early evaluations
 - **test2Sec.zip** is data used for scoring for official evaluations
-
-
 
 ## Dependencies -
 - [FastAIAudio](https://github.com/mogwai/fastai_audio)
