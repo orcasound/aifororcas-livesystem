@@ -152,6 +152,18 @@ This can be completed in two ways.
         INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING=<string>
         ```
 
+## Adding a new hydrophone
+
+1. Create a new config file under the [config](config) folder
+
+2. Update the last line of the [Dockerfile](Dockerfile) to point to the new config file 
+
+3. Create a new deployment YAML under the [deploy](deploy) folder
+
+4. Update [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py) and [src/globals.py](src/globals.py) to add variables for the new hydrophone location 
+
+5. Follow all other steps below until you update the kubernetes cluster with the new namespace
+
 ## Building the docker container for production
 
 From the `InferenceSystem` directory, run the following command.
@@ -164,7 +176,8 @@ docker build . -t live-inference-system -f ./Dockerfile
 
 Note: the config used in the Dockerfile is a Production config.
 
-TODO: fix. For now, you will have to manually create 3 different docker containers for the 3 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend).
+TODO: fix. For now, you will have to manually create 5 different docker containers for the 5 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend, Sunset Bay and Point Robinson).
+
 
 ## Running the docker container
 
@@ -300,6 +313,7 @@ kubectl logs -n bush-point inference-system-6d4845c5bc-tfsbw
 <details>
   <summary>Deployment to Azure Container Instances (deprecated)</summary>
 # Deploying an updated docker build to Azure Container Instances
+# This method has been deprecated
 
 ## Prerequisites
 

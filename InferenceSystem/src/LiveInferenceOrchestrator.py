@@ -37,8 +37,9 @@ ORCASOUND_LAB_LOCATION = {"id": "rpi_orcasound_lab", "name": "Haro Strait", "lon
 PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.76045, "latitude": 48.13569}
 BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6039, "latitude": 48.03371}
 SUNSET_BAY_LOCATION = {"id": "rpi_sunset_bay", "name": "Sunset Bay", "longitude":  -122.3339, "latitude": 47.86497}
+POINT_ROBINSON_LOCATION = {"id": "rpi_point_robinson", "name": "Point Robinson", "longitude":  -122.37267, "latitude": 47.38838}
 
-source_guid_to_location = {"rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION, "rpi_sunset_bay": SUNSET_BAY_LOCATION }
+source_guid_to_location = {"rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION, "rpi_sunset_bay": SUNSET_BAY_LOCATION, "rpi_point_robinson": POINT_ROBINSON_LOCATION }
 
 def assemble_blob_uri(container_name, item_name):
 
@@ -100,11 +101,11 @@ if __name__ == "__main__":
 		config_params = yaml.load(f, Loader=yaml.FullLoader)
 
 	# logger to app insights
-	con_string = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
+	app_insights_connection_string = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
 	logger = logging.getLogger(__name__)
-	if con_string is not None:
-		logger.addHandler(AzureLogHandler(connection_string=con_string))
-		logger.addHandler(AzureEventHandler(connection_string=con_string))
+	if app_insights_connection_string is not None:
+		logger.addHandler(AzureLogHandler(connection_string=app_insights_connection_string))
+		logger.addHandler(AzureEventHandler(connection_string=app_insights_connection_string))
 		logger.setLevel(logging.INFO)
 
 	## Model Details
