@@ -78,3 +78,26 @@ The inference.py returns a dictionary -
 - [Pydub] (https://github.com/jiaaro/pydub/)
 - [tqdm] (https://github.com/tqdm/tqdm)
 - [sklearn](https://scikit-learn.org/stable/install.html)
+
+## AWS Audio Data (.ts files)
+Use the `awsAudioTS2Mp3DownloadandConvert.py` python script to retrieve the original audio data streamed from the hydrophones and convert that audio data to an mp3 file.
+
+This script will:
+- convert the provided datetime stamp to epoch format
+- look in aws for the epoch closest (less than) the desired datetime
+- download the `.ts` files to the users temp (%temp%) folder. Ex: C:\Users\User\AppData\Local\Temp\orca_ffmpeg_temp
+- use ffmpeg to convert the `.ts` files into one `.ts` file (`all.ts`), convert that one ts file to an mp4 file, and then convert the mp4 file (`output.mp4`) to the final mp3 file (`output.mp3`).
+- delete the `.ts` files, `all.ts`, and `output.mp4`.
+
+### Setup/dependencies
+1. Run `pip install ffmpeg-python python-dateutil` to install the required python dependencies
+1. Run `winget install Gyan.FFmpeg`.  You may need to add the FFmpeg path to system/user PATH variable. These are example paths:
+"C:\Users\User\AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe" or "C:\Users\User\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-6.0-full_build\bin\ffmpeg.exe". Instructions to add an exe to path can be found here: https://medium.com/@kevinmarkvi/how-to-add-executables-to-your-path-in-windows-5ffa4ce61a53
+
+### Usage
+`python .\awsAudioTS2Mp3DownloadandConvert.py --date '2020-09-11 22:14:00 PST' --node rpi_orcasound_lab`
+
+- date must be in the format shown and include the timezone.
+- node defaults to `rpi_orcasound_lab` but the other hydrophones can be selected: 'rpi_bush_point', 'rpi_mast_center' 'rpi_north_sjc', 'rpi_orcasound_lab', 'rpi_port_townsend', or 'rpi_sunset_bay'
+
+The `output.mp3` file contains all of the audio data from the individual `.ts` files.
