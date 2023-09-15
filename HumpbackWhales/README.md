@@ -7,7 +7,7 @@ This folder contains the collaborative efforts of the team for the Microsoft Glo
 ### References:
 - **Data Source**: The raw audio data is sourced from the ["Haro Humpback" catalog & open annotations](s3://acoustic-sandbox/humpbacks/Emily-Vierling-Orcasound-data/Em_HW_Processed/) prepared by Emily Vierling.
 - **Denoising Toolkit**: The project utilizes [ORCA-CLEAN: A Deep Denoising Toolkit for Killer Whale Communication](https://www.isca-speech.org/archive/interspeech_2020/bergler20_interspeech.html), developed by Christian Bergler. The toolkit can be found [here](https://github.com/ChristianBergler/ORCA-CLEAN). We are using our own fork with a minor fix, which can be found [here](https://github.com/mariamedp/whale-denoising).
-- **Audio Spectrogram Transformer**: The project also appies the [Audio Spectrogram Transformer](https://github.com/YuanGongND/ast) developed by Yuan Gong, Yu-An Chung, and James Glass.
+- **Audio Spectrogram Transformer**: The project also applies the [Audio Spectrogram Transformer](https://github.com/YuanGongND/ast) developed by Yuan Gong, Yu-An Chung, and James Glass.
 
 
 ## Table of Contents
@@ -60,13 +60,15 @@ The dataset consists of audio files of humpback whale vocalizations and correspo
 
 ### Done
 - ✅ Acquisition and annotation-based extraction of hydrophone recordings: download raw hydrophone recordings from Orcasound Amazon S3 and extract humpback vocalizations based on provided annotations.
+- ✅ Data augmentation: develop a notebook for extracting %-portions from vocalizations using a sliding window of 5 sconds.
 - ✅ Noise segment isolation: develop notebooks to isolate noise segments from raw hydrophone recordings for further analysis.
-- ✅ AzureML pipeline integration for ORCA-CLEAN: encapsulate the training process of the ORCA-CLEAN denoising model within an AzureML pipeline.
 - ✅ Performance benchmarking of Audio Spectrogram Transformer: conduct basic benchmarking tests for the Audio Spectrogram Transformer on humpback vocalizations.
+
+### Debugging:
+- [ ] AzureML pipeline integration for ORCA-CLEAN: encapsulate the training process of the ORCA-CLEAN denoising model within an AzureML pipeline.
 
 ### ToDo
 - [ ] Noise segment refinement: develop a binary classifier to accurately distinguish between true noise segments and those erroneously labeled as noise but containing vocalizations.
-- [ ] Additional testing data preparation: develop a notebook for extracting %-portions from vocalizations using a sliding window of 5 sconds.
 - [ ] ORCA-CLEAN model optimization: finalize the training of the ORCA-CLEAN model through iterative training and testing cycles for humpback vocalizations.
 - [ ] Data denoising: utilize the trained ORCA-CLEAN model to preprocess the vocalization data, generating denoised records for subsequent steps.
 - [ ] Classifier fine-tuning: fine-tune the Audio Spectrogram Transformer using the denoised records to improve classification performance.
