@@ -4,10 +4,11 @@
 
 This folder contains the collaborative efforts of the team for the Microsoft Global Hackathon 2023. The project focuses on the [classification of humpback whale vocalizations](https://www.orcasound.net/portfolio/humpback-catalogue/) using advanced deep learning techniques. Within this folder, we collected a series of Jupyter notebook organized into sub-folders based on their specific role in solving the classification problem.
 
-## References
+### References:
 - **Data Source**: The raw audio data is sourced from the ["Haro Humpback" catalog & open annotations](s3://acoustic-sandbox/humpbacks/Emily-Vierling-Orcasound-data/Em_HW_Processed/) prepared by Emily Vierling.
 - **Denoising Toolkit**: The project utilizes [ORCA-CLEAN: A Deep Denoising Toolkit for Killer Whale Communication](https://www.isca-speech.org/archive/interspeech_2020/bergler20_interspeech.html), developed by Christian Bergler. The toolkit can be found [here](https://github.com/ChristianBergler/ORCA-CLEAN).
 - **Audio Spectrogram Transformer**: The project also appies the [Audio Spectrogram Transformer](https://github.com/YuanGongND/ast) developed by Yuan Gong, Yu-An Chung, and James Glass.
+
 
 ## Table of Contents
 
@@ -17,6 +18,15 @@ This folder contains the collaborative efforts of the team for the Microsoft Glo
 - [Running Notebooks on Azure ML](#running-notebooks-on-azure-ml)
 - [Folder Organization](#folder-organization)
 - [Checklist](#checklist)
+
+## Prerequisites
+- An Azure account with an active subscription - [Create an account for free](https://azure.microsoft.com/free/?WT.mc_id=A261C142F)
+
+
+## Data
+
+The dataset consists of audio files of humpback whale vocalizations and corresponding labels. The raw data is taken from the ["Haro Humpback" catalog and open annotations prepared by Emily Vierling](https://github.com/orcasound/orcadata/wiki/Other-training-data:-humpback-whales). For more details about the data used in this project, refer to the [relevant Orcasound GitHub repository](https://github.com/orcasound/orcadata/wiki/Other-training-data:-humpback-whales).
+
 
 ## Installation
 
@@ -28,10 +38,6 @@ This folder contains the collaborative efforts of the team for the Microsoft Glo
     ```bash
     cd humpback-whales-vocalizations-classification/HumpbackWhales
     ```
-
-## Data
-
-The dataset consists of audio files of humpback whale vocalizations and corresponding labels. The raw data is taken from the ["Haro Humpback" catalog and open annotations prepared by Emily Vierling](https://github.com/orcasound/orcadata/wiki/Other-training-data:-humpback-whales). For more details about the data used in this project, refer to the [relevant Orcasound GitHub repository](https://github.com/orcasound/orcadata/wiki/Other-training-data:-humpback-whales).
 
 
 ## Running Notebooks on Azure ML
