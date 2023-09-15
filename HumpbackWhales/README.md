@@ -12,7 +12,6 @@ This folder contains the collaborative efforts of the team for the Microsoft Glo
 
 ## Table of Contents
 
-- [Overview](#overview)
 - [Data](#data)
 - [Installation](#installation)
 - [Running Notebooks on Azure ML](#running-notebooks-on-azure-ml)
