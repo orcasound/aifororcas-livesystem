@@ -1,0 +1,89 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: train_model
+display_name: Train Deep Denoising Model
+description: The training component
+version: 0.0.1
+inputs:
+  whales_data: 
+    type: uri_folder
+    mode: rw_mount
+  noise_train_data: 
+    type: uri_folder
+    mode: rw_mount
+  noise_val_data: 
+    type: uri_folder
+    mode: rw_mount
+  noise_test_data: 
+    type: uri_folder
+    mode: rw_mount
+  max_train_epochs:
+    type: integer
+    default: 150
+  learning_rate: 
+    type: number
+    default: 0.001
+  batch_size: 
+    type: integer
+    default: 16
+  num_workers:
+    type: integer
+    default: 6
+  augmentation:
+    type: integer
+    default: 1
+  n_fft:
+    type: integer
+    default: 4096
+  hop_length:
+    type: integer
+    default: 441
+  sequence_len:
+    type: integer
+    default: 1280 
+  freq_compression:
+    type: string
+    default: linear
+  model_dir:
+    type: uri_folder
+    mode: rw_mount
+  log_dir:
+    type: uri_folder
+    mode: rw_mount
+  checkpoint_dir:
+    type: uri_folder
+    mode: rw_mount
+  cache_dir:
+    type: uri_folder
+    mode: rw_mount
+  summary_dir:
+    type: uri_folder
+    mode: rw_mount
+outputs:
+  model_output:
+    type: uri_folder
+code: ./orca_clean
+environment: azureml:whales-denoising-env:1.3
+command: >-
+  python main.py 
+  --debug 
+  --random_val
+  --max_train_epochs ${{inputs.max_train_epochs}} 
+  --lr ${{inputs.learning_rate}} 
+  --batch_size ${{inputs.batch_size}} 
+  --num_workers ${{inputs.num_workers}} 
+  --data_dir ${{inputs.whales_data}} 
+  --noise_dir_train ${{inputs.noise_train_data}} 
+  --noise_dir_val ${{inputs.noise_val_data}} 
+  --noise_dir_test ${{inputs.noise_test_data}} 
+  --model_dir ${{inputs.model_dir}} 
+  --log_dir ${{inputs.log_dir}} 
+  --checkpoint_dir ${{inputs.checkpoint_dir}} 
+  --cache_dir ${{inputs.cache_dir}} 
+  --summary_dir ${{inputs.summary_dir}} 
+  --augmentation ${{inputs.augmentation}} 
+  --n_fft ${{inputs.n_fft}} 
+  --hop_length ${{inputs.hop_length}} 
+  --sequence_len ${{inputs.sequence_len}} 
+  --freq_compression ${{inputs.freq_compression}}
