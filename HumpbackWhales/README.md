@@ -6,7 +6,7 @@ This folder contains the collaborative efforts of the team for the Microsoft Glo
 
 ### References:
 - **Data Source**: The raw audio data is sourced from the ["Haro Humpback" catalog & open annotations](s3://acoustic-sandbox/humpbacks/Emily-Vierling-Orcasound-data/Em_HW_Processed/) prepared by Emily Vierling.
-- **Denoising Toolkit**: The project utilizes [ORCA-CLEAN: A Deep Denoising Toolkit for Killer Whale Communication](https://www.isca-speech.org/archive/interspeech_2020/bergler20_interspeech.html), developed by Christian Bergler. The toolkit can be found [here](https://github.com/ChristianBergler/ORCA-CLEAN).
+- **Denoising Toolkit**: The project utilizes [ORCA-CLEAN: A Deep Denoising Toolkit for Killer Whale Communication](https://www.isca-speech.org/archive/interspeech_2020/bergler20_interspeech.html), developed by Christian Bergler. The toolkit can be found [here](https://github.com/ChristianBergler/ORCA-CLEAN). We are using our own fork with a minor fix, which can be found [here](https://github.com/mariamedp/whale-denoising).
 - **Audio Spectrogram Transformer**: The project also appies the [Audio Spectrogram Transformer](https://github.com/YuanGongND/ast) developed by Yuan Gong, Yu-An Chung, and James Glass.
 
 
@@ -52,7 +52,7 @@ The dataset consists of audio files of humpback whale vocalizations and correspo
 
 - `01_DataPreprocessing`: Notebooks for data acquisition and preprocessing.
 - `02_ExploratoryDataAnalysis`: Notebooks for exploratory data analysis.
-- `03_Denoising/ML_pipeline`: Notebooks and scripts for setting up Azure ML pipelines for training the [ORCA-CLEAN deep denoising network](https://github.com/ChristianBergler/ORCA-CLEAN).
+- `03_Denoising/ML_pipeline`: Notebooks and scripts for setting up Azure ML pipelines for training the [ORCA-CLEAN deep denoising network](https://github.com/mariamedp/whale-denoising).
 - `04_Classification`: Notebooks for running classification experiments.
 - `05_ModelEvaluation`: Notebooks for evaluating the performance of the models.
 
@@ -65,9 +65,9 @@ The dataset consists of audio files of humpback whale vocalizations and correspo
 - ✅ Performance benchmarking of Audio Spectrogram Transformer: conduct basic benchmarking tests for the Audio Spectrogram Transformer on humpback vocalizations.
 
 ### ToDo
-- ❌ Noise segment refinement: develop a binary classifier to accurately distinguish between true noise segments and those erroneously labeled as noise but containing vocalizations.
-- ❌ Additional testing data preparation: develop a notebook for extracting %-portions from vocalizations using a sliding window of 5 sconds.
-- ❌ ORCA-CLEAN model optimization: finalize the training of the ORCA-CLEAN model through iterative training and testing cycles for humpback vocalizations.
-- ❌ Data denoising: utilize the trained ORCA-CLEAN model to preprocess the vocalization data, generating denoised records for subsequent steps.
-- ❌ Classifier fine-tuning: fine-tune the Audio Spectrogram Transformer using the denoised records to improve classification performance.
-- ❌ Inference pipeline deployment: develop and deploy an end-to-end inference pipeline comprising two sequential steps: denoising using ORCA-CLEAN and classification using the Audio Spectrogram Transformer.
+- [ ] Noise segment refinement: develop a binary classifier to accurately distinguish between true noise segments and those erroneously labeled as noise but containing vocalizations.
+- [ ] Additional testing data preparation: develop a notebook for extracting %-portions from vocalizations using a sliding window of 5 sconds.
+- [ ] ORCA-CLEAN model optimization: finalize the training of the ORCA-CLEAN model through iterative training and testing cycles for humpback vocalizations.
+- [ ] Data denoising: utilize the trained ORCA-CLEAN model to preprocess the vocalization data, generating denoised records for subsequent steps.
+- [ ] Classifier fine-tuning: fine-tune the Audio Spectrogram Transformer using the denoised records to improve classification performance.
+- [ ] Inference pipeline deployment: develop and deploy an end-to-end inference pipeline comprising two sequential steps: denoising using ORCA-CLEAN and classification using the Audio Spectrogram Transformer.
