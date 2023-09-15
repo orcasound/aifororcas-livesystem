@@ -59,15 +59,15 @@ The dataset consists of audio files of humpback whale vocalizations and correspo
 ## Checklist
 
 ### Done
-- [x] Acquisition and annotation-based extraction of hydrophone recordings: download raw hydrophone recordings from Orcasound Amazon S3 and extract humpback vocalizations based on provided annotations.
-- [x] Noise segment isolation: develop notebooks to isolate noise segments from raw hydrophone recordings for further analysis.
-- [x] AzureML pipeline integration for ORCA-CLEAN: encapsulate the training process of the ORCA-CLEAN denoising model within an AzureML pipeline.
-- [x] Performance benchmarking of Audio Spectrogram Transformer: conduct basic benchmarking tests for the Audio Spectrogram Transformer on humpback vocalizations.
+- ✅ Acquisition and annotation-based extraction of hydrophone recordings: download raw hydrophone recordings from Orcasound Amazon S3 and extract humpback vocalizations based on provided annotations.
+- ✅ Noise segment isolation: develop notebooks to isolate noise segments from raw hydrophone recordings for further analysis.
+- ✅ AzureML pipeline integration for ORCA-CLEAN: encapsulate the training process of the ORCA-CLEAN denoising model within an AzureML pipeline.
+- ✅ Performance benchmarking of Audio Spectrogram Transformer: conduct basic benchmarking tests for the Audio Spectrogram Transformer on humpback vocalizations.
 
 ### ToDo
-- [ ] Noise segment refinement: develop a binary classifier to accurately distinguish between true noise segments and those erroneously labeled as noise but containing vocalizations.
-- [ ] Additional testing data preparation: develop a notebook for extracting %-portions from vocalizations using a sliding window of 5 sconds.
-- [ ] ORCA-CLEAN model optimization: finalize the training of the ORCA-CLEAN model through iterative training and testing cycles for humpback vocalizations.
-- [ ] Data denoising: utilize the trained ORCA-CLEAN model to preprocess the vocalization data, generating denoised records for subsequent steps.
-- [ ] Classifier fine-tuning: fine-tune the Audio Spectrogram Transformer using the denoised records to improve classification performance.
-- [ ] Inference pipeline deployment: develop and deploy an end-to-end inference pipeline comprising two sequential steps: denoising using ORCA-CLEAN and classification using the Audio Spectrogram Transformer.
+- ❌ Noise segment refinement: develop a binary classifier to accurately distinguish between true noise segments and those erroneously labeled as noise but containing vocalizations.
+- ❌ Additional testing data preparation: develop a notebook for extracting %-portions from vocalizations using a sliding window of 5 sconds.
+- ❌ ORCA-CLEAN model optimization: finalize the training of the ORCA-CLEAN model through iterative training and testing cycles for humpback vocalizations.
+- ❌ Data denoising: utilize the trained ORCA-CLEAN model to preprocess the vocalization data, generating denoised records for subsequent steps.
+- ❌ Classifier fine-tuning: fine-tune the Audio Spectrogram Transformer using the denoised records to improve classification performance.
+- ❌ Inference pipeline deployment: develop and deploy an end-to-end inference pipeline comprising two sequential steps: denoising using ORCA-CLEAN and classification using the Audio Spectrogram Transformer.
