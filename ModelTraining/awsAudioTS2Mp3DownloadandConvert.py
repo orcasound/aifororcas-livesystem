@@ -11,6 +11,10 @@
 # python .\awsAudioTS2Mp3DownloadandConvert.py --date '2020-09-11 22:14:00 PST' --node rpi_orcasound_lab
 # AWS Bucket defaults to: streaming-orcasound-net. Otherwise use --awsBucket streaming-orcasound-net to change bucket name
 
+# To-Do
+# Select a subset of the ts files to download based on the delta from the epoch datetime and user input datetime. This reduces the download and output file size.
+# Rename the output file
+
 # ffmpeg -i '.\live.m3u8' -c copy -bsf:a aac_adtstoasc demo.mp4
 
 import datetime, argparse, os, requests, ffmpeg, shutil
@@ -58,8 +62,7 @@ assert(args.node in locations)
 
 s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED, region_name='us-east-1'))
 
-# test_epoch = 1539203407
-# '1543804333' 'rpi_orcasound_lab'
+DELETE_TEMP_FILES = True
 user_directory = os.environ['USERPROFILE']
 temp_dir_name = os.path.join('AppData\Local\Temp', 'orca_ffmpeg_temp')
 temp_directory_path = os.path.join(user_directory, temp_dir_name)
@@ -84,9 +87,7 @@ else:
 user_input_formatted = parser.parse(user_input)
 # user_input_formatted = time.strptime(user_input, '%Y-%m-%d %H:%M:%S %Z')
 print('time_formatted', user_input_formatted)
-# user_input_formatted2 = time.strftime(user_input, '%Y-%m-%d %H:%M:%S')
-# print('time_formatted2', user_input_formatted2)
-user_input_epoch = user_input_formatted.timestamp()#time.mktime(user_input_formatted)
+user_input_epoch = user_input_formatted.timestamp()
 print('user_input_epoch', user_input_epoch)
 
 
@@ -145,7 +146,7 @@ if epoch_needed:
 else:
     print("No Matching Epoch Found")
 assert(epoch_needed)
-epoch_folder = datetime.datetime.fromtimestamp(int(epoch_needed))#.strftime('%Y-%m-%d %H:%M:%S %Z')
+epoch_folder = datetime.datetime.fromtimestamp(int(epoch_needed))
 print('Conversion to datetime', epoch_folder)
 print(int(user_input_epoch) - int(epoch_needed))
 
@@ -157,9 +158,6 @@ aws_files = get_all_aws_objects(bucket_name=my_bucket, filename_prefix=filename_
 for aws_file in aws_files:
     if '.' in aws_file:
         download(streamingBucketURL+aws_file, dest_folder=temp_directory_path)
-
-# print("You provided $# arguments: $1, $2, $3, and $4")
-# aws s3 sync s3://streaming-orcasound-net/rpi_$1/hls/$2/ .
 
 glob_path = os.path.join(temp_directory_path, '*.ts')
 glob_list_files = glob(glob_path)
@@ -174,7 +172,6 @@ glob_list_files = glob(glob_path)
 # for i in *.ts ; do
 #     mv $i `printf '%04d' ${i%.ts}`.ts
 # done
-# with(mylist.txt
 # printf "file '%s'\n" ./*.ts > mylist.txt
 mylist_path = os.path.join(temp_directory_path, 'mylist.txt')
 with open(mylist_path, "w", encoding="utf-8") as f:
@@ -192,6 +189,13 @@ ffmpeg.input(allTS_path).output(outputMp4_path, acodec='copy', bsf='aac_adtstoas
 ffmpeg.input(outputMp4_path).output(outputMp3_path).run()
 # ffmpeg -i output.mp4 output.mp3
 # rm *.ts output.mp4 mylist.txt
+
+# delete temp files
+if DELETE_TEMP_FILES:
+    for f in glob(os.path.join(temp_directory_path, "*.ts")):
+        os.remove(f)
+    os.remove(allTS_path)
+    os.remove(outputMp4_path)
 
 print('Epoch needed', epoch_needed)
 print('Conversion to datetime', epoch_folder)
