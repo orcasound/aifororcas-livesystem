@@ -194,7 +194,6 @@ ffmpeg.input(outputMp4_path).output(outputMp3_path).run()
 if DELETE_TEMP_FILES:
     for f in glob(os.path.join(temp_directory_path, "*.ts")):
         os.remove(f)
-    os.remove(allTS_path)
     os.remove(outputMp4_path)
 
 print('Epoch needed', epoch_needed)
