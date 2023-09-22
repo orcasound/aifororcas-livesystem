@@ -34,6 +34,9 @@
         [SwaggerSchema("List of tags entered by the human moderator during review.")]
         public List<string> Tags { get; set; } = new List<string>();
 
+        [SwaggerSchema("A special interest label entered by the human moderator during review.")]
+        public string InterestLabel { get; set; }
+
         [SwaggerSchema("Any text comments entered by the human moderator during review.")]
         public string Comments { get; set; }
 

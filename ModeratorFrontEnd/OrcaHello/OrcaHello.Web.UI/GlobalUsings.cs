@@ -1,0 +1,15 @@
+﻿global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Components;
+global using Microsoft.JSInterop;
+global using OrcaHello.Web.Shared.Extensions;
+global using OrcaHello.Web.Shared.Models.Detections;
+global using OrcaHello.Web.Shared.Models.Hydrophones;
+global using OrcaHello.Web.Shared.Services;
+global using OrcaHello.Web.Shared.Utilities;
+global using OrcaHello.Web.UI.Brokers;
+global using OrcaHello.Web.UI.Models;
+global using OrcaHello.Web.UI.Pages.Components;
+global using OrcaHello.Web.UI.Services;
+global using Radzen;
+global using Radzen.Blazor;
+global using System.Diagnostics.CodeAnalysis;

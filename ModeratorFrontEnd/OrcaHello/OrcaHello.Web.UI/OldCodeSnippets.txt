@@ -1,0 +1,85 @@
+﻿        private async Task LoadDataAsync()
+        {
+            try
+            {
+                // blank existing data
+                IsLoading = true;
+                DetectionItemViews = null!;
+                TotalCount = 0;
+                await InvokeAsync(StateHasChanged);
+
+                // TODO: Clean up and pull from other elements and State Enum
+
+                DetectionFilterAndPagination filterAndPagination = new()
+                {
+                    Page = 1,
+                    PageSize = 10,
+                    State = "Unreviewed",
+                    SortBy = "timestamp",
+                    IsDescending = true,
+                    FromDate = DateTime.Now.AddDays(-30),
+                    ToDate = DateTime.Now
+                };
+
+                // load data
+                var response = await ViewService.RetrieveFilteredAndPaginatedDetectionItemViewsAsync(filterAndPagination);
+                DetectionItemViews = response.DetectionItemViews;
+                TotalCount = response.Count;
+
+                // finish the process
+                IsLoading = false;
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception exception)
+            {
+                // Make the page show 'no records found' on any load exception
+                DetectionItemViews = new();
+                TotalCount = 0;
+                IsLoading = false;
+                LogAndReportUnknownException(exception);
+            }
+        }
+
+
+                <div class="rz-background-color-black">
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-color-white mb-0 rz-text-align-center" Style="font-weight: 100">Presented by AI for Orcas</RadzenText>
+        </div>
+
+        /* OrcaHello-specific color palatte */
+:root {
+    /* Orca Black */
+    --oh-orca: #000000;
+    --oh-border-orca: var(--rz-border-width) var(--oh-base-orca);
+    /* Kelp Green */
+    --oh-kelp-green: #A4D3D1;
+    /* Seal Grey */
+    --oh-seal-light: #9B9B9B;
+    --oh-seal-dark: #1F1F1F;
+    /* Deep Blue */
+    --oh-base-deep-blue: #002F49;
+}
+
+/* OrcaHello remapping of Radzen colors */
+:root {
+    --rz-sidebar-toggle-border: var(--oh-border-orca);
+    --rz-sidebar-border-right: var(--oh-border-orca);
+    --rz-header-border: var(--oh-border-orca);
+    --rz-base-background-color: var(--oh-orca);
+    --rz-layout-body-background-color: var(--oh-seal-dark);
+    --rz-layout-background-color: var(--oh-seal-dark);
+    --rz-panel-menu-background-color: var(--oh-orca);
+    --rz-panel-menu-item-active-background-color: var(--oh-seal-dark);
+    --rz-menu-item-hover-background-color: var(--oh-seal-light);
+    --rz-panel-menu-item-border: var(--oh-border-orca);
+    --rz-on-primary: var(--oh-kelp-green);
+}
+
+/* OrcaHello changes of Radzen definitions for various components */
+:root {
+    --rz-dropdown-item-padding: 0rem 1rem;
+    --rz-text-font-family: 'Work Sans Regular';
+}
+
+    --rz-primary: #A4D3D1;*/ /* Primary color (for buttons) - Kelp Green*/
+    /*--rz-panel-menu-background-color: #000000;
+    --rz-panel-menu-item-active-background-color: #1F1F1F;*/

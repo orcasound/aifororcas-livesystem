@@ -1,0 +1,39 @@
+﻿    <RadzenRow Gap="0">
+        <RadzenColumn Size="2">
+            <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-mb-0">State</RadzenText>
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <RadzenTextBox @bind-Value=@moderateDetection.State Style="width:50%;"></RadzenTextBox>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="2">
+            <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-mb-0">Comments</RadzenText>
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <RadzenTextArea @bind-Value=@moderateDetection.Comments Style="width:100%;"></RadzenTextArea>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="2">
+            <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-mb-0">Tags</RadzenText>
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <RadzenTextBox @bind-Value=@moderateDetection.Tags Style="width:100%;"></RadzenTextBox>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="0">
+        <RadzenColumn Size="2">
+            <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-mb-0">Label</RadzenText>
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <RadzenTextBox @bind-Value=@moderateDetection.InterestLabel Style="width:50%;"></RadzenTextBox>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="0" Style="margin-top: 10px;">
+        <RadzenColumn>
+            <RadzenButton Text="Submit" @onclick="Submit"></RadzenButton>
+            <RadzenButton Text="Map"></RadzenButton>
+            <RadzenButton Text="Spectragraph"></RadzenButton>
+        </RadzenColumn>
+    </RadzenRow>

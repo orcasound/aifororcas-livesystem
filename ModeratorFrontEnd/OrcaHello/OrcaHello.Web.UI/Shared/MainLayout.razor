@@ -1,0 +1,68 @@
+﻿@inherits LayoutComponentManager
+
+<RadzenLayout class="rz-shadow-3" id="container">
+    <RadzenHeader>
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.SpaceBetween>
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.Left Gap="0">
+                <RadzenSidebarToggle Click=@(() => sidebarExpanded = !sidebarExpanded) Style="margin:0;" />
+                <OrcaIcon />
+                <RadzenStack Orientation=Orientation.Vertical>
+                    <RadzenLabel Text="OrcaHello" Style="font-size:24px;font-weight:600;line-height:28px;" />
+                    <RadzenLabel Text="By AI for Orcas" Style="font-size:12px;font-weight:400;line-height:19px;" />
+                </RadzenStack>
+            </RadzenStack>
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center Gap="10px">
+                <RadzenText id="large-only" Text="@DateTime.UtcNow.UTCToPDT()" TextStyle=TextStyle.Body2 Style="margin:0;" />
+                <RadzenText id="phone-only" Text="@DateTime.UtcNow.UTCToPDT(true)" TextStyle=TextStyle.Body2 Style="margin:0;" />
+                <partial name="_LoginPartial" />
+
+
+                <AuthorizeView>
+                    <Authorized>
+                        <RadzenProfileMenu>
+                            <Template>
+                                <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                                    <RadzenLabel id="large-only" Text="Mike Cowan" TextStyle=TextStyle.Body2 />
+                                    <RadzenIcon Icon="account_circle" Style="font-size:32px;" />
+                                </RadzenStack>
+                            </Template>
+                            <ChildContent>
+                                <RadzenProfileMenuItem Text="Activity log" Path="buttons" Icon="formatted_list_bulleted"></RadzenProfileMenuItem>
+                                <RadzenProfileMenuItem Text="Log out" Path="menu" Icon="logout"></RadzenProfileMenuItem>
+                            </ChildContent>
+                        </RadzenProfileMenu>
+                    </Authorized>
+                    <NotAuthorized>
+                        <RadzenButton Text="Log in" Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Style="margin-right:10px;" />
+                    </NotAuthorized>
+                </AuthorizeView>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenSidebar @bind-Expanded=@sidebarExpanded>
+        <RadzenPanelMenu>
+            <RadzenPanelMenuItem Path="index" Text="Summary" Selected=@isSummarySelected Icon="home" />
+            <RadzenPanelMenuItem Path="hydrophones" Text="Hydrophones" Icon="mic" />
+            <RadzenPanelMenuItem Path="metrics" Text="Metrics" Icon="donut_large" />
+            <RadzenPanelMenuItem Path="orca_sounds" Text="Orca Sounds" Icon="headphones" />
+            <RadzenPanelMenuItem Path="search_by_tag" Text="Search By Tag" Icon="search" />
+            <RadzenPanelMenuItem Text="Curate" Icon="settings_applications">
+                <RadzenPanelMenuItem Path="curate_tags" Text="Tags" Icon="sell" />
+                <RadzenPanelMenuItem Path="curate_interest_labels" Text="Interest Labels" Icon="label" />
+            </RadzenPanelMenuItem>
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+    <RadzenBody class="p-1" Style="overflow-y:hidden;height:calc(100%);">
+        @Body
+    </RadzenBody>
+    <RadzenFooter class="p-0">
+        <div class="rz-background-color-black">
+            <RadzenText TextStyle=TextStyle.Subtitle2 class="rz-color-white mb-0 rz-text-align-center" Style="font-weight:100">©Copyright 2023 OrcaHello | All Rights Reserved</RadzenText>
+        </div>
+    </RadzenFooter>
+</RadzenLayout>
+
+<RadzenDialog />
+<RadzenNotification />
+<RadzenContextMenu />
+<RadzenTooltip />
