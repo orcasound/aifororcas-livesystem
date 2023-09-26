@@ -1,28 +1,29 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add AppSettings
-
-var appSettings = new AppSettings();
+// Inject application 
+AppSettings appSettings = new();
 builder.Configuration.GetSection("AppSettings").Bind(appSettings);
-builder.Services.AddSingleton(appSettings);
+builder.Services.AddSingleton<AppSettings>(appSettings);
 
-// Add services to the container.
+// Inject external libraries (Models\Extensions\ExternalServices)
+builder.ConfigureExternalUtilities(appSettings);
+
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddRadzenComponents();
+// Inject authentication services and access policies (Models\Extensions\AuthenticationServices)
+builder.ConfigureAuthProviders();
+builder.ConfigureModeratorPolicy(appSettings);
 
-builder.Services.AddHttpClient();
+// Inject web services (Models\Extensions\WebServices)
+builder.ConfigureHttpServices();
+builder.ConfigureApiClient(appSettings);
 
-builder.Services.AddSingleton<IHttpService, HttpService>();
-
-builder.Services.AddScoped<IDetectionAPIBroker, DetectionAPIBroker>();
-
-builder.Services.AddScoped<IHydrophoneService, HydrophoneService>();
-builder.Services.AddScoped<IDetectionService, DetectionService>();
-
-builder.Services.AddScoped<IHydrophoneViewService, HydrophoneViewService>();
-builder.Services.AddScoped<IDetectionViewService, DetectionViewService>();
+// Inject data services (Modeles\Extensions\DataServices)
+builder.ConfigureDataServices();
 
 var app = builder.Build();
 
@@ -35,20 +36,23 @@ using (var scope = app.Services.CreateScope())
     appSettings.HydrophoneLocationNames = (await hydrophoneService.RetrieveAllHydrophonesAsync()).Select(x => x.Name).ToList();
 }
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Components/Error");
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/Components/_Host");
 

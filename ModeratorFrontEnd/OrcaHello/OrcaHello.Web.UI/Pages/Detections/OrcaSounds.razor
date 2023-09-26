@@ -1,4 +1,5 @@
 ﻿@inherits ComponentManager
+
 @page "/orca_sounds"
 
 <RadzenLayout Style="height:100vh;">
@@ -117,7 +118,11 @@
                                     </RadzenColumn>
                                 </RadzenRow>
 
-                                <ModerationForm DetectionItemView=@item />
+                                <AuthorizeView Policy="Moderators">
+                                    <Authorized Context="Auth">
+                                        <ModerationForm DetectionItemView=@item />
+                                    </Authorized>
+                                </AuthorizeView>
 
                             </RadzenColumn>
                             <RadzenColumn Size="6">

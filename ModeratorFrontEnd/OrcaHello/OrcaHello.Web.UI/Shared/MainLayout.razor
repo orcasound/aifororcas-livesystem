@@ -14,10 +14,10 @@
             <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center Gap="10px">
                 <RadzenText id="large-only" Text="@DateTime.UtcNow.UTCToPDT()" TextStyle=TextStyle.Body2 Style="margin:0;" />
                 <RadzenText id="phone-only" Text="@DateTime.UtcNow.UTCToPDT(true)" TextStyle=TextStyle.Body2 Style="margin:0;" />
-                <partial name="_LoginPartial" />
+                <RightTopBar />
 
 
-                <AuthorizeView>
+@*                 <AuthorizeView>
                     <Authorized>
                         <RadzenProfileMenu>
                             <Template>
@@ -35,7 +35,7 @@
                     <NotAuthorized>
                         <RadzenButton Text="Log in" Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Style="margin-right:10px;" />
                     </NotAuthorized>
-                </AuthorizeView>
+                </AuthorizeView> *@
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>

@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\catsk\.nuget\packages\blazorade.msal\2.2.0\contentFiles\any\net6.0\Blazorade-Icon-128.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazorade.Msal" Version="2.2.0" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageReference Include="Radzen.Blazor" Version="4.15.11" />
   </ItemGroup>
 
@@ -16,3 +22,5 @@
   </ItemGroup>
 
 </Project>
+
+
