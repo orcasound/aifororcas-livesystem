@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace OrcaHello.Web.Api.Services
+﻿namespace OrcaHello.Web.Api.Services
 {
     public partial class DetectionOrchestrationService
     {
@@ -16,13 +14,16 @@ namespace OrcaHello.Web.Api.Services
                 throw new InvalidDetectionOrchestrationException(LoggingUtilities.MissingRequiredProperty(propertyName));
         }
 
-        protected void ValidateModerateRequestOnUpdate(ModerateDetectionRequest request)
+        protected void ValidateModerateRequestOnUpdate(ModerateDetectionsRequest request)
         {
             if (request is null)
                 throw new NullModerateDetectionRequestException();
 
             switch(request)
             {
+                case { } when request.Ids is null || !request.Ids.Any():
+                    throw new InvalidDetectionOrchestrationException(LoggingUtilities.MissingRequiredProperty(nameof(request.Ids)));
+
                 case { } when ValidatorUtilities.IsInvalid(request.State) :
                     throw new InvalidDetectionOrchestrationException(LoggingUtilities.MissingRequiredProperty(nameof(request.State)));
 
@@ -39,18 +40,6 @@ namespace OrcaHello.Web.Api.Services
             {
                 throw new NotFoundMetadataException(id);
             }
-        }
-
-        protected void ValidateDeleted(bool deleted, string id)
-        {
-            if (!deleted)
-                throw new DetectionNotDeletedException(id);
-        }
-
-        protected void ValidateInserted(bool inserted, string id)
-        {
-            if (!inserted)
-                throw new DetectionNotInsertedException(id);
         }
 
         protected void ValidatePage(int page)

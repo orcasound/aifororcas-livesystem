@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.Shared.Services
 {
+    [ExcludeFromCodeCoverage]
     public class HttpService : IHttpService
     {
         private readonly HttpClient _httpClient;

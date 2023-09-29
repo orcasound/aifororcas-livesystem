@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.Shared.Extensions
 {
+    [ExcludeFromCodeCoverage]
     public static class DateTimeExtensions
     {
         public static string UTCToPDT(this DateTime datetime, bool timeOnly = false)

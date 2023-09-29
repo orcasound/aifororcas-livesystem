@@ -44,50 +44,58 @@
             var jsonBytes = ParseBase64WithoutPadding(payload);
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
 
-            keyValuePairs.TryGetValue("groups", out object groups);
-
-            if (groups != null)
+            if (keyValuePairs is not null)
             {
-                if (groups.ToString().Trim().StartsWith("["))
-                {
-                    var parsedGroups = JsonSerializer.Deserialize<string[]>(groups.ToString());
+                keyValuePairs.TryGetValue("groups", out object? groups);
 
-                    foreach (var parsedGroup in parsedGroups)
+                if (groups is not null)
+                {
+                    if (groups.ToString()!.Trim().StartsWith("["))
                     {
-                        claims.Add(new Claim("groups", parsedGroup));
+                        var parsedGroups = JsonSerializer.Deserialize<string[]>(groups.ToString()!);
+
+                        if (parsedGroups is not null)
+                        {
+                            foreach (var parsedGroup in parsedGroups)
+                            {
+                                claims.Add(new Claim("groups", parsedGroup));
+                            }
+                        }
                     }
-                }
-                else
-                {
-                    claims.Add(new Claim("groups", groups.ToString()));
-                }
-
-                keyValuePairs.Remove("groups");
-            }
-
-            keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
-
-            if (roles != null)
-            {
-                if (roles.ToString().Trim().StartsWith("["))
-                {
-                    var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString());
-
-                    foreach (var parsedRole in parsedRoles)
+                    else
                     {
-                        claims.Add(new Claim(ClaimTypes.Role, parsedRole));
+                        claims.Add(new Claim("groups", groups.ToString()!));
                     }
+
+                    keyValuePairs.Remove("groups");
                 }
-                else
+
+                keyValuePairs.TryGetValue(ClaimTypes.Role, out object? roles);
+
+                if (roles is not null)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
+                    if (roles.ToString()!.Trim().StartsWith("["))
+                    {
+                        var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString()!);
+
+                        if (parsedRoles is not null)
+                        {
+                            foreach (var parsedRole in parsedRoles)
+                            {
+                                claims.Add(new Claim(ClaimTypes.Role, parsedRole));
+                            };
+                        }
+                    }
+                    else
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, roles.ToString()!));
+                    }
+
+                    keyValuePairs.Remove(ClaimTypes.Role);
                 }
 
-                keyValuePairs.Remove(ClaimTypes.Role);
+                claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)));
             }
-
-            claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString())));
-
             return claims;
         }
 

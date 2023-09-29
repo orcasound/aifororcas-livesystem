@@ -35,6 +35,7 @@ using static OrcaHello.Web.Shared.Services.HttpResponseNotFoundException;
 
 namespace OrcaHello.Web.Shared.Services
 {
+    [ExcludeFromCodeCoverage]
     public class ValidationService
     {
         public async static ValueTask ValidateHttpResponseAsync(HttpResponseMessage httpResponseMessage)
@@ -167,6 +168,7 @@ namespace OrcaHello.Web.Shared.Services
             content.ToLower().Contains("\"title\":") && content.ToLower().Contains("\"type\":");
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseException : Xeption
     {
         public HttpResponseException() { }
@@ -177,6 +179,7 @@ namespace OrcaHello.Web.Shared.Services
         public HttpResponseMessage HttpResponseMessage { get; private set; }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseBadRequestException : HttpResponseException
     {
         public HttpResponseBadRequestException()
@@ -193,6 +196,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseUnauthorizedException : HttpResponseException
     {
         public HttpResponseUnauthorizedException()
@@ -209,6 +213,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseUrlNotFoundException : HttpResponseException
     {
         public HttpResponseUrlNotFoundException()
@@ -218,6 +223,7 @@ namespace OrcaHello.Web.Shared.Services
             : base(responseMessage, message) { }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseNotFoundException : HttpResponseException
     {
         public HttpResponseNotFoundException()
@@ -234,6 +240,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseInternalServerErrorException : HttpResponseException
     {
         public HttpResponseInternalServerErrorException()
@@ -250,6 +257,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseConflictException : HttpResponseException
     {
         public HttpResponseConflictException()
@@ -266,6 +274,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseForbiddenException : HttpResponseException
     {
         public HttpResponseForbiddenException()
@@ -282,6 +291,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseMethodNotAllowedException : HttpResponseException
     {
         public HttpResponseMethodNotAllowedException()
@@ -297,6 +307,8 @@ namespace OrcaHello.Web.Shared.Services
             this.AddData((IDictionary)problemDetails.Errors);
         }
     }
+
+    [ExcludeFromCodeCoverage]
     public class HttpResponseNotAcceptableException : HttpResponseException
     {
         public HttpResponseNotAcceptableException()
@@ -313,6 +325,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseNotImplementedException : HttpResponseException
     {
         public HttpResponseNotImplementedException()
@@ -329,6 +342,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseRequestUriTooLongException : HttpResponseException
     {
         public HttpResponseRequestUriTooLongException()
@@ -345,6 +359,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseRequestTimeoutException : HttpResponseException
     {
         public HttpResponseRequestTimeoutException()
@@ -360,6 +375,8 @@ namespace OrcaHello.Web.Shared.Services
             this.AddData((IDictionary)problemDetails.Errors);
         }
     }
+
+    [ExcludeFromCodeCoverage]
     public class HttpResponseServiceUnavailableException : HttpResponseException
     {
         public HttpResponseServiceUnavailableException()
@@ -376,6 +393,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseGoneException : HttpResponseException
     {
         public HttpResponseGoneException()
@@ -392,6 +410,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class HttpResponseGatewayTimeoutException : HttpResponseException
     {
         public HttpResponseGatewayTimeoutException()
@@ -408,6 +427,7 @@ namespace OrcaHello.Web.Shared.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public class Xeption : Exception
     {
         public Xeption() : base() { }

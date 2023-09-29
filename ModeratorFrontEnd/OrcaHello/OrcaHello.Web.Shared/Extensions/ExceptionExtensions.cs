@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.Shared.Extensions
 {
+    [ExcludeFromCodeCoverage]
     public static class ExceptionExtensions
     {
         // Extension method to get all messages from an exception and its inner exceptions

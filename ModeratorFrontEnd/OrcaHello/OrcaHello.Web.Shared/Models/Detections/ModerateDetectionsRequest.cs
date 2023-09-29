@@ -1,11 +1,11 @@
 ﻿namespace OrcaHello.Web.Shared.Models.Detections
 {
     [ExcludeFromCodeCoverage]
-    [SwaggerSchema("A request for updating a detection with moderator-related information.")]
-    public class ModerateDetectionRequest
+    [SwaggerSchema("A request for updating one or more detections with moderator-related information.")]
+    public class ModerateDetectionsRequest
     {
-        [SwaggerSchema("The detection id.")]
-        public string Id { get; set; }
+        [SwaggerSchema("The detection ids to be moderated.")]
+        public List<string> Ids { get; set; }
 
         [SwaggerSchema("The detection's new state.")]
         public string State { get; set; }

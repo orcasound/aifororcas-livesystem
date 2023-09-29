@@ -6,33 +6,36 @@
         [TestMethod]
         public async Task Default_PutModeratedInfoAsync_Expect_Detection()
         {
-            Detection expectedResult = new();
+            ModerateDetectionsResponse expectedResult = new();
 
             _orchestrationServiceMock.Setup(service =>
-                service.ModerateDetectionByIdAsync(It.IsAny<string>(), It.IsAny<ModerateDetectionRequest>()))
+                service.ModerateDetectionsByIdAsync(It.IsAny<ModerateDetectionsRequest>()))
             .ReturnsAsync(expectedResult);
 
-            ModerateDetectionRequest request = new()
+            ModerateDetectionsRequest request = new()
             {
-                Id = Guid.NewGuid().ToString(),
+                Ids = new List<string> { Guid.NewGuid().ToString() },
                 Moderator = "Ira M. Goober",
                 DateModerated = DateTime.UtcNow,
                 Comments = "Comments",
                 Tags = new List<string>() { "Tag1" }
             };
 
-            ActionResult<Detection> actionResult =
-                await _controller.PutModeratedInfoAsync(Guid.NewGuid().ToString(), request);
+            ActionResult<ModerateDetectionsResponse> actionResult =
+                await _controller.PutModeratedInfoAsync(request);
 
 
             var contentResult = actionResult.Result as ObjectResult;
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.IsNotNull((Detection)contentResult.Value);
+            if (contentResult.Value is ModerateDetectionsResponse response)
+            {
+                Assert.IsNotNull(response);
+            }
 
             _orchestrationServiceMock.Verify(service =>
-               service.ModerateDetectionByIdAsync(It.IsAny<string>(), It.IsAny<ModerateDetectionRequest>()),
+               service.ModerateDetectionsByIdAsync(It.IsAny<ModerateDetectionsRequest>()),
                 Times.Once);
         }
     }

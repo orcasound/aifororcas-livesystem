@@ -6,12 +6,7 @@
         public async Task TryCatch_PutModeratedInfoAsync_Expect_Exception()
         {
             _orchestrationServiceMock
-                .SetupSequence(p => p.ModerateDetectionByIdAsync(It.IsAny<string>(), It.IsAny<ModerateDetectionRequest>()))
-
-                .Throws(new DetectionOrchestrationValidationException(new NotFoundMetadataException("id")))
-
-                .Throws(new DetectionOrchestrationValidationException(new DetectionNotDeletedException("id")))
-                .Throws(new DetectionOrchestrationValidationException(new DetectionNotInsertedException("id")))
+                .SetupSequence(p => p.ModerateDetectionsByIdAsync(It.IsAny<ModerateDetectionsRequest>()))
 
                 .Throws(new DetectionOrchestrationValidationException(new Exception()))
                 .Throws(new DetectionOrchestrationDependencyValidationException(new Exception()))
@@ -21,15 +16,13 @@
 
                 .Throws(new Exception());
 
-            await ExecuteModerateDetectionById(1, StatusCodes.Status404NotFound);
-            await ExecuteModerateDetectionById(2, StatusCodes.Status422UnprocessableEntity);
             await ExecuteModerateDetectionById(2, StatusCodes.Status400BadRequest);
             await ExecuteModerateDetectionById(3, StatusCodes.Status500InternalServerError);
 
             _orchestrationServiceMock
                  .Verify(service => service
-                    .ModerateDetectionByIdAsync(It.IsAny<string>(), It.IsAny<ModerateDetectionRequest>()),
-                    Times.Exactly(8));
+                    .ModerateDetectionsByIdAsync(It.IsAny<ModerateDetectionsRequest>()),
+                    Times.Exactly(5));
 
         }
 
@@ -37,8 +30,8 @@
         {
             for (int x = 0; x < count; x++)
             {
-                ActionResult<Detection> actionResult =
-                    await _controller.PutModeratedInfoAsync("id", new ModerateDetectionRequest());
+                ActionResult<ModerateDetectionsResponse> actionResult =
+                    await _controller.PutModeratedInfoAsync(new ModerateDetectionsRequest());
 
                 var contentResult = actionResult.Result as ObjectResult;
                 Assert.IsNotNull(contentResult);
