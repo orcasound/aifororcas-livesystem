@@ -17,6 +17,7 @@
         public string Tags { get; set; }
         public string InterestLabel { get; set; }
         public string AverageConfidence { get => $"{Confidence.ToString("00.##")}% average confidence"; }
+        public string SmallConfidence { get => $"{Confidence.ToString("F2")}%"; }
         public string DetectionCount { get => $"{Annotations.Count} detections"; }
     }
 }

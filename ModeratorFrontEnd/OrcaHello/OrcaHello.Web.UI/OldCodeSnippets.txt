@@ -83,3 +83,9 @@
     --rz-primary: #A4D3D1;*/ /* Primary color (for buttons) - Kelp Green*/
     /*--rz-panel-menu-background-color: #000000;
     --rz-panel-menu-item-active-background-color: #1F1F1F;*/
+
+                <RadzenDataList AllowVirtualization="true"
+                            WrapItems="false" AllowPaging="false" LoadData=@LoadData
+                            Data=@DetectionItemViews Count=@TotalDetectionCount TItem="DetectionItemView" PageSize="10"
+                            PagerHorizontalAlign=HorizontalAlign.Left ShowPagingSummary="true" @ref="DetectionDataList"
+                            Style="margin-top:10px;">

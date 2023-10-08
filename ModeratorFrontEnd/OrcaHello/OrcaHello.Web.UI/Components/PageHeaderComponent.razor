@@ -1,0 +1,8 @@
+﻿<PageTitle>OrcaHello-@Title</PageTitle>
+
+<RadzenText TextStyle=TextStyle.H2 class="rz-pt-1" Text=@Title />
+
+@if (!string.IsNullOrWhiteSpace(Description))
+{
+    <RadzenText TextStyle=TextStyle.Body1 class="rz-mb-4" Text=@Description />
+}

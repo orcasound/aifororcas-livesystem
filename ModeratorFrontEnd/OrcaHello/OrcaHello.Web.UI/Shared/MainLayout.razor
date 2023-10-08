@@ -4,38 +4,16 @@
     <RadzenHeader>
         <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.SpaceBetween>
             <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.Left Gap="0">
-                <RadzenSidebarToggle Click=@(() => sidebarExpanded = !sidebarExpanded) Style="margin:0;" />
-                <OrcaIcon />
+                <RadzenSidebarToggle Click=@(() => sidebarExpanded = !sidebarExpanded) />
+                <OrcaIconComponent />
                 <RadzenStack Orientation=Orientation.Vertical>
-                    <RadzenLabel Text="OrcaHello" Style="font-size:24px;font-weight:600;line-height:28px;" />
-                    <RadzenLabel Text="By AI for Orcas" Style="font-size:12px;font-weight:400;line-height:19px;" />
+                    <RadzenText Text="OrcaHello" TextStyle=TextStyle.H1 />
+                    <RadzenText Text="By AI for Orcas" TextStyle=TextStyle.Body2 />
                 </RadzenStack>
             </RadzenStack>
             <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center Gap="10px">
-                <RadzenText id="large-only" Text="@DateTime.UtcNow.UTCToPDT()" TextStyle=TextStyle.Body2 Style="margin:0;" />
-                <RadzenText id="phone-only" Text="@DateTime.UtcNow.UTCToPDT(true)" TextStyle=TextStyle.Body2 Style="margin:0;" />
-                <RightTopBar />
-
-
-@*                 <AuthorizeView>
-                    <Authorized>
-                        <RadzenProfileMenu>
-                            <Template>
-                                <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                    <RadzenLabel id="large-only" Text="Mike Cowan" TextStyle=TextStyle.Body2 />
-                                    <RadzenIcon Icon="account_circle" Style="font-size:32px;" />
-                                </RadzenStack>
-                            </Template>
-                            <ChildContent>
-                                <RadzenProfileMenuItem Text="Activity log" Path="buttons" Icon="formatted_list_bulleted"></RadzenProfileMenuItem>
-                                <RadzenProfileMenuItem Text="Log out" Path="menu" Icon="logout"></RadzenProfileMenuItem>
-                            </ChildContent>
-                        </RadzenProfileMenu>
-                    </Authorized>
-                    <NotAuthorized>
-                        <RadzenButton Text="Log in" Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Style="margin-right:10px;" />
-                    </NotAuthorized>
-                </AuthorizeView> *@
+                <CurrentDateTimeComponent />
+                <AuthenticationComponent />
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>

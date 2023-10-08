@@ -19,6 +19,9 @@
         private async ValueTask<T> PostAsync<T>(string relativeUrl, T content) =>
             await _apiClient.PostContentAsync<T>(createFullUrl(relativeUrl), content);
 
+        private async ValueTask<TResult> PutAsync<T, TResult>(string relativeUrl, T content) =>
+            await _apiClient.PutContentAsync<T, TResult>(createFullUrl(relativeUrl), content);
+
         private string createFullUrl(string relativeUrl)
         {
             return _detectionApiUrn.EndsWith("/") ?

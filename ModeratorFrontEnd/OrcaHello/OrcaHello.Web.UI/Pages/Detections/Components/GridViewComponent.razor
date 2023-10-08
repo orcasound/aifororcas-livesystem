@@ -1,0 +1,13 @@
+﻿<h3>GridViewComponent</h3>
+
+<RadzenText Text=@DetectionState.ToString() />
+<RadzenText Text=@SortBy.ToString() />
+<RadzenText Text=@SortOrder.ToString() />
+<RadzenText Text=@Timeframe.ToString() />
+<RadzenText Text=@(StartDateTime.HasValue ? StartDateTime.Value.ToString() : string.Empty) />
+<RadzenText Text=@(EndDateTime.HasValue ? EndDateTime.Value.ToString() : string.Empty) />
+<RadzenText Text=@Location />
+<RadzenText Text=@MaxRecords.ToString() />
+<RadzenButton Text="Show" Click=OnShowReviewButtonClicked />
+<RadzenButton Text="Hide" Click=OnHideReviewButtonClicked />
+

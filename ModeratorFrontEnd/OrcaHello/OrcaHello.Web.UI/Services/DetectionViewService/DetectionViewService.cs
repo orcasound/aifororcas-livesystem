@@ -33,6 +33,31 @@
             };
         });
 
+        public ValueTask<ModerateDetectionsResponse> ModerateDetectionsAsync(List<string> ids, string state, string moderator, string comments, string tags) =>
+        TryCatch(async () =>
+        {
+            // ValidateParameters();
+
+            // TODO: How to handle validation errors?
+
+            ModerateDetectionsRequest request = new()
+            {
+                Ids = ids,
+                State = state,
+                Moderator = moderator,
+                DateModerated = DateTime.UtcNow,
+                Comments = comments,
+                Tags = tags.Split(new char[] {',', ';' }, StringSplitOptions.RemoveEmptyEntries).ToList()
+            };
+
+            ModerateDetectionsResponse response = 
+                await _detectionService.ModerateDetectionsAsync(request);
+
+            // TODO: How to handle any errors? Probably in the component.
+
+            return response;
+        });
+
         private static Func<Detection, DetectionItemView> AsDetectionItemView =>
             detection => new DetectionItemView
             {

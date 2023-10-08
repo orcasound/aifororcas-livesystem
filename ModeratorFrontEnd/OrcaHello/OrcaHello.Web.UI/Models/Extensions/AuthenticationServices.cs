@@ -18,8 +18,11 @@
         // Inject service providers
         public static void ConfigureAuthProviders(this WebApplicationBuilder builder)
         {
-            builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+            builder.Services.AddScoped<ApiAuthenticationStateProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
+                provider.GetRequiredService<ApiAuthenticationStateProvider>());
             builder.Services.AddScoped<IAccountService, AccountService>();
+            //builder.Services.AddHostedService<JwtRefreshBackgroundService>();
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Services
+﻿using System.IdentityModel.Tokens.Jwt;
+
+namespace OrcaHello.Web.UI.Services
 {
     public class AccountService : IAccountService
     {
@@ -82,6 +84,7 @@
             }
             catch (Exception exception)
             {
+                // TODO: Better reporting for this
                 Console.WriteLine(exception.Message);
             }
         }
@@ -91,6 +94,24 @@
             await _localStorage.ClearAsync();
             ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
             _httpService.DefaultRequestHeaders.Clear();
+        }
+
+        public async Task LogoutIfExpired()
+        {
+            AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+            ClaimsPrincipal user = authState.User;
+
+            if (user?.Identity != null && user.Identity.IsAuthenticated)
+            {
+                var savedToken = await _localStorage.GetItemAsync<string>("authToken");
+
+                if (((ApiAuthenticationStateProvider)_authenticationStateProvider).IsTokenExpired(savedToken))
+                {
+                    await _localStorage.ClearAsync();
+                    ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
+                    _httpService.DefaultRequestHeaders.Clear();
+                }
+            }
         }
     }
 }

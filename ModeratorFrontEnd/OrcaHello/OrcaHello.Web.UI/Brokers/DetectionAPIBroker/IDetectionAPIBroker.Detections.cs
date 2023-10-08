@@ -3,5 +3,6 @@
     public partial interface IDetectionAPIBroker
     {
         ValueTask<DetectionListResponse> GetFilteredDetectionsAsync(string queryString);
+        ValueTask<ModerateDetectionsResponse> PutModerateDetectionsAsync(ModerateDetectionsRequest request);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Services
+﻿using System.IdentityModel.Tokens.Jwt;
+
+namespace OrcaHello.Web.UI.Services
 {
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
@@ -35,6 +37,27 @@
             var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
             var authState = Task.FromResult(new AuthenticationState(anonymousUser));
             NotifyAuthenticationStateChanged(authState);
+        }
+
+        public bool IsTokenExpired(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return true;
+            }
+
+            // Parse the JWT and get the expiry time
+            var jwtHandler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = jwtHandler.ReadJwtToken(token);
+            var expiryTime = jwtSecurityToken.ValidTo;
+
+            // Check if the JWT has expired
+            if (expiryTime < DateTime.UtcNow)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)

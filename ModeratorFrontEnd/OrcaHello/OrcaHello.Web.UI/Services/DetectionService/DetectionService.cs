@@ -30,5 +30,16 @@
 
             return response;
         });
+
+        public ValueTask<ModerateDetectionsResponse> ModerateDetectionsAsync(ModerateDetectionsRequest request) =>
+        TryCatch(async () =>
+        {
+            // ValidateModerateDetectionsOnPut();
+            ModerateDetectionsResponse response = await _apiBroker.PutModerateDetectionsAsync(request);
+
+            // ValidateResponseHasNoErrors();
+
+            return response;
+        });
     }
 }

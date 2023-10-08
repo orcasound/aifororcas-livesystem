@@ -1,0 +1,22 @@
+﻿<RadzenRow Gap="0" class="rz-mt-3 rz-me-3">
+    <RadzenColumn Size="12" SizeXS="12">
+        <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+            <RadzenLabel Text="Was there an SRKW call in this clip?" />
+            <RadzenRadioButtonList @bind-Value=@Item.State TValue="string" Orientation=Orientation.Vertical>
+                <Items>
+                    <RadzenRadioButtonListItem Text="Yes" Value=@("Positive")/>
+                    <RadzenRadioButtonListItem Text="No" Value=@("Negative") />
+                    <RadzenRadioButtonListItem Text="Don't Know" Value=@("Unknown") />
+                </Items>
+            </RadzenRadioButtonList>
+            <RadzenLabel Text="Tags" />
+            <RadzenTextBox @bind-Value=@Item.Tags Style="width: 100%; margin-top: 1rem;" Placeholder="Add tags separated by commas or semicolons" />
+            <RadzenLabel Text="Comments" Style="margin-top: 1rem;"/>
+            <RadzenTextArea @bind-Value=@Item.Comments  Style="width: 100%; margin-top: 1rem;" Rows="3" Placeholder="Add comments"/>
+        </RadzenStack>
+        <RadzenStack Orientation=Orientation.Horizontal Style="margin-top: 1rem;">
+            <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Click=OnSubmitClicked Text ="Submit" Style="margin-right: 0.5rem;" />
+            <DetectionButtonsComponent />
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>

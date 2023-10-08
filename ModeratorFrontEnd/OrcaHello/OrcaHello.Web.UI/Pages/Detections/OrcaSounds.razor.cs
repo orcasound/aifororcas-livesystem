@@ -3,57 +3,88 @@
     public partial class OrcaSounds
     {
         [Inject]
-        public IDetectionViewService ViewService { get; set; }
-
-        [Inject]
-        public AppSettings AppSettings { get; set; }
-
-        protected IEnumerable<DetectionItemView> DetectionItemViews;
-        protected int TotalDetectionCount = 0;
-        protected bool IsLoading = false;
-
-        // Detection State
-        List<PicklistOption> DetectionStateOptions = new() {
-            new(0, "Candidates for Review", DetectionState.Unreviewed.ToString()),
-            new(1, "Confirmed Whale Calls", DetectionState.Positive.ToString()),
-            new(2, "Negative Detections", DetectionState.Negative.ToString()),
-            new(3, "Unknown or Unconfirmed Detections", DetectionState.Unknown.ToString()) };
-        protected int? DetectionStateValue = 0; // Candidates is default
+        public AppSettings AppSettings { get; set; } = null!;
 
         // View Mode
-        protected int? ViewMode = 0; // Tile mode is default
+        protected ViewMode SelectedViewMode = ViewMode.GridView;
 
-        // View Type
-        List<PicklistOption> ViewTypeOptions = new()
-        {
-            new(0, "Tile View", null, "grid_view"),
-            new(1, "Grid View", null, "toc")
-        };
-        protected int? ViewTypeValue = 0; // Tile View is default
+        // Detection State
+        protected List<DropdownOption> DetectionStateDropdownOptions = new() {
+            new(DetectionState.Unreviewed, "Unreviewed Calls"),
+            new(DetectionState.Positive, "Verfied Calls"),
+            new(DetectionState.Negative, "Rejected Calls"),
+            new(DetectionState.Unknown, "Unclear Calls" )};
+
+        protected DetectionState SelectedDetectionState = DetectionState.Unreviewed;
 
         // Sort By
-        List<PicklistOption> SortByOptions = new() { new(0, "Confidence", "confidence"), new(1, "Timestamp", "timestamp") };
-        protected int? SortByValue = 1; // Timestamp is default
+        protected List<DropdownOption> SortByDropdownOptions = new()
+        {
+            new(SortBy.Confidence, "Confidence"),
+            new(SortBy.Timestamp, "Timestamp")
+        };
+
+        protected SortBy SelectedSortBy = SortBy.Timestamp;
+        protected SortBy PassedSortBy;
 
         // Sort Order
-        List<PicklistOption> SortOrderOptions = new() { new(0, "Ascending", "ASC"), new(1, "Descending", "DESC") };
-        int? SortOrderValue = 1; // Ascending is default
+        protected List<DropdownOption> SortOrderDropdownOptions = new() 
+        { 
+            new(Models.SortOrder.Asc, "Ascending"), 
+            new(Models.SortOrder.Desc, "Descending") 
+        };
+
+        protected Models.SortOrder SelectedSortOrder = Models.SortOrder.Asc;
+        protected Models.SortOrder PassedSortOrder;
 
         // Timeframe
-        List<PicklistOption> TimeframeOptions = new() { new(0, "Last 30 Minutes", "30min"), new(1, "Last 3 Hours", "3hrs"),
-            new(2, "Last 6 Hours", "6hrs"), new(3, "Last 24 Hours", "24hrs"), new(4, "Last Week", "7dys"),
-            new(5, "Last Month", "30dys"), new(6, "All", "all"), new(7, "Select Date Range", "range")};
-        int? TimeframeValue = 2;
+        protected List<DropdownOption> TimeframeDropdownOptions = new()
+        {
+            new(Timeframe.ThirtyMinutes, "Last 30 Minutes"),
+            new(Timeframe.ThreeHours, "Last 3 Hours"),
+            new(Timeframe.SixHours, "Last 6 hours"),
+            new(Timeframe.TwentyFourHours, "Last 24 hours"),
+            new(Timeframe.SevenDays, "Last Week"),
+            new(Timeframe.ThirtyDays, "Last Month"),
+            new(Timeframe.All, "All"),
+            new(Timeframe.Range, "Select Date Range")
+        };
+
+        protected Timeframe SelectedTimeframe = Timeframe.SixHours;
+        protected Timeframe PassedTimeframe;
+
+        // Datetime Range
+
+        protected DateTime? SelectedStartDateTime = null;
+        protected DateTime? SelectedEndDateTime = null;
+        protected DateTime? PassedStartDateTime = null;
+        protected DateTime? PassedEndDateTime = null;
 
         // Locations
-        List<PicklistOption> LocationOptions = new();
-        int? LocationValue = 0;
+        List<DropdownOption> LocationDropdownOptions = new();
+        protected int SelectedLocation;
+        protected string PassedLocation = string.Empty;
 
-        protected DateTime? StartDateTime;
-        protected DateTime? EndDateTime;
+        // Maximum Records
+        List<DropdownOption> MaxRecordsDropdownOptions = new() 
+        { 
+            new(10, "10"),
+            new(25, "25"),
+            new(50, "50"),
+            new(100, "100"),
+            new(250, "250"),
+            new(500, "500"),
+            new(1000, "1000")
+        };
 
-        RadzenDataList<DetectionItemView> DetectionDataList;
-        RadzenDataGrid<DetectionItemView> DetectionDataGrid;
+        protected int SelectedMaxRecords = 10;
+        protected int PassedMaxRecords;
+
+        // Review button
+        protected bool IsReviewButtonVisible = false;
+
+        // Reference to GridViewComponent
+        protected GridViewComponent GridView = null!;
 
         #region lifecycle events
 
@@ -62,126 +93,91 @@
             int index = 0;
             foreach (var location in AppSettings.HydrophoneLocationNames)
             {
-                LocationOptions.Add(new(index++, location));
+                LocationDropdownOptions.Add(new(index++, location));
             }
-            LocationOptions.Add(new(index, "All"));
-            LocationValue = index;
+            LocationDropdownOptions.Add(new(index, "All"));
+            SelectedLocation = index;
+
+            // Initially sync the passed values with the selected values
+            OnApplyFilterClicked();
+
         }
 
         #endregion
 
         #region button actions
 
-        protected async Task OnDetectionStateChanged()
-        {
-            DetectionDataList.Data = null;
+        // Needed in order to select the correct default timeframe
 
-            if (DetectionStateValue.HasValue)
+        protected void OnDetectionStateChanged()
+        {
+            SelectedStartDateTime = null;
+            SelectedEndDateTime = null;
+
+            switch (SelectedDetectionState)
             {
-                switch (DetectionStateOptions[DetectionStateValue.Value].ValueText)
-                {
-                    case nameof(DetectionState.Unreviewed):
-                        TimeframeValue = TimeframeOptions.Where(x => x.ValueText == "6hrs").Select(x => x.Value).FirstOrDefault();
-                        break;
-                    case nameof(DetectionState.Positive):
-                    case nameof(DetectionState.Negative):
-                    case nameof(DetectionState.Unknown):
-                        TimeframeValue = TimeframeOptions.Where(x => x.ValueText == "24hrs").Select(x => x.Value).FirstOrDefault();
-                        break;
-                }
+                case DetectionState.Unreviewed:
+                    SelectedTimeframe = Timeframe.SixHours;
+                    break;
+                case DetectionState.Positive:
+                case DetectionState.Negative:
+                case DetectionState.Unknown:
+                    SelectedTimeframe = Timeframe.TwentyFourHours;
+                    break;
             }
 
-            await DetectionDataList.Reload();
+            OnApplyFilterClicked();
         }
 
-        protected async Task OnGridModeClicked()
+        protected void OnTimeframeChanged()
         {
-            ViewMode = 1;
-            DetectionDataList.Data = null;
-            await DetectionDataList.Reload();
-        }
-
-        protected async Task OnTileModeClicked()
-        {
-            ViewMode = 0;
-            DetectionDataList.Data = null;
-            await DetectionDataList.Reload();
-        }
-
-        protected async Task OnApplyFilterClicked()
-        {
-            DetectionDataList.Data = null;
-            await DetectionDataList.Reload();
-        }
-
-        #endregion
-
-        #region helpers
-
-        private async Task LoadData(LoadDataArgs args)
-        {
-            IsLoading = true;
-
-            var state = DetectionStateValue.HasValue ?
-                DetectionStateOptions[DetectionStateValue.Value].ValueText : string.Empty;
-
-            var sortBy = SortByValue.HasValue ?
-                SortByOptions[SortByValue.Value].ValueText : string.Empty;
-
-            var isDescending = SortOrderValue.HasValue ?
-                SortOrderOptions[SortOrderValue.Value].ValueText == "ASC" ? false : true : true;
-
-            var locationName = LocationValue.HasValue && LocationValue.Value < LocationOptions.Count - 1 ?
-                LocationOptions[LocationValue.Value].Text : string.Empty;
-
-            // This sets the initial value to all
-            var fromDate = StartDateTime.HasValue ? StartDateTime.Value : new DateTime(1970, 1, 1);
-            var toDate = EndDateTime.HasValue ? EndDateTime.Value : DateTime.UtcNow;
-
-            if (TimeframeValue.HasValue)
+            if(SelectedTimeframe != Timeframe.Range)
             {
-                switch (TimeframeOptions[TimeframeValue.Value].ValueText)
-                {
-                    case "30min":
-                        fromDate = toDate.AddMinutes(-30);
-                        break;
-                    case "3hrs":
-                        fromDate = toDate.AddHours(-3);
-                        break;
-                    case "6hrs":
-                        fromDate = toDate.AddHours(-6);
-                        break;
-                    case "24hrs":
-                        fromDate = toDate.AddHours(-24);
-                        break;
-                    case "7dys":
-                        fromDate = toDate.AddDays(-7);
-                        break;
-                    case "30dys":
-                        fromDate = toDate.AddDays(-30);
-                        break;
-                }
+                SelectedStartDateTime = null;
+                SelectedEndDateTime = null;
+            } 
+            else if(SelectedStartDateTime == null || SelectedEndDateTime == null)
+            {
+                SelectedStartDateTime = DateTime.UtcNow.AddDays(-1);
+                SelectedEndDateTime = DateTime.UtcNow;
             }
+        }
 
-            DetectionFilterAndPagination filterAndPagination = new()
-            {
-                Page = (args.Skip.Value / args.Top.Value) + 1,
-                PageSize = args.Top.Value,
-                State = state,
-                SortBy = sortBy,
-                IsDescending = isDescending,
-                FromDate = fromDate,
-                ToDate = toDate,
-                Location = locationName
-            };
+        protected void OnApplyFilterClicked()
+        {
+            PassedSortBy = SelectedSortBy;
+            PassedSortOrder = SelectedSortOrder;
+            PassedTimeframe = SelectedTimeframe;
+            PassedStartDateTime = SelectedStartDateTime;
+            PassedEndDateTime = SelectedEndDateTime;
+            PassedLocation = LocationDropdownOptions[SelectedLocation].Text;
+            PassedMaxRecords = SelectedMaxRecords;
+        }
 
-            var result = await ViewService.RetrieveFilteredAndPaginatedDetectionItemViewsAsync(filterAndPagination);
-            // Update the Data property
-            DetectionItemViews = result.DetectionItemViews;
-            // Update the count
-            TotalDetectionCount = result.Count;
+        protected void OnGridViewClicked()
+        {
+            SelectedViewMode = ViewMode.GridView;
+        }
 
-            IsLoading = false;
+        protected void OnTileViewClicked()
+        {
+            IsReviewButtonVisible = false;
+            SelectedViewMode = ViewMode.TileView;
+        }
+
+        protected void HideReviewButton()
+        {
+            IsReviewButtonVisible = false;
+        }
+
+        protected void ShowReviewButton()
+        {
+            IsReviewButtonVisible = true;
+        }
+
+        protected async Task OnReviewClicked()
+        {
+            await GridView.OnReviewClicked();
         }
 
         #endregion

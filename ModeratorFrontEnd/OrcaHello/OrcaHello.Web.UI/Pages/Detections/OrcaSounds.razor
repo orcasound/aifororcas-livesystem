@@ -2,157 +2,129 @@
 
 @page "/orca_sounds"
 
-<RadzenLayout Style="height:100vh;">
-    <RadzenBody Style="height:100vh;">
+<RadzenLayout Style="height:calc(100%);">
+    <RadzenBody Style="height:calc(100%);">
 
-        <RadzenRow Gap="0">
-            <RadzenColumn SizeMD="6" SizeXS="12">
-                <RadzenFormField Variant="Variant.Text" Style="width:100%;margin-top:-15px;">
-                    <RadzenDropDown @bind-Value=@DetectionStateValue Data=@DetectionStateOptions TextProperty="Text" ValueProperty="Value"
-                                    AllowClear="false" Style="width:100%;" Change="OnDetectionStateChanged">
-                        <Template>
-                            <h5 class="rz-text-h5">@((context as PicklistOption).Text)</h5>
-                        </Template>
-                    </RadzenDropDown>
-                </RadzenFormField>
-            </RadzenColumn>
-        </RadzenRow>
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.SpaceBetween>
 
-        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-3">
+            <!-- View selections -->
 
-            <RadzenStack Orientation=Orientation.Vertical Gap="0">
-                <RadzenLabel Text="Sort By" />
-                <RadzenDropDown @bind-Value=@SortByValue Data=@SortByOptions TextProperty="Text" ValueProperty="Value" AllowClear="false" />
-            </RadzenStack>
-            <RadzenStack Orientation=Orientation.Vertical Gap="0">
-                <RadzenLabel Text="Sort Order" />
-                <RadzenDropDown @bind-Value=@SortOrderValue Data=@SortOrderOptions TextProperty="Text" ValueProperty="Value" AllowClear="false" />
-            </RadzenStack>
-            <RadzenStack Orientation=Orientation.Vertical Gap="0">
-                <RadzenLabel Text="Timeframe" />
-                <RadzenDropDown @bind-Value=@TimeframeValue Data=@TimeframeOptions TextProperty="Text" ValueProperty="Value" AllowClear="false" />
-            </RadzenStack>
+            <RadzenFormField Variant=Variant.Text Style="margin-top: -15px; width: 50%;" class="rz-mb-5">
+                <RadzenDropDown TValue=DetectionState @bind-Value=@SelectedDetectionState Data=@DetectionStateDropdownOptions
+                                TextProperty=Text ValueProperty=Value
+                                AllowClear="false" Style="height: 50px;"
+                                Change=OnDetectionStateChanged>
+                    <Template Context="data">
+                        <RadzenText TextStyle=TextStyle.H2>@data.Text</RadzenText>
+                    </Template>
+                </RadzenDropDown>
+            </RadzenFormField>
 
-            @if (TimeframeValue.HasValue && TimeframeOptions[TimeframeValue.Value].ValueText == "range")
-            {
-                <RadzenStack Orientation=Orientation.Vertical Gap="0">
-                    <RadzenLabel Text="Start" />
-                    <RadzenDatePicker @bind-Value=@StartDateTime ShowTime="true" ShowSeconds="true" MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
-                </RadzenStack>
-                <RadzenStack Orientation=Orientation.Vertical Gap="0">
-                    <RadzenLabel Text="End" />
-                    <RadzenDatePicker @bind-Value=@EndDateTime ShowTime="true" ShowSeconds="true" MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
-                </RadzenStack>
-            }
+            <!-- View modes -->
 
-            <RadzenStack Orientation=Orientation.Vertical Gap="0">
-                <RadzenLabel Text="Hydrophone Location" />
-                <RadzenDropDown @bind-Value=@LocationValue Data=@LocationOptions TextProperty="Text" ValueProperty="Value" AllowClear="false" />
-            </RadzenStack>
-            <RadzenButton Click="OnApplyFilterClicked" Variant=Variant.Outlined Text="Apply Filters"></RadzenButton>
-
-            @if (ViewMode == 0)
-            {
-                <RadzenButton id="large-only" Click="OnGridModeClicked" Variant=Variant.Outlined Icon="table_view" Text="Grid Mode" />
-            }
-            else
-            {
-                <RadzenButton Click="OnTileModeClicked" Variant=Variant.Outlined Icon="wysiwyg" Text="Tile Mode" />
-            }
+            <div style="display: flex;">
+                <RadzenButton Disabled=@(SelectedViewMode == ViewMode.TileView)
+                              Click="OnTileViewClicked" ButtonStyle=ButtonStyle.Primary
+                              Variant=Variant.Text Size=ButtonSize.Large Icon="rectangle"
+                              Class="oh-min-button"
+                              Style="margin-right:0;" />
+                <RadzenButton id="large-only" Disabled=@(SelectedViewMode == ViewMode.GridView)
+                              Click="OnGridViewClicked" ButtonStyle=ButtonStyle.Primary
+                              Variant=Variant.Text Size=ButtonSize.Large Icon="grid_on"
+                              Class="oh-min-button"
+                              Style="margin-left:0;" />
+            </div>
         </RadzenStack>
 
-        @if (DetectionItemViews != null && DetectionItemViews.Count() == 0)
+        <!-- Filter pulldowns and buttons -->
+
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-5">
+
+            <!-- Sort By -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Sort By:" />
+                <RadzenDropDown TValue=SortBy @bind-Value=@SelectedSortBy Data=@SortByDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Sort Order -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Sort Order:" />
+                <RadzenDropDown TValue=Models.SortOrder @bind-Value=@SelectedSortOrder Data=@SortOrderDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Timeframe -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Timeframe:" />
+                <RadzenDropDown TValue=Timeframe @bind-Value=@SelectedTimeframe Data=@TimeframeDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false"
+                                Change=OnTimeframeChanged />
+            </RadzenStack>
+
+            <!-- Start and End DateTimes -->
+            @if (SelectedTimeframe == Timeframe.Range)
+            {
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="Start:" />
+                    <RadzenDatePicker @bind-Value=@SelectedStartDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="End:" />
+                    <RadzenDatePicker @bind-Value=@SelectedEndDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+            }
+
+            <!-- Hydrophone location -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Hydrophone Location:" />
+                <RadzenDropDown TValue="int" @bind-Value=@SelectedLocation Data=@LocationDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Maximum number of records -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Maximum Records:" />
+                <RadzenDropDown TValue="int" @bind-Value=@SelectedMaxRecords Data=@MaxRecordsDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Apply Filters button -->
+
+            <RadzenButton Click=OnApplyFilterClicked Variant=Variant.Outlined Text="Apply Filters" />
+
+            <!-- Review button -->
+
+            <RadzenButton Click=OnReviewClicked Visible=IsReviewButtonVisible
+                Variant=Variant.Outlined Text="Review" />
+
+
+        </RadzenStack>
+
+        @if (SelectedViewMode == ViewMode.TileView)
         {
-            <RadzenAlert AllowClose="false"
-                         AlertStyle="AlertStyle.Warning"
-                         Variant="Variant.Flat"
-                         Shade="Shade.Lighter">
-                There are no Detections listed for this timeframe and filtering conditions.
-            </RadzenAlert>
-        }
-
-        <LoadingSpinner IsLoading=@IsLoading />
-
-        @if (ViewMode == 0)
-        {
-            <RadzenDataList AllowVirtualization="true"
-                            WrapItems="false" AllowPaging="false" LoadData=@LoadData
-                            Data=@DetectionItemViews Count=@TotalDetectionCount TItem="DetectionItemView" PageSize="10"
-                            PagerHorizontalAlign=HorizontalAlign.Left ShowPagingSummary="true" @ref="DetectionDataList"
-                            Style="margin-top:10px;">
-                <Template Context="item">
-                    <div Style="width: 100%; padding: 0;">
-                        <RadzenRow Gap="0">
-                            <RadzenColumn Size="6">
-                                <RadzenRow Gap="0">
-                                    <RadzenColumn Size="12">
-                                        <RadzenText TextStyle=TextStyle.H6 Text=@item.Id />
-                                    </RadzenColumn>
-                                </RadzenRow>
-                                <RadzenRow Gap="0">
-                                    <RadzenColumn Size="6">
-                                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                            <RadzenIcon id="tile-icon" Icon="watch_later" IconStyle=IconStyle.Primary />
-                                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.Timestamp.UTCToPDTFull() />
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                    <RadzenColumn Size="6">
-                                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                            <RadzenIcon id="tile-icon" Icon="gps_fixed" IconStyle=IconStyle.Primary />
-                                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.LocationName />
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                </RadzenRow>
-                                <RadzenRow Gap="0" Style="margin-top:15px;">
-                                    <RadzenColumn Size="6">
-                                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                            <RadzenIcon id="tile-icon" Icon="mic" IconStyle=IconStyle.Primary />
-                                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.DetectionCount />
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                    <RadzenColumn Size="6">
-                                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                            <RadzenIcon id="tile-icon" Icon="signal_cellular_alt" IconStyle=IconStyle.Primary />
-                                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.AverageConfidence />
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                </RadzenRow>
-
-                                <AuthorizeView Policy="Moderators">
-                                    <Authorized Context="Auth">
-                                        <ModerationForm DetectionItemView=@item />
-                                    </Authorized>
-                                </AuthorizeView>
-
-                            </RadzenColumn>
-                            <RadzenColumn Size="6">
-                                <RadzenImage Path="@item.SpectrogramUri" Style="max-width: 100%;height: auto;" />
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </div>
-                </Template>
-            </RadzenDataList>
+            <TileViewComponent DetectionState=SelectedDetectionState
+                               SortBy=PassedSortBy SortOrder=PassedSortOrder
+                               Timeframe=PassedTimeframe
+                               StartDateTime=PassedStartDateTime EndDateTime=PassedEndDateTime
+                               Location=@PassedLocation MaxRecords=PassedMaxRecords />
         }
         else
         {
-            <RadzenDataGrid @ref="DetectionDataGrid" Data=@DetectionItemViews Count=@TotalDetectionCount
-                            LoadData=@LoadData TItem="DetectionItemView" AllowVirtualization="true"
-                            AllowFiltering="true" FilterPopupRenderMode=PopupRenderMode.OnDemand
-                            FilterCaseSensitivity=FilterCaseSensitivity.CaseInsensitive LogicalFilterOperator=LogicalFilterOperator.Or
-                            AllowSorting="true" Style="margin-top:20px;">
-
-                <Columns>
-                    <RadzenDataGridColumn TItem="DetectionItemView" Property="Id" Title="Candidate ID" />
-                    <RadzenDataGridColumn TItem="DetectionItemView" Property="Timestamp" Title="Timestamp" />
-                    <RadzenDataGridColumn TItem="DetectionItemView" Property="LocationName" Title="Location" />
-                    @*                    <RadzenDataGridColumn TItem="DetectionItemView" Property="Detections" Title="Detections" /> *@
-                    <RadzenDataGridColumn TItem="DetectionItemView" Property="Confidence" Title="Confidence" />
-                    @*                     <RadzenDataGridColumn TItem="DetectionItemView" Property="Confidence" Title="Confidence" /> *@
-                    <RadzenDataGridColumn TItem="DetectionItemView" Property="Tags" Title="Tags" />
-                    <RadzenDataGridColumn TItem="DetectionItemView" Property="Comments" Title="Comments" />
-                </Columns>
-
-            </RadzenDataGrid>
+            <GridViewComponent DetectionState=SelectedDetectionState
+                               SortBy=PassedSortBy SortOrder=PassedSortOrder
+                               Timeframe=PassedTimeframe
+                               StartDateTime=PassedStartDateTime EndDateTime=PassedEndDateTime
+                               Location=@PassedLocation MaxRecords=PassedMaxRecords
+                               OnHideReviewButton=HideReviewButton OnShowReviewButton=ShowReviewButton 
+                               @ref=GridView/>
         }
 
     </RadzenBody>

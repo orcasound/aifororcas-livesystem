@@ -1,4 +1,4 @@
-﻿namespace OrcaHello.Web.UI.Pages.Dashboard
+﻿namespace OrcaHello.Web.UI.Pages.Explore
 {
     [ExcludeFromCodeCoverage]
     public partial class Hydrophones
