@@ -1,6 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-
-namespace OrcaHello.Web.UI.Services
+﻿namespace OrcaHello.Web.UI.Services
 {
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {

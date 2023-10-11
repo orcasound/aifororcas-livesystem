@@ -103,28 +103,25 @@
             <!-- Review button -->
 
             <RadzenButton Click=OnReviewClicked Visible=IsReviewButtonVisible
-                Variant=Variant.Outlined Text="Review" />
+                          Variant=Variant.Outlined Text="Review" />
 
 
         </RadzenStack>
 
         @if (SelectedViewMode == ViewMode.TileView)
         {
-            <TileViewComponent DetectionState=SelectedDetectionState
-                               SortBy=PassedSortBy SortOrder=PassedSortOrder
-                               Timeframe=PassedTimeframe
-                               StartDateTime=PassedStartDateTime EndDateTime=PassedEndDateTime
-                               Location=@PassedLocation MaxRecords=PassedMaxRecords />
+            @*             <TileViewComponent DetectionState=SelectedDetectionState
+        SortBy=PassedSortBy SortOrder=PassedSortOrder
+        Timeframe=PassedTimeframe
+        StartDateTime=PassedStartDateTime EndDateTime=PassedEndDateTime
+        Location=@PassedLocation MaxRecords=PassedMaxRecords /> *@
         }
         else
         {
-            <GridViewComponent DetectionState=SelectedDetectionState
-                               SortBy=PassedSortBy SortOrder=PassedSortOrder
-                               Timeframe=PassedTimeframe
-                               StartDateTime=PassedStartDateTime EndDateTime=PassedEndDateTime
-                               Location=@PassedLocation MaxRecords=PassedMaxRecords
-                               OnHideReviewButton=HideReviewButton OnShowReviewButton=ShowReviewButton 
-                               @ref=GridView/>
+            <GridViewComponent Filters=PassedFilters
+                OnShowReviewButton=ShowReviewButton
+                @ref=GridView />
+
         }
 
     </RadzenBody>

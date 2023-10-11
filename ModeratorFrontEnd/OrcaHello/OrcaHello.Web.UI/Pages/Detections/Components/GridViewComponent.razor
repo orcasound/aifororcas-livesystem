@@ -1,13 +1,60 @@
-﻿<h3>GridViewComponent</h3>
+﻿@inherits ComponentManager
 
-<RadzenText Text=@DetectionState.ToString() />
-<RadzenText Text=@SortBy.ToString() />
-<RadzenText Text=@SortOrder.ToString() />
-<RadzenText Text=@Timeframe.ToString() />
-<RadzenText Text=@(StartDateTime.HasValue ? StartDateTime.Value.ToString() : string.Empty) />
-<RadzenText Text=@(EndDateTime.HasValue ? EndDateTime.Value.ToString() : string.Empty) />
-<RadzenText Text=@Location />
-<RadzenText Text=@MaxRecords.ToString() />
-<RadzenButton Text="Show" Click=OnShowReviewButtonClicked />
-<RadzenButton Text="Hide" Click=OnHideReviewButtonClicked />
+<RadzenDataGrid @ref="DetectionDataGrid"
+                Data=@DetectionItemViews
+                Count=@TotalDetectionCount
+                LoadData=@LoadData
+                TItem="DetectionItemView"
+                AllowVirtualization="true"
+                AllowFiltering="false"
+                AllowRowSelectOnRowClick="true"
+                IsLoading=IsLoading
+                SelectionMode=DataGridSelectionMode.Multiple
+                @bind-Value=SelectedDetectionItemViews
+                AllowSorting="false"
+                Style="margin-top:20px;">
+    <EmptyTemplate>
+        <RadzenAlert AllowClose="false"
+                     AlertStyle=AlertStyle.Warning
+                     Variant=Variant.Flat
+                     Shade=Shade.Lighter>
+            There are no Detections listed for this timeframe and filtering conditions.
+        </RadzenAlert>
+    </EmptyTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="DetectionItemView" Width="40px" Sortable="false" Filterable="false">
+            <HeaderTemplate>
+                <RadzenCheckBox TriState="false" TValue="bool?"
+                                Value="@(SelectedDetectionItemViews == null || SelectedDetectionItemViews?.Any() != true ? false : !DetectionItemViews.All(i => SelectedDetectionItemViews.Contains(i)) ? null : DetectionItemViews.Any(i => SelectedDetectionItemViews.Contains(i)))"
+                                Change="@((args) => OnAllItemsChanged(args))" />
+            </HeaderTemplate>
+            <Template Context="data">
+                <RadzenCheckBox TriState="false" Value="@(SelectedDetectionItemViews != null && SelectedDetectionItemViews.Contains(data))"
+                                TValue="bool" Change=@(args => { if(!true) { DetectionDataGrid.SelectRow(data); }}) />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="Id" Title="Candidate ID" />
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="Timestamp" Title="Timestamp" Width="140px;">
+            <Template Context="data">
+                <RadzenText Text=@(data.Timestamp.UTCToPDT()) />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="LocationName" Title="Location" Width="200px;" />
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="Annotations" Title="Detections" Width="90px;">
+            <Template Context="data">
+                <RadzenText Text=@(data.Annotations.Count().ToString()) />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="SmallConfidence" Title="Confidence" Width="95px;" />
+        <RadzenDataGridColumn TItem="DetectionItemView" Title="Spectrogram">
+            <Template Context="data">
+                <RadzenImage Path="@data.SpectrogramUri" Style="width:200px; height: 36px;" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="State" Title="Call" />
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="Tags" Title="Tags" />
+        <RadzenDataGridColumn TItem="DetectionItemView" Property="Comments" Title="Comments" />
+    </Columns>
+</RadzenDataGrid>
+
 

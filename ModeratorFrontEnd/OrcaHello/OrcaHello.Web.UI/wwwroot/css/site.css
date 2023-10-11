@@ -64,7 +64,7 @@
     --rz-dropdown-item-selected-hover-background-color: var(--rz-base-900);
     --rz-dropdown-item-selected-hover-color: var(--rz-primary);
     --rz-dropdown-item-hover-color: var(--rz-primary);
-    --rz-grid-cell-padding: 0 0.5rem 0 0.5rem;
+    --rz-grid-cell-padding: 0.5rem 0.5rem 0.5rem 0.5rem;
     --rz-grid-stripe-background-color: var(--rz-grid-background-color);
     --rz-grid-bottom-cell-border: none;
     --rz-grid-right-cell-border: none;
@@ -198,4 +198,8 @@ a:hover {
     #large-only {
         display: block;
     }
+}
+
+.rzi {
+    font-size: 28px;
 }

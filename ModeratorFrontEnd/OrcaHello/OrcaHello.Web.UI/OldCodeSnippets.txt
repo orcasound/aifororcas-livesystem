@@ -1,4 +1,22 @@
-﻿        private async Task LoadDataAsync()
+﻿@*                  <RadzenCheckBox TriState="false" 
+                                Value="@(SelectedDetectionItemViews != null && SelectedDetectionItemViews.Contains(data))"
+                                TValue="bool"
+                                Change="@((args) => OnSingleItemChanged(args, data))" />  
+
+                <RadzenCheckBox TriState="false" Value="@(SelectedDetectionItemViews != null && SelectedDetectionItemViews.Contains(data))"
+                                TValue="bool" Change=@(args => { if(!true) { DetectionDataGrid.SelectRow(data); }}) />
+
+
+
+                <RadzenCheckBox TriState="false" Value="@(SelectedDetectionItemViews != null && SelectedDetectionItemViews.Contains(data))"
+                                TValue="bool" Change=@(args => { if(!true) { DetectionDataGrid.SelectRow(data); }}) /> 
+ 
+                <RadzenCheckBox TriState="false" @bind-Value=@isChecked TValue="bool" Change=@(args => OnChange(args, data)) />
+ *@
+
+
+
+        private async Task LoadDataAsync()
         {
             try
             {

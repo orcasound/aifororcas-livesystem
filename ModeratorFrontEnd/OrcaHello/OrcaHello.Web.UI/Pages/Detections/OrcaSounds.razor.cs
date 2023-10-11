@@ -15,7 +15,7 @@
             new(DetectionState.Negative, "Rejected Calls"),
             new(DetectionState.Unknown, "Unclear Calls" )};
 
-        protected DetectionState SelectedDetectionState = DetectionState.Unreviewed;
+        protected DetectionState SelectedDetectionState;
 
         // Sort By
         protected List<DropdownOption> SortByDropdownOptions = new()
@@ -24,18 +24,16 @@
             new(SortBy.Timestamp, "Timestamp")
         };
 
-        protected SortBy SelectedSortBy = SortBy.Timestamp;
-        protected SortBy PassedSortBy;
+        protected SortBy SelectedSortBy;
 
         // Sort Order
-        protected List<DropdownOption> SortOrderDropdownOptions = new() 
-        { 
-            new(Models.SortOrder.Asc, "Ascending"), 
-            new(Models.SortOrder.Desc, "Descending") 
+        protected List<DropdownOption> SortOrderDropdownOptions = new()
+        {
+            new(Models.SortOrder.Asc, "Ascending"),
+            new(Models.SortOrder.Desc, "Descending")
         };
 
-        protected Models.SortOrder SelectedSortOrder = Models.SortOrder.Asc;
-        protected Models.SortOrder PassedSortOrder;
+        protected Models.SortOrder SelectedSortOrder;
 
         // Timeframe
         protected List<DropdownOption> TimeframeDropdownOptions = new()
@@ -50,24 +48,20 @@
             new(Timeframe.Range, "Select Date Range")
         };
 
-        protected Timeframe SelectedTimeframe = Timeframe.SixHours;
-        protected Timeframe PassedTimeframe;
+        protected Timeframe SelectedTimeframe;
 
         // Datetime Range
 
         protected DateTime? SelectedStartDateTime = null;
         protected DateTime? SelectedEndDateTime = null;
-        protected DateTime? PassedStartDateTime = null;
-        protected DateTime? PassedEndDateTime = null;
 
         // Locations
         List<DropdownOption> LocationDropdownOptions = new();
         protected int SelectedLocation;
-        protected string PassedLocation = string.Empty;
 
         // Maximum Records
-        List<DropdownOption> MaxRecordsDropdownOptions = new() 
-        { 
+        List<DropdownOption> MaxRecordsDropdownOptions = new()
+        {
             new(10, "10"),
             new(25, "25"),
             new(50, "50"),
@@ -77,8 +71,9 @@
             new(1000, "1000")
         };
 
-        protected int SelectedMaxRecords = 10;
-        protected int PassedMaxRecords;
+        protected int SelectedMaxRecords;
+
+        protected Filters PassedFilters = new();
 
         // Review button
         protected bool IsReviewButtonVisible = false;
@@ -98,21 +93,26 @@
             LocationDropdownOptions.Add(new(index, "All"));
             SelectedLocation = index;
 
+             SelectedDetectionState = DetectionState.Unreviewed;
+
+            SetFilterDefaults();
+
             // Initially sync the passed values with the selected values
             OnApplyFilterClicked();
-
         }
 
         #endregion
 
-        #region button actions
+        #region helpers
 
-        // Needed in order to select the correct default timeframe
-
-        protected void OnDetectionStateChanged()
+        protected void SetFilterDefaults()
         {
+            SelectedSortBy = SortBy.Timestamp;
+            SelectedSortOrder = Models.SortOrder.Asc;
+            SelectedMaxRecords = 10;
             SelectedStartDateTime = null;
             SelectedEndDateTime = null;
+            SelectedLocation = LocationDropdownOptions.Count - 1;
 
             switch (SelectedDetectionState)
             {
@@ -125,18 +125,28 @@
                     SelectedTimeframe = Timeframe.TwentyFourHours;
                     break;
             }
+        }
 
+        #endregion
+
+        #region button actions
+
+        // Needed in order to select the correct default timeframe
+
+        protected void OnDetectionStateChanged()
+        {
+            SetFilterDefaults();
             OnApplyFilterClicked();
         }
 
         protected void OnTimeframeChanged()
         {
-            if(SelectedTimeframe != Timeframe.Range)
+            if (SelectedTimeframe != Timeframe.Range)
             {
                 SelectedStartDateTime = null;
                 SelectedEndDateTime = null;
-            } 
-            else if(SelectedStartDateTime == null || SelectedEndDateTime == null)
+            }
+            else if (SelectedStartDateTime == null || SelectedEndDateTime == null)
             {
                 SelectedStartDateTime = DateTime.UtcNow.AddDays(-1);
                 SelectedEndDateTime = DateTime.UtcNow;
@@ -145,13 +155,16 @@
 
         protected void OnApplyFilterClicked()
         {
-            PassedSortBy = SelectedSortBy;
-            PassedSortOrder = SelectedSortOrder;
-            PassedTimeframe = SelectedTimeframe;
-            PassedStartDateTime = SelectedStartDateTime;
-            PassedEndDateTime = SelectedEndDateTime;
-            PassedLocation = LocationDropdownOptions[SelectedLocation].Text;
-            PassedMaxRecords = SelectedMaxRecords;
+            PassedFilters = new()
+            {
+                SortBy = SelectedSortBy,
+                SortOrder = SelectedSortOrder,
+                Timeframe = SelectedTimeframe,
+                StartDateTime = SelectedStartDateTime,
+                EndDateTime = SelectedEndDateTime,
+                Location = LocationDropdownOptions[SelectedLocation].Text,
+                MaxRecords = SelectedMaxRecords
+            };
         }
 
         protected void OnGridViewClicked()

@@ -76,6 +76,8 @@ namespace OrcaHello.Web.UI.Services
             {
                 token = await _msalService.AcquireTokenAsync(prompt: LoginPrompt.Login, scopes: scopes);
 
+                token.ExpiresOn = DateTime.UtcNow.AddSeconds(30);
+
                 await _localStorage.SetItemAsync("authToken", token.AccessToken);
 
                 await ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated();
