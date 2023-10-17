@@ -39,6 +39,8 @@ parser = argparse.ArgumentParser()
 """
 Convert string to boolean.
 """
+
+
 def str2bool(v):
     if v.lower() in ("yes", "true", "t", "y", "1"):
         return True
@@ -46,6 +48,7 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError("Boolean value expected.")
+
 
 parser.add_argument(
     "-d",
@@ -59,6 +62,12 @@ parser.add_argument(
     "--data_dir",
     type=str,
     help="The path to the dataset directory.",
+)
+
+parser.add_argument(
+    "--training_output",
+    type=str,
+    help="The target data asset where to store the outputs of the training stage",
 )
 
 parser.add_argument(
@@ -128,7 +137,7 @@ parser.add_argument(
     "--max_train_epochs",
     type=int,
     default=500,
-    help="Maximum number of training epochs for the model."
+    help="Maximum number of training epochs for the model.",
 )
 
 parser.add_argument(
@@ -146,17 +155,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--batch_size",
-    type=int,
-    default=1,
-    help="The number of images per batch."
+    "--batch_size", type=int, default=1, help="The number of images per batch."
 )
 
 parser.add_argument(
-    "--num_workers",
-    type=int,
-    default=4,
-    help="Number of workers used in data-loading"
+    "--num_workers", type=int, default=4, help="Number of workers used in data-loading"
 )
 
 parser.add_argument(
@@ -175,10 +178,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--beta1",
-    type=float,
-    default=0.5,
-    help="beta1 for the adam optimizer."
+    "--beta1", type=float, default=0.5, help="beta1 for the adam optimizer."
 )
 
 parser.add_argument(
@@ -206,14 +206,11 @@ parser.add_argument(
 parser.add_argument(
     "--filter_broken_audio",
     action="store_true",
-    help="Filter files which are below a minimum loudness of 1e-3 (float32)."
+    help="Filter files which are below a minimum loudness of 1e-3 (float32).",
 )
 
 parser.add_argument(
-    "--sequence_len",
-    type=int,
-    default=1280,
-    help="Sequence length in ms."
+    "--sequence_len", type=int, default=1280, help="Sequence length in ms."
 )
 
 parser.add_argument(
@@ -231,19 +228,9 @@ parser.add_argument(
     help="Number of frequency bins after compression.",
 )
 
-parser.add_argument(
-    "--n_fft",
-    type=int,
-    default=4096,
-    help="FFT size."
-)
+parser.add_argument("--n_fft", type=int, default=4096, help="FFT size.")
 
-parser.add_argument(
-    "--hop_length",
-    type=int,
-    default=441,
-    help="FFT hop length."
-)
+parser.add_argument("--hop_length", type=int, default=441, help="FFT hop length.")
 
 parser.add_argument(
     "--min_max_norm",
@@ -290,6 +277,8 @@ log = Logger("TRAIN", ARGS.debug, ARGS.log_dir)
 """
 Get audio all audio files from the given data directory except they are broken.
 """
+
+
 def get_audio_files():
     audio_files = None
     if input_data.can_load_from_csv():
@@ -314,9 +303,12 @@ def get_audio_files():
             exit(1)
     return audio_files
 
+
 """
 Save the trained model and corresponding options either via torch.jit and/or torch.save.
 """
+
+
 def save_model(unet, dataOpts, path, model, use_jit=False):
     unet = unet.cpu()
     unet_state_dict = unet.state_dict()
@@ -329,7 +321,7 @@ def save_model(unet, dataOpts, path, model, use_jit=False):
     if use_jit:
         example = torch.rand(1, 1, 128, 256)
         extra_files = {}
-        extra_files['dataOpts'] = dataOpts.__str__()
+        extra_files["dataOpts"] = dataOpts.__str__()
         model = torch.jit.trace(model, example)
         torch.jit.save(model, path, _extra_files=extra_files)
         log.debug("Model successfully saved via torch jit: " + str(path))
@@ -342,14 +334,24 @@ def save_model(unet, dataOpts, path, model, use_jit=False):
 Main function to compute data preprocessing, network training, evaluation, and saving.
 """
 if __name__ == "__main__":
-
     debug = ARGS.debug
+    training_output = ARGS.training_output
     data_dir = ARGS.data_dir
-    cache_dir = ARGS.cache_dir
-    model_dir = ARGS.model_dir
-    checkpoint_dir = ARGS.checkpoint_dir
-    log_dir = ARGS.log_dir
-    summary_dir = ARGS.summary_dir
+    cache_dir = os.path.join(training_output, ARGS.cache_dir)
+    model_dir = os.path.join(training_output, ARGS.model_dir)
+    checkpoint_dir = os.path.join(training_output, ARGS.checkpoint_dir)
+    log_dir = os.path.join(training_output, ARGS.log_dir)
+    summary_dir = os.path.join(training_output, ARGS.summary_dir)
+    if not cache_dir:
+        os.makedirs(cache_dir)
+    if not model_dir:
+        os.makedirs(model_dir)
+    if not checkpoint_dir:
+        os.makedirs(checkpoint_dir)
+    if not log_dir:
+        os.makedirs(log_dir)
+    if not summary_dir:
+        os.makedirs(summary_dir)
     noise_dir_train = ARGS.noise_dir_train
     noise_dir_val = ARGS.noise_dir_val
     noise_dir_test = ARGS.noise_dir_test
@@ -385,33 +387,59 @@ if __name__ == "__main__":
     log.info(f"The directory where the checkpoints will be stored: {checkpoint_dir}")
     log.info(f"The directory to store the logs: {log_dir}")
     log.info(f"The directory to store the tensorboard summaries: {summary_dir}")
-    log.info(f"Path to a directory with noise files for training noise2noise approach using real world noise: {noise_dir_train}")
-    log.info(f"Path to a directory with noise files for validation noise2noise approach using real world noise: {noise_dir_val}")
-    log.info(f"Path to a directory with noise files for testing noise2noise approach using real world noise: {noise_dir_test}")
-    log.info(f"Start taining from scratch, i.e. do not use checkpoint to restore: {start_scratch}")
+    log.info(
+        f"Path to a directory with noise files for training noise2noise approach using real world noise: {noise_dir_train}"
+    )
+    log.info(
+        f"Path to a directory with noise files for validation noise2noise approach using real world noise: {noise_dir_val}"
+    )
+    log.info(
+        f"Path to a directory with noise files for testing noise2noise approach using real world noise: {noise_dir_test}"
+    )
+    log.info(
+        f"Start taining from scratch, i.e. do not use checkpoint to restore: {start_scratch}"
+    )
     log.info(f"Save model via torch.jit save functionality: {jit_save}")
     log.info(f"Maximum number of training epochs for the model: {max_train_epochs}")
-    log.info(f"Select random value intervals for noise2noise and binary mask alternatives also in validation and not only during training: {random_val}")
+    log.info(
+        f"Select random value intervals for noise2noise and binary mask alternatives also in validation and not only during training: {random_val}"
+    )
     log.info(f"The number of batches to run in between evaluations: {epochs_per_eval}")
     log.info(f"The number of images per batch: {batch_size}")
     log.info(f"Number of workers used in data-loading: {num_workers}")
     log.info(f"GPU support: {cuda}")
     log.info(f"Initial learning rate. Will get multiplied by the batch size: {lr}")
     log.info(f"Beta1 for the adam optimizer: {beta1}")
-    log.info(f"Decay the learning rate after N/epochs_per_eval epochs without any improvements on the validation set: {lr_patience_epochs}")
+    log.info(
+        f"Decay the learning rate after N/epochs_per_eval epochs without any improvements on the validation set: {lr_patience_epochs}"
+    )
     log.info(f"Decay factor to apply to the learning rate: {lr_decay_factor}")
-    log.info(f"Early stopping (stop training) after N/epochs_per_eval epochs without any improvements on the validation set: {early_stopping_patience_epochs}")
-    log.info(f"Filter files which are below a minimum loudness of 1e-3 (float32): {filter_broken_audio}")
+    log.info(
+        f"Early stopping (stop training) after N/epochs_per_eval epochs without any improvements on the validation set: {early_stopping_patience_epochs}"
+    )
+    log.info(
+        f"Filter files which are below a minimum loudness of 1e-3 (float32): {filter_broken_audio}"
+    )
     log.info(f"Sequence length in ms: {sequence_len}")
     log.info(f"Frequency compression to reduce GPU memory usage: {freq_compression}")
     log.info(f"Number of frequency bins after compression: {n_freq_bins}")
     log.info(f"Spectrogram FFT size: {n_fft}")
     log.info(f"Spectrogram FFT hop length: {hop_length}")
-    log.info(f"Activates min-max normalization instead of default 0/1-dB-normalization: {min_max_norm}")
-    log.info(f"Whether to augment the input data (during training only): {augmentation}")
-    log.info(f"The percentage multiplied with the maximum signal strength resulting in the target height for the maximum intensity peak picking orca detection algorithm: {perc_of_max_signal}")
-    log.info(f"Minimum/Lower value (percentage) for the embedded peak finding algorithm to calculate the minimum frequency bin (n_fft/2+1 * min_thres_detect = min_freq_bin) in order to robustly calculate signal strength within a min_freq_bin and max_freq_bin range to extract a fixed temporal context from longer vocal events. For the orca detection: {min_thres_detect}")
-    log.info(f"Maximum/Upper value (percentage) for the embedded peak finding algorithm to calculate the maximum frequency bin (n_fft/2+1 * max_thres_detect = max_freq_bin) in order to robustly calculate signal strength within a min_freq_bin and max_freq_bin range to extract a fixed temporal context from longer vocal events. For the orca detection: {max_thres_detect}")
+    log.info(
+        f"Activates min-max normalization instead of default 0/1-dB-normalization: {min_max_norm}"
+    )
+    log.info(
+        f"Whether to augment the input data (during training only): {augmentation}"
+    )
+    log.info(
+        f"The percentage multiplied with the maximum signal strength resulting in the target height for the maximum intensity peak picking orca detection algorithm: {perc_of_max_signal}"
+    )
+    log.info(
+        f"Minimum/Lower value (percentage) for the embedded peak finding algorithm to calculate the minimum frequency bin (n_fft/2+1 * min_thres_detect = min_freq_bin) in order to robustly calculate signal strength within a min_freq_bin and max_freq_bin range to extract a fixed temporal context from longer vocal events. For the orca detection: {min_thres_detect}"
+    )
+    log.info(
+        f"Maximum/Upper value (percentage) for the embedded peak finding algorithm to calculate the maximum frequency bin (n_fft/2+1 * max_thres_detect = max_freq_bin) in order to robustly calculate signal strength within a min_freq_bin and max_freq_bin range to extract a fixed temporal context from longer vocal events. For the orca detection: {max_thres_detect}"
+    )
 
     dataOpts = DefaultSpecDatasetOps
 
@@ -440,10 +468,8 @@ if __name__ == "__main__":
     log.debug("Model: " + str(unet))
     model = nn.Sequential(OrderedDict([("unet", unet)]))
 
-    split_fracs = {"train": .7, "val": .15, "test": .15}
-    input_data = DatabaseCsvSplit(
-        split_fracs, working_dir=data_dir, split_per_dir=True
-    )
+    split_fracs = {"train": 0.7, "val": 0.15, "test": 0.15}
+    input_data = DatabaseCsvSplit(split_fracs, working_dir=data_dir, split_per_dir=True)
 
     audio_files = get_audio_files()
 
@@ -470,12 +496,14 @@ if __name__ == "__main__":
             noise_files_train=noise_files_train,
             noise_files_val=noise_files_val if split == "val" else False,
             noise_files_test=noise_files_test if split == "test" else False,
-            random=True if split == "train" or (split == "val" and random_val) else False,
+            random=True
+            if split == "train" or (split == "val" and random_val)
+            else False,
             dataset_name=split,
             min_max_normalize=min_max_norm,
             min_thres_detect=min_thres_detect,
             max_thres_detect=max_thres_detect,
-            perc_of_max_signal=perc_of_max_signal
+            perc_of_max_signal=perc_of_max_signal,
         )
         for split in split_fracs.keys()
     }
@@ -502,9 +530,7 @@ if __name__ == "__main__":
         start_scratch=start_scratch,
     )
 
-    optimizer = optim.Adam(
-        model.parameters(), lr=lr, betas=(beta1, 0.999)
-    )
+    optimizer = optim.Adam(model.parameters(), lr=lr, betas=(beta1, 0.999))
 
     metric_mode = "min"
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
@@ -529,7 +555,7 @@ if __name__ == "__main__":
         val_interval=epochs_per_eval,
         patience_early_stopping=early_stopping_patience_epochs,
         device=device,
-        val_metric="loss"
+        val_metric="loss",
     )
 
     path = os.path.join(model_dir, "ORCA-CLEAN.pk")

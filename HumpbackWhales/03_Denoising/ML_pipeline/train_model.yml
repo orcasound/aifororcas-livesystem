@@ -41,24 +41,22 @@ inputs:
   freq_compression:
     type: string
     default: linear
-outputs:
   model_dir:
-    type: uri_folder
-    mode: upload
+    type: string
   log_dir:
-    type: uri_folder
-    mode: upload
+    type: string
   checkpoint_dir:
-    type: uri_folder
-    mode: upload
+    type: string
   cache_dir:
-    type: uri_folder
-    mode: upload
+    type: string
   summary_dir:
+    type: string
+outputs:
+  training_output:
     type: uri_folder
-    mode: upload
+    description: Training output
 code: ./orca_clean
-environment: azureml:whales-denoising-env:1.8
+environment: azureml:whales-denoising-env@latest
 command: >-
   python main.py 
   --debug 
@@ -71,11 +69,12 @@ command: >-
   --noise_dir_train ${{inputs.noise_train_data}} 
   --noise_dir_val ${{inputs.noise_val_data}} 
   --noise_dir_test ${{inputs.noise_test_data}} 
-  --model_dir ${{outputs.model_dir}} 
-  --log_dir ${{outputs.log_dir}} 
-  --checkpoint_dir ${{outputs.checkpoint_dir}} 
-  --cache_dir ${{outputs.cache_dir}} 
-  --summary_dir ${{outputs.summary_dir}} 
+  --model_dir ${{inputs.model_dir}} 
+  --log_dir ${{inputs.log_dir}} 
+  --checkpoint_dir ${{inputs.checkpoint_dir}} 
+  --cache_dir ${{inputs.cache_dir}} 
+  --summary_dir ${{inputs.summary_dir}}
+  --training_output ${{outputs.training_output}}
   --augmentation ${{inputs.augmentation}} 
   --n_fft ${{inputs.n_fft}} 
   --hop_length ${{inputs.hop_length}} 
