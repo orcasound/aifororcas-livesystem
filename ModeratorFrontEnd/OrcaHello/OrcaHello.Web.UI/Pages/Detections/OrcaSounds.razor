@@ -102,8 +102,12 @@
 
             <!-- Review button -->
 
-            <RadzenButton Click=OnReviewClicked Visible=IsReviewButtonVisible
-                          Variant=Variant.Outlined Text="Review" />
+            <AuthorizeView Policy="Moderators">
+
+                <RadzenButton Click=OnReviewClicked Visible=IsReviewButtonVisible
+                              Variant=Variant.Outlined Text="Review" />
+
+            </AuthorizeView>
 
 
         </RadzenStack>
@@ -119,8 +123,8 @@
         else
         {
             <GridViewComponent Filters=PassedFilters
-                OnShowReviewButton=ShowReviewButton
-                @ref=GridView />
+                               OnShowReviewButton=ShowReviewButton
+            @ref=GridView />
 
         }
 

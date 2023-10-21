@@ -338,6 +338,8 @@ namespace OrcaHello.Web.Api.Services
 
              List<string> TagList = await _storageBroker.GetTagListByTimeframe(fromDate, toDate);
 
+             TagList.RemoveAll(x => string.IsNullOrWhiteSpace(x));
+
              return new QueryableTagsForTimeframe
              {
                  QueryableRecords = TagList.AsQueryable(),
@@ -401,6 +403,7 @@ namespace OrcaHello.Web.Api.Services
         {
             List<string> TagList = await _storageBroker.GetAllTagList();
 
+            TagList.RemoveAll(x => string.IsNullOrWhiteSpace(x));
 
             return new QueryableTags
             {

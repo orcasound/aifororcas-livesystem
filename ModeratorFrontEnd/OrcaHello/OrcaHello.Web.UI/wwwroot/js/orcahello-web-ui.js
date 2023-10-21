@@ -38,3 +38,25 @@ function CreateScaledPushpin(location, imgUrl, scale, callback) {
 
 	img.src = imgUrl;
 }
+
+/* Spectrogram functionality */
+
+function StartGridAudioPlayback(url, dotnetHelper)
+{
+    var sound = new Howl({ src: [url], html5: true });
+
+    var completionEvent = new CustomEvent("completionEvent", {
+        detail: {
+            Url: url
+        }
+    });
+
+    sound.on("end", function () { dotnetHelper.invokeMethodAsync("OnJSCustomEvent", completionEvent) });
+    sound.play();
+}
+
+function StopGridAudioPlayback()
+{
+	Howler.stop();
+	Howler.unload();
+}

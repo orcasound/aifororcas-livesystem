@@ -157,6 +157,7 @@
         {
             PassedFilters = new()
             {
+                DetectionState = SelectedDetectionState,
                 SortBy = SelectedSortBy,
                 SortOrder = SelectedSortOrder,
                 Timeframe = SelectedTimeframe,

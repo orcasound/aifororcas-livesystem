@@ -107,3 +107,6 @@
                             Data=@DetectionItemViews Count=@TotalDetectionCount TItem="DetectionItemView" PageSize="10"
                             PagerHorizontalAlign=HorizontalAlign.Left ShowPagingSummary="true" @ref="DetectionDataList"
                             Style="margin-top:10px;">
+
+
+Change=@(args => { if(!true) { DetectionDataGrid.SelectRow(data); }})

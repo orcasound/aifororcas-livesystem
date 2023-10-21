@@ -4,27 +4,27 @@
     public class ComponentManager : ComponentBase
     {
         [Inject]
-        protected NavigationManager NavManager { get; set; }
+        protected NavigationManager NavManager { get; set; } = null!;
 
         [Inject]
-        public IJSRuntime JSRuntime { get; set; }
+        public IJSRuntime JSRuntime { get; set; } = null!;
 
         [Inject]
-        public DialogService DialogService { get; set; }
+        public DialogService DialogService { get; set; } = null!;
 
         [Inject]
-        public NotificationService NotificationService { get; set; }
+        public NotificationService NotificationService { get; set; } = null!;
 
         [Inject]
-        public ContextMenuService ContextMenuService { get; set; }
+        public ContextMenuService ContextMenuService { get; set; } = null!;
 
         [Inject]
-        public TooltipService TooltipService { get; set; }
+        public TooltipService TooltipService { get; set; } = null!;
 
         [Inject]
-        public ILoggerFactory LoggerFactory { get; set; }
+        public ILoggerFactory LoggerFactory { get; set; } = null!;
 
-        public ILogger Logger;
+        public ILogger Logger = null!;
 
         protected override void OnInitialized()
         {
@@ -37,7 +37,7 @@
             DialogService.Close();
         }
 
-        public void ShowTooltip(ElementReference elementReference, string message, TooltipOptions options = null) =>
+        public void ShowTooltip(ElementReference elementReference, string message, TooltipOptions options = null!) =>
             TooltipService.Open(elementReference, message, options);
 
         public void LogAndReportUnknownException(Exception exception)
@@ -56,6 +56,30 @@
 
             NotificationService.Notify(message);
             Logger.LogError(exception, "Unknown Failure");
+        }
+
+        public void ReportSuccess(string summary, string detail)
+        {
+            NotificationService.Notify(
+                new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = summary,
+                    Detail = detail,
+                    Duration = 5000
+                });
+        }
+
+        public void ReportError(string summary, string detail)
+        {
+            NotificationService.Notify(
+                new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = summary,
+                    Detail = detail,
+                    Duration = 5000
+                });
         }
     }
 }

@@ -22,7 +22,6 @@
             builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
                 provider.GetRequiredService<ApiAuthenticationStateProvider>());
             builder.Services.AddScoped<IAccountService, AccountService>();
-            //builder.Services.AddHostedService<JwtRefreshBackgroundService>();
         }
     }
 }

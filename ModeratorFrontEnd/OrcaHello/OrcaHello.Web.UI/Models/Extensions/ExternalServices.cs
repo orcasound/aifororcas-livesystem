@@ -15,9 +15,9 @@
                 o.TokenCacheScope = TokenCacheScope.Persistent;
             });
 
-            // Blazored.LocalStorage
+            // InMemory Storage
 
-            builder.Services.AddBlazoredLocalStorage();
+            builder.Services.AddMemoryCache();
 
             // Radzen.Blazor
 

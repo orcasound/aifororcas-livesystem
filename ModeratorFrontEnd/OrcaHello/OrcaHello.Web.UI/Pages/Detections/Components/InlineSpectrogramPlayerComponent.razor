@@ -1,0 +1,17 @@
+﻿<div id="waveform"></div>
+<audio id="audio" src=@AudioUri></audio>
+<button onclick="play">Play</button>
+
+<script>
+    var wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: 'violet',
+        progressColor: 'purple'
+    });
+
+    wavesurfer.load(document.querySelector('#audio').src);
+
+    function play() {
+        wavesurfer.playPause();
+    }
+</script>

@@ -3,12 +3,15 @@
     public partial class DetectionViewService : IDetectionViewService
     {
         private readonly IDetectionService _detectionService;
+        private readonly ITagService _tagService;
         private readonly ILogger<DetectionViewService> _logger;
 
         public DetectionViewService(IDetectionService detectionService,
+            ITagService tagService,
             ILogger<DetectionViewService> logger)
         {
             _detectionService = detectionService;
+            _tagService = tagService;
             _logger = logger;
         }
 
@@ -46,7 +49,7 @@
                 State = state,
                 Moderator = moderator,
                 DateModerated = DateTime.UtcNow,
-                Comments = comments,
+                Comments = !string.IsNullOrWhiteSpace(comments) ? comments : string.Empty,
                 Tags = tags.Split(new char[] {',', ';' }, StringSplitOptions.RemoveEmptyEntries).ToList()
             };
 
@@ -56,6 +59,12 @@
             // TODO: How to handle any errors? Probably in the component.
 
             return response;
+        });
+
+        public ValueTask<List<string>> RetrieveAllTagsAsync() =>
+        TryCatch(async () =>
+        {
+            return await _tagService.RetrieveAllTagsAsync();
         });
 
         private static Func<Detection, DetectionItemView> AsDetectionItemView =>

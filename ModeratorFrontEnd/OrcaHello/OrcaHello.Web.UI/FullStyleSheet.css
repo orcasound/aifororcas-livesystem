@@ -15027,6 +15027,7 @@ ul.rz-profile-menu {
 .rz-selectable tbody tr.rz-data-row td,
 .rz-selectable tbody tr.rz-data-row .rz-cell-data {
     transition: background-color var(--rz-transition), color var(--rz-transition);
+    transition: background-color var(--rz-transition), color var(--rz-transition);
 }
 
     .rz-selectable tbody tr.rz-data-row td.rz-frozen-cell:before, .rz-selectable tbody tr.rz-data-row td.rz-frozen-cell:after,

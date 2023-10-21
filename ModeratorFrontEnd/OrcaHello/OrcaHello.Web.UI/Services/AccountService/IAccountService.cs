@@ -5,8 +5,7 @@
         Task Login();
         Task Logout();
         Task LogoutIfExpired();
-        Task<string> GetToken();
-        Task<string> GetDisplayname();
-        Task<string> GetUsername();
+        Task<string> GetDisplayName();
+        Task<string> GetUserName();
     }
 }

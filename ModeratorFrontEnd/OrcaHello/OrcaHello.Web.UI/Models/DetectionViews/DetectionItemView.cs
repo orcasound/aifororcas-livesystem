@@ -16,8 +16,55 @@
         public DateTime? Moderated { get; set; }
         public string Tags { get; set; }
         public string InterestLabel { get; set; }
+        public bool IsCurrentlyPlaying { get; set; }
         public string AverageConfidence { get => $"{Confidence.ToString("00.##")}% average confidence"; }
         public string SmallConfidence { get => $"{Confidence.ToString("F2")}%"; }
         public string DetectionCount { get => $"{Annotations.Count} detections"; }
+        
+        public List<string> TagsList
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Tags))
+                    return new List<string>();
+
+                return Tags.Split(',').ToList();
+            }
+            set
+            {
+                if(value != null && value.Count > 0)
+                    Tags = string.Join(',', value);
+            }
+        }
+
+        public string EnteredTags
+        {
+            get
+            {
+                return string.Empty;
+            }
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    var enteredTagsList = value
+                        .Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                        .ToList()
+                        .Select(s => s.Trim());
+
+                    var workingTagsList = !string.IsNullOrWhiteSpace(Tags) ?
+                        Tags.Split(',').ToList() : new List<string>();
+
+                    foreach(var tag in enteredTagsList)
+                    {
+                        if (!workingTagsList.Contains(tag))
+                            workingTagsList.Add(tag);
+                    }
+
+                    if(workingTagsList.Count > 0)
+                        Tags = string.Join(",", workingTagsList);
+                }
+            }
+        }
     }
 }

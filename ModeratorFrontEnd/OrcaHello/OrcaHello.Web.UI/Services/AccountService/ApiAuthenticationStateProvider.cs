@@ -3,25 +3,78 @@
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly HttpClient _httpClient;
-        private readonly ILocalStorageService _localStorage;
+        private readonly IMemoryCache _memoryCache;
+        private readonly IJSRuntime _jsRuntime;
+        private readonly ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+        private const string _tokenName = "authToken";
+        private const string _headerName = "bearer";
+        private const string _claimIdentity = "jwt";
 
-        public ApiAuthenticationStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
+        public ApiAuthenticationStateProvider(HttpClient httpClient, IMemoryCache memoryCache, IJSRuntime jsRuntime)
         {
             _httpClient = httpClient;
-            _localStorage = localStorage;
+            _memoryCache = memoryCache;
+            _jsRuntime = jsRuntime;
         }
+
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var savedToken = await _localStorage.GetItemAsync<string>("authToken");
+            var savedToken = await GetToken();
 
             if (string.IsNullOrWhiteSpace(savedToken))
+                return new AuthenticationState(_anonymous);
+
+            _httpClient.DefaultRequestHeaders.Authorization = 
+                new AuthenticationHeaderValue(_headerName, savedToken);
+
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(
+                    ParseClaimsFromJwt(savedToken), _claimIdentity)));
+        }
+
+        public async Task<string> GetToken()
+        {
+            var memoryToken = _memoryCache.Get<string>(_tokenName);
+
+            if (!string.IsNullOrWhiteSpace(memoryToken) && !IsTokenExpired(memoryToken))
+                return memoryToken;
+
+            if (await IsAppActiveAsync())
             {
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                var localToken = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", _tokenName);
+
+                if (!string.IsNullOrWhiteSpace(localToken) && !IsTokenExpired(localToken))
+                {
+                    _memoryCache.Set<string>(_tokenName, localToken);
+                    return localToken;
+                }
             }
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", savedToken);
+            return string.Empty;
+        }
 
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(savedToken), "jwt")));
+        public async Task SetToken(string token)
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", _tokenName, token);
+
+            _memoryCache.Set(_tokenName, token);
+        }
+
+        public async Task ClearToken()
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", _tokenName);
+
+            _memoryCache.Remove(_tokenName);
+        }
+
+        public void ClearMemoryToken()
+        {
+            _memoryCache.Remove(_tokenName);
+        }
+
+        private async Task<bool> IsAppActiveAsync()
+        {
+            bool isRunning = await _jsRuntime.InvokeAsync<bool>("eval", "window.location.href != 'about:blank'");
+            return isRunning;
         }
 
         public async Task MarkUserAsAuthenticated()
@@ -32,8 +85,7 @@
 
         public void MarkUserAsLoggedOut()
         {
-            var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
-            var authState = Task.FromResult(new AuthenticationState(anonymousUser));
+            var authState = Task.FromResult(new AuthenticationState(_anonymous));
             NotifyAuthenticationStateChanged(authState);
         }
 

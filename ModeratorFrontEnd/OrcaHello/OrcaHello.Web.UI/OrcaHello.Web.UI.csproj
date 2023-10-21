@@ -13,8 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazorade.Msal" Version="2.2.0" />
-    <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
-    <PackageReference Include="Radzen.Blazor" Version="4.16.2" />
+    <PackageReference Include="Radzen.Blazor" Version="4.18.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.2" />
   </ItemGroup>
 

@@ -15,7 +15,7 @@
         {
             // TODO: How to get Moderator if not already in the item?
 
-            string moderator = await AccountService.GetUsername();
+            string moderator = await AccountService.GetUserName();
 
             var response = await ViewService.ModerateDetectionsAsync(
                 new List<string> { Item.Id },

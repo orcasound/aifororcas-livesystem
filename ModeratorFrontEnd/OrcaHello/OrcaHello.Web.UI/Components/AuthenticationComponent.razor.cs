@@ -10,7 +10,7 @@
 
         protected override async Task OnInitializedAsync()
         {
-            DisplayName = await AccountService.GetDisplayname();
+            DisplayName = await AccountService.GetDisplayName();
         }
 
         protected override void OnAfterRender(bool firstRender)
@@ -34,7 +34,7 @@
         private async Task Login()
         {
             await AccountService.Login();
-            DisplayName = await AccountService.GetDisplayname();
+            DisplayName = await AccountService.GetDisplayName();
         }
 
         private async Task OnProfileMenuClicked(RadzenProfileMenuItem item)

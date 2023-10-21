@@ -10,10 +10,12 @@
             // Foundation services
             builder.Services.AddScoped<IHydrophoneService, HydrophoneService>();
             builder.Services.AddScoped<IDetectionService, DetectionService>();
+            builder.Services.AddScoped<ITagService, TagService>();
 
             // View services
             builder.Services.AddScoped<IHydrophoneViewService, HydrophoneViewService>();
             builder.Services.AddScoped<IDetectionViewService, DetectionViewService>();
+            builder.Services.AddScoped<IMetricsViewService, MetricsViewService>();
         }
     }
 }

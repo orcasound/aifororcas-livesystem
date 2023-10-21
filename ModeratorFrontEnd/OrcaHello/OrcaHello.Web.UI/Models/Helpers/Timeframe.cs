@@ -8,6 +8,9 @@
         TwentyFourHours,
         SevenDays,
         ThirtyDays,
+        ThreeMonths,
+        SixMonths,
+        OneYear,
         All,
         Range
     }

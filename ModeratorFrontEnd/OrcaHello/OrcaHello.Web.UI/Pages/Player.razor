@@ -1,0 +1,24 @@
+﻿@page "/player"
+@inherits ComponentManager
+
+<h1>Player Test</h1>
+
+<div id="waveform">
+    <img src="https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_orcasound_lab_2020_09_27_21_15_03_PDT.png" />
+    </div>
+<button @onclick="PlayIt">Play</button>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // await JSRuntime.InvokeVoidAsync("LightItUp");
+        }
+    }
+
+    protected async Task PlayIt()
+    {
+        await JSRuntime.InvokeVoidAsync("LightItUp");
+    }
+}

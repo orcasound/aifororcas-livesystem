@@ -20,13 +20,15 @@
     <RadzenSidebar @bind-Expanded=@sidebarExpanded>
         <RadzenPanelMenu>
             <RadzenPanelMenuItem Path="index" Text="Summary" Selected=@isSummarySelected Icon="home" />
-            <RadzenPanelMenuItem Path="hydrophones" Text="Hydrophones" Icon="mic" />
             <RadzenPanelMenuItem Path="metrics" Text="Metrics" Icon="donut_large" />
             <RadzenPanelMenuItem Path="orca_sounds" Text="Orca Sounds" Icon="headphones" />
-            <RadzenPanelMenuItem Path="search_by_tag" Text="Search By Tag" Icon="search" />
+            <RadzenPanelMenuItem Text="Explore" Icon="explore">
+                <RadzenPanelMenuItem Path="hydrophones" Text="Hydrophones" Icon="mic" />
+            </RadzenPanelMenuItem>
             <RadzenPanelMenuItem Text="Curate" Icon="settings_applications">
                 <RadzenPanelMenuItem Path="curate_tags" Text="Tags" Icon="sell" />
                 <RadzenPanelMenuItem Path="curate_interest_labels" Text="Interest Labels" Icon="label" />
+                <RadzenPanelMenuItem Path="search_by_tag" Text="Search By Tag" Icon="search" />
             </RadzenPanelMenuItem>
         </RadzenPanelMenu>
     </RadzenSidebar>

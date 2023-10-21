@@ -1,13 +1,14 @@
 ﻿global using Blazorade.Msal.Configuration;
 global using Blazorade.Msal.Security;
 global using Blazorade.Msal.Services;
-global using Blazored.LocalStorage;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.Authorization;
+global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.JSInterop;
 global using OrcaHello.Web.Shared.Extensions;
 global using OrcaHello.Web.Shared.Models.Detections;
 global using OrcaHello.Web.Shared.Models.Hydrophones;
+global using OrcaHello.Web.Shared.Models.Tags;
 global using OrcaHello.Web.Shared.Services;
 global using OrcaHello.Web.Shared.Utilities;
 global using OrcaHello.Web.UI.Brokers;

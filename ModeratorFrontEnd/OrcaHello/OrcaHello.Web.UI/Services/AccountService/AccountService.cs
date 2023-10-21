@@ -1,40 +1,34 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-
-namespace OrcaHello.Web.UI.Services
+﻿namespace OrcaHello.Web.UI.Services
 {
     public class AccountService : IAccountService
     {
         private readonly HttpClient _httpService;
-        private readonly AuthenticationStateProvider _authenticationStateProvider;
         private readonly BlazoradeMsalService _msalService;
-        private readonly ILocalStorageService _localStorage;
         private readonly AppSettings _appSettings;
+        private const string _tokenName = "authToken";
+        private const string _headerName = "bearer";
+        private readonly ApiAuthenticationStateProvider _apiAuthenticationStateProvider;
+        private readonly NavigationManager _navigationManager;
 
         public AccountService(
             HttpClient httpService,
-            AuthenticationStateProvider authenticationStateProvider,
+            ApiAuthenticationStateProvider apiAuthenticationStateProvider,
             BlazoradeMsalService msalService,
-            ILocalStorageService localStorage,
+            NavigationManager navigationManager,
             AppSettings appSettings)
         {
             _httpService = httpService;
-            _authenticationStateProvider = authenticationStateProvider;
+            _apiAuthenticationStateProvider = apiAuthenticationStateProvider;
             _msalService = msalService;
-            _localStorage = localStorage;
+            _navigationManager = navigationManager;
             _appSettings = appSettings;
         }
 
-        public async Task<string> GetToken()
+        public async Task<string> GetDisplayName()
         {
-            string savedToken = await _localStorage.GetItemAsync<string>("authToken");
-            return savedToken;
-        }
-
-        public async Task<string> GetDisplayname()
-        {
-            if (_authenticationStateProvider != null)
+            if (_apiAuthenticationStateProvider != null)
             {
-                AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+                AuthenticationState authState = await _apiAuthenticationStateProvider.GetAuthenticationStateAsync();
                 ClaimsPrincipal user = authState.User;
 
                 if (user?.Identity != null && user.Identity.IsAuthenticated)
@@ -48,11 +42,11 @@ namespace OrcaHello.Web.UI.Services
             return string.Empty;
         }
 
-        public async Task<string> GetUsername()
+        public async Task<string> GetUserName()
         {
-            if (_authenticationStateProvider != null)
+            if (_apiAuthenticationStateProvider != null)
             {
-                AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+                AuthenticationState authState = await _apiAuthenticationStateProvider.GetAuthenticationStateAsync();
                 ClaimsPrincipal user = authState.User;
 
                 if (user?.Identity != null && user.Identity.IsAuthenticated)
@@ -76,13 +70,11 @@ namespace OrcaHello.Web.UI.Services
             {
                 token = await _msalService.AcquireTokenAsync(prompt: LoginPrompt.Login, scopes: scopes);
 
-                token.ExpiresOn = DateTime.UtcNow.AddSeconds(30);
+                await _apiAuthenticationStateProvider.SetToken(token.AccessToken);
 
-                await _localStorage.SetItemAsync("authToken", token.AccessToken);
+                await _apiAuthenticationStateProvider.MarkUserAsAuthenticated();
 
-                await ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated();
-
-                _httpService.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token.AccessToken);
+                _httpService.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_headerName, token.AccessToken);
             }
             catch (Exception exception)
             {
@@ -93,26 +85,42 @@ namespace OrcaHello.Web.UI.Services
 
         public async Task Logout()
         {
-            await _localStorage.ClearAsync();
-            ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
+            await _apiAuthenticationStateProvider.ClearToken();
+
+            _apiAuthenticationStateProvider.MarkUserAsLoggedOut();
+
             _httpService.DefaultRequestHeaders.Clear();
         }
 
         public async Task LogoutIfExpired()
         {
-            AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
-            ClaimsPrincipal user = authState.User;
-
-            if (user?.Identity != null && user.Identity.IsAuthenticated)
+            try
             {
-                var savedToken = await _localStorage.GetItemAsync<string>("authToken");
+                AuthenticationState authState = await _apiAuthenticationStateProvider.GetAuthenticationStateAsync();
+                ClaimsPrincipal user = authState.User;
 
-                if (((ApiAuthenticationStateProvider)_authenticationStateProvider).IsTokenExpired(savedToken))
+                if (user?.Identity != null && user.Identity.IsAuthenticated)
                 {
-                    await _localStorage.ClearAsync();
-                    ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
-                    _httpService.DefaultRequestHeaders.Clear();
+                    var savedToken = await _apiAuthenticationStateProvider.GetToken();
+
+                    if (!string.IsNullOrWhiteSpace(savedToken) && _apiAuthenticationStateProvider.IsTokenExpired(savedToken))
+                    {
+                        await _apiAuthenticationStateProvider.ClearToken();
+
+                        _apiAuthenticationStateProvider.MarkUserAsLoggedOut();
+                        _httpService.DefaultRequestHeaders.Clear();
+                        _navigationManager.NavigateTo("/");
+
+                    }
                 }
+            }
+            catch 
+            {
+                _apiAuthenticationStateProvider.ClearMemoryToken();
+
+                _apiAuthenticationStateProvider.MarkUserAsLoggedOut();
+                _httpService.DefaultRequestHeaders.Clear();
+                _navigationManager.NavigateTo("/");
             }
         }
     }

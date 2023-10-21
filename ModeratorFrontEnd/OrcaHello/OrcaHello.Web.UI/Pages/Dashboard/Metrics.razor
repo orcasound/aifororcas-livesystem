@@ -2,7 +2,124 @@
 
 <RadzenLayout Style="height:calc(100%);">
     <RadzenBody>
-        <PageHeaderAndTitle Title="Metrics"
-                            Description="Review key system metrics for a given timeframe." />
+        <PageHeaderComponent Title="Metrics"
+                             Description="Review key system metrics for a given timeframe." />
+
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-5">
+
+            <!-- Timeframe -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Timeframe:" />
+                <RadzenDropDown TValue=Timeframe @bind-Value=@SelectedTimeframe Data=@TimeframeDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false"
+                                Change=OnTimeframeChanged />
+            </RadzenStack>
+
+            <!-- Start and End DateTimes -->
+            @if (SelectedTimeframe == Timeframe.Range)
+            {
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="Start:" />
+                    <RadzenDatePicker @bind-Value=@SelectedStartDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="End:" />
+                    <RadzenDatePicker @bind-Value=@SelectedEndDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+            }
+
+            <!-- Apply Filters button -->
+
+            <RadzenButton Click=OnApplyFilterClicked Variant=Variant.Outlined Text="Apply Filters" />
+
+        </RadzenStack>
+
+        <LoadingSpinnerComponent IsLoading=@IsLoading />
+
+        <RadzenStack Gap="1rem" Style="position:relative">
+
+            <!-- Detection donut graph -->
+
+            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4 rz-mt-3">
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="6" SizeXL="3">
+                    <RadzenCard Variant=Variant.Outlined>
+                        <RadzenText TextStyle=TextStyle.H6>Detections</RadzenText>
+                        <RadzenChart>
+                            <RadzenDonutSeries Data=@MetricsItemViewResponse.MetricsItemViews CategoryProperty=Name
+                                               ValueProperty=Value Fills=@FillColors InnerRadius=100>
+                                <ChildContent>
+                                    <RadzenSeriesDataLabels Visible="true" />
+                                </ChildContent>
+                                <TitleTemplate>
+                                    <div class="rz-donut-content">
+                                        <div>DD MMM YYYY HH:MM</div>
+                                        <div>to</div>
+                                        <div>DD MMM YYYY HH:MM</div>
+                                    </div>
+                                </TitleTemplate>
+                            </RadzenDonutSeries>
+                        </RadzenChart>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <!-- Tags -->
+
+            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
+                <RadzenColumn Size="12">
+                    <RadzenCard Variant=Variant.Outlined>
+                        <RadzenAccordion 
+                            Collapse=@(args => OnTagsAccordionCollapsed(args))
+                            Expand=@(args => OnTagsAccordionExpanded(args))>
+                            <Items>
+                                <RadzenAccordionItem Text="Tags">
+
+                                    <LoadingSpinnerComponent IsLoading=@IsLoadingTags />
+
+                                    @if(TagsForTimeframe is not null && TagsForTimeframe.Count > 0)
+                                    {
+                                        <RadzenAccordion>
+                                            <Items>
+                                                @foreach(var tag in TagsForTimeframe)
+                                                {
+                                                    <RadzenAccordionItem Text=@tag.ToUpper()>
+                                                        <RadzenText TextStyle=TextStyle.H6 Text=@($"Detections for {tag}") />
+                                                    </RadzenAccordionItem>
+                                                }
+                                            </Items>
+                                        </RadzenAccordion>
+                                    }
+
+                                </RadzenAccordionItem>
+                            </Items>
+                        </RadzenAccordion>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <!-- Comments from Confirmed Detections -->
+
+            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
+                <RadzenColumn Size="12">
+                    <RadzenCard Variant=Variant.Outlined>
+                        <RadzenText TextStyle=TextStyle.H6>Comments from Confirmed Detections</RadzenText>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <!-- Comments from False Positives and Unknown Detections -->
+
+            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
+                <RadzenColumn Size="12">
+                    <RadzenCard Variant=Variant.Outlined>
+                        <RadzenText TextStyle=TextStyle.H6>Comments from False Positives and Unknown Detections</RadzenText>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+        </RadzenStack>
     </RadzenBody>
 </RadzenLayout>

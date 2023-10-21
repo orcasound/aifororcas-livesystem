@@ -24,12 +24,15 @@
     --rz-white: var(--cg-white);
     --rz-primary: var(--cg-charlotte);
     --rz-primary-lighter: var(--cg-charlotte);
+    --rz-secondary-lighter: var(--cg-smoke-black);
     --rz-on-primary-lighter: var(--cg-vampire-black);
+    --rz-on-secondary-lighter: var(--cg-charlotte);
     --rz-layout-background-color: var(--cg-raisin-black);
     --rz-layout-body-background-color: var(--cg-raisin-black);
     --rz-datalist-item-background-color: var(--cg-raisin-black);
     --rz-datalist-background-color: var(--cg-raisin-black);
     --rz-secondary: var(--cg-philippine-silver);
+    --rz-danger: #b3261e;
 }
 
 /* Override other Radzen component definitions where appropriate */
@@ -73,6 +76,12 @@
     --rz-grid-header-cell-border-bottom: none;
     --rz-grid-header-background-color: var(--rz-grid-background-color);
     --rz-sidebar-border-right: none;
+    --rz-grid-hover-background-color: var(--rz-grid-background-color);
+    --rz-grid-hover-color: var(--rz-white);
+    --rz-grid-selected-background-color: var(--rz-grid-background-color);
+    --rz-grid-selected-color: var(--rz-white);
+    --rz-accordion-item-background-color: var(--cg-rasin-black);
+    --rz-grid-frozen-cell-background-color: var(--rz-grid-background-color);
 }
 
 /* Font remappings */
@@ -114,6 +123,8 @@
     --rz-text-body2-color: var(--rz-text-color);
     --rz-text-body2-margin-bottom: 0.5rem;
     --rz-input-font-size: 1rem;
+    --rz-alert-icon-size: 1.5rem;
+    --rz-icon-size: 1.5rem;
 }
 
 :root {
@@ -160,6 +171,27 @@ a:hover {
     color: var(--rz-white);
 }
 
+.rz-dialog {
+    border: 1px solid var(--rz-white);
+}
+
+.rz-button.rz-variant-text.rz-secondary.rz-shade-default {
+    color: var(--rz-primary);
+    font-weight: 400;
+}
+
+.rz-button.rz-variant-text.rz-secondary.rz-shade-default .rz-button-text:hover {
+    text-decoration: underline;
+}
+
+.rz-accordion-header a[role=tab] {
+    font-family: var(--rz-text-font-family);
+    font-size: var(--rz-text-h6-font-size);
+    line-height: var(--rz-text-h6-line-height);
+    font-weight: var(--rz-text-h6-font-weight);
+    letter-spacing: var(--rz-text-h6-letter-spacing);
+}
+
 .oh-min-button {
     border: 0 !important;
     min-height: 0 !important;
@@ -171,6 +203,7 @@ a:hover {
 .oh-min-button:hover .rz-button-icon-left {
     color: var(--rz-white);
 }
+
 #tile-icon {
     font-size:22px;
     margin-right:10px;
@@ -200,6 +233,17 @@ a:hover {
     }
 }
 
-.rzi {
-    font-size: 28px;
+.rz-growl-title {
+    line-height: 25px;
+}
+
+/* Style the image elements with a play button */
+.oh-spectrogram-bar {
+    position: relative;
+    width: 200px;
+    height: 36px;
+}
+
+.oh-top {
+    vertical-align: top;
 }
