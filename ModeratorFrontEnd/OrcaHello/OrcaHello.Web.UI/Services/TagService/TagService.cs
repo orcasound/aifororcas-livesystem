@@ -28,7 +28,7 @@
         {
             // ValidateRequiredProperties();
 
-            var queryString = $"&fromDate={fromDate.Value.ToString()}&toDate={toDate.Value.ToString()}";
+            var queryString = $"fromDate={fromDate.Value.ToString()}&toDate={toDate.Value.ToString()}";
 
             TagListForTimeframeResponse response = await _apiBroker.GetFilteredTagsAsync(queryString);
             //ValidateResponseNotNull();

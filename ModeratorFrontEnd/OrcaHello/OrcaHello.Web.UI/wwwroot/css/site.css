@@ -20,11 +20,11 @@
 :root {
     --rz-base-800: var(--cg-smoky-black);
     --rz-base-900: var(--cg-raisin-black);
-    --rz-black: var(--cg-smoke-black);
+    --rz-black: var(--cg-smoky-black);
     --rz-white: var(--cg-white);
     --rz-primary: var(--cg-charlotte);
     --rz-primary-lighter: var(--cg-charlotte);
-    --rz-secondary-lighter: var(--cg-smoke-black);
+    --rz-secondary-lighter: var(--cg-smoky-black);
     --rz-on-primary-lighter: var(--cg-vampire-black);
     --rz-on-secondary-lighter: var(--cg-charlotte);
     --rz-layout-background-color: var(--cg-raisin-black);
@@ -82,6 +82,7 @@
     --rz-grid-selected-color: var(--rz-white);
     --rz-accordion-item-background-color: var(--cg-rasin-black);
     --rz-grid-frozen-cell-background-color: var(--rz-grid-background-color);
+    --rz-panel-background-color: var(--cg-raisin-black);
 }
 
 /* Font remappings */
@@ -125,6 +126,7 @@
     --rz-input-font-size: 1rem;
     --rz-alert-icon-size: 1.5rem;
     --rz-icon-size: 1.5rem;
+    --rz-progressbar-height: 0.25rem;
 }
 
 :root {
@@ -185,6 +187,14 @@ a:hover {
 }
 
 .rz-accordion-header a[role=tab] {
+    font-family: var(--rz-text-font-family);
+    font-size: var(--rz-text-h6-font-size);
+    line-height: var(--rz-text-h6-line-height);
+    font-weight: var(--rz-text-h6-font-weight);
+    letter-spacing: var(--rz-text-h6-letter-spacing);
+}
+
+.rz-panel-titlebar > div > span {
     font-family: var(--rz-text-font-family);
     font-size: var(--rz-text-h6-font-size);
     line-height: var(--rz-text-h6-line-height);

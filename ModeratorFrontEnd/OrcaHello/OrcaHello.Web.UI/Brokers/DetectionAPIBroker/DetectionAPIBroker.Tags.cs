@@ -8,6 +8,6 @@
             await this.GetAsync<TagListResponse>(tagRelativeUrl);
 
         public async ValueTask<TagListForTimeframeResponse> GetFilteredTagsAsync(string queryString) =>
-            await this.GetAsync<TagListForTimeframeResponse>($"{tagRelativeUrl}?{queryString}");
+            await this.GetAsync<TagListForTimeframeResponse>($"{tagRelativeUrl}/bytimeframe?{queryString}");
     }
 }

@@ -7,7 +7,7 @@
         <PageHeaderComponent Title="Hydrophones" 
                         Description="A list of the locations for all the hydrophones used to collect whale calls for analysis and reporting."/>
 
-        <LoadingSpinnerComponent IsLoading=@IsLoading />
+        <LoadingSliderComponent IsLoading=@IsLoading />
 
         @if (HydrophoneItemViews != null && !HydrophoneItemViews.Any())
         {

@@ -1,4 +1,4 @@
-﻿namespace OrcaHello.Web.UI.Models
+﻿namespace OrcaHello.Web.UI
 {
     public class DropdownOption
     {

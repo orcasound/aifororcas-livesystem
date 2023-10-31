@@ -15,7 +15,7 @@
             _logger = logger;
         }
 
-        public ValueTask<DetectionItemViewResponse> RetrieveFilteredAndPaginatedDetectionItemViewsAsync(DetectionFilterAndPagination options) =>
+        public ValueTask<DetectionItemViewResponse> RetrieveFilteredAndPaginatedDetectionItemViewsAsync(PaginatedDetectionsByStateRequest options) =>
         TryCatch(async () =>
         {
             DetectionListResponse detectionListResponse =

@@ -1,4 +1,6 @@
-﻿@page "/metrics"
+﻿@inherits ComponentManager
+
+@page "/metrics"
 
 <RadzenLayout Style="height:calc(100%);">
     <RadzenBody>
@@ -37,88 +39,23 @@
 
         </RadzenStack>
 
-        <LoadingSpinnerComponent IsLoading=@IsLoading />
-
         <RadzenStack Gap="1rem" Style="position:relative">
 
             <!-- Detection donut graph -->
 
-            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4 rz-mt-3">
-                <RadzenColumn Size="12" SizeMD="6" SizeLG="6" SizeXL="3">
-                    <RadzenCard Variant=Variant.Outlined>
-                        <RadzenText TextStyle=TextStyle.H6>Detections</RadzenText>
-                        <RadzenChart>
-                            <RadzenDonutSeries Data=@MetricsItemViewResponse.MetricsItemViews CategoryProperty=Name
-                                               ValueProperty=Value Fills=@FillColors InnerRadius=100>
-                                <ChildContent>
-                                    <RadzenSeriesDataLabels Visible="true" />
-                                </ChildContent>
-                                <TitleTemplate>
-                                    <div class="rz-donut-content">
-                                        <div>DD MMM YYYY HH:MM</div>
-                                        <div>to</div>
-                                        <div>DD MMM YYYY HH:MM</div>
-                                    </div>
-                                </TitleTemplate>
-                            </RadzenDonutSeries>
-                        </RadzenChart>
-                    </RadzenCard>
-                </RadzenColumn>
-            </RadzenRow>
+            <DetectionMetricsComponent StateView=MetricsState />
 
             <!-- Tags -->
 
-            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
-                <RadzenColumn Size="12">
-                    <RadzenCard Variant=Variant.Outlined>
-                        <RadzenAccordion 
-                            Collapse=@(args => OnTagsAccordionCollapsed(args))
-                            Expand=@(args => OnTagsAccordionExpanded(args))>
-                            <Items>
-                                <RadzenAccordionItem Text="Tags">
+            <TagsComponent StateView=TagsState OnToggleOpen=OnToggleOpen />
 
-                                    <LoadingSpinnerComponent IsLoading=@IsLoadingTags />
+            <!-- Comments from Positive Detections -->
 
-                                    @if(TagsForTimeframe is not null && TagsForTimeframe.Count > 0)
-                                    {
-                                        <RadzenAccordion>
-                                            <Items>
-                                                @foreach(var tag in TagsForTimeframe)
-                                                {
-                                                    <RadzenAccordionItem Text=@tag.ToUpper()>
-                                                        <RadzenText TextStyle=TextStyle.H6 Text=@($"Detections for {tag}") />
-                                                    </RadzenAccordionItem>
-                                                }
-                                            </Items>
-                                        </RadzenAccordion>
-                                    }
-
-                                </RadzenAccordionItem>
-                            </Items>
-                        </RadzenAccordion>
-                    </RadzenCard>
-                </RadzenColumn>
-            </RadzenRow>
-
-            <!-- Comments from Confirmed Detections -->
-
-            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
-                <RadzenColumn Size="12">
-                    <RadzenCard Variant=Variant.Outlined>
-                        <RadzenText TextStyle=TextStyle.H6>Comments from Confirmed Detections</RadzenText>
-                    </RadzenCard>
-                </RadzenColumn>
-            </RadzenRow>
+            <PositiveCommentsComponent StateView=PositiveCommentsState OnToggleOpen=OnToggleOpen />
 
             <!-- Comments from False Positives and Unknown Detections -->
 
-            <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
-                <RadzenColumn Size="12">
-                    <RadzenCard Variant=Variant.Outlined>
-                        <RadzenText TextStyle=TextStyle.H6>Comments from False Positives and Unknown Detections</RadzenText>
-                    </RadzenCard>
-                </RadzenColumn>
-            </RadzenRow>
+            <NegativeAndUnknownCommentsComponent StateView=NegativeAndUnknownCommentsState OnToggleOpen=OnToggleOpen />
 
         </RadzenStack>
     </RadzenBody>

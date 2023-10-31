@@ -1,4 +1,4 @@
-﻿namespace OrcaHello.Web.UI.Models.Helpers
+﻿namespace OrcaHello.Web.UI.Models
 {
     public static class DateTimeExtensions
     {
@@ -18,6 +18,12 @@
                     return dateTime.AddDays(-7);
                 case Timeframe.ThirtyDays:
                     return dateTime.AddDays(-30);
+                case Timeframe.ThreeMonths:
+                    return dateTime.AddMonths(-3);
+                case Timeframe.SixMonths:
+                    return dateTime.AddMonths(-6);
+                case Timeframe.OneYear:
+                    return dateTime.AddYears(-1);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(Timeframe), timeframe, null);
             }

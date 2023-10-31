@@ -31,6 +31,22 @@
             return response;
         });
 
+        public ValueTask<DetectionListForTagResponse> RetrieveFilteredAndPaginatedDetectionsForTagAsync(string tag, DateTime? fromDate, DateTime? toDate,
+            int page, int pageSize) =>
+        TryCatch(async () =>
+        {
+            // ValidateRequiredProperties();
+
+            var queryString = $"fromDate={fromDate.Value.ToString()}&toDate={toDate.Value.ToString()}";
+            queryString += $"&page={page}&pageSize={pageSize}";
+
+            DetectionListForTagResponse response = await _apiBroker.GetFilteredDetectionsForTagAsync(tag, queryString);
+            //ValidateResponseNotNull();
+            //ValidateResponseHasValues();
+
+            return response;
+        });
+
         public ValueTask<ModerateDetectionsResponse> ModerateDetectionsAsync(ModerateDetectionsRequest request) =>
         TryCatch(async () =>
         {

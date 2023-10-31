@@ -1,4 +1,4 @@
-﻿namespace OrcaHello.Web.UI.Models.Helpers
+﻿namespace OrcaHello.Web.UI.Models
 {
     public class CustomJSEventHelper
     {

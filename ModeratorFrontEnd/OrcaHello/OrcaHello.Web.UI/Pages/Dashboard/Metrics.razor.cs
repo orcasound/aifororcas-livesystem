@@ -1,16 +1,12 @@
-﻿using OrcaHello.Web.UI.Models.Dashboard;
-using System;
-
-namespace OrcaHello.Web.UI.Pages.Dashboard
+﻿namespace OrcaHello.Web.UI.Pages.Dashboard
 {
-    public partial class Metrics
+    public partial class Metrics : ComponentManager
     {
         [Inject]
         public IMetricsViewService ViewService { get; set; } = null!;
 
-        protected bool IsLoading = false;
-        protected bool IsLoadingTags = false;
-        protected List<string> TagsForTimeframe = new();
+        [Inject]
+        public AppSettings AppSettings { get; set; } = null!;
 
         // Timeframe
         protected List<DropdownOption> TimeframeDropdownOptions = new()
@@ -26,33 +22,39 @@ namespace OrcaHello.Web.UI.Pages.Dashboard
             new(Timeframe.Range, "Select Date Range")
         };
 
-        protected Timeframe SelectedTimeframe;
+        protected Timeframe SelectedTimeframe = Timeframe.ThirtyDays;
 
         // Datetime Range
 
         protected DateTime? SelectedStartDateTime = null;
         protected DateTime? SelectedEndDateTime = null;
 
-        protected List<string> FillColors = new();
+        // Positive Comments
 
-        protected MetricsItemViewResponse MetricsItemViewResponse { get; set; } = null!;
+        protected CommentStateView PositiveCommentsState = new();
+
+        // Negative and Unknown Comments
+
+        protected CommentStateView NegativeAndUnknownCommentsState = new();
+
+        // Tags
+
+        protected TagStateView TagsState = new();
+
+        // Metrics
+
+        protected MetricsStateView MetricsState = new();
+
+        #region lifecycle events
 
         protected override async Task OnInitializedAsync()
         {
-            MetricsItemViewResponse = new MetricsItemViewResponse
-            {
-                MetricsItemViews = new()
-                {
-                    new MetricsItemView("Unreviewed", 1958),
-                    new MetricsItemView("Negative", 3470),
-                    new MetricsItemView("Positive", 600),
-                    new MetricsItemView("Unknown", 30)
-                }
-            };
-
-            FillColors = new() { "#219696", "#bb595f", "#468f57", "#bc913e" };
+            await SetNewDates();
         }
 
+        #endregion
+
+        #region button actions
 
         protected void OnTimeframeChanged()
         {
@@ -68,31 +70,41 @@ namespace OrcaHello.Web.UI.Pages.Dashboard
             }
         }
 
-        protected void OnApplyFilterClicked()
+        protected async Task OnApplyFilterClicked()
         {
-
+            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
+            await SetNewDates();
         }
 
-        protected async Task OnTagsAccordionExpanded(object value)
+        protected async Task SetNewDates()
         {
-            IsLoadingTags = true;
+            // This sets the initial value to Range (if populated) or All (if not)
+            var fromDate = SelectedStartDateTime.HasValue ? SelectedStartDateTime.Value : AppSettings.EpochDate;
+            var toDate = SelectedEndDateTime.HasValue ? SelectedEndDateTime.Value : DateTime.UtcNow;
 
-            var TagFilter = new TagFilter
-            {
-                FromDate = DateTime.UtcNow.AddDays(-365),
-                ToDate = DateTime.UtcNow
-            };
+            if (SelectedTimeframe != Timeframe.All && SelectedTimeframe != Timeframe.Range)
+                fromDate = toDate.Adjust(SelectedTimeframe);
 
-            TagsForTimeframe = await ViewService.RetrieveFilteredTagsAsync(TagFilter);
-
-            IsLoadingTags = false;
+            // Reset and close all accordions
+            MetricsState.Reset(fromDate, toDate);
+            TagsState.Reset(fromDate, toDate);
+            PositiveCommentsState.Reset(fromDate, toDate);
+            NegativeAndUnknownCommentsState.Reset(fromDate, toDate);
 
             await InvokeAsync(StateHasChanged);
         }
 
-        protected async Task OnTagsAccordionCollapsed(object value)
+        protected async Task OnToggleOpen()
         {
+            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
 
+            TagsState.Close();
+            PositiveCommentsState.Close();
+            NegativeAndUnknownCommentsState.Close();
+
+            await InvokeAsync(StateHasChanged);
         }
+
+        #endregion
     }
 }

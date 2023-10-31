@@ -234,7 +234,7 @@
             int skip = args.Skip.HasValue ? args.Skip.Value : 1;
             int top = args.Top.HasValue ? args.Top.Value : 10;
 
-            DetectionFilterAndPagination filterAndPagination = new()
+            PaginatedDetectionsByStateRequest filterAndPagination = new()
             {
                 Page = (skip / top) + 1,
                 PageSize = Filters.MaxRecords,

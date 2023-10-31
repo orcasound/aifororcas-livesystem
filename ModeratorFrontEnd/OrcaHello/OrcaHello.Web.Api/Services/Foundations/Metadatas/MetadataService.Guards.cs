@@ -77,7 +77,7 @@ namespace OrcaHello.Web.Api.Services
 
         protected void ValidateTagContainsOnlyValidCharacters(string tag)
         {
-            string pattern = "[^a-zA-Z0-9,|]";
+            string pattern = "[^a-zA-Z0-9,| ?-]";
             Regex regex = new(pattern);
             bool hasInvalidChars = regex.IsMatch(tag);
 
