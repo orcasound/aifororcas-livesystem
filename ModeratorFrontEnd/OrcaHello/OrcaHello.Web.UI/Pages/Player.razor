@@ -1,24 +1,101 @@
 ﻿@page "/player"
 @inherits ComponentManager
 
-<h1>Player Test</h1>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script> 
 
-<div id="waveform">
-    <img src="https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_orcasound_lab_2020_09_27_21_15_03_PDT.png" />
-    </div>
-<button @onclick="PlayIt">Play</button>
+<!-- Add some style for the player --> 
+<style> 
 
-@code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // await JSRuntime.InvokeVoidAsync("LightItUp");
-        }
-    }
-
-    protected async Task PlayIt()
-    {
-        await JSRuntime.InvokeVoidAsync("LightItUp");
-    }
+#player {
+    width: 100%;
+    height: auto;
+    max-width: 1280px;
+    position: relative;
 }
+
+#image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+    #progress {
+        height: 100%; /* Match the height of the image */
+        width: 2px; /* Make the width small */
+        background-color: rgba(0, 0, 255, 0.5); /* Change the color to blue */
+        position: absolute;
+        bottom: 0;
+        left: 0%; /* Start from the left */
+    }
+
+#timer {
+  color: white;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+
+#controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: gray;
+  color: white;
+  font-size: 20px;
+}
+
+    /* Add some style for the location elements */
+    .location {
+        height: 100%;
+        border-left: 2px solid red;
+        position: absolute;
+        top: 0;
+    }
+
+</style>
+
+@*         {
+          "id": 0,
+          "startTime": 8.135593220338983,
+          "endTime": 9.152542372881356,
+          "confidence": 0.9882193505764008
+        },
+        {
+          "id": 1,
+          "startTime": 9.152542372881356,
+          "endTime": 10.169491525423728,
+          "confidence": 0.9860371649265289
+        },
+        {
+          "id": 2,
+          "startTime": 10.169491525423728,
+          "endTime": 11.1864406779661,
+          "confidence": 0.5110060330480337
+        }, *@
+
+
+<div id="player">
+    <img id="image" src="https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_orcasound_lab_2023_03_25_08_52_10_PDT.png" alt="Audio image">
+    <div id="progress"></div> 
+    <span id="timer">00:00 / 00:00</span>
+    <div id="location1" class="location" style="left: 13.55932203389831%;"></div>
+    <div id="location2" class="location" style="left: 15.25423728813559%;"></div>
+    <div id="location3" class="location" style="left: 15.25423728813559%;"></div>
+    <div id="location4" class="location" style="left: 16.94915254237287%;"></div>
+</div>
+<div id="controls"> 
+    <button id="play" class="button">Play</button>
+    <button id="pause" class="button">Pause</button>
+    <button id="stop" class="button">Stop</button>
+    <button id="mute" class="button">Mute</button> 
+    <input id="volume" type="range" min="0" max="1" step="0.01" value="1">
+</div>
+

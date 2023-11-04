@@ -11,6 +11,9 @@
             await this.PutAsync<ModerateDetectionsRequest, ModerateDetectionsResponse>($"{detectionRelativeUrl}/moderate", request);
 
         public async ValueTask<DetectionListForTagResponse> GetFilteredDetectionsForTagAsync(string tag, string queryString) =>
-            await this.GetAsync<DetectionListForTagResponse>($"{detectionRelativeUrl}/bytag/{tag}?{queryString}");    
+            await this.GetAsync<DetectionListForTagResponse>($"{detectionRelativeUrl}/bytag/{tag}?{queryString}");
+
+        public async ValueTask<Detection> GetDetectionAsync(string id) =>
+    await this.GetAsync<Detection>($"{detectionRelativeUrl}/{id}");
     }
 }

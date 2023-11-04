@@ -67,6 +67,14 @@
             return await _tagService.RetrieveAllTagsAsync();
         });
 
+        public ValueTask<DetectionItemView> RetrieveDetectionAsync(string id) =>
+        TryCatch(async () =>
+        {
+            Detection response = await _detectionService.RetrieveDetectionAsync(id);
+
+            return AsDetectionItemView(response);
+        });
+
         private static Func<Detection, DetectionItemView> AsDetectionItemView =>
             detection => new DetectionItemView
             {

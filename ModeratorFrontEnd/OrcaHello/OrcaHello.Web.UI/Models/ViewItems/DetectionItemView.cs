@@ -1,4 +1,7 @@
-﻿namespace OrcaHello.Web.UI.Models
+﻿using Microsoft.AspNetCore.Authorization;
+using System.Drawing;
+
+namespace OrcaHello.Web.UI.Models
 {
     public class DetectionItemView
     {
@@ -20,6 +23,37 @@
         public string AverageConfidence { get => $"{Confidence.ToString("00.##")}% average confidence"; }
         public string SmallConfidence { get => $"{Confidence.ToString("F2")}%"; }
         public string DetectionCount { get => $"{Annotations.Count} detections"; }
+        public string StateString
+        {
+            get
+            {
+               switch(State)
+                {
+                    case "Unreviewed":
+                        return "Unreviewed";
+                    case "Positive":
+                        return "Yes";
+                    case "Negative":
+                        return "No";
+                    case "Unknown":
+                        return "Don't Know";
+                    default:
+                        return string.Empty;
+
+                }
+            }
+        }
+
+        public string FullLocation
+        {
+            get
+            {
+                if(Location is null)
+                    return string.Empty;
+
+                return $"{Location.Name} ({Location.Latitude}, {Location.Longitude})";
+            }
+        }
         
         public List<string> TagsList
         {

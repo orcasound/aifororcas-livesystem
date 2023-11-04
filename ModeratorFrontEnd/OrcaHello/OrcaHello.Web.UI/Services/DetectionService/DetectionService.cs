@@ -57,5 +57,14 @@
 
             return response;
         });
+
+        public ValueTask<Detection> RetrieveDetectionAsync(string id) =>
+        TryCatch(async () =>
+        {
+            // ValidateId(id);
+            Detection response = await _apiBroker.GetDetectionAsync(id);
+
+            return response;
+        });
     }
 }

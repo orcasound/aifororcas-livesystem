@@ -111,6 +111,11 @@
     --rz-text-h3-letter-spacing: 0.0em;
     --rz-text-h3-color: var(--rz-text-title-color);
     --rz-text-h3-margin-bottom: 1rem;
+    --rz-text-h4-font-size: 1.143rem;
+    --rz-text-h4-font-weight: 400;
+    --rz-text-h4-line-height: 1.429rem;
+    --rz-text-h4-margin-bottom: 0.0rem;
+    --rz-text-h4-color: var(--rz-text-title-color);
     --rz-text-body1-font-size: 1rem;
     --rz-text-body1-line-height: 1.357rem;
     --rz-text-body1-font-weight: 400;
@@ -200,6 +205,10 @@ a:hover {
     line-height: var(--rz-text-h6-line-height);
     font-weight: var(--rz-text-h6-font-weight);
     letter-spacing: var(--rz-text-h6-letter-spacing);
+}
+
+.rz-link .rz-link-text {
+    word-break: break-all;
 }
 
 .oh-min-button {

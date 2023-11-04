@@ -9,5 +9,7 @@
             int page, int pageSize);
 
         ValueTask<ModerateDetectionsResponse> ModerateDetectionsAsync(ModerateDetectionsRequest request);
+
+        ValueTask<Detection> RetrieveDetectionAsync(string id);
     }
 }
