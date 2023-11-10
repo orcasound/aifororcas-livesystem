@@ -51,6 +51,7 @@ app.UseRouting();
 
 app.MapControllers();
 app.MapBlazorHub();
+
 app.MapFallbackToPage("/Components/_Host");
 
 app.Run();

@@ -1,11 +1,93 @@
-﻿<h3>TileViewComponent</h3>
+﻿@inherits ComponentManager
 
-<RadzenText Text=@DetectionState.ToString() />
-<RadzenText Text=@SortBy.ToString() />
-<RadzenText Text=@SortOrder.ToString() />
-<RadzenText Text=@Timeframe.ToString() />
-<RadzenText Text=@(StartDateTime.HasValue ? StartDateTime.Value.ToString() : string.Empty) />
-<RadzenText Text=@(EndDateTime.HasValue ? EndDateTime.Value.ToString() : string.Empty) />
-<RadzenText Text=@Location />
-<RadzenText Text=@MaxRecords.ToString() />
+@if(!IsLoading && DetectionItemViews != null && DetectionItemViews.Count() == 0)
+{
+    <RadzenAlert AllowClose="false"
+                 AlertStyle=AlertStyle.Warning
+                 Variant=Variant.Flat
+                 Shade=Shade.Lighter>
+        There are no Detections listed for this timeframe and filtering conditions.
+    </RadzenAlert>
+}
 
+<RadzenDataList AllowVirtualization="true"
+                WrapItems="false"
+                AllowPaging="false"
+                LoadData=@LoadData
+                Data=@DetectionItemViews
+                Count=@TotalDetectionCount
+                TItem=DetectionItemView
+                IsLoading=@IsLoading
+                PageSize="1000"
+                PagerHorizontalAlign=HorizontalAlign.Left
+                ShowPagingSummary="true"
+                @ref=DetectionDataList
+                Style="margin-top:20px;">
+
+    <Template Context="item">
+        <RadzenRow Gap="0">
+            <RadzenColumn Size="12" SizeXS="6" Style="display:flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <RadzenRow Gap="0">
+                        <RadzenColumn Size="12" SizeXS="12">
+                            <RadzenLink id="large-only" Path=@($"/orca_sounds/{item.Id}") Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-h3-font-size)" />
+                            <RadzenLink id="phone-only" Path=@($"/orca_sounds/{item.Id}") Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-body1-font-size)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow Gap="0" Class="rz-mt-3">
+                        <RadzenColumn Size="12" SizeXS="6">
+                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                                <RadzenIcon id="tile-icon" Icon="watch_later" IconStyle=IconStyle.Secondary />
+                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.Timestamp.UTCToPDTFull() />
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeXS="6">
+                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                                <RadzenIcon id="tile-icon" Icon="gps_fixed" IconStyle=IconStyle.Secondary />
+                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.LocationName />
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow Gap="0" class="rz-mt-3">
+                        <RadzenColumn Size="12" SizeXS="6">
+                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                                <RadzenIcon id="tile-icon" Icon="mic" IconStyle=IconStyle.Secondary />
+                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.DetectionCount />
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeXS="6">
+                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                                <RadzenIcon id="tile-icon" Icon="signal_cellular_alt" IconStyle=IconStyle.Secondary />
+                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.AverageConfidence />
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <AuthorizeView Policy="Moderators">
+                        <NotAuthorized>
+                            @if (item.State.ToUpper() != DetectionState.Unreviewed.ToString().ToUpper())
+                            {
+                                <EditedModeratorFieldsComponent DetectionItemView=@item />
+                            }
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+                <AuthorizeView Policy="Moderators">
+                    <Authorized Context="Auth">
+                        <EditableModeratorFieldsComponent Item=@item />
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="rz-mt-3">
+                            <RadzenStack Orientation=Orientation.Horizontal>
+                                <DetectionButtonsComponent />
+                            </RadzenStack>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeXS="6">
+                <RadzenImage Path="@item.SpectrogramUri" Style="max-width: 100%;height: 300px;" />
+            </RadzenColumn>
+        </RadzenRow>
+    </Template>
+
+</RadzenDataList>

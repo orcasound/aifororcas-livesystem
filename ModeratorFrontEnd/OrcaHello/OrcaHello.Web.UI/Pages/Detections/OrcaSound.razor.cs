@@ -1,6 +1,4 @@
-﻿using Azure.Core;
-
-namespace OrcaHello.Web.UI.Pages.Detections
+﻿namespace OrcaHello.Web.UI.Pages.Detections
 {
     public partial class OrcaSound
     {
@@ -31,6 +29,19 @@ namespace OrcaHello.Web.UI.Pages.Detections
             }
 
             IsLoading = false;
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if(firstRender)
+            {
+                await JSRuntime.InvokeVoidAsync("SetupPlayback", ItemView.AudioUri, ItemView.Id);
+            }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
         }
     }
 }

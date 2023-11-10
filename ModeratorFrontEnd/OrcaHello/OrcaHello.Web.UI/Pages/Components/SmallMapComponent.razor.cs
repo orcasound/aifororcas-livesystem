@@ -3,13 +3,13 @@
     public partial class SmallMapComponent
     {
         [Parameter]
-        public int Id { get; set; }
+        public int Id { get; set; } = 0;
 
         [Parameter]
-        public double Longitude { get; set; }
+        public double Longitude { get; set; } = double.MinValue;
 
         [Parameter]
-        public double Latitude { get; set; }
+        public double Latitude { get; set; } = double.MinValue;
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {

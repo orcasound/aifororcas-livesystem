@@ -6,7 +6,7 @@
         public AppSettings AppSettings { get; set; } = null!;
 
         // View Mode
-        protected ViewMode SelectedViewMode = ViewMode.GridView;
+        protected ViewMode SelectedViewMode = ViewMode.TileView;
 
         // Detection State
         protected List<DropdownOption> DetectionStateDropdownOptions = new() {
@@ -80,6 +80,9 @@
 
         // Reference to GridViewComponent
         protected GridViewComponent GridView = null!;
+
+        // Reference to TileViewComponent
+        protected TileViewComponent TileView = null!;
 
         #region lifecycle events
 

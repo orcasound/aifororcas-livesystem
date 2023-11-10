@@ -114,18 +114,12 @@
 
         @if (SelectedViewMode == ViewMode.TileView)
         {
-            @*             <TileViewComponent DetectionState=SelectedDetectionState
-        SortBy=PassedSortBy SortOrder=PassedSortOrder
-        Timeframe=PassedTimeframe
-        StartDateTime=PassedStartDateTime EndDateTime=PassedEndDateTime
-        Location=@PassedLocation MaxRecords=PassedMaxRecords /> *@
+            <TileViewComponent Filters=PassedFilters @ref=TileView/> 
         }
         else
         {
             <GridViewComponent Filters=PassedFilters
-                               OnShowReviewButton=ShowReviewButton
-            @ref=GridView />
-
+                               OnShowReviewButton=ShowReviewButton @ref=GridView />
         }
 
     </RadzenBody>

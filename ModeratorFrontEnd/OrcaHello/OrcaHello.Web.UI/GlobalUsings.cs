@@ -3,6 +3,7 @@ global using Blazorade.Msal.Security;
 global using Blazorade.Msal.Services;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.Authorization;
+global using Microsoft.AspNetCore.Cors;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.JSInterop;
 global using OrcaHello.Web.Shared.Extensions;

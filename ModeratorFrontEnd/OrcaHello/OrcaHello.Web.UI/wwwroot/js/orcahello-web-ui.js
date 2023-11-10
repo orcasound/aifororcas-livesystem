@@ -58,24 +58,27 @@ function StartGridAudioPlayback(url, dotnetHelper)
 function StopGridAudioPlayback()
 {
 	Howler.stop();
-	Howler.unload();
+    Howler.unload();
+    console.log("Unloaded");
 }
 
+/* Single Page Spectrogram functionality */
 
-    var sound = new Howl({
-        src: ["https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_orcasound_lab_2023_03_25_08_52_10_PDT.wav"] });
+function SetupPlayback(audioFileUrl, id) {
+
+    var sound = new Howl({ src: [audioFileUrl], html5: false });
+
     // Get references to the HTML elements
-    var play = document.getElementById('play');
-    var pause = document.getElementById('pause');
-    var stop = document.getElementById('stop');
-    var mute = document.getElementById('mute');
-    var volume = document.getElementById('volume');
-    var progress = document.getElementById('progress');
-var timer = document.getElementById('timer');
-var image = document.getElementById('image'); // Get the image element
+    var play = document.getElementById('play_' + id);
+    var pause = document.getElementById('pause_' + id);
+    var stop = document.getElementById('stop_' + id);
+    var volume = document.getElementById('volume_' + id);
+    var progress = document.getElementById('progress_' + id);
+    var timer = document.getElementById('timer_' + id);
+    var image = document.getElementById('image_' + id);
 
     // Add event listeners to the buttons
-play.addEventListener('click', function () {
+    play.addEventListener('click', function () {
         sound.play();
     });
 
@@ -87,12 +90,29 @@ play.addEventListener('click', function () {
         sound.stop();
     });
 
-    mute.addEventListener('click', function () {
-        sound.mute(!sound.mute());
-    });
-
     volume.addEventListener('input', function () {
         sound.volume(volume.value);
+    });
+
+    image.addEventListener('click', function (e) {
+
+        // Get the x coordinate of the mouse pointer relative to the image element
+        var x = e.offsetX;
+        // Get the width of the image element
+        var width = image.offsetWidth;
+        // Calculate the percentage value of the click position
+        var percentage = (x / width) * 100;
+
+        // Set the new position of the progress element
+        progress.style.left = percentage + '%';
+
+        // Calculate the new position of the sound in seconds
+        var duration = sound.duration();
+
+        var position = (percentage / 100) * duration;
+
+        // Set the new position of the sound
+        sound.seek(position);
     });
 
     // Add event listeners to the Howl object
@@ -100,46 +120,121 @@ play.addEventListener('click', function () {
         // Update the progress and timer every 100ms
         var interval = setInterval(function () {
             var seek = sound.seek() || 0; // Get the current position in seconds
-    var duration = sound.duration(); // Get the total duration in seconds
-    var percentage = (seek / duration) * 100; // Calculate the percentage of progress
-    var minutes = Math.floor(seek / 60); // Calculate the minutes part of the timer
-    var seconds = Math.floor(seek % 60); // Calculate the seconds part of the timer
-    // Format the timer as mm:ss
-    if (minutes < 10) minutes = '0' + minutes;
-    if (seconds < 10) seconds = '0' + seconds;
-            // Format the duration as mm:ss
+            var duration = sound.duration(); // Get the total duration in seconds
+            var percentage = (seek / duration) * 100; // Calculate the percentage of progress
+
+            var minutes = Math.floor(seek / 60); // Calculate the minutes part of the timer
+            var seconds = Math.floor(seek % 60); // Calculate the seconds part of the timer
+
+            // Format the timer as mm:ss
+            if (minutes < 10) minutes = '0' + minutes;
+            if (seconds < 10) seconds = '0' + seconds;
+
             var durationMinutes = Math.floor(duration / 60); // Calculate the minutes part of the duration
             var durationSeconds = Math.floor(duration % 60); // Calculate the seconds part of the duration
+
+            // Format the duration as mm:ss
             if (durationMinutes < 10) durationMinutes = '0' + durationMinutes; // Add a leading zero if needed
             if (durationSeconds < 10) durationSeconds = '0' + durationSeconds; // Add a leading zero if needed
+
             var timerText = minutes + ':' + seconds + ' / ' + durationMinutes + ':' + durationSeconds;
 
-    // Update the progress and timer elements
-    progress.style.left = percentage + '%';
-    timer.textContent = timerText;
+            // Update the progress and timer elements
+            progress.style.left = percentage + '%';
+            timer.textContent = timerText;
         }, 100);
     });
 
     sound.on('end', function () {
         // Clear the interval and reset the player when the audio has finished playing
         clearInterval(interval);
-    progress.style.left = '0%';
-    timer.textContent = '00:00 / 00:00';
+        progress.style.left = '0%';
+        timer.textContent = '00:00 / 00:00';
     });
+}
 
-// Add a click event listener to the image element
-image.addEventListener('click', function (e) {
-    // Get the x coordinate of the mouse pointer relative to the image element
-    var x = e.offsetX;
-    // Get the width of the image element
-    var width = image.offsetWidth;
-    // Calculate the percentage value of the click position
-    var percentage = (x / width) * 100;
-    // Calculate the new position of the sound in seconds
-    var duration = sound.duration();
-    var position = (percentage / 100) * duration;
-    // Set the new position of the sound
-    sound.seek(position);
-    // Set the new position of the progress element
-    progress.style.left = percentage + '%';
-});
+// TODO: Remove when done with Player.razor
+
+//var sound = new Howl({
+//    src: ["https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_orcasound_lab_2023_08_17_17_28_52_PDT.wav"], html5: true
+//});
+//// Get references to the HTML elements
+//var play = document.getElementById('play');
+//var pause = document.getElementById('pause');
+//var stop = document.getElementById('stop');
+//var mute = document.getElementById('mute');
+//var volume = document.getElementById('volume');
+//var progress = document.getElementById('progress');
+//var timer = document.getElementById('timer');
+//var image = document.getElementById('image'); // Get the image element
+
+//// Add event listeners to the buttons
+//play.addEventListener('click', function () {
+//    sound.play();
+//});
+
+//pause.addEventListener('click', function () {
+//    sound.pause();
+//});
+
+//stop.addEventListener('click', function () {
+//    sound.stop();
+//});
+
+//mute.addEventListener('click', function () {
+//    sound.mute(!sound.mute());
+//});
+
+//volume.addEventListener('input', function () {
+//    sound.volume(volume.value);
+//});
+
+//// Add event listeners to the Howl object
+//sound.on('play', function () {
+//    // Update the progress and timer every 100ms
+//    var interval = setInterval(function () {
+//        var seek = sound.seek() || 0; // Get the current position in seconds
+//        var duration = sound.duration(); // Get the total duration in seconds
+//        var percentage = (seek / duration) * 100; // Calculate the percentage of progress
+//        var minutes = Math.floor(seek / 60); // Calculate the minutes part of the timer
+//        var seconds = Math.floor(seek % 60); // Calculate the seconds part of the timer
+//        // Format the timer as mm:ss
+//        if (minutes < 10) minutes = '0' + minutes;
+//        if (seconds < 10) seconds = '0' + seconds;
+//        // Format the duration as mm:ss
+//        var durationMinutes = Math.floor(duration / 60); // Calculate the minutes part of the duration
+//        var durationSeconds = Math.floor(duration % 60); // Calculate the seconds part of the duration
+//        if (durationMinutes < 10) durationMinutes = '0' + durationMinutes; // Add a leading zero if needed
+//        if (durationSeconds < 10) durationSeconds = '0' + durationSeconds; // Add a leading zero if needed
+//        var timerText = minutes + ':' + seconds + ' / ' + durationMinutes + ':' + durationSeconds;
+
+//        // Update the progress and timer elements
+//        progress.style.left = percentage + '%';
+//        timer.textContent = timerText;
+//    }, 100);
+//});
+
+//sound.on('end', function () {
+//    // Clear the interval and reset the player when the audio has finished playing
+//    clearInterval(interval);
+//    progress.style.left = '0%';
+//    timer.textContent = '00:00 / 00:00';
+//});
+
+//// Add a click event listener to the image element
+//image.addEventListener('click', function (e) {
+//    // Get the x coordinate of the mouse pointer relative to the image element
+//    var x = e.offsetX;
+//    // Get the width of the image element
+//    var width = image.offsetWidth;
+//    // Calculate the percentage value of the click position
+//    var percentage = (x / width) * 100;
+//    // Calculate the new position of the sound in seconds
+//    var duration = sound.duration();
+//    var position = (percentage / 100) * duration;
+//    // Set the new position of the sound
+//    sound.seek(position);
+//    alert(sound.seek());
+//    // Set the new position of the progress element
+//    progress.style.left = percentage + '%';
+//});
