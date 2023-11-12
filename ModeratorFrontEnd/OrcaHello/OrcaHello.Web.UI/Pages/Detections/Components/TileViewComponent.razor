@@ -1,6 +1,6 @@
 ﻿@inherits ComponentManager
 
-@if(!IsLoading && DetectionItemViews != null && DetectionItemViews.Count() == 0)
+@if (!IsLoading && DetectionItemViews != null && DetectionItemViews.Count() == 0)
 {
     <RadzenAlert AllowClose="false"
                  AlertStyle=AlertStyle.Warning
@@ -13,11 +13,11 @@
 <RadzenDataList AllowVirtualization="true"
                 WrapItems="false"
                 AllowPaging="false"
-                LoadData=@LoadData
-                Data=@DetectionItemViews
-                Count=@TotalDetectionCount
+                LoadData=LoadData
+                Data=DetectionItemViews
+                Count=CurrentlySetFilters.MaxRecords
                 TItem=DetectionItemView
-                IsLoading=@IsLoading
+                IsLoading=IsLoading
                 PageSize="1000"
                 PagerHorizontalAlign=HorizontalAlign.Left
                 ShowPagingSummary="true"
@@ -26,66 +26,59 @@
 
     <Template Context="item">
         <RadzenRow Gap="0">
-            <RadzenColumn Size="12" SizeXS="6" Style="display:flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <RadzenRow Gap="0">
-                        <RadzenColumn Size="12" SizeXS="12">
-                            <RadzenLink id="large-only" Path=@($"/orca_sounds/{item.Id}") Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-h3-font-size)" />
-                            <RadzenLink id="phone-only" Path=@($"/orca_sounds/{item.Id}") Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-body1-font-size)" />
-                        </RadzenColumn>
-                    </RadzenRow>
-                    <RadzenRow Gap="0" Class="rz-mt-3">
-                        <RadzenColumn Size="12" SizeXS="6">
-                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                <RadzenIcon id="tile-icon" Icon="watch_later" IconStyle=IconStyle.Secondary />
-                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.Timestamp.UTCToPDTFull() />
-                            </RadzenStack>
-                        </RadzenColumn>
-                        <RadzenColumn Size="12" SizeXS="6">
-                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                <RadzenIcon id="tile-icon" Icon="gps_fixed" IconStyle=IconStyle.Secondary />
-                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.LocationName />
-                            </RadzenStack>
-                        </RadzenColumn>
-                    </RadzenRow>
-                    <RadzenRow Gap="0" class="rz-mt-3">
-                        <RadzenColumn Size="12" SizeXS="6">
-                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                <RadzenIcon id="tile-icon" Icon="mic" IconStyle=IconStyle.Secondary />
-                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.DetectionCount />
-                            </RadzenStack>
-                        </RadzenColumn>
-                        <RadzenColumn Size="12" SizeXS="6">
-                            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
-                                <RadzenIcon id="tile-icon" Icon="signal_cellular_alt" IconStyle=IconStyle.Secondary />
-                                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.AverageConfidence />
-                            </RadzenStack>
-                        </RadzenColumn>
-                    </RadzenRow>
-                    <AuthorizeView Policy="Moderators">
-                        <NotAuthorized>
-                            @if (item.State.ToUpper() != DetectionState.Unreviewed.ToString().ToUpper())
-                            {
-                                <EditedModeratorFieldsComponent DetectionItemView=@item />
-                            }
-                        </NotAuthorized>
-                    </AuthorizeView>
-                </div>
+            <RadzenColumn Size="12" SizeXS="6">
+                <RadzenRow Gap="0">
+                    <RadzenColumn Size="12" SizeXS="12">
+                        <RadzenLink id="large-only" Path=@($"/orca_sounds/{item.Id}") Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-h3-font-size)" />
+                        <RadzenLink id="phone-only" Path=@($"/orca_sounds/{item.Id}") Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-body1-font-size)" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Gap="0" Class="rz-mt-3">
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="watch_later" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.Timestamp.UTCToPDTFull() />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="map" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.FullLocation />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Gap="0" class="rz-mt-3">
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="headphones" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.DetectionCount />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="signal_cellular_alt" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.AverageConfidence />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
                 <AuthorizeView Policy="Moderators">
-                    <Authorized Context="Auth">
-                        <EditableModeratorFieldsComponent Item=@item />
-                    </Authorized>
                     <NotAuthorized>
-                        <div class="rz-mt-3">
-                            <RadzenStack Orientation=Orientation.Horizontal>
-                                <DetectionButtonsComponent />
-                            </RadzenStack>
-                        </div>
+                        @if (item.State.ToUpper() != DetectionState.Unreviewed.ToString().ToUpper())
+                        {
+                            <EditedModeratorFieldsComponent DetectionItemView=@item />
+                        }
                     </NotAuthorized>
+                    <Authorized>
+                        <EditableModeratorFieldsComponent 
+                            Moderator=Moderator 
+                            AvailableTags=AvailableTags 
+                            DetectionItemView=@item
+                            ReloadCurrentView=ReloadData />
+                    </Authorized>
                 </AuthorizeView>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeXS="6">
-                <RadzenImage Path="@item.SpectrogramUri" Style="max-width: 100%;height: 300px;" />
+                <SmallSpectrogramPlayerComponent DetectionItemView=@item />
             </RadzenColumn>
         </RadzenRow>
     </Template>

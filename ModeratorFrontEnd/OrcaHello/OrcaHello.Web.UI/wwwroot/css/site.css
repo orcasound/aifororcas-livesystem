@@ -83,6 +83,9 @@
     --rz-accordion-item-background-color: var(--cg-rasin-black);
     --rz-grid-frozen-cell-background-color: var(--rz-grid-background-color);
     --rz-panel-background-color: var(--cg-raisin-black);
+    --rz-radio-checked-background-color: var(--cg-raisin-black);
+    --rz-radio-circle-background-color: var(--rz-primary);
+    --rz-radio-checked-border: 1px solid var(--rz-primary);
 }
 
 /* Font remappings */

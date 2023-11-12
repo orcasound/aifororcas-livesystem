@@ -14,6 +14,12 @@
         [Parameter]
         public EventCallback OnShowReviewButton { get; set; }
 
+        [Parameter]
+        public int PillCount { get; set; }
+
+        [Parameter]
+        public EventCallback<int> PillCountChanged { get; set; }
+
         RadzenDataGrid<DetectionItemView> DetectionDataGrid = null!; // Reference to the grid component
 
         protected bool IsLoading = false; // Flag indicating data is being loaded into the grid
@@ -211,7 +217,7 @@
 
         #endregion
 
-        #region helpers
+        #region data loaders
 
         async Task ReloadData()
         {
@@ -254,6 +260,10 @@
 
             // Update the count
             TotalDetectionCount = result.Count;
+
+            // Update the PillCount
+            PillCount = result.Count;
+            await PillCountChanged.InvokeAsync(PillCount);
 
             IsLoading = false;
             await InvokeAsync(StateHasChanged);

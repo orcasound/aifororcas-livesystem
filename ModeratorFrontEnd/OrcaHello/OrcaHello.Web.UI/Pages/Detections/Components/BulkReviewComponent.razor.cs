@@ -22,7 +22,6 @@
         protected string Comments = string.Empty;
         protected string State = string.Empty;
 
-
         protected string StateValidationMessage = string.Empty; // Error message holder
 
         // Working values for tags being selected and entered

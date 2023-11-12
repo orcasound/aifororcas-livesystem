@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
+﻿using System.Security.Cryptography;
+
+namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
     public partial class TileViewComponent
     {
@@ -10,6 +12,12 @@
 
         [Parameter]
         public Filters Filters { get; set; } = null!;
+
+        [Parameter]
+        public int PillCount { get; set; }
+
+        [Parameter]
+        public EventCallback<int> PillCountChanged { get; set; }
 
         RadzenDataList<DetectionItemView> DetectionDataList = null!; // Reference to the list component
 
@@ -81,17 +89,32 @@
                 Location = Filters.Location == "All" ? string.Empty : Filters.Location
             };
 
-            var result = await ViewService.
-                RetrieveFilteredAndPaginatedDetectionItemViewsAsync(filterAndPagination);
+            try
+            {
+                var result = await ViewService.
+                    RetrieveFilteredAndPaginatedDetectionItemViewsAsync(filterAndPagination);
 
-            // Update the Data property
-            DetectionItemViews = result.DetectionItemViews;
+                // Update the Data property
+                DetectionItemViews = result.DetectionItemViews;
 
-            // Update the count
-            TotalDetectionCount = result.Count;
+                // Update the count
+                TotalDetectionCount = result.Count;
 
-            IsLoading = false;
-            await InvokeAsync(StateHasChanged);
+                // Update the PillCount
+                PillCount = result.Count;
+                await PillCountChanged.InvokeAsync(PillCount);
+
+                IsLoading = false;
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                IsLoading = false;
+                await InvokeAsync(StateHasChanged);
+
+                await Console.Out.WriteLineAsync(ex.Message);
+
+            }
         }
 
         #endregion

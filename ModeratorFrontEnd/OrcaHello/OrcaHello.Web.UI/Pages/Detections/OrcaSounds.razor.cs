@@ -84,6 +84,9 @@
         // Reference to TileViewComponent
         protected TileViewComponent TileView = null!;
 
+        // Pill Count
+        protected int PillCount = 0;
+
         #region lifecycle events
 
         protected override void OnInitialized()

@@ -5,37 +5,68 @@
 <RadzenLayout Style="height:calc(100%);">
     <RadzenBody Style="height:calc(100%);">
 
-        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.SpaceBetween>
+        <RadzenRow Gap="0" Class="rz-mt-3">
+            <RadzenColumn Size="11" SizeLG="6">
+                <RadzenFormField Variant=Variant.Text Style="margin-top: -15px; width: 50%;" class="rz-mb-5">
+                    <RadzenDropDown TValue=DetectionState @bind-Value=@SelectedDetectionState Data=@DetectionStateDropdownOptions
+                                    TextProperty=Text ValueProperty=Value
+                                    AllowClear="false" Style="height: 50px;"
+                                    Change=OnDetectionStateChanged>
+                        <Template Context="data">
+                            <RadzenText TextStyle=TextStyle.H2>@data.Text</RadzenText>
+                        </Template>
+                    </RadzenDropDown>
+                </RadzenFormField>
+                <RadzenBadge IsPill="true" BadgeStyle="BadgeStyle.Secondary" Text=@($"{PillCount}") />
+            </RadzenColumn>
+            <RadzenColumn Size="1" SizeLG="6">
+                <RadzenStack Orientation=Orientation.Horizontal Gap="0" AlignItems=AlignItems.Center JustifyContent=JustifyContent.End>
+                    <RadzenButton Disabled=@(SelectedViewMode == ViewMode.TileView)
+                                  Click="OnTileViewClicked" ButtonStyle=ButtonStyle.Primary
+                                  Variant=Variant.Text Size=ButtonSize.Large Icon="rectangle"
+                                  Class="oh-min-button"
+                                  Style="margin-right:0;" />
+                    <RadzenButton id="large-only" Disabled=@(SelectedViewMode == ViewMode.GridView)
+                                  Click="OnGridViewClicked" ButtonStyle=ButtonStyle.Primary
+                                  Variant=Variant.Text Size=ButtonSize.Large Icon="grid_on"
+                                  Class="oh-min-button"
+                                  Style="margin-left:0;" />
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
 
-            <!-- View selections -->
 
-            <RadzenFormField Variant=Variant.Text Style="margin-top: -15px; width: 50%;" class="rz-mb-5">
-                <RadzenDropDown TValue=DetectionState @bind-Value=@SelectedDetectionState Data=@DetectionStateDropdownOptions
-                                TextProperty=Text ValueProperty=Value
-                                AllowClear="false" Style="height: 50px;"
-                                Change=OnDetectionStateChanged>
-                    <Template Context="data">
-                        <RadzenText TextStyle=TextStyle.H2>@data.Text</RadzenText>
-                    </Template>
-                </RadzenDropDown>
-            </RadzenFormField>
+        @*       <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.SpaceBetween>
 
-            <!-- View modes -->
+        <!-- View selections -->
 
-            <div style="display: flex;">
-                <RadzenButton Disabled=@(SelectedViewMode == ViewMode.TileView)
-                              Click="OnTileViewClicked" ButtonStyle=ButtonStyle.Primary
-                              Variant=Variant.Text Size=ButtonSize.Large Icon="rectangle"
-                              Class="oh-min-button"
-                              Style="margin-right:0;" />
-                <RadzenButton id="large-only" Disabled=@(SelectedViewMode == ViewMode.GridView)
-                              Click="OnGridViewClicked" ButtonStyle=ButtonStyle.Primary
-                              Variant=Variant.Text Size=ButtonSize.Large Icon="grid_on"
-                              Class="oh-min-button"
-                              Style="margin-left:0;" />
-            </div>
+        <RadzenFormField Variant=Variant.Text Style="margin-top: -15px; width: 50%;" class="rz-mb-5">
+        <RadzenDropDown TValue=DetectionState @bind-Value=@SelectedDetectionState Data=@DetectionStateDropdownOptions
+        TextProperty=Text ValueProperty=Value
+        AllowClear="false" Style="height: 50px;"
+        Change=OnDetectionStateChanged>
+        <Template Context="data">
+        <RadzenText TextStyle=TextStyle.H2>@data.Text</RadzenText>
+        </Template>
+        </RadzenDropDown>
+        </RadzenFormField>
+
+        <!-- View modes -->
+
+        <div style="display: flex;">
+        <RadzenButton Disabled=@(SelectedViewMode == ViewMode.TileView)
+        Click="OnTileViewClicked" ButtonStyle=ButtonStyle.Primary
+        Variant=Variant.Text Size=ButtonSize.Large Icon="rectangle"
+        Class="oh-min-button"
+        Style="margin-right:0;" />
+        <RadzenButton id="large-only" Disabled=@(SelectedViewMode == ViewMode.GridView)
+        Click="OnGridViewClicked" ButtonStyle=ButtonStyle.Primary
+        Variant=Variant.Text Size=ButtonSize.Large Icon="grid_on"
+        Class="oh-min-button"
+        Style="margin-left:0;" />
+        </div>
         </RadzenStack>
-
+        *@
         <!-- Filter pulldowns and buttons -->
 
         <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-5">
@@ -109,17 +140,19 @@
 
             </AuthorizeView>
 
-
         </RadzenStack>
 
         @if (SelectedViewMode == ViewMode.TileView)
         {
-            <TileViewComponent Filters=PassedFilters @ref=TileView/> 
+            <TileViewComponent Filters=PassedFilters 
+                @bind-PillCount="PillCount" 
+                @ref=TileView />
         }
         else
         {
             <GridViewComponent Filters=PassedFilters
-                               OnShowReviewButton=ShowReviewButton @ref=GridView />
+                @bind-PillCount="PillCount"
+                OnShowReviewButton=ShowReviewButton @ref=GridView />
         }
 
     </RadzenBody>

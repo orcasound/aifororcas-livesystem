@@ -89,7 +89,7 @@
                 if (Location is null)
                     return string.Empty;
 
-                return $"{Location.Name} ({Location.Latitude}, {Location.Longitude})";
+                return $"{Location.Name} ({Location.Latitude.ToString("00.##")}, {Location.Longitude.ToString("00.##")})";
             }
         }
 
