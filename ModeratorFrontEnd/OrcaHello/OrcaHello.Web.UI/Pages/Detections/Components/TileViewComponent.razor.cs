@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-namespace OrcaHello.Web.UI.Pages.Detections.Components
+﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
     public partial class TileViewComponent
     {
@@ -18,6 +16,8 @@ namespace OrcaHello.Web.UI.Pages.Detections.Components
 
         [Parameter]
         public EventCallback<int> PillCountChanged { get; set; }
+
+        protected string PlaybackId = string.Empty; // Currently Played SpectrographID
 
         RadzenDataList<DetectionItemView> DetectionDataList = null!; // Reference to the list component
 
@@ -58,7 +58,7 @@ namespace OrcaHello.Web.UI.Pages.Detections.Components
 
         async Task ReloadData()
         {
-            DetectionDataList.Data = null;
+            DetectionItemViews = null!;
             await DetectionDataList.Reload();
         }
 

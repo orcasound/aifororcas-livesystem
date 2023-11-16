@@ -101,7 +101,9 @@
                 if (string.IsNullOrWhiteSpace(Tags))
                     return new List<string>();
 
-                return Tags.Split(',').ToList();
+                return Tags.Split(',')
+                    .Select(s => s.Trim())
+                    .ToList();
             }
             set
             {
@@ -123,11 +125,11 @@
                 {
                     var enteredTagsList = value
                         .Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                        .ToList()
-                        .Select(s => s.Trim());
+                        .Select(s => s.Trim())
+                        .ToList();
 
                     var workingTagsList = !string.IsNullOrWhiteSpace(Tags) ?
-                        Tags.Split(',').ToList() : new List<string>();
+                        Tags.Split(',').Select(s => s.Trim()).ToList() : new List<string>();
 
                     foreach (var tag in enteredTagsList)
                     {

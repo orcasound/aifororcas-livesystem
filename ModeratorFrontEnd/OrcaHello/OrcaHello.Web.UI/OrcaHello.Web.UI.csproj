@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazorade.Msal" Version="2.2.0" />
+    <PackageReference Include="Howler.Blazor" Version="0.9.8" />
     <PackageReference Include="Radzen.Blazor" Version="4.20.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.2" />
   </ItemGroup>

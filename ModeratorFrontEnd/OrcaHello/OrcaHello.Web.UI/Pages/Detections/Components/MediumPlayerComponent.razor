@@ -1,0 +1,23 @@
+﻿@inherits ComponentManager
+
+<div class="oh-spectrogram-player">
+    <img class="oh-spectrogram-image" src=@ItemView.SpectrogramUri alt="Audio image" @ref="imageRef" @onclick="OnImageClick">
+    <div class="oh-spectrogram-progress" style=@($"left: {PercentCompleteLine}%")></div>
+    <span class="oh-spectrogram-timer">@PlaybackTimer</span>
+</div>
+<div class="rz-mt-3">
+    @if (PlaybackState == PlaybackState.Paused && PlaybackId == ItemView.Id)
+    {
+        <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Pause />
+        <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="fast_rewind" Click=Stop />
+    }
+    @if (PlaybackState == PlaybackState.Playing && PlaybackId == ItemView.Id)
+    {
+        <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="pause" Click=Pause />
+        <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="stop" Click=Stop />
+    }
+    @if (PlaybackState == PlaybackState.NotPlaying || PlaybackId != ItemView.Id)
+    {
+        <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Play />
+    }
+</div>

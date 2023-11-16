@@ -70,15 +70,15 @@
                     </NotAuthorized>
                     <Authorized>
                         <EditableModeratorFieldsComponent 
-                            Moderator=Moderator 
-                            AvailableTags=AvailableTags 
+                            Moderator=@Moderator 
+                            AvailableTags=@AvailableTags 
                             DetectionItemView=@item
                             ReloadCurrentView=ReloadData />
                     </Authorized>
                 </AuthorizeView>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeXS="6">
-                <SmallSpectrogramPlayerComponent DetectionItemView=@item />
+                <MediumPlayerComponent @bind-PlaybackId="PlaybackId" ItemView=@item />
             </RadzenColumn>
         </RadzenRow>
     </Template>

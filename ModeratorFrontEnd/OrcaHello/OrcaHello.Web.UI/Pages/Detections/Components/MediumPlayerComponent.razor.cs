@@ -1,46 +1,29 @@
-﻿namespace OrcaHello.Web.UI.Pages.Detections
+﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
-    public partial class OrcaSound
+    public partial class MediumPlayerComponent
     {
         [Inject]
         public IHowl Howl { get; set; } = null!;
 
-        [Inject]
-        public IDetectionViewService ViewService { get; set; } = null!;
+        [Parameter]
+        public DetectionItemView ItemView { get; set; } = null!;
 
         [Parameter]
-        public string Id { get; set; } = string.Empty; // The ID of the detection being displayed
+        public string PlaybackId { get; set; } = string.Empty;
 
-        protected DetectionItemView ItemView = null!; // The corresponding detection object
-
-        protected bool IsLoading = false; // flag indicating whether the detection object is being loaded
-
-        protected string LinkUrl { get => $"{NavManager.BaseUri}orca_sounds/{Id}"; } // calculated address of the record link
+        [Parameter]
+        public EventCallback<string> PlaybackIdChanged { get; set; }
 
         protected int soundId = -1; // the Howler sound Id of audio currently being played
-        private double PercentCompleteLine; // indicates where to draw the traveling line
-        private PlaybackState PlaybackState = PlaybackState.NotPlaying; // indicates the current playback state of the audio file
-        private string PlaybackTimer = "00:00 / 00:00"; // indicates the time within the playback
-        private double PlaybackLength = 60.00; // have not found a way to calculate the playback length before starting to play,
+        protected double PercentCompleteLine; // indicates where to draw the traveling line
+        protected PlaybackState PlaybackState = PlaybackState.NotPlaying; // indicates the current playback state of the audio file
+        protected string PlaybackTimer = "00:00 / 00:00"; // indicates the time within the playback
+        protected double PlaybackLength = 60.00; // have not found a way to calculate the playback length before starting to play,
                                                // so going to have to hard code it
-        private ElementReference imageRef; // reference to the rendered image
+        protected ElementReference imageRef; // reference to the rendered image
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            IsLoading = true;
-
-            try
-            {
-                ItemView = await ViewService
-                    .RetrieveDetectionAsync(Id);
-            }
-            catch (Exception ex)
-            {
-                ReportError("Trouble loading Detection data", ex.Message);
-            }
-
-            IsLoading = false;
-
             // Register callbacks
             Howl.OnPlay += async e =>
             {
@@ -71,11 +54,6 @@
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender)
-            {
-                await JSRuntime.InvokeVoidAsync("clearAllHowls");
-            }
-
             if (PlaybackState == PlaybackState.Playing)
             {
                 await UpdateLine();
@@ -85,6 +63,10 @@
 
         protected async Task Play()
         {
+            await PlaybackIdChanged.InvokeAsync(ItemView.Id);
+
+            await JSRuntime.InvokeVoidAsync("clearAllHowls");
+
             HowlOptions options = new()
             {
                 Sources = new string[] { ItemView.AudioUri },
@@ -131,7 +113,7 @@
         }
 
         // Handle the click event on the image element
-        private async void OnImageClick(MouseEventArgs e)
+        protected async void OnImageClick(MouseEventArgs e)
         {
             if (PlaybackState == PlaybackState.Playing)
             {
@@ -142,8 +124,6 @@
                 var percentage = (x / width) * 100;
 
                 var position = (percentage / 100) * PlaybackLength;
-
-                var seek = await Howl.GetCurrentTime(soundId);
 
                 await Howl.Seek(soundId, new TimeSpan(0, 0, Convert.ToInt32(position)));
             }

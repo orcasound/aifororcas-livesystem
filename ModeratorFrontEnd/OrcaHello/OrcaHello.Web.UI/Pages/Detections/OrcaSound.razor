@@ -1,7 +1,7 @@
 ﻿@page "/orca_sounds/{Id}"
+
 @layout EmptyLayout
 @inherits ComponentManager
-@implements IAsyncDisposable
 
 <RadzenLayout Style="height:calc(100%);">
     <RadzenBody>
@@ -41,21 +41,31 @@
 
             <RadzenRow Gap="0" class="rz-mt-3">
                 <RadzenColumn>
-                    <div id=@($"player_{ItemView.Id}") class="oh-spectrogram-player">
-                        <img id=@($"image_{ItemView.Id}") class="oh-spectrogram-image" src=@ItemView.SpectrogramUri alt="Audio image">
-                        <div id=@($"progress_{ItemView.Id}") class="oh-spectrogram-progress"></div>
+                    <div class="oh-spectrogram-player">
+                        <img class="oh-spectrogram-image" src=@ItemView.SpectrogramUri alt="Audio image" @ref="imageRef" @onclick="OnImageClick">
+                        <div class="oh-spectrogram-progress" style=@($"left: {PercentCompleteLine}%")></div>
                         @foreach (var annotation in ItemView.Annotations)
                         {
-                            <div class="oh-spectrogram-marker" style=@($"left: {(annotation.StartTime / 60) * 100}%;") />
-                            <div class="oh-spectrogram-marker" style=@($"left: {(annotation.EndTime / 60) * 100}%;") />
+                            <div class="oh-spectrogram-marker" style=@($"left: {(annotation.StartTime / 61) * 100}%;") />
+                            <div class="oh-spectrogram-marker" style=@($"left: {(annotation.EndTime / 61) * 100}%;") />
                         }
-                        <span id=@($"timer_{ItemView.Id}") class="oh-spectrogram-timer">00:00 / 00:00</span>
+                        <span class="oh-spectrogram-timer">@PlaybackTimer</span>
                     </div>
-                    <div id=@($"controls_{ItemView.Id}") class="oh-spectrogram-controls">
-                        <RadzenButton id=@($"play_{ItemView.Id}") Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" />
-                        <RadzenButton id=@($"pause_{ItemView.Id}") Variant=Variant.Outlined Size=ButtonSize.Large Icon="pause" />
-                        <RadzenButton id=@($"stop_{ItemView.Id}") Variant=Variant.Outlined Size=ButtonSize.Large Icon="stop" />
-                        <input id=@($"volume_{ItemView.Id}") type="range" min="0" max="1" step="0.01" value="1">
+                    <div class="rz-mt-3">
+                        @if (PlaybackState == PlaybackState.Paused)
+                        {
+                            <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Pause />
+                            <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="fast_rewind" Click=Stop />
+                        }
+                        @if (PlaybackState == PlaybackState.Playing)
+                        {
+                            <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="pause" Click=Pause />
+                            <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="stop" Click=Stop />
+                        }
+                        @if (PlaybackState == PlaybackState.NotPlaying)
+                        {
+                            <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Play />
+                        }
                     </div>
                 </RadzenColumn>
             </RadzenRow>

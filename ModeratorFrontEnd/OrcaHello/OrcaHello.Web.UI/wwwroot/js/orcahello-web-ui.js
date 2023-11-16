@@ -39,117 +39,128 @@ function CreateScaledPushpin(location, imgUrl, scale, callback) {
     img.src = imgUrl;
 }
 
+/* Spectogram functionality */
+
+function getBoundingClientRect(element) {
+    // Get the bounding client rectangle of the element
+    return element.getBoundingClientRect();
+}
+
+function clearAllHowls() {
+    Howler.unload();
+}
+
 /* Spectrogram functionality */
 
-function StartGridAudioPlayback(url, dotnetHelper) {
-    var sound = new Howl({ src: [url], html5: true });
+//function StartGridAudioPlayback(url, dotnetHelper) {
+//    var sound = new Howl({ src: [url], html5: true });
 
-    var completionEvent = new CustomEvent("completionEvent", {
-        detail: {
-            Url: url
-        }
-    });
+//    var completionEvent = new CustomEvent("completionEvent", {
+//        detail: {
+//            Url: url
+//        }
+//    });
 
-    sound.on("end", function () { dotnetHelper.invokeMethodAsync("OnJSCustomEvent", completionEvent) });
-    sound.play();
-}
+//    sound.on("end", function () { dotnetHelper.invokeMethodAsync("OnJSCustomEvent", completionEvent) });
+//    sound.play();
+//}
 
-function StopGridAudioPlayback() {
-    Howler.stop();
-    Howler.unload();
-    console.log("Unloaded");
-}
+//function StopGridAudioPlayback() {
+//    Howler.stop();
+//    Howler.unload();
+//    console.log("Unloaded");
+//}
 
-/* Single Page Spectrogram functionality */
+///* Single Page Spectrogram functionality */
 
-function SetupPlayback(audioFileUrl, id) {
+//function SetupPlayback(audioFileUrl, id) {
 
-    var sound = new Howl({ src: [audioFileUrl], html5: false });
+//    var sound = new Howl({ src: [audioFileUrl], html5: false });
 
-    // Get references to the HTML elements
-    var play = document.getElementById('play_' + id);
-    var pause = document.getElementById('pause_' + id);
-    var stop = document.getElementById('stop_' + id);
-    var volume = document.getElementById('volume_' + id);
-    var progress = document.getElementById('progress_' + id);
-    var timer = document.getElementById('timer_' + id);
-    var image = document.getElementById('image_' + id);
+//    // Get references to the HTML elements
+//    var play = document.getElementById('play_' + id);
+//    var pause = document.getElementById('pause_' + id);
+//    var stop = document.getElementById('stop_' + id);
+//    var volume = document.getElementById('volume_' + id);
+//    var progress = document.getElementById('progress_' + id);
+//    var timer = document.getElementById('timer_' + id);
+//    var image = document.getElementById('image_' + id);
 
-    // Add event listeners to the buttons
-    play.addEventListener('click', function () {
-        sound.play();
-    });
+//    // Add event listeners to the buttons
+//    play.addEventListener('click', function () {
+//        sound.play();
+//    });
 
-    pause.addEventListener('click', function () {
-        sound.pause();
-    });
+//    pause.addEventListener('click', function () {
+//        sound.pause();
+//    });
 
-    stop.addEventListener('click', function () {
-        sound.stop();
-    });
+//    stop.addEventListener('click', function () {
+//        sound.stop();
+//    });
 
-    volume.addEventListener('input', function () {
-        sound.volume(volume.value);
-    });
+//    volume.addEventListener('input', function () {
+//        sound.volume(volume.value);
+//    });
 
-    image.addEventListener('click', function (e) {
+//    image.addEventListener('click', function (e) {
 
-        // Get the x coordinate of the mouse pointer relative to the image element
-        var x = e.offsetX;
-        // Get the width of the image element
-        var width = image.offsetWidth;
-        // Calculate the percentage value of the click position
-        var percentage = (x / width) * 100;
+//        // Get the x coordinate of the mouse pointer relative to the image element
+//        var x = e.offsetX;
+//        // Get the width of the image element
+//        var width = image.offsetWidth;
+//        // Calculate the percentage value of the click position
+//        var percentage = (x / width) * 100;
 
-        // Set the new position of the progress element
-        progress.style.left = percentage + '%';
+//        // Set the new position of the progress element
+//        progress.style.left = percentage + '%';
 
-        // Calculate the new position of the sound in seconds
-        var duration = sound.duration();
+//        // Calculate the new position of the sound in seconds
+//        var duration = sound.duration();
 
-        var position = (percentage / 100) * duration;
+//        var position = (percentage / 100) * duration;
 
-        // Set the new position of the sound
-        sound.seek(position);
-    });
+//        // Set the new position of the sound
+//        sound.seek(position);
+//    });
 
-    // Add event listeners to the Howl object
-    sound.on('play', function () {
-        // Update the progress and timer every 100ms
-        var interval = setInterval(function () {
-            var seek = sound.seek() || 0; // Get the current position in seconds
-            var duration = sound.duration(); // Get the total duration in seconds
-            var percentage = (seek / duration) * 100; // Calculate the percentage of progress
+//    // Add event listeners to the Howl object
+//    sound.on('play', function () {
+//        // Update the progress and timer every 100ms
+//        var interval = setInterval(function () {
+//            var seek = sound.seek() || 0; // Get the current position in seconds
+//            var duration = sound.duration(); // Get the total duration in seconds
+//            var percentage = (seek / duration) * 100; // Calculate the percentage of progress
 
-            var minutes = Math.floor(seek / 60); // Calculate the minutes part of the timer
-            var seconds = Math.floor(seek % 60); // Calculate the seconds part of the timer
+//            var minutes = Math.floor(seek / 60); // Calculate the minutes part of the timer
+//            var seconds = Math.floor(seek % 60); // Calculate the seconds part of the timer
 
-            // Format the timer as mm:ss
-            if (minutes < 10) minutes = '0' + minutes;
-            if (seconds < 10) seconds = '0' + seconds;
+//            // Format the timer as mm:ss
+//            if (minutes < 10) minutes = '0' + minutes;
+//            if (seconds < 10) seconds = '0' + seconds;
 
-            var durationMinutes = Math.floor(duration / 60); // Calculate the minutes part of the duration
-            var durationSeconds = Math.floor(duration % 60); // Calculate the seconds part of the duration
+//            var durationMinutes = Math.floor(duration / 60); // Calculate the minutes part of the duration
+//            var durationSeconds = Math.floor(duration % 60); // Calculate the seconds part of the duration
 
-            // Format the duration as mm:ss
-            if (durationMinutes < 10) durationMinutes = '0' + durationMinutes; // Add a leading zero if needed
-            if (durationSeconds < 10) durationSeconds = '0' + durationSeconds; // Add a leading zero if needed
+//            // Format the duration as mm:ss
+//            if (durationMinutes < 10) durationMinutes = '0' + durationMinutes; // Add a leading zero if needed
+//            if (durationSeconds < 10) durationSeconds = '0' + durationSeconds; // Add a leading zero if needed
 
-            var timerText = minutes + ':' + seconds + ' / ' + durationMinutes + ':' + durationSeconds;
+//            var timerText = minutes + ':' + seconds + ' / ' + durationMinutes + ':' + durationSeconds;
 
-            // Update the progress and timer elements
-            progress.style.left = percentage + '%';
-            timer.textContent = timerText;
-        }, 100);
-    });
+//            // Update the progress and timer elements
+//            progress.style.left = percentage + '%';
+//            timer.textContent = timerText;
+//        }, 100);
+//    });
 
-    sound.on('end', function () {
-        // Clear the interval and reset the player when the audio has finished playing
-        clearInterval(interval);
-        progress.style.left = '0%';
-        timer.textContent = '00:00 / 00:00';
-    });
-}
+//    sound.on('end', function () {
+//        // Clear the interval and reset the player when the audio has finished playing
+//        clearInterval(interval);
+//        progress.style.left = '0%';
+//        timer.textContent = '00:00 / 00:00';
+//    });
+//}
 
 /* SmallSpectrogramPlayerComponent setup and execution */
 
