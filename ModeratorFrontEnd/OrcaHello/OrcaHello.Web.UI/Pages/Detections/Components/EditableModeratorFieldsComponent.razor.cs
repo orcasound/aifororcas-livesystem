@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
+﻿using System.Diagnostics;
+
+namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
     public partial class EditableModeratorFieldsComponent
     {
@@ -19,13 +21,16 @@
 
         protected string StateValidationMessage = string.Empty; // Error message holder
 
-        protected void UpdateAvailableTags()
+        protected void OnEnteredTagsChanged()
         {
-            foreach(var tag in DetectionItemView.Tags.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                if (!AvailableTags.Contains(tag))
-                    AvailableTags.Add(tag);
-            }
+            if (string.IsNullOrWhiteSpace(DetectionItemView?.Tags)) return;
+
+            var enteredTags = DetectionItemView.Tags.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                              .Select(s => s.Trim())
+                                              .Distinct();
+
+            var newTags = enteredTags.Except(AvailableTags);
+            AvailableTags.AddRange(newTags);
             AvailableTags.Sort();
         }
 

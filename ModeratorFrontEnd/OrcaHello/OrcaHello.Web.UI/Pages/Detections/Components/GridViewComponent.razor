@@ -88,27 +88,22 @@
         <RadzenDataGridColumn OrderIndex="6" TItem=DetectionItemView Width="275px;"
                               CssClass="oh-top">
             <Template Context="data">
-                <RadzenImage Path=@data.SpectrogramUri Class="oh-spectrogram-bar" />
-                @if (data.IsCurrentlyPlaying)
-                {
-                    <RadzenButton Icon="stop_circle" ButtonStyle=ButtonStyle.Danger Variant=Variant.Text Size=ButtonSize.Small Click=@((args) => OnStopAudioClicked(data)) />
-                }
-                else
-                {
-                    <RadzenButton Icon="play_circle" ButtonStyle=ButtonStyle.Success Variant=Variant.Text Size=ButtonSize.Small Click=@((args) => OnPlayAudioClicked(data)) />
-                }
-
+                <InlinePlayerComponent 
+                    @bind-PlaybackId="PlaybackId" 
+                    Id=@data.Id 
+                    AudioUri=@data.AudioUri 
+                    SpectrogramUri=@data.SpectrogramUri />
             </Template>
         </RadzenDataGridColumn>
 
         <!-- Call column -->
 
         <RadzenDataGridColumn OrderIndex="8" TItem=DetectionItemView
-                              Title="Call" Width="150px;" CssClass="oh-top">
+                              Title="SRKW Call?" Width="150px;" CssClass="oh-top">
             <Template Context="data">
                 @if (data.State != DetectionState.Unreviewed.ToString())
                 {
-                    <RadzenText Text=@data.State />
+                    <RadzenText Text=@data.StateString />
                 }
             </Template>
             <EditTemplate Context="data">
@@ -131,7 +126,7 @@
                                     Style="width: 100%; max-width: 400px;">
                     </RadzenDropDown>
                     <RadzenLabel Text="And/Or" Class="rz-my-2" />
-                    <RadzenTextBox @bind-Value=@data.EnteredTags Style="width: 100%;" Placeholder="Separate with , or ;" />
+                    <RadzenTextBox @bind-Value=@data.EnteredTags Change=OnEnteredTagsChanged Style ="width: 100%;" Placeholder="Separate with , or ;" />
                 </RadzenStack>
             </EditTemplate>
         </RadzenDataGridColumn>

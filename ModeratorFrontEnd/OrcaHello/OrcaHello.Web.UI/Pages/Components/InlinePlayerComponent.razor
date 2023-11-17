@@ -1,0 +1,12 @@
+﻿@inherits ComponentManager
+
+<img class="oh-spectrogram-bar" src=@SpectrogramUri alt="Audio image" @ref="imageRef">
+
+@if (PlaybackState == PlaybackState.Playing && PlaybackId == Id)
+{
+    <RadzenButton Icon="stop_circle" ButtonStyle=ButtonStyle.Danger Variant=Variant.Text Size=ButtonSize.Small Click=Stop />
+}
+else
+{
+    <RadzenButton Icon="play_circle" ButtonStyle=ButtonStyle.Success Variant=Variant.Text Size=ButtonSize.Small Click=Play />
+}

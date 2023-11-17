@@ -29,21 +29,11 @@
         protected DateTime? SelectedStartDateTime = null;
         protected DateTime? SelectedEndDateTime = null;
 
-        // Positive Comments
-
-        protected CommentStateView PositiveCommentsState = new();
-
-        // Negative and Unknown Comments
-
-        protected CommentStateView NegativeAndUnknownCommentsState = new();
-
-        // Tags
-
-        protected TagStateView TagsState = new();
-
-        // Metrics
-
-        protected MetricsStateView MetricsState = new();
+        protected CommentStateView PositiveCommentsState = new(); // Positive Comments
+        protected CommentStateView NegativeAndUnknownCommentsState = new(); // Negative and Unknown Comments
+        protected TagStateView TagsState = new(); // Tags
+        protected MetricsStateView MetricsState = new(); // Metrics
+        protected string PlaybackId = string.Empty; // Currently Played SpectrographID
 
         #region lifecycle events
 
@@ -72,7 +62,7 @@
 
         protected async Task OnApplyFilterClicked()
         {
-            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
+            await JSRuntime.InvokeVoidAsync("clearAllHowls");
             await SetNewDates();
         }
 
@@ -96,7 +86,7 @@
 
         protected async Task OnToggleOpen()
         {
-            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
+            await JSRuntime.InvokeVoidAsync("clearAllHowls");
 
             TagsState.Close();
             PositiveCommentsState.Close();

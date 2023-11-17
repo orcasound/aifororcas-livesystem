@@ -11,7 +11,11 @@
         [Parameter]
         public EventCallback OnToggleOpen { get; set; }
 
-        protected CommentItemView ActiveItem = null!; // Holder for item being edited or played
+        [Parameter]
+        public string PlaybackId { get; set; } = string.Empty; // Currently Played SpectrographID
+
+        [Parameter]
+        public EventCallback<string> PlaybackIdChanged { get; set; }
 
         #region component buttons
 
@@ -37,51 +41,6 @@
         {
             StateView.Page++;
             await LoadNegativeAndUnknownCommentsAsync();
-        }
-
-        #endregion
-
-        #region grid audio events
-
-        protected async Task OnPlayAudioClicked(CommentItemView item)
-        {
-            if (ActiveItem is null)
-            {
-                ActiveItem = item;
-                ActiveItem.IsCurrentlyPlaying = true;
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
-                ActiveItem.IsCurrentlyPlaying = false;
-                await InvokeAsync(StateHasChanged);
-                ActiveItem = item;
-                ActiveItem.IsCurrentlyPlaying = true;
-            }
-
-            CustomJSEventHelper helper = new CustomJSEventHelper(OnDonePlaying);
-            DotNetObjectReference<CustomJSEventHelper> reference =
-                DotNetObjectReference.Create(helper);
-
-            await JSRuntime.InvokeVoidAsync("StartGridAudioPlayback", item.AudioUri, reference);
-        }
-
-        protected async Task OnDonePlaying(EventArgs args)
-        {
-            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
-
-            ActiveItem.IsCurrentlyPlaying = false;
-            await InvokeAsync(StateHasChanged);
-            ActiveItem = null!;
-        }
-
-        protected async Task OnStopAudioClicked(CommentItemView item)
-        {
-            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback", item.Id, item.AudioUri);
-
-            ActiveItem.IsCurrentlyPlaying = false;
-            await InvokeAsync(StateHasChanged);
-            ActiveItem = null!;
         }
 
         #endregion

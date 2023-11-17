@@ -9,13 +9,13 @@
         @StateValidationMessage
     </RadzenAlert>
     <RadzenLabel Text="Tags" />
-    <RadzenDropDown @bind-Value=@SelectedTags Data=@AvailableTags Chips=true AllowSelectAll=false 
-        Multiple=true AllowClear=true Placeholder="Select tags" 
-        Style="width: 100%; max-width: 400px; margin-top: 1rem;">
+    <RadzenDropDown @bind-Value=@SelectedTags Data=@AvailableTags Chips=true AllowSelectAll=false
+                    Multiple=true AllowClear=true Placeholder="Select tags"
+                    Style="width: 100%; max-width: 400px; margin-top: 1rem;">
     </RadzenDropDown>
-    <RadzenLabel Text="And/Or" Style="margin-top: 1rem;"/>
-    <RadzenTextBox @bind-Value=@EnteredTags Style="width: 100%; margin-top: 1rem;" Placeholder="Add tags separated by commas or semicolons" />
-  <RadzenLabel Text="Comments" Style="margin-top: 1rem;" />
+    <RadzenLabel Text="And/Or" Style="margin-top: 1rem;" />
+    <RadzenTextBox @bind-Value=@EnteredTags Change=OnChangeEnteredTags Style="width: 100%; margin-top: 1rem;" Placeholder="Add tags separated by commas or semicolons" />
+   <RadzenLabel Text="Comments" Style="margin-top: 1rem;" />
     <RadzenTextArea @bind-Value=@Comments Style="width: 100%; margin-top: 1rem;" Rows="3" Placeholder="Add comments" />
 </RadzenStack>
 <RadzenStack Orientation=Orientation.Horizontal Style="margin-top: 1rem;">

@@ -11,9 +11,13 @@
         [Parameter]
         public EventCallback OnToggleOpen { get; set; }
 
-        protected TagDetectionStateView TagDetectionsState = new();
+        [Parameter]
+        public string PlaybackId { get; set; } = string.Empty; // Currently Played SpectrographID
 
-        protected DetectionItemView ActiveItem = null!; // Holder for item being edited or played
+        [Parameter]
+        public EventCallback<string> PlaybackIdChanged { get; set; }
+
+        protected TagDetectionStateView TagDetectionsState = new();
 
         #region component buttons
 
@@ -94,7 +98,6 @@
 
             try
             {
-
                 var result = await ViewService
                     .RetrieveFilteredDetectionsForTagsAsync(request);
 
@@ -104,7 +107,6 @@
 
                 // Update the count
                 TagDetectionsState.Count = result.Count;
-
             }
             catch(Exception ex)
             {
@@ -112,51 +114,6 @@
             }
 
             TagDetectionsState.IsLoading = false;
-        }
-
-        #endregion
-
-        #region grid audio events
-
-        protected async Task OnPlayAudioClicked(DetectionItemView item)
-        {
-            if (ActiveItem is null)
-            {
-                ActiveItem = item;
-                ActiveItem.IsCurrentlyPlaying = true;
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
-                ActiveItem.IsCurrentlyPlaying = false;
-                await InvokeAsync(StateHasChanged);
-                ActiveItem = item;
-                ActiveItem.IsCurrentlyPlaying = true;
-            }
-
-            CustomJSEventHelper helper = new CustomJSEventHelper(OnDonePlaying);
-            DotNetObjectReference<CustomJSEventHelper> reference =
-                DotNetObjectReference.Create(helper);
-
-            await JSRuntime.InvokeVoidAsync("StartGridAudioPlayback", item.AudioUri, reference);
-        }
-
-        protected async Task OnDonePlaying(EventArgs args)
-        {
-            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback");
-
-            ActiveItem.IsCurrentlyPlaying = false;
-            await InvokeAsync(StateHasChanged);
-            ActiveItem = null!;
-        }
-
-        protected async Task OnStopAudioClicked(DetectionItemView item)
-        {
-            await JSRuntime.InvokeVoidAsync("StopGridAudioPlayback", item.Id, item.AudioUri);
-
-            ActiveItem.IsCurrentlyPlaying = false;
-            await InvokeAsync(StateHasChanged);
-            ActiveItem = null!;
         }
 
         #endregion

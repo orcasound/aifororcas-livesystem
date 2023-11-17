@@ -1,4 +1,4 @@
-﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
+﻿namespace OrcaHello.Web.UI.Pages.Components
 {
     public partial class MediumPlayerComponent
     {
@@ -19,7 +19,7 @@
         protected PlaybackState PlaybackState = PlaybackState.NotPlaying; // indicates the current playback state of the audio file
         protected string PlaybackTimer = "00:00 / 00:00"; // indicates the time within the playback
         protected double PlaybackLength = 60.00; // have not found a way to calculate the playback length before starting to play,
-                                               // so going to have to hard code it
+                                                 // so going to have to hard code it
         protected ElementReference imageRef; // reference to the rendered image
 
         protected override void OnInitialized()
@@ -121,9 +121,9 @@
                 var rect = await JSRuntime.InvokeAsync<DOMRect>("getBoundingClientRect", imageRef);
                 var x = e.ClientX - rect.Left;
                 var width = rect.Width;
-                var percentage = (x / width) * 100;
+                var percentage = x / width * 100;
 
-                var position = (percentage / 100) * PlaybackLength;
+                var position = percentage / 100 * PlaybackLength;
 
                 await Howl.Seek(soundId, new TimeSpan(0, 0, Convert.ToInt32(position)));
             }

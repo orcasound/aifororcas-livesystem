@@ -18,7 +18,6 @@
         public List<string> AvailableTags { get; set; } = new();
 
         // Content being edited
-        protected string Tags = string.Empty;
         protected string Comments = string.Empty;
         protected string State = string.Empty;
 
@@ -28,6 +27,22 @@
         protected List<string> SelectedTags = new();
         protected string EnteredTags = string.Empty;
 
+        protected void OnChangeEnteredTags()
+        {
+            if (string.IsNullOrWhiteSpace(EnteredTags)) return;
+
+            var enteredTagsList = EnteredTags
+                .Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .ToList();
+
+            SelectedTags.AddRange(enteredTagsList.Except(SelectedTags));
+            AvailableTags.AddRange(enteredTagsList.Except(AvailableTags));
+            AvailableTags.Sort();
+
+            EnteredTags = string.Empty;
+        }
+
         protected async Task OnSubmitClicked()
         {
             if (string.IsNullOrEmpty(State))
@@ -35,16 +50,12 @@
 
             else
             {
-                SelectedTags.AddRange(EnteredTags.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries));
-                var trimmedList = SelectedTags.Select(s => s.Trim());
-                Tags = string.Join(",", trimmedList);
-
                 var response = await ViewService.ModerateDetectionsAsync(
                     SelectedIds,
                     State,
                     Moderator,
                     Comments,
-                    Tags);
+                    string.Join(",", SelectedTags));
 
                 if (response.IdsToUpdate.Count == response.IdsSuccessfullyUpdated.Count)
                     ReportSuccess("Success",

@@ -36,15 +36,11 @@
                                 <RadzenCard Variant=Variant.Text Style="width:100%; padding: 0; margin-bottom: 15px;">
                                     <RadzenRow Gap="0">
                                         <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                                            <RadzenImage Path=@comment.SpectrogramUri Class="oh-spectrogram-bar" />
-                                            @if (comment.IsCurrentlyPlaying)
-                                            {
-                                                <RadzenButton Icon="stop_circle" ButtonStyle=ButtonStyle.Danger Variant=Variant.Text Size=ButtonSize.Small Click=@((args) => OnStopAudioClicked(comment)) />
-                                            }
-                                            else
-                                            {
-                                                <RadzenButton Icon="play_circle" ButtonStyle=ButtonStyle.Success Variant=Variant.Text Size=ButtonSize.Small Click=@((args) => OnPlayAudioClicked(comment)) />
-                                            }
+                                            <InlinePlayerComponent 
+                                                @bind-PlaybackId="PlaybackId" 
+                                                Id=@comment.Id
+                                                AudioUri=@comment.AudioUri
+                                                SpectrogramUri=@comment.SpectrogramUri />
                                         </RadzenColumn>
                                         <RadzenColumn Size="12" SizeMD="6" SizeLG="9" Style="padding-bottom: 10px; border-bottom: 1px solid var(--cg-dark-gray);">
                                             <RadzenStack Orientation=Orientation.Vertical>

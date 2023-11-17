@@ -64,6 +64,8 @@
 
         private async Task LoadData(LoadDataArgs args)
         {
+            await JSRuntime.InvokeVoidAsync("clearAllHowls");
+
             IsLoading = true;
             await InvokeAsync(StateHasChanged);
 

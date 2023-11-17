@@ -174,13 +174,17 @@
             };
         }
 
-        protected void OnGridViewClicked()
+        protected async Task OnGridViewClicked()
         {
+            await JSRuntime.InvokeVoidAsync("clearAllHowls");
+
             SelectedViewMode = ViewMode.GridView;
         }
 
-        protected void OnTileViewClicked()
+        protected async Task OnTileViewClicked()
         {
+            await JSRuntime.InvokeVoidAsync("clearAllHowls");
+
             IsReviewButtonVisible = false;
             SelectedViewMode = ViewMode.TileView;
         }

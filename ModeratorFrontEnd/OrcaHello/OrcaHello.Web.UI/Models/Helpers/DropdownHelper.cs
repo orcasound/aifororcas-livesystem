@@ -7,11 +7,11 @@
             get
             {
                 return new List<DropdownOption>
-            {
-                new(DetectionState.Positive.ToString(), "Yes"),
-                new(DetectionState.Negative.ToString(), "No"),
-                new(DetectionState.Unknown.ToString(), "Don't Know")
-            };
+                {
+                    new(DetectionState.Positive.ToString(), "Yes"),
+                    new(DetectionState.Negative.ToString(), "No"),
+                    new(DetectionState.Unknown.ToString(), "Don't Know")
+                };
             }
         }
     }
