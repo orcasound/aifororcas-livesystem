@@ -33,7 +33,8 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        appSettings.HydrophoneLocationNames = (await hydrophoneService.RetrieveAllHydrophonesAsync()).Select(x => x.Name).ToList();
+        appSettings.HydrophoneLocationNames = (await hydrophoneService.RetrieveAllHydrophonesAsync())
+            .Select(x => x.Name).ToList();
     }
     catch(Exception ex)
     {

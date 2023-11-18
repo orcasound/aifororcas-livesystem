@@ -9,6 +9,13 @@
     }
 
     [ExcludeFromCodeCoverage]
+    public class NullHydrophoneViewException : Exception
+    {
+        public NullHydrophoneViewException()
+            : base(message: "Null hydrophone error occurred.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class HydrophoneViewValidationException : Exception
     {
         public HydrophoneViewValidationException() { }
@@ -42,5 +49,13 @@
 
         public HydrophoneViewServiceException(Exception innerException)
             : base($"Internal or unknown system failure (HydrophoneViewServiceException): {innerException.Message}", innerException) { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class FailedHydrophoneViewServiceException : Xeption
+    {
+        public FailedHydrophoneViewServiceException(Exception innerException)
+            : base(message: "Failed hydrophone view service error occurred, please contact support.", innerException)
+        { }
     }
 }
