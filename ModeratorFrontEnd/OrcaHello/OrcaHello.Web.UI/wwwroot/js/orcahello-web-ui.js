@@ -46,6 +46,11 @@ function getBoundingClientRect(element) {
     return element.getBoundingClientRect();
 }
 
+function repositionHowl(soundId, position) {
+    const howl = getHowl(soundId);
+    howl.seek(position);
+}
+
 function clearAllHowls() {
     Howler.stop();
     Howler.unload();

@@ -4,12 +4,12 @@
     public partial class Hydrophones
     {
         [Inject]
-        public IHydrophoneViewService ViewService { get; set; }
+        public IHydrophoneViewService ViewService { get; set; } = null!;
 
-        protected List<HydrophoneItemView> HydrophoneItemViews;
+        protected List<HydrophoneItemView> HydrophoneItemViews = null!;
         protected bool IsLoading = false;
 
-        RadzenDataGrid<HydrophoneItemView> grid;
+        RadzenDataGrid<HydrophoneItemView> grid = null!;
 
         protected int Zoom = 3;
 
@@ -25,7 +25,7 @@
 
         #endregion
 
-        #region helpers
+        #region data loaders
 
         private async Task LoadDataAsync()
         {

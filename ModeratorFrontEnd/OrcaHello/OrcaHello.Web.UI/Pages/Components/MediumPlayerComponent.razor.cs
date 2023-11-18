@@ -121,11 +121,10 @@
                 var rect = await JSRuntime.InvokeAsync<DOMRect>("getBoundingClientRect", imageRef);
                 var x = e.ClientX - rect.Left;
                 var width = rect.Width;
-                var percentage = x / width * 100;
 
-                var position = percentage / 100 * PlaybackLength;
+                var position = Convert.ToInt32(x / width * PlaybackLength);
 
-                await Howl.Seek(soundId, new TimeSpan(0, 0, Convert.ToInt32(position)));
+                await Howl.Seek(soundId, new TimeSpan(0, 0, position));
             }
         }
     }

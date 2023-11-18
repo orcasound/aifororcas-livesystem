@@ -57,25 +57,20 @@
             Howl.OnStop += async e =>
             {
                 PlaybackState = PlaybackState.NotPlaying;
-                ResetLine();
+                await ResetLine();
                 await InvokeAsync(StateHasChanged);
             };
 
             Howl.OnEnd += async e =>
             {
                 PlaybackState = PlaybackState.NotPlaying;
-                ResetLine();
+                await ResetLine();
                 await InvokeAsync(StateHasChanged);
             };
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender)
-            {
-                await JSRuntime.InvokeVoidAsync("clearAllHowls");
-            }
-
             if (PlaybackState == PlaybackState.Playing)
             {
                 await UpdateLine();
@@ -85,6 +80,8 @@
 
         protected async Task Play()
         {
+            await ResetLine();
+
             HowlOptions options = new()
             {
                 Sources = new string[] { ItemView.AudioUri },
@@ -123,11 +120,12 @@
             }
         }
 
-        private void ResetLine()
+        private async Task ResetLine()
         {
             PercentCompleteLine = 0;
             soundId = -1;
             PlaybackTimer = "00:00 / 00:00";
+            await JSRuntime.InvokeVoidAsync("clearAllHowls");
         }
 
         // Handle the click event on the image element
@@ -139,13 +137,11 @@
                 var rect = await JSRuntime.InvokeAsync<DOMRect>("getBoundingClientRect", imageRef);
                 var x = e.ClientX - rect.Left;
                 var width = rect.Width;
-                var percentage = (x / width) * 100;
 
-                var position = (percentage / 100) * PlaybackLength;
+                var position = Convert.ToInt32(x / width * PlaybackLength) * 1000;
+                var timespan = TimeSpan.FromMilliseconds(position);
 
-                var seek = await Howl.GetCurrentTime(soundId);
-
-                await Howl.Seek(soundId, new TimeSpan(0, 0, Convert.ToInt32(position)));
+                await Howl.Seek(soundId, timespan);
             }
         }
     }

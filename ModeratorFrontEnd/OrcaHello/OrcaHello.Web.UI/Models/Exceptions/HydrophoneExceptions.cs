@@ -1,6 +1,13 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
     [ExcludeFromCodeCoverage]
+    public class NullHydrophoneResponseException : Xeption
+    {
+        public NullHydrophoneResponseException()
+            : base(message: "API call returned a null response.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class InvalidHydrophoneException : Xeption
     {
         public InvalidHydrophoneException() { }
@@ -19,6 +26,14 @@
     {
         public FailedHydrophoneDependencyException(Exception innerException)
             : base(message: "Failed hydrophone dependency error occurred, please contact support.", innerException)
+        { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class FailedHydrophoneServiceException : Xeption
+    {
+        public FailedHydrophoneServiceException(Exception innerException)
+            : base(message: "Failed hydrophone service error occurred, please contact support.", innerException)
         { }
     }
 

@@ -30,7 +30,15 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var hydrophoneService = scope.ServiceProvider.GetRequiredService<IHydrophoneService>();
-    appSettings.HydrophoneLocationNames = (await hydrophoneService.RetrieveAllHydrophonesAsync()).Select(x => x.Name).ToList();
+
+    try
+    {
+        appSettings.HydrophoneLocationNames = (await hydrophoneService.RetrieveAllHydrophonesAsync()).Select(x => x.Name).ToList();
+    }
+    catch(Exception ex)
+    {
+        // TODO: Report this exception
+    }
 }
 
 if (app.Environment.IsDevelopment())
