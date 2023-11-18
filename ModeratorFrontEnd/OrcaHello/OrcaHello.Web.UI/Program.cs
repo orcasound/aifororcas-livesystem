@@ -30,6 +30,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var hydrophoneService = scope.ServiceProvider.GetRequiredService<IHydrophoneService>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
     try
     {
@@ -38,7 +39,9 @@ using (var scope = app.Services.CreateScope())
     }
     catch(Exception ex)
     {
-        // TODO: Report this exception
+        appSettings.HydrophoneLocationNames = new List<string>();
+        // Log the exception as an error with a custom message and the stack trace
+        logger.LogError(ex, "Failed to retrieve hydrophone names.");
     }
 }
 
