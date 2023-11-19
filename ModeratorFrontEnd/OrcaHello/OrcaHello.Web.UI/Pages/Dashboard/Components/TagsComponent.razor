@@ -56,9 +56,16 @@
                                                                     <RadzenText TextStyle=TextStyle.Body2>@($"{detection.Timestamp.UTCToPDTCompact()} at {detection.LocationName} - {detection.State} Orca detection")</RadzenText>
                                                                         <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@detection.Comments</RadzenText>
                                                                         @if (!string.IsNullOrWhiteSpace(detection.Moderator))
-                                                                    {
-                                                                        <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {detection.Moderator}")</RadzenText>
-                                                                    }
+                                                                        {
+                                                                        @if (detection.Moderated.HasValue)
+                                                                            {
+                                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {detection.Moderator} ({detection.Moderated.Value.UTCToPDTCompact()})")</RadzenText>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {detection.Moderator}")</RadzenText>
+                                                                            }
+                                                                        }
                                                                 </RadzenStack>
                                                             </RadzenColumn>
                                                         </RadzenRow>

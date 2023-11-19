@@ -3,13 +3,16 @@
     public partial class NegativeAndUnknownCommentsComponent
     {
         [Inject]
-        public IMetricsViewService ViewService { get; set; } = null!;
+        public IDashboardViewService ViewService { get; set; } = null!;
 
         [Parameter]
         public CommentStateView StateView { get; set; } = null!;
 
         [Parameter]
         public EventCallback OnToggleOpen { get; set; }
+
+        [Parameter]
+        public string Moderator { get; set; } = null!;
 
         [Parameter]
         public string PlaybackId { get; set; } = string.Empty; // Currently Played SpectrographID
@@ -47,7 +50,6 @@
 
         #region data loaders
 
-
         protected async Task LoadNegativeAndUnknownCommentsAsync()
         {
             StateView.IsLoading = true;
@@ -62,15 +64,16 @@
 
             try
             {
-                var result = await ViewService
-                    .RetrieveFilteredNegativeAndUnknownCommentsAsync(request);
+                var response = Moderator != null
+                    ? await ViewService.RetrieveFilteredNegativeAndUnknownCommentsForModeratorAsync(Moderator, request)
+                    : await ViewService.RetrieveFilteredNegativeAndUnknownCommentsAsync(request);
 
                 // Update the Data property
-                if (result.CommentItemViews.Any())
-                    StateView.Items.AddRange(result.CommentItemViews);
+                if (response.CommentItemViews.Any())
+                    StateView.Items.AddRange(response.CommentItemViews);
 
                 // Update the count
-                StateView.Count = result.Count;
+                StateView.Count = response.Count;
             }
             catch (Exception ex)
             {

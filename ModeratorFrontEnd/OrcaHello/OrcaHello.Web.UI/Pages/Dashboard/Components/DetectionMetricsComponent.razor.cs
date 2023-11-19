@@ -3,10 +3,13 @@
     public partial class DetectionMetricsComponent
     { 
         [Inject]
-        public IMetricsViewService ViewService { get; set; } = null!;
+        public IDashboardViewService ViewService { get; set; } = null!;
 
         [Parameter]
         public MetricsStateView StateView { get; set; } = null!;
+
+        [Parameter]
+        public string Moderator { get; set; } = null!;
 
         #region lifecycle events
 
@@ -29,14 +32,16 @@
                 ToDate = StateView.ToDate
             };
 
-            try
-            {
-                MetricsItemViewResponse response = await ViewService.RetrieveFilteredMetricsAsync(request);
+            try { 
+
+                var response = Moderator != null
+                    ? await ViewService.RetrieveFilteredMetricsForModeratorAsync(Moderator, request)
+                    : await ViewService.RetrieveFilteredMetricsAsync(request);
 
                 StateView.MetricsItemViews = response.MetricsItemViews;
                 StateView.FillColors = response.MetricsItemViews.Select(x => x.Color).ToList();
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 ReportError("Trouble loading Metrics data", ex.Message);
             }

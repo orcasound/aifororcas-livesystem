@@ -158,7 +158,7 @@
              };
          });
 
-        private static Detection AsDetection(Metadata metadata)
+        public static Detection AsDetection(Metadata metadata)
         {
             var detection = new Detection
             {
@@ -190,7 +190,7 @@
             return detection;
         }
 
-        private static Annotation AsAnnotation(Prediction prediction)
+        public static Annotation AsAnnotation(Prediction prediction)
         {
             return new Annotation
             {

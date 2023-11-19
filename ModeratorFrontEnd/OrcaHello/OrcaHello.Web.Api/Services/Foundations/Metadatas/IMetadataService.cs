@@ -16,6 +16,8 @@
         ValueTask<MetricsSummaryForTimeframe> RetrieveMetricsForGivenTimeframeAsync(DateTime fromDate, DateTime toDate);
         ValueTask<MetricsSummaryForTimeframeAndModerator> RetrieveMetricsForGivenTimeframeAndModeratorAsync(DateTime fromDate, DateTime toDate,
             string moderator);
+        ValueTask<QueryableMetadataForTimeframeTagAndModerator> RetrieveMetadataForGivenTimeframeTagAndModeratorAsync(DateTime fromDate, DateTime toDate,
+            string moderator, string tag, int page, int pageSize);
         ValueTask<QueryableMetadataFiltered> RetrievePaginatedMetadataAsync(string state, DateTime fromDate, DateTime toDate, string sortBy,
             bool isDescending, string location, int page, int pageSize);
         ValueTask<Metadata> RetrieveMetadataByIdAsync(string id);

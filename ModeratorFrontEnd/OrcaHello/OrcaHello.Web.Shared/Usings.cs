@@ -4,6 +4,7 @@ global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 global using OrcaHello.Web.Shared.Models.Comments;
+global using OrcaHello.Web.Shared.Models.Detections;
 global using OrcaHello.Web.Shared.Models.Metrics;
 global using OrcaHello.Web.Shared.Models.Tags;
 global using Swashbuckle.AspNetCore.Annotations;

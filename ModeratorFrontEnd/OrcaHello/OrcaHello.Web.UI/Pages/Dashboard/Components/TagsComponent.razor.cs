@@ -3,13 +3,16 @@
     public partial class TagsComponent
     {
         [Inject]
-        public IMetricsViewService ViewService { get; set; } = null!;
+        public IDashboardViewService ViewService { get; set; } = null!;
 
         [Parameter]
         public TagStateView StateView { get; set; } = null!;
 
         [Parameter]
         public EventCallback OnToggleOpen { get; set; }
+
+        [Parameter]
+        public string Moderator { get; set; } = null!;
 
         [Parameter]
         public string PlaybackId { get; set; } = string.Empty; // Currently Played SpectrographID
@@ -70,7 +73,9 @@
 
             try
             {
-                StateView.Items = await ViewService.RetrieveFilteredTagsAsync(request);
+                StateView.Items = Moderator != null
+                    ? await ViewService.RetrieveFilteredTagsForModeratorAsync(Moderator, request)
+                    : await ViewService.RetrieveFilteredTagsAsync(request);
                 StateView.Count = StateView.Items.Count;
             }
             catch(Exception ex)
@@ -98,8 +103,9 @@
 
             try
             {
-                var result = await ViewService
-                    .RetrieveFilteredDetectionsForTagsAsync(request);
+                var result = Moderator != null
+                    ? await ViewService.RetrieveFilteredDetectionsForTagAndModeratorAsync(Moderator, request)
+                    : await ViewService.RetrieveFilteredDetectionsForTagsAsync(request);
 
                 // Update the Data property
                 if (result.DetectionItemViews.Any())

@@ -1,9 +1,12 @@
 ﻿namespace OrcaHello.Web.UI.Pages.Dashboard
 {
-    public partial class Metrics : ComponentManager
+    public partial class ModeratorMetrics
     {
         [Inject]
         public IDashboardViewService ViewService { get; set; } = null!;
+
+        [Inject]
+        public IAccountService AccountService { get; set; } = null!;
 
         [Inject]
         public AppSettings AppSettings { get; set; } = null!;
@@ -34,11 +37,13 @@
         protected TagStateView TagsState = new(); // Tags
         protected MetricsStateView MetricsState = new(); // Metrics
         protected string PlaybackId = string.Empty; // Currently Played SpectrographID
+        protected string Moderator = null!;
 
         #region lifecycle events
 
         protected override async Task OnInitializedAsync()
         {
+            Moderator = await AccountService.GetUserName();
             await SetNewDates();
         }
 

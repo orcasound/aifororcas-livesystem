@@ -37,6 +37,17 @@
     }
 
     [ExcludeFromCodeCoverage]
+    public class QueryableMetadataForTimeframeTagAndModerator : QueryableMetadata
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public string Moderator { get; set; }
+        public string Tag { get; set; }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class QueryableMetadataFiltered : QueryableMetadata
     {
         public DateTime FromDate { get; set; }

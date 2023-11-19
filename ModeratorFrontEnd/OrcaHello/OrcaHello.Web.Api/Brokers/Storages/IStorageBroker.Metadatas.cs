@@ -11,6 +11,9 @@
             int page = 1, int pageSize = 10);
         Task<ListMetadataAndCount> GetPositiveMetadataListByTimeframeAndModerator(DateTime fromDate, DateTime toDate,
             string moderator, int page = 1, int pageSize = 10);
+        Task<ListMetadataAndCount> GetMetadataListByTimeframeTagAndModerator(DateTime fromDate, DateTime toDate,
+                string moderator, string tag, int page = 1, int pageSize = 10);
+
         Task<ListMetadataAndCount> GetNegativeAndUnknownMetadataListByTimeframe(DateTime fromDate, DateTime toDate,
             int page = 1, int pageSize = 10);
         Task<ListMetadataAndCount> GetNegativeAndUnknownMetadataListByTimeframeAndModerator(DateTime fromDate, DateTime toDate,

@@ -49,7 +49,14 @@
                                                     <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@comment.Comments</RadzenText>
                                                     @if (!string.IsNullOrWhiteSpace(comment.Moderator))
                                                 {
-                                                    <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator}")</RadzenText>
+                                                    @if (comment.Moderated.HasValue)
+                                                    {
+                                                        <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator} ({comment.Moderated.Value.UTCToPDTCompact()})")</RadzenText>
+                                                    }
+                                                    else
+                                                    {
+                                                        <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator}")</RadzenText>
+                                                    }
                                                 }
                                             </RadzenStack>
                                         </RadzenColumn>

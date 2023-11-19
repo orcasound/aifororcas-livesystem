@@ -36,11 +36,10 @@
                                 <RadzenCard Variant=Variant.Text Style="width:100%; padding: 0; margin-bottom: 15px;">
                                     <RadzenRow Gap="0">
                                         <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                                            <InlinePlayerComponent 
-                                                @bind-PlaybackId="PlaybackId" 
-                                                Id=@comment.Id
-                                                AudioUri=@comment.AudioUri
-                                                SpectrogramUri=@comment.SpectrogramUri />
+                                            <InlinePlayerComponent @bind-PlaybackId="PlaybackId"
+                                                                   Id=@comment.Id
+                                                                   AudioUri=@comment.AudioUri
+                                                                   SpectrogramUri=@comment.SpectrogramUri />
                                         </RadzenColumn>
                                         <RadzenColumn Size="12" SizeMD="6" SizeLG="9" Style="padding-bottom: 10px; border-bottom: 1px solid var(--cg-dark-gray);">
                                             <RadzenStack Orientation=Orientation.Vertical>
@@ -49,9 +48,16 @@
                                                 <RadzenText TextStyle=TextStyle.Body2>@($"{comment.Timestamp.UTCToPDTCompact()} at {comment.LocationName}")</RadzenText>
                                                     <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@comment.Comments</RadzenText>
                                                     @if (!string.IsNullOrWhiteSpace(comment.Moderator))
-                                                {
-                                                    <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator}")</RadzenText>
-                                                }
+                                                    {
+                                                        @if (comment.Moderated.HasValue)
+                                                        {
+                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator} ({comment.Moderated.Value.UTCToPDTCompact()})")</RadzenText>
+                                                        }
+                                                        else
+                                                        {
+                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator}")</RadzenText>
+                                                        }
+                                                    }
                                             </RadzenStack>
                                         </RadzenColumn>
                                     </RadzenRow>

@@ -3,13 +3,16 @@
     public partial class PositiveCommentsComponent
     {
         [Inject]
-        public IMetricsViewService ViewService { get; set; } = null!;
+        public IDashboardViewService ViewService { get; set; } = null!;
 
         [Parameter]
         public CommentStateView StateView { get; set; } = null!;
 
         [Parameter]
         public EventCallback OnToggleOpen { get; set; }
+
+        [Parameter]
+        public string Moderator { get; set; } = null!;
 
         [Parameter]
         public string PlaybackId { get; set; } = string.Empty; // Currently Played SpectrographID
@@ -60,15 +63,16 @@
 
             try
             {
-                var result = await ViewService
-                    .RetrieveFilteredPositiveCommentsAsync(request);
+                var response = Moderator != null
+                    ? await ViewService.RetrieveFilteredPositiveCommentsForModeratorAsync(Moderator, request)
+                    : await ViewService.RetrieveFilteredPositiveCommentsAsync(request);
 
                 // Update the Data property
-                if (result.CommentItemViews.Any())
-                    StateView.Items.AddRange(result.CommentItemViews);
+                if (response.CommentItemViews.Any())
+                    StateView.Items.AddRange(response.CommentItemViews);
 
                 // Update the count
-                StateView.Count = result.Count;
+                StateView.Count = response.Count;
             }
             catch(Exception ex)
             {

@@ -13,11 +13,12 @@
             builder.Services.AddScoped<ITagService, TagService>();
             builder.Services.AddScoped<IMetricsService, MetricsService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddScoped<IModeratorService, ModeratorService>();
 
             // View services
             builder.Services.AddScoped<IHydrophoneViewService, HydrophoneViewService>();
             builder.Services.AddScoped<IDetectionViewService, DetectionViewService>();
-            builder.Services.AddScoped<IMetricsViewService, MetricsViewService>();
+            builder.Services.AddScoped<IDashboardViewService, DashboardViewService>();
         }
     }
 }

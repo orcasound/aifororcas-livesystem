@@ -18,10 +18,10 @@
             {
                 MetricsItemViews = new List<MetricsItemView>()
                 {
-                            new(DetectionState.Unreviewed.ToString(), metricsResponse.Unreviewed, "#219696"),
-                            new(DetectionState.Positive.ToString(), metricsResponse.Positive, "#468f57"),
-                            new(DetectionState.Negative.ToString(), metricsResponse.Negative, "#bb595f"),
-                            new(DetectionState.Unknown.ToString(), metricsResponse.Unknown, "#bc913e")
+                    new(DetectionState.Unreviewed.ToString(), metricsResponse.Unreviewed, "#219696"),
+                    new(DetectionState.Positive.ToString(), metricsResponse.Positive, "#468f57"),
+                    new(DetectionState.Negative.ToString(), metricsResponse.Negative, "#bb595f"),
+                    new(DetectionState.Unknown.ToString(), metricsResponse.Unknown, "#bc913e")
                 },
                 FromDate = metricsResponse.FromDate,
                 ToDate = metricsResponse.ToDate
