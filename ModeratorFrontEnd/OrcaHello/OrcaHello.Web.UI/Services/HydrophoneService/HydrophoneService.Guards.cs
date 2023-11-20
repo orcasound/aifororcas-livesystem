@@ -1,6 +1,9 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
-    // This partial class implements all level-specific validations for the HydrophoneService.
+    /// <summary>
+    /// Partial of the the <see cref="HydrophoneService"/> foundation service class responsible for peforming 
+    /// level-specific validations.
+    /// </summary>
     public partial class HydrophoneService
     {
         // RULE: Check if the response from the broker is not null.

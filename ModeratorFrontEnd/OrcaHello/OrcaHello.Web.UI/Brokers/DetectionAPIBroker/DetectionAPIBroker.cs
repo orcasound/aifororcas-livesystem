@@ -22,6 +22,9 @@
         private async ValueTask<TResult> PutAsync<T, TResult>(string relativeUrl, T content) =>
             await _apiClient.PutContentAsync<T, TResult>(createFullUrl(relativeUrl), content);
 
+        private async ValueTask<T> DeleteAsync<T>(string relativeUrl) =>
+            await _apiClient.DeleteContentAsync<T>(createFullUrl(relativeUrl));
+
         private string createFullUrl(string relativeUrl)
         {
             return _detectionApiUrn.EndsWith("/") ?

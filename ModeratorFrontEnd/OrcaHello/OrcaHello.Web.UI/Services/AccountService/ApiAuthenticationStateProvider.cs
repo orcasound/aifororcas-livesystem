@@ -1,5 +1,8 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
+    /// <summary>
+    /// Custom authentication state provider for interacting with Azure AD and managing the authentication token.
+    /// </summary>
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly HttpClient _httpClient;

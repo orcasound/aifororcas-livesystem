@@ -78,22 +78,22 @@
             return result;
         });
 
-        public ValueTask<TagReplaceResponse> ReplaceTagInAllDetectionsAsync(string oldTag, string newTag) =>
+        public ValueTask<TagReplaceResponse> ReplaceTagInAllDetectionsAsync(ReplaceTagRequest request) =>
         TryCatch(async () =>
         {
-            Validate(oldTag, nameof(oldTag));
-            Validate(newTag, nameof(newTag));
+            Validate(request.OldTag, nameof(request.OldTag));
+            Validate(request.NewTag, nameof(request.NewTag));
 
-            var allMetadataWithTag = await _metadataService.RetrieveMetadataForTagAsync(oldTag);
+            var allMetadataWithTag = await _metadataService.RetrieveMetadataForTagAsync(request.OldTag);
 
             int totalReplaced = 0;
 
             foreach (Metadata item in allMetadataWithTag.QueryableRecords)
             {
-                int indexOfOldTag = item.Tags.IndexOf(oldTag);
+                int indexOfOldTag = item.Tags.IndexOf(request.OldTag);
                 if (indexOfOldTag >= 0)
                 {
-                    item.Tags[indexOfOldTag] = newTag;
+                    item.Tags[indexOfOldTag] = request.NewTag;
                 }
 
                 bool recordUpdated = await _metadataService.UpdateMetadataAsync(item);
@@ -104,8 +104,8 @@
 
             TagReplaceResponse result = new()
             {
-                OldTag = oldTag,
-                NewTag = newTag,
+                OldTag = request.OldTag,
+                NewTag = request.NewTag,
                 TotalMatching = allMetadataWithTag.TotalCount,
                 TotalReplaced = totalReplaced
             };

@@ -1,5 +1,9 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AccountService"/> foundation service class peforming
+    /// various authentication and authorization services.
+    /// </summary>
     public class AccountService : IAccountService
     {
         private readonly HttpClient _httpService;
@@ -24,6 +28,10 @@
             _appSettings = appSettings;
         }
 
+        /// <summary>
+        /// Get the user's friendly display name.
+        /// </summary>
+        /// <returns>A friendly name string.</returns>
         public async Task<string> GetDisplayName()
         {
             if (_apiAuthenticationStateProvider != null)
@@ -42,6 +50,10 @@
             return string.Empty;
         }
 
+        /// <summary>
+        /// Get the user's user name (email).
+        /// </summary>
+        /// <returns>A user name string.</returns>
         public async Task<string> GetUserName()
         {
             if (_apiAuthenticationStateProvider != null)
@@ -60,6 +72,9 @@
             return string.Empty;
         }
 
+        /// <summary>
+        /// Perform the actions needed to authenticate a user in using Azure AD.
+        /// </summary>
         public async Task Login()
         {
             AuthenticationResult token = null!;
@@ -83,6 +98,9 @@
             }
         }
 
+        /// <summary>
+        /// Perform log out operations if initiated by the user.
+        /// </summary>
         public async Task Logout()
         {
             await _apiAuthenticationStateProvider.ClearToken();
@@ -92,6 +110,9 @@
             _httpService.DefaultRequestHeaders.Clear();
         }
 
+        /// <summary>
+        /// Perform log out operations if the user's credentials have expired.
+        /// </summary>
         public async Task LogoutIfExpired()
         {
             try

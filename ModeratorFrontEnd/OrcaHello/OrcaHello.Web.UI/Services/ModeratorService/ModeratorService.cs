@@ -1,9 +1,11 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
-    // ModeratorService is a partial class that implements the contract for a Foundation Service that accesses an
-    // API broker for moderator-related data. A Foundation Service provides basic functionality for other services, such as
-    // logging or authentication. The ModeratorService constructor uses dependency injection to receive an
-    // IDetectionAPIBroker and an ILogger<ModeratorService>. 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModeratorService"/> foundation service class for interacting 
+    /// with moderator-related endpoints of the API.
+    /// </summary>
+    /// <param name="apiBroker">The detection API broker.</param>
+    /// <param name="logger">The logger.</param>
     public partial class ModeratorService : IModeratorService
     {
         private readonly IDetectionAPIBroker _apiBroker;
@@ -16,26 +18,50 @@
             _apiBroker = apiBroker;
             _logger = logger;
         }
-        // Returns a list of positive comments for a given moderator, filtered by the date range, page number, and page size.
-        // It calls the broker service, validates the parameters and the response, and handles any exceptions.
+
+        /// <summary>
+        /// Retrieves a list of positive comments, filtered by the date range, page number, 
+        /// and page size from the API for the given moderator.
+        /// </summary>
+        /// <param name="moderator">The name of the moderator.</param>
+        /// <param name="fromDate">The start date of the filter.</param>
+        /// <param name="toDate">The end date of the filter.</param>
+        /// <param name="page">Which page of the list to return.</param>
+        /// <param name="pageSize">The page size to return.</param>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="InvalidModeratorException">If one or more of the parameters are invalid.</exception>
+        /// <exception cref="NullModeratorResponseException">If the response from the API is null.</exception>
         public ValueTask<CommentListForModeratorResponse> GetFilteredPositiveCommentsForModeratorAsync(string moderator,
         DateTime? fromDate, DateTime? toDate, int page, int pageSize) =>
         TryCatch(async () => {
+
             ValidateModerator(moderator);
             ValidateDateRange(fromDate, toDate);
             ValidatePagination(page, pageSize);
+
             var queryString = $"fromDate={fromDate.GetValueOrDefault()}&toDate={toDate.GetValueOrDefault()}";
             queryString += $"&page={page}&pageSize={pageSize}";
+
             CommentListForModeratorResponse response = await _apiBroker
                 .GetFilteredPositiveCommentsForModeratorAsync(moderator, queryString);
 
-            ValidateCommentResponse(response);
+            ValidateResponse(response);
 
             return response;
         });
 
-        // Returns a list of negative and unknown comments for a given moderator, filtered by the date range, page number, and page size.
-        // It calls the broker service, validates the parameters and the response, and handles any exceptions.
+        /// <summary>
+        /// Retrieves a list of negative and unknown comments, filtered by the date range, page number, 
+        /// and page size from the API for the given moderator.
+        /// </summary>
+        /// <param name="moderator">The name of the moderator.</param>
+        /// <param name="fromDate">The start date of the filter.</param>
+        /// <param name="toDate">The end date of the filter.</param>
+        /// <param name="page">Which page of the list to return.</param>
+        /// <param name="pageSize">The page size to return.</param>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="InvalidModeratorException">If one or more of the parameters are invalid.</exception>
+        /// <exception cref="NullModeratorResponseException">If the response from the API is null.</exception>
         public ValueTask<CommentListForModeratorResponse> GetFilteredNegativeAndUknownCommentsForModeratorAsync(string moderator,
            DateTime? fromDate, DateTime? toDate, int page, int pageSize) =>
         TryCatch(async () => {
@@ -50,12 +76,20 @@
             CommentListForModeratorResponse response = await _apiBroker
                 .GetFilteredNegativeAndUknownCommentsForModeratorAsync(moderator, queryString);
 
-            ValidateCommentResponse(response);
+            ValidateResponse(response);
+
             return response;
         });
 
-        // Returns a list of tags for a given moderator, filtered by the date range.
-        // It calls the broker service, validates the parameters and the response, and handles any exceptions.
+        /// <summary>
+        /// Retrieves a list of tags, filtered by the date range from the API for the given moderator.
+        /// </summary>
+        /// <param name="moderator">The name of the moderator.</param>
+        /// <param name="fromDate">The start date of the filter.</param>
+        /// <param name="toDate">The end date of the filter.</param>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="InvalidModeratorException">If one or more of the parameters are invalid.</exception>
+        /// <exception cref="NullModeratorResponseException">If the response from the API is null.</exception>
         public ValueTask<TagListForModeratorResponse> GetFilteredTagsForModeratorAsync(string moderator,
            DateTime? fromDate, DateTime? toDate) =>
         TryCatch(async () => {
@@ -68,13 +102,23 @@
              TagListForModeratorResponse response = await _apiBroker
                 .GetFilteredTagsForModeratorAsync(moderator, queryString);
 
-            ValidateTagResponse(response);
+            ValidateResponse(response);
 
             return response;
         });
 
-        // Returns a list of detections for a given moderator and tag, filtered by the date range, page number, and page size.
-        // It calls the broker service, validates the parameters and the response, and handles any exceptions.
+        /// <summary>
+        /// Retrieves a list of detections, filtered by the date range, page number, 
+        /// and page size from the API for the given moderator.
+        /// </summary>
+        /// <param name="moderator">The name of the moderator.</param>
+        /// <param name="fromDate">The start date of the filter.</param>
+        /// <param name="toDate">The end date of the filter.</param>
+        /// <param name="page">Which page of the list to return.</param>
+        /// <param name="pageSize">The page size to return.</param>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="InvalidModeratorException">If one or more of the parameters are invalid.</exception>
+        /// <exception cref="NullModeratorResponseException">If the response from the API is null.</exception>
         public ValueTask<DetectionListForModeratorAndTagResponse> GetFilteredDetectionsForTagAndModeratorAsync(string moderator, string tag,
             DateTime? fromDate, DateTime? toDate, int page, int pageSize) =>
         TryCatch(async () => {
@@ -87,13 +131,21 @@
             DetectionListForModeratorAndTagResponse response = await _apiBroker
                 .GetFilteredDetectionsForTagAndModeratorAsync(moderator, tag, queryString);
 
-            ValidateDetectionResponse(response);
+            ValidateResponse(response);
 
             return response;
         });
 
-        // Returns a metrics object for a given moderator, filtered by the date range.
-        // It calls the broker service, validates the parameters and the response, and handles any exceptions.
+        /// <summary>
+        /// Retrieves the metrics counts (unreviewed, positive, negative, unknown), filtered by the date range from 
+        /// the API for the given moderator.
+        /// </summary>
+        /// <param name="moderator">The name of the moderator.</param>
+        /// <param name="fromDate">The start date of the filter.</param>
+        /// <param name="toDate">The end date of the filter.</param>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="InvalidModeratorException">If one or more of the parameters are invalid.</exception>
+        /// <exception cref="NullModeratorResponseException">If the response from the API is null.</exception>
         public ValueTask<MetricsForModeratorResponse> GetFilteredMetricsForModeratorAsync(string moderator,
            DateTime? fromDate, DateTime? toDate) =>
         TryCatch(async () => {
@@ -105,7 +157,7 @@
 
             MetricsForModeratorResponse response = await _apiBroker.GetFilteredMetricsForModeratorAsync(moderator, queryString);
 
-            ValidateMetricsResponse(response);
+            ValidateResponse(response);
 
             return response;
         });

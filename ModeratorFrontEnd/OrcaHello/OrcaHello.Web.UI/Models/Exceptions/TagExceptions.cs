@@ -1,6 +1,20 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
     [ExcludeFromCodeCoverage]
+    public class NullTagResponseException : Xeption
+    {
+        public NullTagResponseException()
+            : base(message: "API call returned a null response.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class NullTagRequestException : Xeption
+    {
+        public NullTagRequestException()
+            : base(message: "Request is null.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class InvalidTagException : Xeption
     {
         public InvalidTagException() { }
@@ -19,6 +33,14 @@
     {
         public FailedTagDependencyException(Exception innerException)
             : base(message: "Failed Tag dependency error occurred, please contact support.", innerException)
+        { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class FailedTagServiceException : Xeption
+    {
+        public FailedTagServiceException(Exception innerException)
+            : base(message: "Failed Tag service error occurred, please contact support.", innerException)
         { }
     }
 

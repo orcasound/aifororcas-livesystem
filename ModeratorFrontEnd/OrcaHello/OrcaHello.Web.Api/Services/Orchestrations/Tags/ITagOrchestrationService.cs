@@ -5,6 +5,6 @@
         ValueTask<TagListResponse> RetrieveAllTagsAsync();
         ValueTask<TagListForTimeframeResponse> RetrieveTagsForGivenTimePeriodAsync(DateTime? fromDate, DateTime? toDate);
         ValueTask<TagRemovalResponse> RemoveTagFromAllDetectionsAsync(string tagToRemove);
-        ValueTask<TagReplaceResponse> ReplaceTagInAllDetectionsAsync(string oldTag, string newTag);
+        ValueTask<TagReplaceResponse> ReplaceTagInAllDetectionsAsync(ReplaceTagRequest request);
     }
 }

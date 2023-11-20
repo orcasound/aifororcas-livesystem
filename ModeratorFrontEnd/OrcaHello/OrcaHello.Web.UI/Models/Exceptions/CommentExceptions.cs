@@ -15,10 +15,25 @@
     }
 
     [ExcludeFromCodeCoverage]
+    public class NullCommentResponseException : Xeption
+    {
+        public NullCommentResponseException()
+            : base(message: "API call returned a null response.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class FailedCommentDependencyException : Xeption
     {
         public FailedCommentDependencyException(Exception innerException)
             : base(message: "Failed Comment dependency error occurred, please contact support.", innerException)
+        { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class FailedCommentServiceException : Xeption
+    {
+        public FailedCommentServiceException(Exception innerException)
+            : base(message: "Failed Comment service error occurred, please contact support.", innerException)
         { }
     }
 

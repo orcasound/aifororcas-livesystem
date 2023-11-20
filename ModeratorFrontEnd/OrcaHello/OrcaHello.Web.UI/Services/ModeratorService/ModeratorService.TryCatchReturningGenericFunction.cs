@@ -1,19 +1,13 @@
-﻿using System;
-
-namespace OrcaHello.Web.UI.Services
+﻿namespace OrcaHello.Web.UI.Services
 {
-
-    // This partial class implements a generic TryCatch for the ModeratorService.
+    /// <summary>
+    /// Partial of the the <see cref="ModeratorService"/> foundation service class responsible for peforming a generic
+    /// TryCatch to marshal level-specific and dependent exceptions.
+    /// </summary>
     public partial class ModeratorService
     {
-        // ReturningGenericFunction is a delegate that represents a generic asynchronous
-        // function that returns a value of type T.
         public delegate ValueTask<T> ReturningGenericFunction<T>();
 
-        // TryCatch is a method that takes a ReturningGenericFunction as a parameter and executes it in a try-catch block.
-        // It handles different types of exceptions that may occur during the execution and logs them using LoggingUtilities.
-        // It also rethrows the exceptions as specific types of ModeratorServiceException, ModeratorDependencyException,
-        // ModeratorDependencyValidationException, or ModeratorValidationException.
         protected async ValueTask<T> TryCatch<T>(ReturningGenericFunction<T> returningGenericFunction)
         {
             try

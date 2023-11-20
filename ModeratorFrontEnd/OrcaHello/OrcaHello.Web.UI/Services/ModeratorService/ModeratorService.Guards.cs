@@ -1,5 +1,9 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
+    /// <summary>
+    /// Partial of the the <see cref="ModeratorService"/> foundation service class responsible for peforming 
+    /// level-specific validations.
+    /// </summary>
     public partial class ModeratorService
     {
         // RULE: Check if the moderator name is valid.
@@ -24,11 +28,11 @@
         // It checks if the parameters are valid and throws an InvalidModeratorException if not.
         private void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-            // If the fromDate parameter is not null and is greater than the current date, throw an InvalidDateRangeException with a custom message.
+            // If the fromDate parameter is not null and is greater than the current date, throw an InvalidModeratorException with a custom message.
             if (fromDate.HasValue && fromDate.Value > DateTime.Now)
                 throw new InvalidModeratorException("The from date cannot be in the future.");
 
-            // If the toDate parameter is not null and is less than the fromDate parameter, throw an InvalidDateRangeException with a custom message.
+            // If the toDate parameter is not null and is less than the fromDate parameter, throw an InvalidModeratorException with a custom message.
             if (toDate.HasValue && toDate.Value < fromDate)
                 throw new InvalidModeratorException("The to date cannot be before the from date.");
         }
@@ -46,40 +50,11 @@
                 throw new InvalidModeratorException("The page size must be positive.");
         }
 
-        // RULE: Check if the response from the broker is not null.
-        // If the response is null, throw a NullModeratorResponseException.
-        private static void ValidateCommentResponse(CommentListForModeratorResponse response)
+        // RULE: Response cannot be null.
+        // It checks if the response is null and throws a NullModeratorResponseException if so.
+        private static void ValidateResponse<T>(T response)
         {
-            if (response == null)
-            {
-                throw new NullModeratorResponseException();
-            }
-        }
-
-        // RULE: Check if the response from the broker is not null.
-        // If the response is null, throw a NullModeratorResponseException.
-        private static void ValidateTagResponse(TagListForModeratorResponse response)
-        {
-            if (response == null)
-            {
-                throw new NullModeratorResponseException();
-            }
-        }
-
-        // RULE: Check if the response from the broker is not null.
-        // If the response is null, throw a NullModeratorResponseException.
-        private static void ValidateMetricsResponse(MetricsForModeratorResponse response)
-        {
-            if (response == null)
-            {
-                throw new NullModeratorResponseException();
-            }
-        }
-
-        // RULE: Check if the response from the broker is not null.
-        // If the response is null, throw a NullModeratorResponseException.
-        private static void ValidateDetectionResponse(DetectionListForModeratorAndTagResponse response)
-        {
+            // If the response is null, throw a NullModeratorResponseException.
             if (response == null)
             {
                 throw new NullModeratorResponseException();

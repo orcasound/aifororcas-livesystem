@@ -1,9 +1,11 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
-    // HydrophoneService is a partial class that implements the contract for a Foundation Service that accesses an
-    // API broker for hydrophone data. A Foundation Service provides basic functionality for other services, such as
-    // logging or authentication. The HydrophoneService constructor uses dependency injection to receive an
-    // IDetectionAPIBroker and an ILogger<HydrophoneService>. 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HydrophoneService"/> foundation service class for interacting 
+    /// with hydrophone-related endpoints of the API.
+    /// </summary>
+    /// <param name="apiBroker">The detection API broker.</param>
+    /// <param name="logger">The logger.</param>
     public partial class HydrophoneService : IHydrophoneService
     {
         private readonly IDetectionAPIBroker _apiBroker;
@@ -17,11 +19,17 @@
             _logger = logger;
         }
 
-        // Retrieve all hydrophones asynchronously from the API broker using a TryCatch block.
+        /// <summary>
+        /// Retrieves information for all hydrophones from the API.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="InvalidHydrophoneException">If the API returns no hydrophones (empty list).</exception>
+        /// <exception cref="NullHydrophoneResponseException">If the response from the API is null.</exception>
         public ValueTask<List<Hydrophone>> RetrieveAllHydrophonesAsync() =>
         TryCatch(async () => {
 
             HydrophoneListResponse response = await _apiBroker.GetAllHydrophonesAsync();
+
             ValidateResponse(response);
             ValidateThereAreHydrophones(response.Count);
 

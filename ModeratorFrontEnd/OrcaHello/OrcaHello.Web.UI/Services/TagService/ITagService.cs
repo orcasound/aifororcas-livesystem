@@ -4,5 +4,6 @@
     {
         ValueTask<List<string>> RetrieveAllTagsAsync();
         ValueTask<TagListForTimeframeResponse> RetrieveFilteredTagsAsync(DateTime? fromDate, DateTime? toDate);
+        ValueTask<TagRemovalResponse> RemoveTagAsync(string tag);
     }
 }

@@ -1,6 +1,13 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
     [ExcludeFromCodeCoverage]
+    public class NullMetricsResponseException : Xeption
+    {
+        public NullMetricsResponseException()
+            : base(message: "API call returned a null response.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class InvalidMetricsException : Xeption
     {
         public InvalidMetricsException() { }
@@ -19,6 +26,14 @@
     {
         public FailedMetricsDependencyException(Exception innerException)
             : base(message: "Failed Metrics dependency error occurred, please contact support.", innerException)
+        { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class FailedMetricsServiceException : Xeption
+    {
+        public FailedMetricsServiceException(Exception innerException)
+            : base(message: "Failed Metrics service error occurred, please contact support.", innerException)
         { }
     }
 
