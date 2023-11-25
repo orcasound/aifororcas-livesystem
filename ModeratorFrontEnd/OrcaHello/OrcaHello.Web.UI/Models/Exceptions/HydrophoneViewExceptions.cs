@@ -16,6 +16,13 @@
     }
 
     [ExcludeFromCodeCoverage]
+    public class NullHydrophoneViewResponseException : Xeption
+    {
+        public NullHydrophoneViewResponseException()
+            : base(message: "Orchestration service call returned a null response.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class HydrophoneViewValidationException : Exception
     {
         public HydrophoneViewValidationException() { }
@@ -49,13 +56,5 @@
 
         public HydrophoneViewServiceException(Exception innerException)
             : base($"Internal or unknown system failure (HydrophoneViewServiceException): {innerException.Message}", innerException) { }
-    }
-
-    [ExcludeFromCodeCoverage]
-    public class FailedHydrophoneViewServiceException : Xeption
-    {
-        public FailedHydrophoneViewServiceException(Exception innerException)
-            : base(message: "Failed hydrophone view service error occurred, please contact support.", innerException)
-        { }
     }
 }

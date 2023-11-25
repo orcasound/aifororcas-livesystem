@@ -2,15 +2,16 @@
 
 namespace OrcaHello.Web.UI.Services
 {
-    // HydrophoneViewService implements the presentation layer of the software application,
-    // according to the Standard. It is responsible for retrieving and displaying hydrophone data to the user,
-    // using the HydrophoneService as a dependency and the LoggingUtilities as a helper.
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HydrophoneViewService"/> orchestration service class for rendering 
+    /// data from HydrophoneService for various hydrophone-related views and implementing hydrophone-related business logic.
+    /// </summary>
+    /// <param name="hydrophoneService">The HydrophoneService foundation service.</param>
+    /// <param name="logger">The logger.</param>
     public partial class HydrophoneViewService : IHydrophoneViewService
     {
-        // _hydrophoneService is used to interact with the hydrophone broker and perform business logic operations.
         private readonly IHydrophoneService _hydrophoneService;
 
-        // _logger to log information, errors, and exceptions that occur during the execution of the methods.
         private readonly ILogger<HydrophoneViewService> _logger;
 
         public HydrophoneViewService(IHydrophoneService hydrophoneService,
@@ -20,14 +21,20 @@ namespace OrcaHello.Web.UI.Services
             _logger = logger;
         }
 
-        // Returns a list of hydrophone views ordered by name after retrieving and mapping them from the HydrophoneService.
+        /// <summary>
+        /// Retrieves a list of all hydrophones from HydrophoneService and sorts them alphabetically.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullHydrophoneViewResponseException">If the response from HydrophoneService is null.</exception>
         public ValueTask<List<HydrophoneItemView>> RetrieveAllHydrophoneViewsAsync() =>
         TryCatch(async () =>
         {
-            List<Hydrophone> hydrophones =
+            List<Hydrophone> response =
                 await _hydrophoneService.RetrieveAllHydrophonesAsync();
 
-            return hydrophones.Select(AsHydrophoneView).OrderBy(x => x.Name).ToList();
+            ValidateResponse(response);
+
+            return response.Select(AsHydrophoneView).OrderBy(x => x.Name).ToList();
         });
 
         // Maps a hydrophone to a hydrophone view for presentation.

@@ -21,6 +21,7 @@ global using OrcaHello.Web.UI.Models;
 global using OrcaHello.Web.UI.Models.Helpers;
 global using OrcaHello.Web.UI.Pages.Components;
 global using OrcaHello.Web.UI.Pages.Detections.Components;
+global using OrcaHello.Web.UI.Pages.Tags.Components;
 global using OrcaHello.Web.UI.Services;
 global using Radzen;
 global using Radzen.Blazor;

@@ -1,22 +1,17 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
-    // This partial class implements a generic TryCatch for the HydrophoneViewService.
+    /// <summary>
+    /// Partial of the the <see cref="HydrophoneViewService"/> orchestration service class responsible for peforming a generic
+    /// TryCatch to marshal level-specific and dependent exceptions.
+    /// </summary>
     public partial class HydrophoneViewService
     {
-        // ReturningGenericFunction is a delegate that represents a generic asynchronous
-        // function that returns a value of type T.
         public delegate ValueTask<T> ReturningGenericFunction<T>();
 
-        // TryCatch is a method that takes a ReturningGenericFunction as a parameter and executes it in a try-catch block.
-        // It handles different types of exceptions that may occur during the execution and logs them using LoggingUtilities.
-        // It also rethrows the exceptions as specific types of HydrophoneViewServiceException,
-        // HydrophoneViewDependencyException, HydrophoneViewDependencyValidationException, or
-        // HydrophoneViewValidationException.
         protected async ValueTask<T> TryCatch<T>(ReturningGenericFunction<T> returningGenericFunction)
         {
             try
             {
-                // Try to execute the function and return the result.
                 return await returningGenericFunction();
             }
             catch (Exception exception)
@@ -24,7 +19,8 @@
                 // If the exception is related to the validation of the hydrophone view, rethrow
                 // it as a HydrophoneViewValidationException and log it.
                 if (exception is NullHydrophoneViewException ||
-                    exception is InvalidHydrophoneViewException)
+                    exception is InvalidHydrophoneViewException ||
+                    exception is NullHydrophoneResponseException)
                     throw LoggingUtilities.CreateAndLogException<HydrophoneViewValidationException>(_logger, exception);
 
                 // If the exception is related to the validation of the hydrophone dependency, rethrow
@@ -40,7 +36,7 @@
                     throw LoggingUtilities.CreateAndLogException<HydrophoneViewDependencyException>(_logger, exception);
 
                 // If the exception is any other type, rethrow it as a HydrophoneViewServiceException and log it.
-                throw LoggingUtilities.CreateAndLogException<HydrophoneViewServiceException>(_logger, new FailedHydrophoneViewServiceException(exception));
+                throw LoggingUtilities.CreateAndLogException<HydrophoneViewServiceException>(_logger, exception);
             }
         }
     }

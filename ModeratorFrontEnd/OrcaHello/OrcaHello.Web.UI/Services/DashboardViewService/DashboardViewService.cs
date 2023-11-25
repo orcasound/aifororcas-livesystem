@@ -1,18 +1,15 @@
-﻿using Azure.Core;
-using Azure;
-using OrcaHello.Web.Shared.Models.Detections;
-using OrcaHello.Web.UI.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Collections.Generic;
-using System.Drawing;
-using System;
-
-namespace OrcaHello.Web.UI.Services
+﻿namespace OrcaHello.Web.UI.Services
 {
-    // DashboardViewService implements the presentation layer of the software application,
-    // according to the Standard. It is responsible for retrieving and displaying summary and metrics for the system and
-    // specific moderator, using the DetectionService, TagService, MetricsService, CommentService, and ModeratorService as 
-    // dependencies and the LoggingUtilities as a helper.
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DashboardViewService"/> orchestration service class for rendering 
+    /// data from various services for various status and metrics-related views and implementing business logic.
+    /// </summary>
+    /// <param name="detectionService">The DetectionService foundation service.</param>
+    /// <param name="tagService">The TagService foundation service.</param>
+    /// <param name="metricsService">The MetricsService foundation service.</param>
+    /// <param name="commentService">The CommentService foundation service.</param>
+    /// <param name="moderatorService">The ModeratorService foundation service.</param>
+    /// <param name="logger">The logger.</param>
     public partial class DashboardViewService : IDashboardViewService
     {
         private readonly IDetectionService _detectionService;
@@ -39,8 +36,13 @@ namespace OrcaHello.Web.UI.Services
 
         #region system metrics
 
-        //Retrieves a list of tags from the tag service, filtered by the date range specified in the request. It calls the broker service,
-        //validates the response, and handles any exceptions.
+        /// <summary>
+        /// Retrieves a list of all tags from TagService, filtered by the date range.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from TagService is null.</exception>
         public ValueTask<List<string>> RetrieveFilteredTagsAsync(TagsByDateRequest request) =>
         TryCatch(async () =>
         {
@@ -57,8 +59,13 @@ namespace OrcaHello.Web.UI.Services
             return response.Tags;
         });
 
-        //Retrieves a metrics object from the MetricsService, filtered by the date range specified in the request. It calls the broker service,
-        //validates the response, and maps it to a metrics item view response.
+        /// <summary>
+        /// Retrieves a list of metrics from MetricsService, filtered by the date range.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from MetricsService is null.</exception>
         public ValueTask<MetricsItemViewResponse> RetrieveFilteredMetricsAsync(MetricsByDateRequest request) =>
         TryCatch(async () =>
         {
@@ -74,10 +81,15 @@ namespace OrcaHello.Web.UI.Services
 
             return MetricsItemView.AsMetricsItemViewResponse(response);
         });
-        
-        // Retrieves a list of detections for a given tag from the DetectionService, filtered by the date range
-        // and paginated by the page number and size specified in the request. It calls the broker service,
-        // validates the response, and maps it to a detection item view response.
+
+        /// <summary>
+        /// Retrieves a list of detections from DetectionService for a specific tag, filtered by the date range
+        /// and paginated by the page number and size.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from MetricsService is null.</exception>
         public ValueTask<DetectionItemViewResponse> RetrieveFilteredDetectionsForTagsAsync(PaginatedDetectionsByTagAndDateRequest request) =>
         TryCatch(async () =>
         {
@@ -102,10 +114,15 @@ namespace OrcaHello.Web.UI.Services
                 Count = response.TotalCount
             };
         });
-        
-        // Retrieves a list of positive comments from the CommentService, filtered by the date range and paginated
-        // by the page number and size specified in the request.It calls the broker service, validates the response,
-        // and maps it to a comment item view response.
+
+        /// <summary>
+        /// Retrieves a list of positive comments from CommentService, filtered by the date range
+        /// and paginated by the page number and size.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from CommentService is null.</exception>
         public ValueTask<CommentItemViewResponse> RetrieveFilteredPositiveCommentsAsync(PaginatedCommentsByDateRequest request) =>
         TryCatch(async () =>
         {
@@ -129,9 +146,14 @@ namespace OrcaHello.Web.UI.Services
             };
         });
 
-        // Retrieves a list of negative and unknown comments from the CommentService, filtered by the date range and paginated
-        // by the page number and size specified in the request. It calls the broker service, validates the response,
-        // and maps it to a comment item view response.
+        /// <summary>
+        /// Retrieves a list of negative and unknown comments from CommentService, filtered by the date range
+        /// and paginated by the page number and size.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from CommentService is null.</exception>
         public ValueTask<CommentItemViewResponse> RetrieveFilteredNegativeAndUnknownCommentsAsync(PaginatedCommentsByDateRequest request) =>
         TryCatch(async () =>
         {
@@ -159,8 +181,13 @@ namespace OrcaHello.Web.UI.Services
 
         #region moderator metrics
 
-        // Retrieves a list of tags for a given moderator from the ModeratorService, filtered by the date range specified in the request.
-        // It calls the broker service, validates the response, and handles any exceptions.
+        /// <summary>
+        /// Retrieves a list of tags entered for a moderator from ModeratorService, filtered by the date range.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the moderator is invalid or request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from ModeratorService is null.</exception>
         public ValueTask<List<string>> RetrieveFilteredTagsForModeratorAsync(string moderator, TagsByDateRequest request) =>
         TryCatch(async () =>
         {
@@ -179,9 +206,14 @@ namespace OrcaHello.Web.UI.Services
             return response.Tags;
         });
 
-        // Retrieves a metrics object for a given moderator from the ModeratorService, filtered by the date range specified in
-        // the request. It calls the broker service, validates the response, and maps it to a moderator metrics item view response.
-        public ValueTask<ModeratorMetricsItemViewResponse> RetrieveFilteredMetricsForModeratorAsync(string moderator, MetricsByDateRequest request) =>
+        /// <summary>
+        /// Retrieves a list of metrics for a moderator from ModeratorService, filtered by the date range.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the moderator is invalid or the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from ModeratorService is null.</exception>
+       public ValueTask<ModeratorMetricsItemViewResponse> RetrieveFilteredMetricsForModeratorAsync(string moderator, MetricsByDateRequest request) =>
         TryCatch(async () =>
         {
             ValidateRequest(request);
@@ -199,9 +231,14 @@ namespace OrcaHello.Web.UI.Services
             return AsModeratorMetricsItemViewResponse(response);
         });
 
-        // Retrieves a list of positive comments for a given moderator from the ModeratorService, filtered by the date range and
-        // paginated by the page number and size specified in the request. It calls the broker service, validates the response, and maps it to a
-        // moderator comment item view response.
+        /// <summary>
+        /// Retrieves a list of positive comments for a moderator from ModeratorService, filtered by the date range
+        /// and paginated by the page number and size.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the moderator is invalid or the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from ModeratorService is null.</exception>
         public ValueTask<ModeratorCommentItemViewResponse> RetrieveFilteredPositiveCommentsForModeratorAsync(string moderator, PaginatedCommentsByDateRequest request) =>
         TryCatch(async () =>
         {
@@ -228,9 +265,14 @@ namespace OrcaHello.Web.UI.Services
             };
         });
 
-        // Retrieves a list of negative and unknown comments for a given moderator from the ModeratorService, filtered by the date range
-        // and paginated by the page number and size specified in the request. It calls the broker service, validates the response,
-        // and maps it to a moderator comment item view response.
+        /// <summary>
+        /// Retrieves a list of negative and unknown comments for a moderator from ModeratorService, filtered by the date range
+        /// and paginated by the page number and size.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the moderator is invalid or the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from ModeratorService is null.</exception>
         public ValueTask<ModeratorCommentItemViewResponse> RetrieveFilteredNegativeAndUnknownCommentsForModeratorAsync(string moderator, PaginatedCommentsByDateRequest request) =>
         TryCatch(async () =>
         {
@@ -256,9 +298,15 @@ namespace OrcaHello.Web.UI.Services
                 Moderator = moderator
             };
         });
-        // Retrieves a list of detections for a given tag and moderator from the ModeratorService, filtered by the date range and
-        // paginated by the page number and size specified in the request. It calls the broker service, validates the response,
-        // and maps it to a moderator detection item view response.
+
+        /// <summary>
+        /// Retrieves a list of detections for a moderator and tag from ModeratorService, filtered by the date range
+        /// and paginated by the page number and size.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullDashboardViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidDashboardViewException">If the moderator is invalid or the request is improperly formatted.</exception>
+        /// <exception cref="NullDashboardViewResponseException">If the response from ModeratorService is null.</exception>
         public ValueTask<ModeratorDetectionItemViewResponse> RetrieveFilteredDetectionsForTagAndModeratorAsync(string moderator, PaginatedDetectionsByTagAndDateRequest request) =>
         TryCatch(async () =>
         {
@@ -287,6 +335,7 @@ namespace OrcaHello.Web.UI.Services
             };
         });
 
+        // Maps a MetricsForModeratorResponse to a ModeratorMetricsItemViewResponse for display.
         private static Func<MetricsForModeratorResponse, ModeratorMetricsItemViewResponse> AsModeratorMetricsItemViewResponse =>
         metricsResponse => new ModeratorMetricsItemViewResponse
         {

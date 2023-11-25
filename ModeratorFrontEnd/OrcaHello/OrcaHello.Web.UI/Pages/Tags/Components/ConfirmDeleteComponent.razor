@@ -1,0 +1,8 @@
+﻿@inherits ComponentManager
+
+<RadzenText Text=@($"Select \"Delete\" below if you are sure you want to permanently remove '{Item.Tag}' from every detection where it occurs.") />
+
+<RadzenStack Orientation=Orientation.Horizontal Style="margin-top: 2rem;" Gap="5px;" AlignItems=AlignItems.Stretch>
+    <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Click=OnConfirmClicked Text="Delete" />
+    <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Secondary Click=OnCancelClicked Text="Cancel" />
+</RadzenStack>

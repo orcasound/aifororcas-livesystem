@@ -1,5 +1,9 @@
 ﻿namespace OrcaHello.Web.UI.Services
 {
+    /// <summary>
+    /// Partial of the the <see cref="DashboardViewService"/> orchestration service class responsible for peforming 
+    /// level-specific validations.
+    /// </summary>
     public partial class DashboardViewService
     {
         // RULE: Date range must be valid.

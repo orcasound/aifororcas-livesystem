@@ -19,6 +19,7 @@
             builder.Services.AddScoped<IHydrophoneViewService, HydrophoneViewService>();
             builder.Services.AddScoped<IDetectionViewService, DetectionViewService>();
             builder.Services.AddScoped<IDashboardViewService, DashboardViewService>();
+            builder.Services.AddScoped<ITagViewService, TagViewService>();
         }
     }
 }
