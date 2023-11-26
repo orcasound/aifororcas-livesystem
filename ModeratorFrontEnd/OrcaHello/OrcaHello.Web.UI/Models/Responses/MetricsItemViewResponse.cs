@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class MetricsItemViewResponse
     {
         public List<MetricsItemView> MetricsItemViews { get; set; } = new();

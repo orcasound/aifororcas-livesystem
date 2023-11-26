@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Pages.Components
 {
+    [ExcludeFromCodeCoverage]
     public partial class InlinePlayerComponent
     {
         [Inject]

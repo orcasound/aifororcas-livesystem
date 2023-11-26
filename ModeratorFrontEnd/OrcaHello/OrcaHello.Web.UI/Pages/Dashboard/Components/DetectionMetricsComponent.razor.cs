@@ -2,6 +2,7 @@
 
 namespace OrcaHello.Web.UI.Pages.Dashboard.Components
 {
+    [ExcludeFromCodeCoverage]
     public partial class DetectionMetricsComponent
     { 
         [Inject]

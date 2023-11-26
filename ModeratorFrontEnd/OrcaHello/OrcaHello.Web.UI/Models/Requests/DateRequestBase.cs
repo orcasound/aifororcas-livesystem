@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class DateRequestBase
     {
         public DateTime FromDate { get; set; }

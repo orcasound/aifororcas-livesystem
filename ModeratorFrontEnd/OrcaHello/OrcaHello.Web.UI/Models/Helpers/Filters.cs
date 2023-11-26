@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class Filters
     {
         public DetectionState DetectionState { get; set; }

@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class PaginatedDetectionsByStateRequest : DateRequestBase
     {
         public string State { get; set; }

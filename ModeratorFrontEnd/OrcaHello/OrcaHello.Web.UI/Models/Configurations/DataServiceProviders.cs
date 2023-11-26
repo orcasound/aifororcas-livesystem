@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public static class DataServiceProviders
     {
         public static void ConfigureDataServices(this WebApplicationBuilder builder)

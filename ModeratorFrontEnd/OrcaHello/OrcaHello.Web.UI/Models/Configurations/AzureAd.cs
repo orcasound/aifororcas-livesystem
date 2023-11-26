@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class AzureAd
     {
         public string Instance { get; set; } = string.Empty;
@@ -10,6 +11,7 @@
         public AzureAdGroups AzureAdGroups { get; set; } = new();
     }
 
+    [ExcludeFromCodeCoverage]
     public class AzureAdGroups
     {
         public string ModeratorGroupId { get; set; } = string.Empty;

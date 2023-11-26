@@ -2,6 +2,7 @@
 
 namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public static class ExternalServiceProviders
     {
         public static void ConfigureExternalUtilities(this WebApplicationBuilder builder, AppSettings appSettings)

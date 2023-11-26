@@ -1,5 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Models.DetectionViews
+﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class ModerateDetectionRequest
     {
         public string Id { get; set; }

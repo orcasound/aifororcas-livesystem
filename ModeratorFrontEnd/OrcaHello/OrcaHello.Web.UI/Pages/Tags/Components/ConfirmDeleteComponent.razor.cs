@@ -3,6 +3,7 @@
     /// <summary>
     /// Code-behind for the ConfirmDeleteComponent.razor page, providing functionality for confirming tag deletion.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class ConfirmDeleteComponent
     {
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI
 {
+    [ExcludeFromCodeCoverage]
     public class DropdownOption
     {
         public string Text { get; private set; }

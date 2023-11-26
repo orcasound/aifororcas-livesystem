@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Pages.Detections
 {
+    [ExcludeFromCodeCoverage]
     public partial class OrcaSounds
     {
         [Inject]

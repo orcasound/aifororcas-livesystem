@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
+    [ExcludeFromCodeCoverage]
     public partial class TileViewComponent
     {
         [Inject]

@@ -5,6 +5,7 @@ namespace OrcaHello.Web.UI.Pages.Tags.Components
     /// <summary>
     /// Code-behind for the ReplaceTagComponent.razor page, providing functionality for replacing tags.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public partial class ReplaceTagComponent
     {
         /// <summary>

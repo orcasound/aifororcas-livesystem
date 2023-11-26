@@ -1,5 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Models.Helpers
+﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class DOMRect
     {
         public double X { get; set; }

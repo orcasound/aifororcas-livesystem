@@ -2,6 +2,7 @@
 {
     // This class represents a view model for detection items, which are used throughout the
     // various view services to display information about detections.
+    [ExcludeFromCodeCoverage]
     public class DetectionItemView
     {
         // Unique identifier for the detection item.

@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public static class AuthenticationServiceProviders
     {
         // Set ModeratorPolicy

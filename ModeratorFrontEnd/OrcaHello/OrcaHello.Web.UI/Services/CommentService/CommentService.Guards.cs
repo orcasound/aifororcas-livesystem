@@ -7,7 +7,7 @@
     public partial class CommentService
     {
         // RULE: Date range must be valid.
-        private void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
+        protected void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
             if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
                 throw new InvalidCommentException("Property 'fromDate' cannot be in the future.");
@@ -17,7 +17,7 @@
         }
 
         // RULE: Pagination must be correct.
-        private void ValidatePagination(int page, int pageSize)
+        protected void ValidatePagination(int page, int pageSize)
         {
             if (page <= 0)
                 throw new InvalidCommentException("Property 'page' number must be positive.");
@@ -27,7 +27,7 @@
         }
 
         // RULE: Response cannot be null.
-        private static void ValidateResponse<T>(T response)
+        protected static void ValidateResponse<T>(T response)
         {
             if (response == null)
             {

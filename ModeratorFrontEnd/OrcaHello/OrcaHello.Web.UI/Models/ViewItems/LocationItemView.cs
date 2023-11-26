@@ -2,6 +2,7 @@
 {
     // This class represents a view model for a location item, which is used throughout the
     // various view services to display information about locations.
+    [ExcludeFromCodeCoverage]
     public class LocationItemView
     {
         // Name of the location.

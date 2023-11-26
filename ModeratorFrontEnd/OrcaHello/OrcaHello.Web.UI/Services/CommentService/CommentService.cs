@@ -11,6 +11,10 @@
         private readonly IDetectionAPIBroker _apiBroker;
         private readonly ILogger<CommentService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public CommentService() { }
+
         public CommentService(
             IDetectionAPIBroker apiBroker,
             ILogger<CommentService> logger)

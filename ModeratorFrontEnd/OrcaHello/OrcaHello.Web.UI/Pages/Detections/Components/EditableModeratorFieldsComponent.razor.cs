@@ -2,6 +2,7 @@
 
 namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
+    [ExcludeFromCodeCoverage]
     public partial class EditableModeratorFieldsComponent
     {
         [Inject]

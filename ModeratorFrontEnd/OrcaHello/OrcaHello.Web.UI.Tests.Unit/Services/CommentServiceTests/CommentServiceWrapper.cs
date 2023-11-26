@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OrcaHello.Web.UI.Tests.Unit.Services.CommentServiceTests
+﻿namespace OrcaHello.Web.UI.Tests.Unit.Services
 {
-    internal class CommentServiceWrapper
+    [ExcludeFromCodeCoverage]
+    public class CommentServiceWrapper : CommentService
     {
+        public new void ValidateDateRange(DateTime? fromDate, DateTime? toDate) =>
+            base.ValidateDateRange(fromDate, toDate);
+
+        public new void ValidatePagination(int page, int pageSize) =>
+            base.ValidatePagination(page, pageSize);
+
+        public new void ValidateResponse<T>(T response) =>
+            ValidateResponse<T>(response);
+
+        public new ValueTask<T> TryCatch<T>(ReturningGenericFunction<T> returningValueTaskFunction) =>
+            base.TryCatch(returningValueTaskFunction);
     }
 }

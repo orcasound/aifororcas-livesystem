@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public class CustomJSEventHelper
     {
         private readonly Func<EventArgs, Task> _callback;

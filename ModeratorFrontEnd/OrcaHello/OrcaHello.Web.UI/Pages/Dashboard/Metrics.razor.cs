@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Pages.Dashboard
 {
+    [ExcludeFromCodeCoverage]
     public partial class Metrics : ComponentManager
     {
         [Inject]

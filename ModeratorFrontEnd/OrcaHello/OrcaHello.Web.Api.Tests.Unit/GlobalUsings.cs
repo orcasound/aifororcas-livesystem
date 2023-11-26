@@ -5,6 +5,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using Moq;
 global using OrcaHello.Web.Api.Brokers.Hydrophones;
+global using OrcaHello.Web.Api.Brokers.Storages;
 global using OrcaHello.Web.Api.Controllers;
 global using OrcaHello.Web.Api.Models;
 global using OrcaHello.Web.Api.Services;

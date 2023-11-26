@@ -2,6 +2,7 @@
 {
     // This class represents a view model for an annotation item, which is used throughout the
     // various view services to display information about annotations.
+    [ExcludeFromCodeCoverage]
     public class AnnotationItemView
     {
         // Unique identifier for the annotation.

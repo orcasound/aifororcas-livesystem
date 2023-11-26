@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
-{ 
+{
+    [ExcludeFromCodeCoverage]
     public class HydrophoneItemView
     {
         public string Id { get; set; }
