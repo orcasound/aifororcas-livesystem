@@ -1,6 +1,11 @@
 ﻿@inherits ComponentManager
 
-@if (!IsLoading && DetectionItemViews != null && DetectionItemViews.Count() == 0)
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false"
+             AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
+</RadzenAlert>
+
+@if (string.IsNullOrEmpty(ValidationMessage) && !IsLoading && DetectionItemViews != null && DetectionItemViews.Count() == 0)
 {
     <RadzenAlert AllowClose="false"
                  AlertStyle=AlertStyle.Warning

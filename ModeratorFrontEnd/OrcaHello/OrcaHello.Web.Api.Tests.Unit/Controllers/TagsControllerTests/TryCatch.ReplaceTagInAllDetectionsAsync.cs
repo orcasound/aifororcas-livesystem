@@ -6,7 +6,7 @@
         public async Task TryCatch_ReplaceTagInAllDetectionsAsync_Expect_Exception()
         {
             _orchestrationServiceMock
-                .SetupSequence(p => p.ReplaceTagInAllDetectionsAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .SetupSequence(p => p.ReplaceTagInAllDetectionsAsync(It.IsAny<ReplaceTagRequest>()))
 
                 .Throws(new TagOrchestrationValidationException(new Exception()))
                 .Throws(new TagOrchestrationDependencyValidationException(new Exception()))
@@ -21,7 +21,7 @@
 
             _orchestrationServiceMock
                  .Verify(service => service
-                    .ReplaceTagInAllDetectionsAsync(It.IsAny<string>(), It.IsAny<string>()),
+                    .ReplaceTagInAllDetectionsAsync(It.IsAny<ReplaceTagRequest>()),
                     Times.Exactly(5));
 
         }
@@ -31,7 +31,7 @@
             for (int x = 0; x < count; x++)
             {
                 ActionResult<TagReplaceResponse> actionResult =
-                    await _controller.ReplaceTagInAllDetectionsAsync("oldTag", "newTag");
+                    await _controller.ReplaceTagInAllDetectionsAsync(new ReplaceTagRequest { OldTag = "oldTag", NewTag = "newTag" });
 
                 var contentResult = actionResult.Result as ObjectResult;
                 Assert.IsNotNull(contentResult);

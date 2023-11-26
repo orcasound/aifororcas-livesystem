@@ -1,8 +1,4 @@
-﻿using Moq;
-using OrcaHello.Web.Api.Models;
-using OrcaHello.Web.Shared.Models.Moderators;
-
-namespace OrcaHello.Web.Api.Tests.Unit.Services
+﻿namespace OrcaHello.Web.Api.Tests.Unit.Services
 {
     public partial class ModeratorOrchestrationServiceTests
     {

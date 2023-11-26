@@ -33,6 +33,9 @@
 
         protected List<string> AvailableTags = new(); // All unique tags in the system for picklists
 
+        // Validation message for displaying error information.
+        protected string ValidationMessage = null!;
+
         #region lifecycle events
 
         protected override async Task OnInitializedAsync()
@@ -43,6 +46,8 @@
 
         protected override async Task OnParametersSetAsync()
         {
+            ValidationMessage = null!;
+
             if (CurrentlySetFilters != Filters)
             {
                 CurrentlySetFilters = Filters;
@@ -105,17 +110,21 @@
                 // Update the PillCount
                 PillCount = result.Count;
                 await PillCountChanged.InvokeAsync(PillCount);
-
-                IsLoading = false;
-                await InvokeAsync(StateHasChanged);
             }
-            catch (Exception ex)
+            catch (Exception exception)
+            {
+                // Handle data entry validation errors
+                if (exception is DetectionViewValidationException ||
+                    exception is DetectionViewDependencyValidationException)
+                    ValidationMessage = ValidatorUtilities.GetInnerMessage(exception);
+                else
+                    // Report any other errors as unknown
+                    LogAndReportUnknownException(exception);
+            }
+            finally
             {
                 IsLoading = false;
                 await InvokeAsync(StateHasChanged);
-
-                await Console.Out.WriteLineAsync(ex.Message);
-
             }
         }
 

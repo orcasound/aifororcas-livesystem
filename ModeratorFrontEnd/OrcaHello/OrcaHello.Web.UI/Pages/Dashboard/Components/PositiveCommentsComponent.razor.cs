@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Pages.Dashboard.Components
+﻿using System;
+
+namespace OrcaHello.Web.UI.Pages.Dashboard.Components
 {
     public partial class PositiveCommentsComponent
     {
@@ -74,9 +76,9 @@
                 // Update the count
                 StateView.Count = response.Count;
             }
-            catch(Exception ex)
+            catch(Exception exception)
             {
-                ReportError("Trouble loading positive Comments data", ex.Message);
+                LogAndReportUnknownException(exception);
             }
 
             StateView.IsLoading = false;

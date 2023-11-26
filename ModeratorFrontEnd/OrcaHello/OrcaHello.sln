@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrcaHello.Web.UI", "OrcaHel
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrcaHello.Console.DataMigration", "OrcaHello.Console.DataMigration\OrcaHello.Console.DataMigration.csproj", "{8D3DFBC3-A031-403C-8F03-5543659B75B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrcaHello.Web.UI.Tests.Unit", "OrcaHello.Web.UI.Tests.Unit\OrcaHello.Web.UI.Tests.Unit.csproj", "{BFB49D85-DDD3-43C1-8EEB-3F8799D7587C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{8D3DFBC3-A031-403C-8F03-5543659B75B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D3DFBC3-A031-403C-8F03-5543659B75B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D3DFBC3-A031-403C-8F03-5543659B75B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFB49D85-DDD3-43C1-8EEB-3F8799D7587C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFB49D85-DDD3-43C1-8EEB-3F8799D7587C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFB49D85-DDD3-43C1-8EEB-3F8799D7587C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFB49D85-DDD3-43C1-8EEB-3F8799D7587C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -66,7 +66,7 @@
         public ValueTask<TagRemovalResponse> RemoveTagAsync(string tag) =>
         TryCatch(async () =>
         {
-            ValidateTag(tag);
+            Validate(tag, nameof(tag));
 
             TagRemovalResponse response = await _apiBroker.RemoveTag(tag);
 
@@ -86,7 +86,9 @@
         public ValueTask<TagReplaceResponse> ReplaceTagAsync(ReplaceTagRequest request) =>
         TryCatch(async () =>
         {
-            ValidateReplaceTagRequest(request);
+            ValidateRequest(request);
+            Validate(request.OldTag, nameof(request.OldTag));
+            Validate(request.NewTag, nameof(request.NewTag));
 
             TagReplaceResponse response = await _apiBroker.ReplaceTagAsync(request);
 

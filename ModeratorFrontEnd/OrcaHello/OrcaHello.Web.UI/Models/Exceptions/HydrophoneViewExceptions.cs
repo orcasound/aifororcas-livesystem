@@ -9,17 +9,10 @@
     }
 
     [ExcludeFromCodeCoverage]
-    public class NullHydrophoneViewException : Exception
-    {
-        public NullHydrophoneViewException()
-            : base(message: "Null hydrophone error occurred.") { }
-    }
-
-    [ExcludeFromCodeCoverage]
     public class NullHydrophoneViewResponseException : Xeption
     {
-        public NullHydrophoneViewResponseException()
-            : base(message: "Orchestration service call returned a null response.") { }
+        public NullHydrophoneViewResponseException(string name)
+            : base(message: $"Service call returned a null '{name}' response.") { }
     }
 
     [ExcludeFromCodeCoverage]

@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace OrcaHello.Web.UI.Pages.Tags
+﻿namespace OrcaHello.Web.UI.Pages.Tags
 {
     /// <summary>
     /// Code-behind for the CurateTags.razor page, a Razor component for curating tags.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public partial class CurateTags
+    public partial class CurateTags : ComponentManager
     {
         // Inject the ITagViewService dependency
         [Inject]

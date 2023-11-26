@@ -1,5 +1,10 @@
 ﻿@inherits ComponentManager
 
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false"
+             AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
+</RadzenAlert>
+
 <RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4 rz-mt-3">
     <RadzenColumn Size="12" SizeMD="6" SizeLG="6" SizeXL="3">
 

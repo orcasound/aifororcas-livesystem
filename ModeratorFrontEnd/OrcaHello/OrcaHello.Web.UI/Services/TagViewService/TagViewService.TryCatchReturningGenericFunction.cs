@@ -20,8 +20,7 @@
                 // If the exception is one of the following types, rethrow it as a TagViewValidationException and log it.
                 // These exceptions indicate that there is something wrong with the view service itself or the request
                 // or response objects.
-                if (exception is NullTagViewException ||
-                    exception is NullTagViewRequestException ||
+                if (exception is NullTagViewRequestException ||
                     exception is InvalidTagViewException ||
                     exception is NullTagViewResponseException)
                     throw LoggingUtilities.CreateAndLogException<TagViewValidationException>(_logger, exception);

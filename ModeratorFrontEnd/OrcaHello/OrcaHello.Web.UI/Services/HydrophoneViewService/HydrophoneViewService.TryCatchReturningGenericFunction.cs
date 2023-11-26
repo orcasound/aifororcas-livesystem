@@ -18,9 +18,8 @@
             {
                 // If the exception is related to the validation of the hydrophone view, rethrow
                 // it as a HydrophoneViewValidationException and log it.
-                if (exception is NullHydrophoneViewException ||
-                    exception is InvalidHydrophoneViewException ||
-                    exception is NullHydrophoneResponseException)
+                if (exception is NullHydrophoneViewResponseException ||
+                    exception is InvalidHydrophoneViewException)
                     throw LoggingUtilities.CreateAndLogException<HydrophoneViewValidationException>(_logger, exception);
 
                 // If the exception is related to the validation of the hydrophone dependency, rethrow

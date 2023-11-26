@@ -9,6 +9,21 @@
     }
 
     [ExcludeFromCodeCoverage]
+    public class NullDetectionViewResponseException : Xeption
+    {
+        public NullDetectionViewResponseException(string name)
+            : base(message: $"Service call returned a null '{name}' response.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class NullDetectionViewRequestException : Xeption
+    {
+        public NullDetectionViewRequestException(string name)
+            : base(message: $"Request '{name}' calling method is null.") { }
+    }
+
+
+    [ExcludeFromCodeCoverage]
     public class DetectionViewValidationException : Exception
     {
         public DetectionViewValidationException() { }

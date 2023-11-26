@@ -32,19 +32,15 @@ namespace OrcaHello.Web.UI.Pages.Tags.Components
         protected string NewTag = string.Empty;
 
         /// <summary>
-        /// Holds the validation message for the new tag.
+        /// Holds the validation message.
         /// </summary>
-        protected string NewTagValidationMessage = string.Empty; // Error message holder
+        protected string ValidationMessage = string.Empty; // Error message holder
 
         /// <summary>
         /// Handles the replacement of the old tag with the new one.
         /// </summary>
         protected async Task OnReplaceClicked()
         {
-            // Check if the new tag is empty, and set a validation message if true
-            if (string.IsNullOrEmpty(NewTag))
-                NewTagValidationMessage = "You must enter a new tag in order to replace the old one.";
-
             // Create a ReplaceTagRequest with old and new tag information
             ReplaceTagRequest request = new()
             {
@@ -59,17 +55,22 @@ namespace OrcaHello.Web.UI.Pages.Tags.Components
 
                 // Check if the tag replacement was successful and report accordingly
                 if (response.MatchingTags == response.ProcessedTags)
-                    ReportSuccess("Success", "Tag was successfully replaced in all detections.");
+                    ReportSuccess("Success", $"'{request.OldTag}' was successfully replaced with '{request.NewTag}' in all detections.");
                 else
-                    ReportError("Failure", "Tag was not replaced in one or more detections.");
+                    ReportError("Failure", $"'{request.OldTag}' was not replaced in one or more detections.");
 
                 // Invoke the OnCloseClicked event with a parameter indicating success
                 await OnCloseClicked.InvokeAsync(true);
             }
             catch (Exception exception)
             {
-                // Report any errors during tag replacement
-                LogAndReportUnknownException(exception);
+                // Handle data entry validation errors
+                if (exception is TagViewValidationException ||
+                    exception is TagViewDependencyValidationException)
+                    ValidationMessage = ValidatorUtilities.GetInnerMessage(exception);
+                else
+                    // Report any other errors as unknown
+                    LogAndReportUnknownException(exception);
             }
         }
 

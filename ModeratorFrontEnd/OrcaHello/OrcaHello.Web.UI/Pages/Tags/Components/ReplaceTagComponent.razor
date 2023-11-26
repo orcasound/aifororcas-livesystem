@@ -4,8 +4,8 @@
 
 <RadzenTextBox @bind-Value=@NewTag Style="width: 100%; margin-top: 1rem;" Placeholder="Enter a new tag" />
 
-<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(NewTagValidationMessage)) AllowClose="false" AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
-    @NewTagValidationMessage
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false" AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
 </RadzenAlert>
 
 <RadzenStack Orientation=Orientation.Horizontal Style="margin-top: 2rem;" Gap="5px;" AlignItems=AlignItems.Stretch>

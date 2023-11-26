@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace OrcaHello.Web.UI.Pages.Tags.Components
+﻿namespace OrcaHello.Web.UI.Pages.Tags.Components
 {
     /// <summary>
     /// Code-behind for the ConfirmDeleteComponent.razor page, providing functionality for confirming tag deletion.
@@ -37,9 +35,9 @@ namespace OrcaHello.Web.UI.Pages.Tags.Components
 
                 // Check if the tag deletion was successful and report accordingly
                 if (response.MatchingTags == response.ProcessedTags)
-                    ReportSuccess("Success", "Tag was successfully deleted from all detections (and will disappear from this list).");
+                    ReportSuccess("Success", $"'{Item.Tag}' was successfully deleted from all detections (and will disappear from this list).");
                 else
-                    ReportError("Failure", "Tag was not deleted from one or more detections.");
+                    ReportError("Failure", $"'{Item.Tag}' was not deleted from one or more detections.");
 
                 // Invoke the OnCloseClicked event with a parameter indicating success
                 await OnCloseClicked.InvokeAsync(true);

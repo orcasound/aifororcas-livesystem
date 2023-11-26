@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
+﻿using System.Linq.Expressions;
+
+namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
     public partial class GridViewComponent
     {
@@ -24,7 +26,7 @@
 
         protected bool IsLoading = false; // Flag indicating data is being loaded into the grid
 
-        protected IEnumerable<DetectionItemView> DetectionItemViews = null!; // List of items currently in the grid
+        protected List<DetectionItemView> DetectionItemViews = null!; // List of items currently in the grid
 
         IList<DetectionItemView> SelectedDetectionItemViews = new List<DetectionItemView>(); // Which items have been selected in the grid
 
@@ -42,6 +44,9 @@
 
         protected string PlaybackId = string.Empty; // Currently Played SpectrographID
 
+        // Validation message for displaying error information.
+        protected string ValidationMessage = null!;
+
         #region lifecycle events
 
         protected override async Task OnInitializedAsync()
@@ -54,6 +59,8 @@
 
         protected override async Task OnParametersSetAsync()
         {
+            ValidationMessage = null!;
+
             if (CurrentlySetFilters != Filters)
             {
                 CurrentlySetFilters = Filters;
@@ -191,7 +198,7 @@
 
         async Task ReloadData()
         {
-            DetectionDataGrid.Data = null;
+            DetectionDataGrid.Reset();
             await DetectionDataGrid.Reload();
         }
 
@@ -224,21 +231,36 @@
                 Location = Filters.Location == "All" ? string.Empty : Filters.Location
             };
 
-            var result = await ViewService.
-                RetrieveFilteredAndPaginatedDetectionItemViewsAsync(filterAndPagination);
+            try
+            {
+                var result = await ViewService.
+                    RetrieveFilteredAndPaginatedDetectionItemViewsAsync(filterAndPagination);
 
-            // Update the Data property
-            DetectionItemViews = result.DetectionItemViews;
+                // Update the Data property
+                DetectionItemViews = result.DetectionItemViews;
 
-            // Update the count
-            TotalDetectionCount = result.Count;
+                // Update the count
+                TotalDetectionCount = result.Count;
 
-            // Update the PillCount
-            PillCount = result.Count;
-            await PillCountChanged.InvokeAsync(PillCount);
-
-            IsLoading = false;
-            await InvokeAsync(StateHasChanged);
+                // Update the PillCount
+                PillCount = result.Count;
+                await PillCountChanged.InvokeAsync(PillCount);
+            }
+            catch(Exception exception)
+            {
+                // Handle data entry validation errors
+                if (exception is DetectionViewValidationException ||
+                    exception is DetectionViewDependencyValidationException)
+                    ValidationMessage = ValidatorUtilities.GetInnerMessage(exception);
+                else
+                    // Report any other errors as unknown
+                    LogAndReportUnknownException(exception);
+            }
+            finally
+            {
+                IsLoading = false;
+                await InvokeAsync(StateHasChanged);
+            }
         }
 
         #endregion

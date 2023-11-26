@@ -6,37 +6,55 @@
     /// </summary>
     public partial class TagViewService
     {
-        // RULE: TagItemView must not be null and Tag property must have a value
-        private static void ValidateTagItemView(TagItemView tagItemView)
+        private static void ValidateAtLeastOneTagSelected(List<string> tags)
         {
-            if (tagItemView is null)
-                throw new NullTagViewException();
-
-            if (String.IsNullOrWhiteSpace(tagItemView.Tag))
-                throw new InvalidTagViewException("The tag cannot be null, empty, or whitespace.");
+            if (tags == null || !tags.Any())
+                throw new InvalidTagViewException("At least one 'Tag' must be selected.");
         }
 
-        // RULE: ReplaceTagRequest must not be null and both tag properties must have a value
-        private static void ValidateReplaceTagRequest(ReplaceTagRequest request)
+        // RULE: Date range must be valid.
+        private static void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-            if (request is null)
-                throw new NullTagViewRequestException();
+            if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
+                throw new InvalidTagViewException("The 'Start' date cannot be in the future.");
 
-            if (String.IsNullOrWhiteSpace(request.OldTag))
-                throw new InvalidTagViewException("The tag being replaced cannot be null, empty, or whitespace.");
+            if (toDate.HasValue && toDate.Value < fromDate)
+                throw new InvalidTagViewException("The 'End' date cannot be before the 'Start' date.");
+        }
 
-            if (String.IsNullOrWhiteSpace(request.NewTag))
-                throw new InvalidTagViewException("The new tag cannot be null, empty, or whitespace.");
+        // RULE: Pagination must be correct.
+        private static void ValidatePagination(int page, int pageSize)
+        {
+            if (page <= 0)
+                throw new InvalidTagViewException("The page number must be positive.");
+
+            if (pageSize <= 0)
+                throw new InvalidTagViewException("The page size must be positive.");
+        }
+
+        // RULE: Tag cannot be null, empty, or whitespace.
+        private static void ValidateTagString(string tag, string name)
+        {
+            if (String.IsNullOrWhiteSpace(tag))
+                throw new InvalidTagViewException($"{name} cannot be null, empty, or whitespace.");
+        }
+
+        // RULE: Request cannot be null.
+        private static void ValidateRequest<T>(T request)
+        {
+            if (request == null)
+            {
+                throw new NullTagViewRequestException(nameof(T));
+            }
         }
 
         // RULE: Response cannot be null.
-        // It checks if the response is null and throws a NullTagViewResponseException if so.
         private static void ValidateResponse<T>(T response)
         {
             // If the response is null, throw a NullTagViewResponseException.
             if (response == null)
             {
-                throw new NullTagViewResponseException();
+                throw new NullTagViewResponseException(nameof(T));
             }
         }
     }

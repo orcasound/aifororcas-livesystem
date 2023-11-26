@@ -1,8 +1,4 @@
-﻿using OrcaHello.Web.Api.Services;
-using OrcaHello.Web.Shared.Models.Comments;
-using System.Diagnostics.CodeAnalysis;
-
-namespace OrcaHello.Web.Api.Tests.Unit.Services
+﻿namespace OrcaHello.Web.Api.Tests.Unit.Services
 {
     [ExcludeFromCodeCoverage]
     public class CommentOrchestrationServiceWrapper : CommentOrchestrationService

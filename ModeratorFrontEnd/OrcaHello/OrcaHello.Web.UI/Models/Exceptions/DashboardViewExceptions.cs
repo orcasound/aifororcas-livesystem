@@ -3,15 +3,16 @@
     [ExcludeFromCodeCoverage]
     public class NullDashboardViewRequestException : Xeption
     {
-        public NullDashboardViewRequestException()
-            : base(message: "Request is null.") { }
+        public NullDashboardViewRequestException(string name)
+            : base(message: $"Request '{name}' calling method is null.") { }
     }
 
     [ExcludeFromCodeCoverage]
     public class NullDashboardViewResponseException : Xeption
     {
-        public NullDashboardViewResponseException()
-            : base(message: "Foundation Service call returned a null response.") { }
+        public NullDashboardViewResponseException(string name)
+            : base(message: $"Service call returned a null '{name}' response.") { }
+
     }
 
     [ExcludeFromCodeCoverage]

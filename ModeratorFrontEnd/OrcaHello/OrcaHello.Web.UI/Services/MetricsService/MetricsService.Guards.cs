@@ -7,23 +7,18 @@
     public partial class MetricsService
     {
         // RULE: Date range must be valid.
-        // It checks if the parameters are valid and throws an InvalidMetricsException if not.
         private void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-            // If the fromDate parameter is not null and is greater than the current date, throw an InvalidMetricsException with a custom message.
-            if (fromDate.HasValue && fromDate.Value > DateTime.Now)
-                throw new InvalidMetricsException("The from date cannot be in the future.");
+             if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
+                throw new InvalidMetricsException("Property 'fromDate' cannot be in the future.");
 
-            // If the toDate parameter is not null and is less than the fromDate parameter, throw an InvalidMetricsException with a custom message.
             if (toDate.HasValue && toDate.Value < fromDate)
-                throw new InvalidMetricsException("The to date cannot be before the from date.");
+                throw new InvalidMetricsException("Property 'toDate' cannot be before the 'fromDate'.");
         }
 
         // RULE: Response cannot be null.
-        // It checks if the response is null and throws a NullMetricsResponseException if so.
         private static void ValidateResponse<T>(T response)
         {
-            // If the response is null, throw a NullMetricsResponseException.
             if (response == null)
             {
                 throw new NullMetricsResponseException();

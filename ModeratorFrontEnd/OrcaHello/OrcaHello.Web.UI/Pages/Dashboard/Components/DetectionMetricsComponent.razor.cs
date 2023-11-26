@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Pages.Dashboard.Components
+﻿using System;
+
+namespace OrcaHello.Web.UI.Pages.Dashboard.Components
 {
     public partial class DetectionMetricsComponent
     { 
@@ -11,10 +13,15 @@
         [Parameter]
         public string Moderator { get; set; } = null!;
 
+        // Validation message for displaying error information.
+        protected string ValidationMessage = null!;
+
         #region lifecycle events
 
         protected override async Task OnParametersSetAsync()
         {
+            ValidationMessage = null!;
+
             await LoadMetricsAsync();
         }
 
@@ -32,8 +39,8 @@
                 ToDate = StateView.ToDate
             };
 
-            try { 
-
+            try
+            {
                 var response = Moderator != null
                     ? await ViewService.RetrieveFilteredMetricsForModeratorAsync(Moderator, request)
                     : await ViewService.RetrieveFilteredMetricsAsync(request);
@@ -41,12 +48,20 @@
                 StateView.MetricsItemViews = response.MetricsItemViews;
                 StateView.FillColors = response.MetricsItemViews.Select(x => x.Color).ToList();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                ReportError("Trouble loading Metrics data", ex.Message);
+                // Handle data entry validation errors
+                if (exception is DashboardViewValidationException ||
+                    exception is DashboardViewDependencyValidationException)
+                    ValidationMessage = ValidatorUtilities.GetInnerMessage(exception);
+                else
+                    // Report any other errors as unknown
+                    LogAndReportUnknownException(exception);
             }
-
-            StateView.IsLoading = false;
+            finally
+            {
+                StateView.IsLoading = false;
+            }
         }
 
         #endregion

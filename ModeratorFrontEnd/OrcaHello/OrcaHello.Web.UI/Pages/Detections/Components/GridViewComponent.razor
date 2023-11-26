@@ -1,5 +1,10 @@
 ﻿@inherits ComponentManager
 
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false"
+             AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
+</RadzenAlert>
+
 <RadzenDataGrid @ref=DetectionDataGrid
                 Data=@DetectionItemViews
                 Count=CurrentlySetFilters.MaxRecords

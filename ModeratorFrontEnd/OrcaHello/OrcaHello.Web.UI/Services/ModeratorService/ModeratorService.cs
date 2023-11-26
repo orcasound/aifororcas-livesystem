@@ -35,7 +35,7 @@
         DateTime? fromDate, DateTime? toDate, int page, int pageSize) =>
         TryCatch(async () => {
 
-            ValidateModerator(moderator);
+            Validate(moderator, nameof(moderator));
             ValidateDateRange(fromDate, toDate);
             ValidatePagination(page, pageSize);
 
@@ -66,7 +66,7 @@
            DateTime? fromDate, DateTime? toDate, int page, int pageSize) =>
         TryCatch(async () => {
 
-            ValidateModerator(moderator);
+            Validate(moderator, nameof(moderator));
             ValidateDateRange(fromDate, toDate);
             ValidatePagination(page, pageSize);
 
@@ -94,7 +94,7 @@
            DateTime? fromDate, DateTime? toDate) =>
         TryCatch(async () => {
 
-            ValidateModerator(moderator);
+            Validate(moderator, nameof(moderator));
             ValidateDateRange(fromDate, toDate);
 
             var queryString = $"fromDate={fromDate.GetValueOrDefault()}&toDate={toDate.GetValueOrDefault()}";
@@ -122,8 +122,8 @@
         public ValueTask<DetectionListForModeratorAndTagResponse> GetFilteredDetectionsForTagAndModeratorAsync(string moderator, string tag,
             DateTime? fromDate, DateTime? toDate, int page, int pageSize) =>
         TryCatch(async () => {
-            ValidateTag(tag);
-            ValidateModerator(moderator);
+            Validate(tag, nameof(tag));
+            Validate(moderator, nameof(moderator));
             ValidateDateRange(fromDate, toDate);
             ValidatePagination(page, pageSize);
             var queryString = $"fromDate={fromDate.GetValueOrDefault()}&toDate={toDate.GetValueOrDefault()}";
@@ -150,7 +150,7 @@
            DateTime? fromDate, DateTime? toDate) =>
         TryCatch(async () => {
 
-            ValidateModerator(moderator);
+            Validate(moderator, nameof(moderator));
             ValidateDateRange(fromDate, toDate);
 
             var queryString = $"fromDate={fromDate.GetValueOrDefault()}&toDate={toDate.GetValueOrDefault()}";

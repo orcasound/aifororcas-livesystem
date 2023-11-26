@@ -15,10 +15,32 @@
     }
 
     [ExcludeFromCodeCoverage]
+    public class NullDetectionRequestException : Xeption
+    {
+        public NullDetectionRequestException()
+            : base(message: "Request is null.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class NullDetectionResponseException : Xeption
+    {
+        public NullDetectionResponseException()
+            : base(message: "API call returned a null response.") { }
+    }
+
+    [ExcludeFromCodeCoverage]
     public class FailedDetectionDependencyException : Xeption
     {
         public FailedDetectionDependencyException(Exception innerException)
             : base(message: "Failed Detection dependency error occurred, please contact support.", innerException)
+        { }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class FailedDetectionServiceException : Xeption
+    {
+        public FailedDetectionServiceException(Exception innerException)
+            : base(message: "Failed Detection service error occurred, please contact support.", innerException)
         { }
     }
 

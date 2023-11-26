@@ -3,22 +3,15 @@
     [ExcludeFromCodeCoverage]
     public class NullTagViewResponseException : Xeption
     {
-        public NullTagViewResponseException()
-            : base(message: "Orchestration service call returned a null response.") { }
+        public NullTagViewResponseException(string name)
+            : base(message: $"Service call returned a null '{name}' response.") { }
     }
 
     [ExcludeFromCodeCoverage]
     public class NullTagViewRequestException : Xeption
     {
-        public NullTagViewRequestException()
-            : base(message: "Request is null.") { }
-    }
-
-    [ExcludeFromCodeCoverage]
-    public class NullTagViewException : Xeption
-    {
-        public NullTagViewException()
-            : base(message: "TagItemView is null.") { }
+        public NullTagViewRequestException(string name)
+            : base(message: $"Request '{name}' calling method is null.") { }
     }
 
     [ExcludeFromCodeCoverage]

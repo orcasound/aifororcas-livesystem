@@ -51,7 +51,8 @@
         public ValueTask<TagItemViewResponse> DeleteTagAsync(TagItemView tagItem) =>
         TryCatch(async () =>
         {
-            ValidateTagItemView(tagItem);
+            ValidateRequest(tagItem);
+            ValidateTagString(tagItem.Tag, "'Tag'");
 
             TagRemovalResponse response =
                 await _tagService.RemoveTagAsync(tagItem.Tag);
@@ -76,7 +77,9 @@
         public ValueTask<TagItemViewResponse> ReplaceTagAsync(ReplaceTagRequest request) =>
         TryCatch(async () =>
         {
-            ValidateReplaceTagRequest(request);
+            ValidateRequest(request);
+            ValidateTagString(request.OldTag, "Old 'Tag'");
+            ValidateTagString(request.NewTag, "New 'Tag'");
 
             TagReplaceResponse response =
                 await _tagService.ReplaceTagAsync(request);
@@ -90,23 +93,42 @@
             };
         });
 
+        /// <summary>
+        /// Retrieves a list of detections from DetectionService for a specific tag string, filtered by the date range
+        /// and paginated by the page number and size.
+        /// </summary>
+        /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="NullTagViewRequestException">If the request is null.</exception>
+        /// <exception cref="InvalidTagViewException">If the request is improperly formatted.</exception>
+        /// <exception cref="NullTagViewResponseException">If the response from DetectionService is null.</exception>
+        public ValueTask<DetectionItemViewResponse> RetrieveDetectionsByTagsAsync(PaginatedDetectionsByTagsAndDateRequest request) =>
+        TryCatch(async () =>
+        {
+            ValidateRequest(request);
+            ValidateAtLeastOneTagSelected(request.Tags);
+            ValidateDateRange(request.FromDate, request.ToDate);
+            ValidatePagination(request.Page, request.PageSize);
 
-        //public ValueTask<TagItemViewResponse> RetrieveDetectionsByTagsAsync(ReplaceTagRequest request) =>
-        //TryCatch(async () =>
-        //{
-        //    ValidateReplaceTagRequest(request);
+            var tagString = request.Logic == LogicalOperator.Or ?
+                string.Join("|", request.Tags) :
+                string.Join(",", request.Tags);
 
-        //    TagReplaceResponse response =
-        //        await _detectionService.RetrieveFilteredAndPaginatedDetectionsForTagAsync()
+            DetectionListForTagResponse response =
+            await _detectionService.RetrieveFilteredAndPaginatedDetectionsForTagAsync(
+            tag: tagString,
+            fromDate: request.FromDate,
+            toDate: request.ToDate,
+            page: request.Page,
+            pageSize: request.PageSize);
 
-        //    ValidateResponse(response);
+            ValidateResponse(response);
 
-        //    return new TagItemViewResponse
-        //    {
-        //        MatchingTags = response.TotalMatching,
-        //        ProcessedTags = response.TotalReplaced
-        //    };
-        //});
+            return new DetectionItemViewResponse
+            {
+                DetectionItemViews = response.Detections.Select(DetectionItemView.AsDetectionItemView).ToList(),
+                Count = response.TotalCount
+            };
+        });
 
         // Maps a tag string to a tag view for presentation.
         private static Func<string, TagItemView> AsTagView =>
