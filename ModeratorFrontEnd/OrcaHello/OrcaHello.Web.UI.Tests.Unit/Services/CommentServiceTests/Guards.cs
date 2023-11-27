@@ -38,18 +38,10 @@
             Assert.ThrowsException<InvalidCommentException>(() =>
                 wrapper.ValidatePagination(validPage, invalidPageSize));
 
-            try
-            {
+            CommentListResponse? invalidResponse = null;
 
-                CommentListResponse? invalidResponse = null;
-
-                Assert.ThrowsException<NullCommentResponseException>(() =>
-                    wrapper.ValidateResponse(invalidResponse));
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            Assert.ThrowsException<NullCommentResponseException>(() =>
+                wrapper.ValidateResponse(invalidResponse));
         }
     }
 }

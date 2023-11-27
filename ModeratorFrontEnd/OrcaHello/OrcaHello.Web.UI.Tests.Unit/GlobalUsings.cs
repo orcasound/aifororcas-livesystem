@@ -8,3 +8,4 @@ global using OrcaHello.Web.UI.Models;
 global using OrcaHello.Web.UI.Services;
 global using System;
 global using System.Diagnostics.CodeAnalysis;
+global using OrcaHello.Web.Shared.Models.Hydrophones;

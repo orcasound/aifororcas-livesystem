@@ -11,6 +11,10 @@
         private readonly IDetectionAPIBroker _apiBroker;
         private readonly ILogger<HydrophoneService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public HydrophoneService() { }
+
         public HydrophoneService(
             IDetectionAPIBroker apiBroker,
             ILogger<HydrophoneService> logger)
