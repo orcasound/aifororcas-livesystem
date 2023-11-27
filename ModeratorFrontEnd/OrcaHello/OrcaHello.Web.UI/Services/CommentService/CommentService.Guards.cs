@@ -9,10 +9,16 @@
         // RULE: Date range must be valid.
         protected void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-            if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
+            if (!fromDate.HasValue)
+                throw new InvalidCommentException("Property 'fromDate' cannot be null.");
+
+            if (fromDate.Value > DateTime.UtcNow)
                 throw new InvalidCommentException("Property 'fromDate' cannot be in the future.");
 
-            if (toDate.HasValue && toDate.Value < fromDate)
+            if(!toDate.HasValue)
+                throw new InvalidCommentException("Property 'toDate' cannot be null.");
+
+            if (toDate.Value < fromDate.Value)
                 throw new InvalidCommentException("Property 'toDate' cannot be before the 'fromDate'.");
         }
 
@@ -27,7 +33,7 @@
         }
 
         // RULE: Response cannot be null.
-        protected static void ValidateResponse<T>(T response)
+        protected void ValidateResponse<T>(T response)
         {
             if (response == null)
             {

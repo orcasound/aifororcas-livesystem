@@ -10,7 +10,7 @@
             base.ValidatePagination(page, pageSize);
 
         public new void ValidateResponse<T>(T response) =>
-            ValidateResponse<T>(response);
+            base.ValidateResponse<T>(response);
 
         public new ValueTask<T> TryCatch<T>(ReturningGenericFunction<T> returningValueTaskFunction) =>
             base.TryCatch(returningValueTaskFunction);
