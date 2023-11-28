@@ -7,17 +7,23 @@
     public partial class MetricsService
     {
         // RULE: Date range must be valid.
-        private void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
+        protected void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-             if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
+            if (!fromDate.HasValue)
+                throw new InvalidMetricsException("Property 'fromDate' cannot be null.");
+
+            if (fromDate.Value > DateTime.UtcNow)
                 throw new InvalidMetricsException("Property 'fromDate' cannot be in the future.");
 
-            if (toDate.HasValue && toDate.Value < fromDate)
+            if (!toDate.HasValue)
+                throw new InvalidMetricsException("Property 'toDate' cannot be null.");
+
+            if (toDate.Value < fromDate.Value)
                 throw new InvalidMetricsException("Property 'toDate' cannot be before the 'fromDate'.");
         }
 
         // RULE: Response cannot be null.
-        private static void ValidateResponse<T>(T response)
+        protected void ValidateResponse<T>(T response)
         {
             if (response == null)
             {

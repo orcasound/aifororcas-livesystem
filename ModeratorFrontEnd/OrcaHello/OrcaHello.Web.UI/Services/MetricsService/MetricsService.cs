@@ -11,6 +11,11 @@
         private readonly IDetectionAPIBroker _apiBroker;
         private readonly ILogger<MetricsService> _logger;
 
+
+        // Needed for unit testing wrapper to work properly
+
+        public MetricsService() { }
+
         public MetricsService(
             IDetectionAPIBroker apiBroker,
             ILogger<MetricsService> logger)
