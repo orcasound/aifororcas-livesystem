@@ -10,21 +10,27 @@
         protected void Validate(string propertyValue, string propertyName)
         {
             if (ValidatorUtilities.IsInvalid(propertyValue))
-                throw new InvalidDetectionException(LoggingUtilities.MissingRequiredProperty(propertyName));
+                throw new InvalidModeratorException(LoggingUtilities.MissingRequiredProperty(propertyName));
         }
 
         // RULE: Date range must be valid.
-        private void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
+        protected void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-             if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
+            if (!fromDate.HasValue)
+                throw new InvalidModeratorException("Property 'fromDate' cannot be null.");
+
+            if (fromDate.Value > DateTime.UtcNow)
                 throw new InvalidModeratorException("Property 'fromDate' cannot be in the future.");
 
-              if (toDate.HasValue && toDate.Value < fromDate)
+            if (!toDate.HasValue)
+                throw new InvalidModeratorException("Property 'toDate' cannot be null.");
+
+            if (toDate.Value < fromDate.Value)
                 throw new InvalidModeratorException("Property 'toDate' cannot be before the 'fromDate'.");
         }
 
         // RULE: Pagination must be correct.
-        private void ValidatePagination(int page, int pageSize)
+        protected void ValidatePagination(int page, int pageSize)
         {
              if (page <= 0)
                 throw new InvalidModeratorException("Property 'page' number must be positive.");
@@ -34,7 +40,7 @@
         }
 
         // RULE: Response cannot be null.
-        private static void ValidateResponse<T>(T response)
+        protected void ValidateResponse<T>(T response)
         {
             if (response == null)
             {

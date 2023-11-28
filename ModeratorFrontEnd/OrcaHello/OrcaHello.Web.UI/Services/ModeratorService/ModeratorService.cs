@@ -11,6 +11,11 @@
         private readonly IDetectionAPIBroker _apiBroker;
         private readonly ILogger<ModeratorService> _logger;
 
+
+        // Needed for unit testing wrapper to work properly
+
+        public ModeratorService() { }
+
         public ModeratorService(
         IDetectionAPIBroker apiBroker,
         ILogger<ModeratorService> logger)
