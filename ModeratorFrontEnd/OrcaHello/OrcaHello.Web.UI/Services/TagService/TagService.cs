@@ -11,6 +11,10 @@
         private readonly IDetectionAPIBroker _apiBroker;
         private readonly ILogger<TagService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public TagService() { }
+
         public TagService(
             IDetectionAPIBroker apiBroker,
             ILogger<TagService> logger)
