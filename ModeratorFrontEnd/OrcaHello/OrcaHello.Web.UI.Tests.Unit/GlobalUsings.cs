@@ -2,6 +2,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using Moq;
 global using OrcaHello.Web.Shared.Models.Comments;
+global using OrcaHello.Web.Shared.Models.Detections;
 global using OrcaHello.Web.Shared.Models.Hydrophones;
 global using OrcaHello.Web.Shared.Models.Metrics;
 global using OrcaHello.Web.Shared.Models.Moderators;

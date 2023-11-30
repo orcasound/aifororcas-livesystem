@@ -11,6 +11,10 @@
         private readonly IDetectionAPIBroker _apiBroker;
         private readonly ILogger<DetectionService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public DetectionService() { }
+
         public DetectionService(
             IDetectionAPIBroker apiBroker,
             ILogger<DetectionService> logger)
