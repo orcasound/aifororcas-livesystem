@@ -7,7 +7,7 @@
     public partial class HydrophoneViewService
     {
         // RULE: Response cannot be null.
-        private static void ValidateResponse<T>(T response)
+        protected void ValidateResponse<T>(T response)
         {
             if (response == null)
             {

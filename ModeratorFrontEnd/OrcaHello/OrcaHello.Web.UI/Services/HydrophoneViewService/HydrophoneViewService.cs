@@ -14,6 +14,10 @@ namespace OrcaHello.Web.UI.Services
 
         private readonly ILogger<HydrophoneViewService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public HydrophoneViewService() { }
+
         public HydrophoneViewService(IHydrophoneService hydrophoneService,
             ILogger<HydrophoneViewService> logger)
         {
