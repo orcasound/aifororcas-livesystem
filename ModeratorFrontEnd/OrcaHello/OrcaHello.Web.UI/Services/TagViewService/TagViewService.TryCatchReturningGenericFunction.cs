@@ -28,13 +28,17 @@
                 // If the exception is one of the following types, rethrow it as a TagViewDependencyValidationException and log it.
                 // These exceptions indicate that there is something wrong with the validation of the Tag entity or its dependencies.
                 if (exception is TagValidationException ||
-                    exception is TagDependencyValidationException)
+                    exception is DetectionValidationException ||
+                    exception is TagDependencyValidationException ||
+                    exception is DetectionViewDependencyValidationException)
                     throw LoggingUtilities.CreateAndLogException<TagViewDependencyValidationException>(_logger, exception);
 
                 // If the exception is one of the following types, rethrow it as a TagViewDependencyException and log it.
                 // These exceptions indicate that there is something wrong with the dependency services or the communication with them.
                 if (exception is TagDependencyException ||
-                    exception is TagServiceException)
+                    exception is DetectionDependencyException ||
+                    exception is TagServiceException ||
+                    exception is DetectionServiceException)
                     throw LoggingUtilities.CreateAndLogException<TagViewDependencyException>(_logger, exception);
 
                 // If the exception is any other type, rethrow it as a TagViewServiceException and log it.

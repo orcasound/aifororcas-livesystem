@@ -13,6 +13,10 @@
         private readonly ITagService _tagService;
         private readonly ILogger<DetectionViewService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public DetectionViewService() { }
+
         public DetectionViewService(IDetectionService detectionService,
             ITagService tagService,
             ILogger<DetectionViewService> logger)
