@@ -14,6 +14,10 @@
 
         private readonly ILogger<TagViewService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public TagViewService() { }
+
         public TagViewService(
             ITagService tagService,
             IDetectionService detectionService,

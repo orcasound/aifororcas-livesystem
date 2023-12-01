@@ -8,6 +8,7 @@ global using OrcaHello.Web.Shared.Models.Metrics;
 global using OrcaHello.Web.Shared.Models.Moderators;
 global using OrcaHello.Web.Shared.Models.Tags;
 global using OrcaHello.Web.Shared.Services;
+global using OrcaHello.Web.Shared.Utilities;
 global using OrcaHello.Web.UI.Brokers;
 global using OrcaHello.Web.UI.Models;
 global using OrcaHello.Web.UI.Services;

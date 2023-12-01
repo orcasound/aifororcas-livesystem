@@ -6,24 +6,30 @@
     /// </summary>
     public partial class TagViewService
     {
-        private static void ValidateAtLeastOneTagSelected(List<string> tags)
+        protected void ValidateAtLeastOneTagSelected(List<string> tags)
         {
             if (tags == null || !tags.Any())
                 throw new InvalidTagViewException("At least one 'Tag' must be selected.");
         }
 
         // RULE: Date range must be valid.
-        private static void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
+        protected void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-            if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
+            if (!fromDate.HasValue)
+                throw new InvalidTagViewException("The 'Start' date cannot be null.");
+
+            if (fromDate.Value > DateTime.UtcNow)
                 throw new InvalidTagViewException("The 'Start' date cannot be in the future.");
 
-            if (toDate.HasValue && toDate.Value < fromDate)
+            if (!toDate.HasValue)
+                throw new InvalidTagViewException("The 'End' date cannot be null.");
+
+            if (toDate.Value < fromDate.Value)
                 throw new InvalidTagViewException("The 'End' date cannot be before the 'Start' date.");
         }
 
         // RULE: Pagination must be correct.
-        private static void ValidatePagination(int page, int pageSize)
+        protected void ValidatePagination(int page, int pageSize)
         {
             if (page <= 0)
                 throw new InvalidTagViewException("The page number must be positive.");
@@ -33,14 +39,14 @@
         }
 
         // RULE: Tag cannot be null, empty, or whitespace.
-        private static void ValidateTagString(string tag, string name)
+        protected void ValidateTagString(string tag, string name)
         {
             if (String.IsNullOrWhiteSpace(tag))
                 throw new InvalidTagViewException($"{name} cannot be null, empty, or whitespace.");
         }
 
         // RULE: Request cannot be null.
-        private static void ValidateRequest<T>(T request)
+        protected void ValidateRequest<T>(T request)
         {
             if (request == null)
             {
@@ -49,9 +55,8 @@
         }
 
         // RULE: Response cannot be null.
-        private static void ValidateResponse<T>(T response)
+        protected void ValidateResponse<T>(T response)
         {
-            // If the response is null, throw a NullTagViewResponseException.
             if (response == null)
             {
                 throw new NullTagViewResponseException(nameof(T));
