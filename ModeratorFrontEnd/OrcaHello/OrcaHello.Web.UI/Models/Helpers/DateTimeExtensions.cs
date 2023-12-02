@@ -1,5 +1,6 @@
 ﻿namespace OrcaHello.Web.UI.Models
 {
+    [ExcludeFromCodeCoverage]
     public static class DateTimeExtensions
     {
         public static DateTime Adjust(this DateTime dateTime, Timeframe timeframe)

@@ -19,6 +19,10 @@
         private readonly IModeratorService _moderatorService;
         private readonly ILogger<DashboardViewService> _logger;
 
+        // Needed for unit testing wrapper to work properly
+
+        public DashboardViewService() { }
+
         public DashboardViewService(IDetectionService detectionService,
             ITagService tagService,
             IMetricsService metricsService,

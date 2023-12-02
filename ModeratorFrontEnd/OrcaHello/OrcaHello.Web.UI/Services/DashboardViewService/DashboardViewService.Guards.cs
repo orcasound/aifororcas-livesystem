@@ -7,17 +7,23 @@
     public partial class DashboardViewService
     {
         // RULE: Date range must be valid.
-        private void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
+        protected void ValidateDateRange(DateTime? fromDate, DateTime? toDate)
         {
-            if (fromDate.HasValue && fromDate.Value > DateTime.UtcNow)
+            if (!fromDate.HasValue)
+                throw new InvalidDashboardViewException("The 'Start' date cannot be null.");
+
+            if (fromDate.Value > DateTime.UtcNow)
                 throw new InvalidDashboardViewException("The 'Start' date cannot be in the future.");
 
-            if (toDate.HasValue && toDate.Value < fromDate)
+            if (!toDate.HasValue)
+                throw new InvalidDashboardViewException("The 'End' date cannot be null.");
+
+            if (toDate.Value < fromDate.Value)
                 throw new InvalidDashboardViewException("The 'End' date cannot be before the 'Start' date.");
         }
 
         // RULE: Pagination must be correct.
-        private void ValidatePagination(int page, int pageSize)
+        protected void ValidatePagination(int page, int pageSize)
         {
             if (page <= 0)
                 throw new InvalidDashboardViewException("The page number must be positive.");
@@ -28,34 +34,34 @@
         }
 
         // RULE: Check if the moderator name is valid.
-        private void ValidateModerator(string moderator)
+        protected void ValidateModerator(string moderator)
         {
             if (String.IsNullOrWhiteSpace(moderator))
                 throw new InvalidDashboardViewException("The moderator name cannot be null, empty, or whitespace.");
         }
 
         // RULE: Check if the tag is valid.
-        private void ValidateTag(string tag)
+        protected void ValidateTag(string tag)
         {
             if (String.IsNullOrWhiteSpace(tag))
                 throw new InvalidDashboardViewException("The tag cannot be null, empty, or whitespace.");
         }
 
-        // RULE: Response cannot be null.
-        private static void ValidateResponse<T>(T response)
-        {
-             if (response == null)
-            {
-                throw new NullDashboardViewResponseException(nameof(T));
-            }
-        }
-
         // RULE: Request cannot be null.
-        private static void ValidateRequest<T>(T request)
+        protected void ValidateRequest<T>(T request)
         {
             if (request == null)
             {
                 throw new NullDashboardViewRequestException(nameof(T));
+            }
+        }
+
+        // RULE: Response cannot be null.
+        protected void ValidateResponse<T>(T response)
+        {
+             if (response == null)
+            {
+                throw new NullDashboardViewResponseException(nameof(T));
             }
         }
     }
