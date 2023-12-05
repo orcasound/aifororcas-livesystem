@@ -24,8 +24,8 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.AreEqual(response.Tags.Count(),
-                ((TagListResponse)contentResult.Value).Tags.Count());
+            Assert.AreEqual(response.Tags.Count,
+                ((TagListResponse)contentResult.Value!).Tags.Count);
 
             _orchestrationServiceMock.Verify(service =>
                 service.RetrieveTagsForGivenTimePeriodAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()),

@@ -22,7 +22,7 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            var result = (InterestLabelListResponse)contentResult.Value;
+            var result = (InterestLabelListResponse)contentResult.Value!;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);

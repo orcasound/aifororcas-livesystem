@@ -3,7 +3,7 @@
     [ExcludeFromCodeCoverage]
     public class TagDetectionStateView
     {
-        public string Tag { get; set; }
+        public string Tag { get; set; } = null!;
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
         public int Page { get; set; } = 1;

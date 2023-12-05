@@ -24,7 +24,7 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            var result = (InterestLabelRemovalResponse)contentResult.Value;
+            var result = (InterestLabelRemovalResponse)contentResult.Value!;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(labelToRemove, result.LabelRemoved);

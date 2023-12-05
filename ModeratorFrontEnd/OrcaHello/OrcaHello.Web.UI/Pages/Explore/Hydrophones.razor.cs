@@ -15,9 +15,6 @@
         // Indicate whether the data is being loaded or not.
         protected bool IsLoading = false;
 
-        // Render the HydrophoneItemViews in a grid format with pagination, sorting, and filtering features.
-        RadzenDataGrid<HydrophoneItemView> grid = null!;
-
         // Control the zoom level of the map component that shows the hydrophone locations.
         protected int Zoom = 3;
 

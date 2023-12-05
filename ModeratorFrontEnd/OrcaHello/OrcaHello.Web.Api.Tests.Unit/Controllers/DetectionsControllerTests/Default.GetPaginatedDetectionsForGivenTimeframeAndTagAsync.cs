@@ -10,7 +10,7 @@
                 Count = 2,
                 FromDate = DateTime.Now,
                 ToDate = DateTime.Now.AddDays(1),
-                Detections = new List<Detection> { new Detection() }
+                Detections = new List<Detection> { new() }
             };
 
             _orchestrationServiceMock.Setup(service =>
@@ -25,7 +25,7 @@
             Assert.AreEqual(200, contentResult.StatusCode);
 
             Assert.AreEqual(response.Detections.Count,
-                ((DetectionListForTagResponse)contentResult.Value).Detections.Count);
+                ((DetectionListForTagResponse)contentResult.Value!).Detections.Count);
 
             _orchestrationServiceMock.Verify(service =>
                service.RetrieveDetectionsForGivenTimeframeAndTagAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()),

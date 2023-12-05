@@ -14,7 +14,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
             Assert.ThrowsException<InvalidInterestLabelOrchestrationException>(() =>
                 wrapper.Validate(invalidProperty, nameof(invalidProperty)));
 
-            Metadata nullMetadata = null;
+            Metadata nullMetadata = null!;
 
             Assert.ThrowsException<NotFoundMetadataException>(() =>
                 wrapper.ValidateMetadataFound(nullMetadata, "id"));

@@ -8,8 +8,8 @@
     /// <param name="logger">The logger.</param>
     public partial class TagService : ITagService
     {
-        private readonly IDetectionAPIBroker _apiBroker;
-        private readonly ILogger<TagService> _logger;
+        private readonly IDetectionAPIBroker _apiBroker = null!;
+        private readonly ILogger<TagService> _logger = null!;
 
         // Needed for unit testing wrapper to work properly
 

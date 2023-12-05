@@ -112,7 +112,7 @@
                     <RadzenColumn Size="12" SizeSM="3">
                         <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
                             <RadzenLabel Text="Date Moderated" Style="color: var(--rz-secondary);" />
-                            <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.Moderated.Value.UTCToPDTFull() />
+                            <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.Moderated!.Value.UTCToPDTFull() />
                         </RadzenStack>
                     </RadzenColumn>
                 </RadzenRow>

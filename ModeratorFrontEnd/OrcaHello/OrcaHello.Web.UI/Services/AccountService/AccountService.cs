@@ -4,12 +4,12 @@
     /// Initializes a new instance of the <see cref="AccountService"/> foundation service class peforming
     /// various authentication and authorization services.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class AccountService : IAccountService
     {
         private readonly HttpClient _httpService;
         private readonly BlazoradeMsalService _msalService;
         private readonly AppSettings _appSettings;
-        private const string _tokenName = "authToken";
         private const string _headerName = "bearer";
         private readonly ApiAuthenticationStateProvider _apiAuthenticationStateProvider;
         private readonly NavigationManager _navigationManager;
@@ -77,7 +77,7 @@
         /// </summary>
         public async Task Login()
         {
-            AuthenticationResult token = null!;
+            AuthenticationResult token;
 
             var scopes = new string[] { $"api://{_appSettings.AzureAd.ClientId}/{_appSettings.AzureAd.DefaultScope}" };
 

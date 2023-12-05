@@ -8,8 +8,8 @@
     /// <param name="logger">The logger.</param>
     public partial class HydrophoneService : IHydrophoneService
     {
-        private readonly IDetectionAPIBroker _apiBroker;
-        private readonly ILogger<HydrophoneService> _logger;
+        private readonly IDetectionAPIBroker _apiBroker = null!;
+        private readonly ILogger<HydrophoneService> _logger = null!;
 
         // Needed for unit testing wrapper to work properly
 

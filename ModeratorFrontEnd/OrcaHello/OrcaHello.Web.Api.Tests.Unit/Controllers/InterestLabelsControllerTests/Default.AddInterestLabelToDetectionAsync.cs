@@ -19,7 +19,7 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.IsNotNull((InterestLabelAddResponse)contentResult.Value);
+            Assert.IsNotNull((InterestLabelAddResponse)contentResult.Value!);
 
             _orchestrationServiceMock.Verify(service =>
                service.AddInterestLabelToDetectionAsync(It.IsAny<string>(), It.IsAny<string>()),

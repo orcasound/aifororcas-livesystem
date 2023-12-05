@@ -2,7 +2,7 @@
     <RadzenColumn Size="12" SizeXS="6">
         <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
             <RadzenIcon id="tile-icon" Icon="event" IconStyle=IconStyle.Secondary />
-            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Moderated.Value.UTCToPDTFull() />
+            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Moderated!.Value.UTCToPDTFull() />
         </RadzenStack>
     </RadzenColumn>
     <RadzenColumn Size="12" SizeXS="6">

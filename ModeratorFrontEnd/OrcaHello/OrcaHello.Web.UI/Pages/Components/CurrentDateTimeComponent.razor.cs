@@ -3,7 +3,7 @@
     [ExcludeFromCodeCoverage]
     public partial class CurrentDateTimeComponent
     {
-        private System.Timers.Timer _timer;
+        private System.Timers.Timer _timer = null!;
         private DateTime _currentDateTime;
 
         protected override void OnInitialized()
@@ -11,7 +11,7 @@
             _currentDateTime = DateTime.UtcNow;
 
             _timer = new System.Timers.Timer(1000); // Set the interval to 1 second
-            _timer.Elapsed += OnTimerElapsed;
+            _timer.Elapsed += (sender, e) => OnTimerElapsed(sender!, e);
             _timer.Start();
         }
 

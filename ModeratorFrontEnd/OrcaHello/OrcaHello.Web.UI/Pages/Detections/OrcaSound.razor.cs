@@ -22,7 +22,7 @@
         private double PercentCompleteLine; // indicates where to draw the traveling line
         private PlaybackState PlaybackState = PlaybackState.NotPlaying; // indicates the current playback state of the audio file
         private string PlaybackTimer = "00:00 / 00:00"; // indicates the time within the playback
-        private double PlaybackLength = 60.00; // have not found a way to calculate the playback length before starting to play,
+        private readonly double PlaybackLength = 60.00; // have not found a way to calculate the playback length before starting to play,
                                                // so going to have to hard code it
         private ElementReference imageRef; // reference to the rendered image
 
@@ -117,7 +117,7 @@
             if (progress > 0)
             {
                 PercentCompleteLine = progress * 100;
-                PlaybackTimer = $"{currentTime.ToString(@"mm\:ss")} / {totalTime.ToString(@"mm\:ss")}";
+                PlaybackTimer = $"{currentTime:mm\\:ss} / {totalTime:mm\\:ss}";
             }
         }
 

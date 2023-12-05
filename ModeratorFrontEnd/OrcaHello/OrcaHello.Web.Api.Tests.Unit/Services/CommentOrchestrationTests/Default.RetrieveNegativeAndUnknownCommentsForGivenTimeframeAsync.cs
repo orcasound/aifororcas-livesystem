@@ -10,7 +10,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
         public async Task Default_RetrieveNegativeAndUnknownCommentsForGivenTimeframeAsync_Expect()
         {
             var nullModeratedMetadata = CreateRandomMetadata();
-            nullModeratedMetadata.DateModerated = null;
+            nullModeratedMetadata.DateModerated = null!;
 
             var expectedResults = new QueryableMetadataForTimeframe
             {
@@ -28,7 +28,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
 
             CommentListResponse result = await _orchestrationService.RetrieveNegativeAndUnknownCommentsForGivenTimeframeAsync(DateTime.Now, DateTime.Now.AddDays(1), 1, 10);
 
-            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Comments.Count());
+            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Comments.Count);
 
             _metadataServiceMock.Verify(service =>
                  service.RetrieveNegativeAndUnknownMetadataForGivenTimeframeAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int>(), It.IsAny<int>()),

@@ -8,8 +8,8 @@
     /// <param name="logger">The logger.</param>
     public partial class ModeratorService : IModeratorService
     {
-        private readonly IDetectionAPIBroker _apiBroker;
-        private readonly ILogger<ModeratorService> _logger;
+        private readonly IDetectionAPIBroker _apiBroker = null!;
+        private readonly ILogger<ModeratorService> _logger = null!;
 
 
         // Needed for unit testing wrapper to work properly

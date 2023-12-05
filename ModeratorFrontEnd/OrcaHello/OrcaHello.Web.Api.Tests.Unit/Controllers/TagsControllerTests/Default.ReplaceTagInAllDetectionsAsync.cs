@@ -33,7 +33,7 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            var result = (TagReplaceResponse)contentResult.Value;
+            var result = (TagReplaceResponse)contentResult.Value!;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(oldTag, result.OldTag);

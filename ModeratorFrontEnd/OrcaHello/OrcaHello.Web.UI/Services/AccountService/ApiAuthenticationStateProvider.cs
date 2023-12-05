@@ -3,12 +3,13 @@
     /// <summary>
     /// Custom authentication state provider for interacting with Azure AD and managing the authentication token.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _memoryCache;
         private readonly IJSRuntime _jsRuntime;
-        private readonly ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+        private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
         private const string _tokenName = "authToken";
         private const string _headerName = "bearer";
         private const string _claimIdentity = "jwt";

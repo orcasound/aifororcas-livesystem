@@ -95,7 +95,7 @@ namespace OrcaHello.Web.UI.Pages.Detections.Components
                 List<string> selectedIds = SelectedDetectionItemViews.Select(x => x.Id).ToList();
 
                 await DialogService.OpenAsync<BulkReviewComponent>(
-                   "Review Candidates",
+                   "Bulk Review of Candidates",
                    new Dictionary<string, object>() {
                        { "SelectedIds", selectedIds },
                        { "Moderator", Moderator },

@@ -10,9 +10,9 @@ namespace OrcaHello.Web.UI.Services
     /// <param name="logger">The logger.</param>
     public partial class HydrophoneViewService : IHydrophoneViewService
     {
-        private readonly IHydrophoneService _hydrophoneService;
+        private readonly IHydrophoneService _hydrophoneService = null!;
 
-        private readonly ILogger<HydrophoneViewService> _logger;
+        private readonly ILogger<HydrophoneViewService> _logger = null!;
 
         // Needed for unit testing wrapper to work properly
 

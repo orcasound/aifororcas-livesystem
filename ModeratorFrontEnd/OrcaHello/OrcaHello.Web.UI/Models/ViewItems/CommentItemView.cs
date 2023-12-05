@@ -3,14 +3,14 @@
     [ExcludeFromCodeCoverage]
     public class CommentItemView
     {
-        public string Id { get; set; }
-        public string Comments { get; set; }
-        public string LocationName { get; set; }
-        public string Moderator { get; set; }
+        public string Id { get; set; } = null!;
+        public string Comments { get; set; } = null!;
+        public string LocationName { get; set; } = null!;
+        public string Moderator { get; set; } = null!;
         public DateTime? Moderated { get; set; }
         public DateTime Timestamp { get; set; }
-        public string AudioUri { get; set; }
-        public string SpectrogramUri { get; set; }
+        public string AudioUri { get; set; } = null!;
+        public string SpectrogramUri { get; set; } = null!;
         public bool IsCurrentlyPlaying { get; set; } = false;
 
         public static Func<Comment, CommentItemView> AsCommentItemView =>

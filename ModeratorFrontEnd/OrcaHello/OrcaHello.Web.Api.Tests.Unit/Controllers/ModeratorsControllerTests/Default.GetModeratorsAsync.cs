@@ -5,7 +5,7 @@
         [TestMethod]
         public async Task Default_GetModeratorsAsync_Expect_DetectionListResponse()
         {
-            ModeratorListResponse response = new ModeratorListResponse
+            ModeratorListResponse response = new()
             {
                 Moderators = new List<string> { "Moderator 1", "Moderator 2" },
                 Count = 2
@@ -22,8 +22,8 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.AreEqual(response.Moderators.Count(),
-                ((ModeratorListResponse)contentResult.Value).Moderators.Count());
+            Assert.AreEqual(response.Moderators.Count,
+                ((ModeratorListResponse)contentResult.Value!).Moderators.Count);
 
             _orchestrationServiceMock.Verify(service =>
                 service.RetrieveModeratorsAsync(),

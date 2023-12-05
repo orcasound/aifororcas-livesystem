@@ -9,9 +9,9 @@
     /// <param name="logger">The logger.</param>
     public partial class DetectionViewService : IDetectionViewService
     {
-        private readonly IDetectionService _detectionService;
-        private readonly ITagService _tagService;
-        private readonly ILogger<DetectionViewService> _logger;
+        private readonly IDetectionService _detectionService = null!;
+        private readonly ITagService _tagService = null!;
+        private readonly ILogger<DetectionViewService> _logger = null!;
 
         // Needed for unit testing wrapper to work properly
 

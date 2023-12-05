@@ -5,12 +5,12 @@
         [TestMethod]
         public async Task Default_GetGetPaginatedNegativeAndUnknownCommentsForGivenTimeframeAndModeratorAsync_Expect_DetectionListResponse()
         {
-            CommentListForModeratorResponse response = new CommentListForModeratorResponse
+            CommentListForModeratorResponse response = new()
             {
                 Count = 2,
                 FromDate = DateTime.Now,
                 ToDate = DateTime.Now.AddDays(1),
-                Comments = new List<Comment> { new Comment() },
+                Comments = new List<Comment> { new() },
                 Moderator = "Moderator"
             };
 
@@ -25,8 +25,8 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.AreEqual(response.Comments.Count(),
-                ((CommentListForModeratorResponse)contentResult.Value).Comments.Count());
+            Assert.AreEqual(response.Comments.Count,
+                ((CommentListForModeratorResponse)contentResult.Value!).Comments.Count);
 
             _orchestrationServiceMock.Verify(service =>
                service.RetrieveNegativeAndUnknownCommentsForGivenTimeframeAndModeratorAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()),

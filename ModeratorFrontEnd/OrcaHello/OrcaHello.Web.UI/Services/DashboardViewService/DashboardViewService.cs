@@ -12,12 +12,12 @@
     /// <param name="logger">The logger.</param>
     public partial class DashboardViewService : IDashboardViewService
     {
-        private readonly IDetectionService _detectionService;
-        private readonly ITagService _tagService;
-        private readonly IMetricsService _metricsService;
-        private readonly ICommentService _commentService;
-        private readonly IModeratorService _moderatorService;
-        private readonly ILogger<DashboardViewService> _logger;
+        private readonly IDetectionService _detectionService = null!;
+        private readonly ITagService _tagService = null!;
+        private readonly IMetricsService _metricsService = null!;
+        private readonly ICommentService _commentService = null!;
+        private readonly IModeratorService _moderatorService = null!;
+        private readonly ILogger<DashboardViewService> _logger = null!;
 
         // Needed for unit testing wrapper to work properly
 

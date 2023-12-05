@@ -11,7 +11,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Controllers
         [TestMethod]
         public async Task Default_GetPaginatedDetectionsForGivenTimeframeTagAndModeratorAsync_Expect_DetectionListForModeratorAndTagResponse()
         {
-            DetectionListForModeratorAndTagResponse response = new DetectionListForModeratorAndTagResponse
+            DetectionListForModeratorAndTagResponse response = new()
             {
                 FromDate = DateTime.Now,
                 ToDate = DateTime.Now.AddDays(1),
@@ -19,7 +19,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Controllers
                 Tag = "Tag",
                 Detections = new List<Detection>
                 {
-                    new Detection { 
+                    new() { 
                         State = "Positive", 
                         Id = Guid.NewGuid().ToString(),
                         Moderator = "Moderator",
@@ -39,8 +39,8 @@ namespace OrcaHello.Web.Api.Tests.Unit.Controllers
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.AreEqual(response.Detections.Count(),
-                ((DetectionListForModeratorAndTagResponse)contentResult.Value).Detections.Count());
+            Assert.AreEqual(response.Detections.Count,
+                ((DetectionListForModeratorAndTagResponse)contentResult.Value!).Detections.Count);
 
             _orchestrationServiceMock.Verify(service =>
                 service.RetrieveDetectionsForGivenTimeframeTagAndModeratorAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()),

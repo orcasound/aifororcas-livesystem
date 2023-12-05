@@ -25,7 +25,7 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            var result = (TagRemovalResponse)contentResult.Value;
+            var result = (TagRemovalResponse)contentResult.Value!;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(tagToRemove, result.Tag);

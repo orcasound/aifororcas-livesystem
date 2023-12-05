@@ -10,7 +10,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
         public async Task Default_RetrievePositiveCommentsForGivenTimeframeAndModeratorAsync_Expect()
         {
             var nullModeratedMetadata = CreateRandomMetadata();
-            nullModeratedMetadata.DateModerated = null;
+            nullModeratedMetadata.DateModerated = null!;
 
             var expectedResults = new QueryableMetadataForTimeframeAndModerator
             {

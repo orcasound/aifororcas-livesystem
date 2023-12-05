@@ -6,7 +6,7 @@
         public async Task Default_RetrieveDetectionsForGivenInterestLabelAsync_Expect()
         {
             var nullModeratedMetadata = CreateRandomMetadata();
-            nullModeratedMetadata.DateModerated = null;
+            nullModeratedMetadata.DateModerated = null!;
 
             var expectedResults = new QueryableMetadata
             {
@@ -20,7 +20,7 @@
 
             DetectionListForInterestLabelResponse result = await _orchestrationService.RetrieveDetectionsForGivenInterestLabelAsync("label");
 
-            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Detections.Count());
+            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Detections.Count);
 
             _metadataServiceMock.Verify(service =>
                 service.RetrieveMetadataForInterestLabelAsync(It.IsAny<string>()),
