@@ -66,7 +66,9 @@
                         {
                             <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Play />
                         }
+                        <RadzenButton Click=@(async () => await Test()) Text="Test" />
                     </div>
+                    @CurrentTime
                 </RadzenColumn>
             </RadzenRow>
 
