@@ -35,38 +35,6 @@
             </RadzenColumn>
         </RadzenRow>
 
-
-        @*       <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.SpaceBetween>
-
-        <!-- View selections -->
-
-        <RadzenFormField Variant=Variant.Text Style="margin-top: -15px; width: 50%;" class="rz-mb-5">
-        <RadzenDropDown TValue=DetectionState @bind-Value=@SelectedDetectionState Data=@DetectionStateDropdownOptions
-        TextProperty=Text ValueProperty=Value
-        AllowClear="false" Style="height: 50px;"
-        Change=OnDetectionStateChanged>
-        <Template Context="data">
-        <RadzenText TextStyle=TextStyle.H2>@data.Text</RadzenText>
-        </Template>
-        </RadzenDropDown>
-        </RadzenFormField>
-
-        <!-- View modes -->
-
-        <div style="display: flex;">
-        <RadzenButton Disabled=@(SelectedViewMode == ViewMode.TileView)
-        Click="OnTileViewClicked" ButtonStyle=ButtonStyle.Primary
-        Variant=Variant.Text Size=ButtonSize.Large Icon="rectangle"
-        Class="oh-min-button"
-        Style="margin-right:0;" />
-        <RadzenButton id="large-only" Disabled=@(SelectedViewMode == ViewMode.GridView)
-        Click="OnGridViewClicked" ButtonStyle=ButtonStyle.Primary
-        Variant=Variant.Text Size=ButtonSize.Large Icon="grid_on"
-        Class="oh-min-button"
-        Style="margin-left:0;" />
-        </div>
-        </RadzenStack>
-        *@
         <!-- Filter pulldowns and buttons -->
 
         <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-5">

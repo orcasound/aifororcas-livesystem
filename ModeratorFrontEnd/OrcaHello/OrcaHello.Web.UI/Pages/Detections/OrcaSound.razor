@@ -41,20 +41,30 @@
 
             <RadzenRow Gap="0" class="rz-mt-3">
                 <RadzenColumn>
-                    <div class="oh-spectrogram-player">
-                        <img class="oh-spectrogram-image" src=@ItemView.SpectrogramUri alt="Audio image" @ref="imageRef" @onclick="OnImageClick">
-                        <div class="oh-spectrogram-progress" style=@($"left: {PercentCompleteLine}%")></div>
+                    <!-- Added a wrapper div around the image and the span element -->
+                    <div id=@($"wrapper_{ItemView.Id}") class="oh-spectrogram-wrapper">
+                        <img id=@($"spectrogram_{ItemView.Id}") src=@ItemView.SpectrogramUri class="oh-spectrogram-img" />
                         @foreach (var annotation in ItemView.Annotations)
                         {
                             <div class="oh-spectrogram-marker" style=@($"left: {(annotation.StartTime / 61) * 100}%;") />
                             <div class="oh-spectrogram-marker" style=@($"left: {(annotation.EndTime / 61) * 100}%;") />
                         }
-                        <span class="oh-spectrogram-timer">@PlaybackTimer</span>
+                        <span id=@($"time_{ItemView.Id}") class="oh-spectrogram-timer">0:00 / 0:00</span>
+                        <div id=@($"line_{ItemView.Id}") class="oh-spectrogram-progress-line"></div>
+                        <!-- Added an onclick event to the image to handle the click -->
+                        <div id=@($"overlay_{ItemView.Id}") onclick="seekAudio(event, @($"'{ItemView.Id}'"));" 
+                            class="oh-spectrogram-overlay"></div>
                     </div>
-                    <div class="rz-mt-3">
+                    <audio id=@($"audio_{ItemView.Id}") preload="metadata"
+                           ontimeupdate="updateTimeAndLine(this);" onloadedmetadata="updateTimeAndLine(this);"
+                           onended="stopAudio(@($"'{ItemView.Id}'"));"
+                            src=@ItemView.AudioUri>
+                    </audio>
+                   
+                    <div class="rz-mt-2">
                         @if (PlaybackState == PlaybackState.Paused)
                         {
-                            <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Pause />
+                            <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Play />
                             <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="fast_rewind" Click=Stop />
                         }
                         @if (PlaybackState == PlaybackState.Playing)
@@ -66,9 +76,7 @@
                         {
                             <RadzenButton Variant=Variant.Outlined Size=ButtonSize.Large Icon="play_arrow" Click=Play />
                         }
-                        <RadzenButton Click=@(async () => await Test()) Text="Test" />
                     </div>
-                    @CurrentTime
                 </RadzenColumn>
             </RadzenRow>
 

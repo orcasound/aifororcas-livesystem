@@ -1,0 +1,96 @@
+﻿@page "/player"
+
+@inject IJSRuntime JS
+
+<h1>Blazor Audio Player</h1>
+
+<!-- Added a wrapper div around the image and the span element -->
+<div id="wrapper" style="position: relative; width: 100%; max-width: 1280px; margin: 0 auto;">
+    <img id="spectrogram" src="https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_port_townsend_2020_11_22_12_24_38_PST.png" alt="Spectrogram" />
+    <span id="time">0:00 / 0:00</span>
+    <div id="line"></div>
+    <!-- Added an onclick event to the image to handle the click -->
+    <div id="overlay" onclick="seekAudio(event, 'audio');"></div>
+</div>
+<audio id="audio" src="https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_port_townsend_2020_11_22_12_24_38_PST.wav" preload="metadata" ontimeupdate="updateTimeAndLine(this);" onloadedmetadata="updateTimeAndLine(this);" onended="stopAudio('audio');"></audio>
+<button @onclick="Play">Play</button>
+<button @onclick="Pause">Pause</button>
+<button @onclick="Stop">Stop</button>
+
+<style>
+    #wrapper {
+        /* Set the wrapper to have a relative position */
+        position: relative;
+        /* Set the wrapper to have a 100% width of the container */
+        width: 100%;
+        /* Set the wrapper to have a maximum width of 1280px */
+        max-width: 1280px;
+        /* Center the wrapper horizontally */
+        margin: 0 auto;
+    }
+
+    div#wrapper img {
+        /* Set the image to have a 100% width of the wrapper */
+        width: 100%;
+        /* Set the image to have an auto height to preserve the aspect ratio */
+        height: auto;
+        /* Set the image to have an object-fit of contain to scale within the wrapper */
+        object-fit: contain;
+    }
+
+    div#wrapper span {
+        /* Set the span to have an absolute position */
+        position: absolute;
+        /* Set the span to align to the bottom right corner of the image */
+        bottom: 0;
+        right: 0;
+        /* Set the span to have a white color and a bold font */
+        color: white;
+        font-weight: bold;
+        /* Set the span to have some padding around it */
+        padding: 5px;
+    }
+
+    #line {
+        /* Set the line to have an absolute position */
+        position: absolute;
+        /* Set the line to align to the top left corner of the image */
+        top: 0;
+        left: 0;
+        /* Set the line to have a 2px width and a 100% height of the image */
+        width: 2px;
+        height: 100%;
+        /* Set the line to have a white background color */
+        background-color: white;
+    }
+
+    #overlay {
+        /* Set the overlay to have an absolute position */
+        position: absolute;
+        /* Set the overlay to cover the whole image */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* Set the overlay to have a transparent background color */
+        background-color: transparent;
+    }
+</style>
+
+@code {
+    private async Task Play()
+    {
+        await JS.InvokeVoidAsync("playAudio", "audio");
+    }
+
+    private async Task Pause()
+    {
+        await JS.InvokeVoidAsync("pauseAudio", "audio");
+    }
+
+    private async Task Stop()
+    {
+        await JS.InvokeVoidAsync("stopAudio", "audio");
+    }
+}
+
