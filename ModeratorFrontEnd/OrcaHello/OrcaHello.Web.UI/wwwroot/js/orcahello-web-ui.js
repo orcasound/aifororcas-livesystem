@@ -41,77 +41,37 @@ function CreateScaledPushpin(location, imgUrl, scale, callback) {
 
 /* Spectrogram functionality */
 
-function playAudio(id) {
-    var audio = document.getElementById('audio_' + id);
-    audio.play();
-}
+window.addAudioEventListeners = (audioElement) => {
 
-function pauseAudio(id) {
-    var audio = document.getElementById('audio_' + id);
-    audio.pause();
-}
+    return new Promise((resolve, reject) => {
 
-function stopAudio(id) {
+        if (!audioElement) {
+            reject('Audio element is not loaded yet.');
+            return;
+        }
 
-    var audio = document.getElementById('audio_' + id);
-    audio.pause();
-    audio.currentTime = 0;
-    // Reset the line position when stopped
-    document.getElementById('line_' + id).style.left = "0px";
-}
+        const spectrogram = document.getElementById('spectrogram');
+        const playbackLine = document.getElementById('playbackLine');
 
-function formatTime(seconds) {
-    var minutes = Math.floor(seconds / 60);
-    var seconds = Math.floor(seconds % 60);
-    return minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
-}
+        audioElement.onloadedmetadata = () => {
+            audioElement.ontimeupdate = () => {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            };
 
-function updateTimeAndLine(audio) {
+            audioElement.onpause = () => {
+                // Pause the movement of the line
+            };
 
-    var audio = document.getElementById(audio.id);
+            audioElement.onplay = () => {
+                // Resume the movement of the line
+            };
 
-    var id = audio.id.slice(6);
-    var currentTime = audio.currentTime;
+            audioElement.onended = () => {
+                playbackLine.style.left = '0px';
+            };
 
-    // Update the time display
-    document.getElementById('time_' + id).innerHTML = formatTime(currentTime) + " / " + formatTime(audio.duration);
-    // Calculate the line position based on the audio progress and the image width
-    var imageWidth = document.getElementById('spectrogram_' + id).width;
-    var linePosition = imageWidth * currentTime / audio.duration;
-    // Use requestAnimationFrame to smooth the line movement
-    requestAnimationFrame(function () {
-        // Move the line to the calculated position
-        document.getElementById('line_' + id).style.left = linePosition + "px";
+            resolve();
+        };
     });
-}
-
-function seekAudio(event, id) {
-
-    // Get the audio element by id
-    var audio = document.getElementById('audio_' + id);
-
-    // Get the mouse position relative to the image
-    var mouseX = event.clientX - document.documentElement.scrollLeft;
-
-    // Get the image element
-    var image = document.getElementById('spectrogram_' + id);
-    // Loop through all the parent elements and subtract their offsetLeft values
-    while (image.offsetParent) {
-        mouseX -= image.offsetLeft;
-        image = image.offsetParent;
-    }
-
-    var image = document.getElementById('spectrogram_' + id);
-    // Get the image width
-    var imageWidth = image.width;
-    // Calculate the audio time based on the mouse position and the image width
-    var time = Number((mouseX * audio.duration / imageWidth).toFixed(0));
-
-    // This is a recommended hack for setting currentTime
-    audio.pause();
-    audio.src = audio.src;
-    audio.currentTime = time;
-
-    updateTimeAndLine(audio);
-    audio.play();
-}
+};
