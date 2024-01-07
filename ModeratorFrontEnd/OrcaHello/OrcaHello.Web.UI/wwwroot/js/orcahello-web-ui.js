@@ -54,10 +54,36 @@ window.addAudioEventListeners = (audioElement) => {
         const playbackLine = document.getElementById('playbackLine');
 
         audioElement.onloadedmetadata = () => {
+
             audioElement.ontimeupdate = () => {
                 const progress = audioElement.currentTime / audioElement.duration;
                 playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
             };
+
+            audioElement.addEventListener('timeupdate', function () {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            });
+
+            audioElement.onseeking = () => {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            };
+
+            audioElement.addEventListener('seeking', function () {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            });
+
+            audioElement.onseeked = () => {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            };
+
+            audioElement.addEventListener('seeked', function () {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            });
 
             audioElement.onpause = () => {
                 // Pause the movement of the line
@@ -73,5 +99,22 @@ window.addAudioEventListeners = (audioElement) => {
 
             resolve();
         };
+    });
+};
+
+window.addAudioEventStopper = (audioId) => {
+
+    var audioElement = document.getElementById('audio_' + audioId);
+    audioElement.addEventListener('play', function () {
+
+        var allAudioElements = document.getElementsByTagName('audio')
+        
+        // When an audio element is played, pause all other audio elements
+        for (var j = 0; j < allAudioElements.length; j++) {
+            if (allAudioElements[j].id != audioElement.id) {  // Don't pause the audio element that is being played
+                allAudioElements[j].pause();
+                allAudioElements[j].currentTime = 0;
+            }
+        }
     });
 };

@@ -1,12 +1,9 @@
 ﻿@inherits ComponentManager
 
-<img class="oh-spectrogram-bar" src=@SpectrogramUri alt="Audio image" @ref="imageRef">
-
-@if (PlaybackState == PlaybackState.Playing && PlaybackId == Id)
-{
-    <RadzenButton Icon="stop_circle" ButtonStyle=ButtonStyle.Danger Variant=Variant.Text Size=ButtonSize.Small Click=Stop />
-}
-else
-{
-    <RadzenButton Icon="play_circle" ButtonStyle=ButtonStyle.Success Variant=Variant.Text Size=ButtonSize.Small Click=Play />
-}
+<RadzenStack Orientation="Orientation.Horizontal">
+    <img src=@SpectrogramUri alt="Spectrogram Image" style="height: 30px;">
+    <audio controls style="height:30px;width:250px;" id=@($"audio_{Id}")>
+        <source src=@AudioUri type="audio/wav">
+        Your browser does not support the audio tag.
+    </audio>
+</RadzenStack>

@@ -43,8 +43,6 @@ namespace OrcaHello.Web.UI.Pages.Detections.Components
 
         protected List<string> AvailableTags = new(); // All unique tags in the system for picklists
 
-        protected string PlaybackId = string.Empty; // Currently Played SpectrographID
-
         // Validation message for displaying error information.
         protected string ValidationMessage = null!;
 

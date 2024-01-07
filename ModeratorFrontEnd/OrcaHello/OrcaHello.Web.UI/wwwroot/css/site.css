@@ -256,54 +256,12 @@ a:hover {
 }
 
 /* Spectrogram styles */
-.oh-spectrogram-progress-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 2px;
-    height: 100%;
-    background-color: white;
-}
 
 .oh-spectrogram-timer {
-    position: absolute;
-    bottom: 0;
-    right: 0;
     color: white;
-    font-weight: bold;
-    padding: 5px;
-}
-
-.oh-spectrogram-img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-}
-
-.oh-spectrogram-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-}
-
-.oh-spectrogram-wrapper {
-    position: relative;
-    width: 100%;
-    max-width: 1280px;
-    margin: 0 0;
-}
-
-.rz-growl-title {
-    line-height: 25px;
-}
-
-.oh-spectrogram-bar {
-    position: relative;
-    width: 200px;
-    height: 36px;
+    bottom: 10px;
+    right: 10px;
 }
 
 .oh-top {
@@ -317,12 +275,6 @@ a:hover {
     position: relative;
 }
 
-.oh-spectrogram-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
 .oh-spectrogram-progress {
     height: 100%; /* Match the height of the image */
     width: 2px; /* Make the width small */
@@ -330,18 +282,6 @@ a:hover {
     position: absolute;
     bottom: 0;
     left: 0%; /* Start from the left */
-}
-
-.oh-spectrogram-timer {
-    color: white;
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-}
-
-.oh-spectrogram-controls {
-    align-items: center;
-    margin-top: 10px;
 }
 
 .oh-spectrogram-marker {

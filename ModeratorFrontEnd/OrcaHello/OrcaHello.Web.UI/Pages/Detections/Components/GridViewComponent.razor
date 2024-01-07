@@ -90,14 +90,10 @@
 
         <!-- Spectrogram column -->
 
-        <RadzenDataGridColumn OrderIndex="6" TItem=DetectionItemView Width="275px;"
-                              CssClass="oh-top">
+        <RadzenDataGridColumn OrderIndex="6" TItem=DetectionItemView Width="400px;" CssClass="oh-top">
             <Template Context="data">
-                <InlinePlayerComponent 
-                    @bind-PlaybackId="PlaybackId" 
-                    Id=@data.Id 
-                    AudioUri=@data.AudioUri 
-                    SpectrogramUri=@data.SpectrogramUri />
+                <InlinePlayerComponent AudioUri=@data.AudioUri 
+                    SpectrogramUri=@data.SpectrogramUri Id=@data.Id />
             </Template>
         </RadzenDataGridColumn>
 
@@ -168,3 +164,21 @@
 
     </Columns>
 </RadzenDataGrid>
+<style>
+    .container {
+        position: relative;
+    }
+
+    .spectrogram-image {
+        width: 200px;
+/*         height: 36px; */
+    }
+
+    .audio-control {
+        width: 200px; /* Match spectrogram width */
+        /* height: 36px; */ /* Match spectrogram height */
+        background-color: rgba(255, 255, 255, 0.1); /* Adjust the overlay background color and transparency */
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Optional: Add a box shadow for better visibility */
+    }
+</style>
