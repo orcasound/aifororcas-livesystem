@@ -1,6 +1,4 @@
-﻿using Howler.Blazor.Components;
-
-namespace OrcaHello.Web.UI.Models
+﻿namespace OrcaHello.Web.UI.Models
 {
     [ExcludeFromCodeCoverage]
     public static class ExternalServiceProviders
@@ -25,10 +23,6 @@ namespace OrcaHello.Web.UI.Models
             // Radzen.Blazor
 
             builder.Services.AddRadzenComponents();
-
-            // Blazor.Howler
-            builder.Services.AddScoped<IHowl, Howl>();
-            builder.Services.AddScoped<IHowlGlobal, HowlGlobal>();
         }
     }
 

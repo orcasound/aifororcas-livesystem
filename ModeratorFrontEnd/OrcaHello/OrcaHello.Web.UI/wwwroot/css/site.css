@@ -275,6 +275,19 @@ a:hover {
     position: relative;
 }
 
+.oh-spectrogram-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.oh-spectrogram-timer {
+    color: white;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
 .oh-spectrogram-progress {
     height: 100%; /* Match the height of the image */
     width: 2px; /* Make the width small */

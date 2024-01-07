@@ -56,7 +56,7 @@
         <RadzenDataGridColumn OrderIndex="1" TItem=DetectionItemView Title="Candidate ID"
                               MinWidth="285px;" Width="285px;" CssClass="oh-top">
             <Template Context="data">
-                <RadzenLink Path=@($"/orca_sounds/{data.Id}") Target="_blank" Text=@data.Id />
+                <RadzenLink Path=@($"/orca_sounds/{data.Id}") @onclick="@StopAllAudio" Target="_blank" Text=@data.Id />
             </Template>
         </RadzenDataGridColumn>
 

@@ -177,14 +177,14 @@
 
         protected async Task OnGridViewClicked()
         {
-            //await JSRuntime.InvokeVoidAsync("clearAllHowls");
+            await JSRuntime.InvokeVoidAsync("stopAllAudio");
 
             SelectedViewMode = ViewMode.GridView;
         }
 
         protected async Task OnTileViewClicked()
         {
-            //await JSRuntime.InvokeVoidAsync("clearAllHowls");
+            await JSRuntime.InvokeVoidAsync("stopAllAudio");
 
             IsReviewButtonVisible = false;
             SelectedViewMode = ViewMode.TileView;

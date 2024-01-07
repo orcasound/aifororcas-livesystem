@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.UI.Pages.Detections.Components
+﻿using System.Security.Policy;
+
+namespace OrcaHello.Web.UI.Pages.Detections.Components
 {
     [ExcludeFromCodeCoverage]
     public partial class TileViewComponent
@@ -17,8 +19,6 @@
 
         [Parameter]
         public EventCallback<int> PillCountChanged { get; set; }
-
-        protected string PlaybackId = string.Empty; // Currently Played SpectrographID
 
         RadzenDataList<DetectionItemView> DetectionDataList = null!; // Reference to the list component
 
@@ -62,6 +62,11 @@
 
         #region data loaders
 
+        async Task StopAllAudio()
+        {
+            await JSRuntime.InvokeVoidAsync("stopAllAudio");
+        }
+
         async Task ReloadData()
         {
             DetectionItemViews = null!;
@@ -70,7 +75,7 @@
 
         private async Task LoadData(LoadDataArgs args)
         {
-            // await JSRuntime.InvokeVoidAsync("clearAllHowls");
+            await StopAllAudio();
 
             IsLoading = true;
             await InvokeAsync(StateHasChanged);

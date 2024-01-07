@@ -32,9 +32,7 @@
 
                     await InvokeAsync(StateHasChanged);
 
-                    await JSRuntime.InvokeVoidAsync("addAudioEventListeners", audioElement);
-
-
+                    await JSRuntime.InvokeVoidAsync("addAudioEventListenersByObject", audioElement);
                 }
                 catch (Exception ex)
                 {

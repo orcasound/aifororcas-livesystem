@@ -1,7 +1,6 @@
 ﻿global using Blazorade.Msal.Configuration;
 global using Blazorade.Msal.Security;
 global using Blazorade.Msal.Services;
-global using Howler.Blazor.Components;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.Authorization;
 global using Microsoft.AspNetCore.Components.Web;

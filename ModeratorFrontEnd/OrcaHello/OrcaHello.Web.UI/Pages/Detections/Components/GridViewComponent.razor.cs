@@ -195,6 +195,11 @@ namespace OrcaHello.Web.UI.Pages.Detections.Components
 
         #region data loaders
 
+        async Task StopAllAudio()
+        {
+            await JSRuntime.InvokeVoidAsync("stopAllAudio");
+        }
+
         async Task ReloadData()
         {
             DetectionDataGrid.Reset();
@@ -203,7 +208,7 @@ namespace OrcaHello.Web.UI.Pages.Detections.Components
 
         private async Task LoadData(LoadDataArgs args)
         {
-            // await JSRuntime.InvokeVoidAsync("clearAllHowls");
+            await StopAllAudio();
 
             IsLoading = true;
             await InvokeAsync(StateHasChanged);

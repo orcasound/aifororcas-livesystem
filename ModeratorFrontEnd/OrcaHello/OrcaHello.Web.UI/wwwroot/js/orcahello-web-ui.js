@@ -41,7 +41,7 @@ function CreateScaledPushpin(location, imgUrl, scale, callback) {
 
 /* Spectrogram functionality */
 
-window.addAudioEventListeners = (audioElement) => {
+window.addAudioEventListenersByObject = (audioElement) => {
 
     return new Promise((resolve, reject) => {
 
@@ -117,4 +117,84 @@ window.addAudioEventStopper = (audioId) => {
             }
         }
     });
+};
+
+window.addAudioEventListenersById = (audioId) => {
+
+    return new Promise((resolve, reject) => {
+
+        var audioElement = document.getElementById('audio_' + audioId);
+
+        if (!audioElement) {
+            reject('Audio element is not loaded yet.');
+            return;
+        }
+
+        const spectrogram = document.getElementById('spectrogram_' + audioId);
+        const playbackLine = document.getElementById('playback_line_' + audioId);
+
+        audioElement.onloadedmetadata = () => {
+
+            audioElement.ontimeupdate = () => {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            };
+
+            audioElement.addEventListener('timeupdate', function () {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            });
+
+            audioElement.onseeking = () => {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            };
+
+            audioElement.addEventListener('seeking', function () {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            });
+
+            audioElement.onseeked = () => {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            };
+
+            audioElement.addEventListener('seeked', function () {
+                const progress = audioElement.currentTime / audioElement.duration;
+                playbackLine.style.left = `${progress * spectrogram.clientWidth}px`;
+            });
+
+            audioElement.onpause = () => {
+                // Pause the movement of the line
+            };
+
+            audioElement.onended = () => {
+                playbackLine.style.left = '0px';
+            };
+
+            audioElement.addEventListener('play', function () {
+
+                var allAudioElements = document.getElementsByTagName('audio');
+
+                // When an audio element is played, pause all other audio elements
+                for (var j = 0; j < allAudioElements.length; j++) {
+                    if (allAudioElements[j].id != audioElement.id) {  // Don't pause the audio element that is being played
+                        allAudioElements[j].pause();
+                        allAudioElements[j].currentTime = 0;
+                    }
+                }
+            });
+
+            resolve();
+        };
+    });
+};
+
+window.stopAllAudio = () => {
+    var allAudioElements = document.getElementsByTagName('audio');
+    for (var j = 0; j < allAudioElements.length; j++) {
+        allAudioElements[j].pause();
+        allAudioElements[j].currentTime = 0;
+    }
 };
