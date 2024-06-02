@@ -1,4 +1,5 @@
 # OrcaHello: A real-time AI-assisted killer whale notification system 🎱 🐋
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/orcasound/aifororcas-livesystem/badge)](https://scorecard.dev/viewer/?uri=github.com/orcasound/aifororcas-livesystem)
 
 [Orcasound](https://www.orcasound.net/) maintains a hydrophone network in Puget Sound (near Seattle, WA, USA, Northeast Pacific). Killer whales (aka orcas) often swim by these hydrophones (underwater microphones) and vocalize with a wide range of calls.
 
