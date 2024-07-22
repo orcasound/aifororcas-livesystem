@@ -33,15 +33,16 @@ COSMOSDB_ACCOUNT_NAME = "aifororcasmetadatastore"
 COSMOSDB_DATABASE_NAME = "predictions"
 COSMOSDB_CONTAINER_NAME = "metadata"
 
-ORCASOUND_LAB_LOCATION = {"id": "rpi_orcasound_lab", "name": "Haro Strait", "longitude":  -123.17357, "latitude": 48.55833}
-PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.76045, "latitude": 48.13569}
-BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6039, "latitude": 48.03371}
-SUNSET_BAY_LOCATION = {"id": "rpi_sunset_bay", "name": "Sunset Bay", "longitude":  -122.3339, "latitude": 47.86497}
-POINT_ROBINSON_LOCATION = {"id": "rpi_point_robinson", "name": "Point Robinson", "longitude":  -122.37267, "latitude": 47.38838}
+# TODO: get this data from https://live.orcasound.net/api/json/feeds
+BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6040035, "latitude": 48.0336664}
 MAST_CENTER_LOCATION = {"id": "rpi_mast_center", "name": "Mast Center", "longitude":  -122.32512, "latitude": 47.34922}
-NORTH_SJC_LOCATION = {"id": "rpi_north_sjc", "name": "North SJC", "longitude":  -123.058779, "latitude": 48.591294}
+NORTH_SAN_JUAN_CHANNEL_LOCATION = {"id": "rpi_north_sjc", "name": "North San Juan Channel", "longitude":  -123.058779, "latitude": 48.591294}
+ORCASOUND_LAB_LOCATION = {"id": "rpi_orcasound_lab", "name": "Orcasound Lab", "longitude":  -123.1735774, "latitude": 48.5583362}
+POINT_ROBINSON_LOCATION = {"id": "rpi_point_robinson", "name": "Point Robinson", "longitude":  -122.37267, "latitude": 47.388383}
+PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.760614, "latitude": 48.135743}
+SUNSET_BAY_LOCATION = {"id": "rpi_sunset_bay", "name": "Sunset Bay", "longitude":  -122.33393605795372, "latitude": 47.86497296593844}
 
-source_guid_to_location = {"rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION, "rpi_sunset_bay": SUNSET_BAY_LOCATION, "rpi_point_robinson": POINT_ROBINSON_LOCATION, "rpi_mast_center": MAST_CENTER_LOCATION, "rpi_north_sjc": NORTH_SJC_LOCATION}
+source_guid_to_location = {"rpi_bush_point": BUSH_POINT_LOCATION, "rpi_mast_center": MAST_CENTER_LOCATION, "rpi_north_sjc": NORTH_SAN_JUAN_CHANNEL_LOCATION, "rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_point_robinson": POINT_ROBINSON_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_sunset_bay": SUNSET_BAY_LOCATION}
 
 def assemble_blob_uri(container_name, item_name):
 

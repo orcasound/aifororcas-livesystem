@@ -176,7 +176,7 @@ docker build . -t live-inference-system -f ./Dockerfile
 
 Note: the config used in the Dockerfile is a Production config.
 
-TODO: fix. For now, you will have to manually create 5 different docker containers for the 7 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend, Sunset Bay, Point Robinson, Mast Center, and North San Juan Center).
+TODO: fix. For now, you will have to manually create a different docker container for each hydrophone location. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location.
 
 
 ## Running the docker container
