@@ -23,7 +23,7 @@
         /// <summary>
         /// The name of the hydrophone where the metadata was collected.
         /// </summary>
-        /// <example>Haro Strait</example>
+        /// <example>Orcasound Lab</example>
         [JsonProperty("locationName", NullValueHandling = NullValueHandling.Ignore)]
         public string LocationName { get; set; }
 
@@ -119,7 +119,7 @@
         /// <summary>
         /// Name of the hydrophone location.
         /// </summary>
-        /// <example>Haro Strait</example>
+        /// <example>Orcasound Lab</example>
         [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
 

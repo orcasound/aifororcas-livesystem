@@ -8,7 +8,7 @@
 		/// <summary>
 		/// Name of the hydrophone location.
 		/// </summary>
-		/// <example>Haro Strait</example>
+		/// <example>Orcasound Lab</example>
 		public string Name { get; set; }
 
 		/// <summary>

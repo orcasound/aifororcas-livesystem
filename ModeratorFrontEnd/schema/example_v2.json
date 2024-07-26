@@ -1,14 +1,14 @@
  {
         "id": "000000000-000000000-00000000-00000000000", // Guid
         "state": "Unreviewed", // State of the review (Unreviewed, Positive, Negative, Unknown)
-        "locationName": "Haro Strait", // the name of the location (does duplicate name in location below)
+        "locationName": "Orcasound Lab", // the name of the location (does duplicate name in location below)
         "audioUri": "https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_orcasound_lab_2020_09_30_03_51_56_PDT.wav", // string
         "imageUri": "https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_orcasound_lab_2020_09_30_03_51_56_PDT.png", // string
         "timestamp": "2020-09-30T10:51:56.057346Z", // ISO format - UTC
         "whaleFoundConfidence": 88.55000000000001, // double
         "location": {
             "id": "rpi_orcasound_lab",
-            "name": "Haro Strait",
+            "name": "Orcasound Lab",
             "longitude": -123.2166658,
             "latitude": 48.5499978
         },
