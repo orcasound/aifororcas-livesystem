@@ -27,7 +27,12 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
+    - uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+      with:
+        egress-policy: audit
     - name: Checkout
       uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -52,7 +57,12 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - build
+    permissions:
+      contents: read
     steps:
+    - uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+      with:
+        egress-policy: audit
     - name: Artifacts cache
       uses: actions/cache@v2
       with:
