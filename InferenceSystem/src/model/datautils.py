@@ -173,6 +173,7 @@ def download_hls_segment(stream_urls,tmp_root,output_root):
 
 
 def test_hls_download():
+    # These URLs are only two of a longer list.
     make_osl_url = lambda x: "https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab/hls/{}/live.m3u8".format(x)
 
     make_bush_url = lambda x: "https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_bush_point/hls/{}/live.m3u8".format(x)
