@@ -21,7 +21,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
                 Page = 1,
                 PageSize = 10,
                 State = "Positive",
-                Location = "Haro Straight",
+                Location = "Orcasound Lab",
                 SortBy = "timestamp",
                 SortOrder = "DESC"
             };
