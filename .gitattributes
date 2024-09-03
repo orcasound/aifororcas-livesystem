@@ -7,9 +7,6 @@
 # reference: https://github.com/github/linguist/blob/master/docs/overrides.md#generated-code
 *.ipynb linguist-generated
 
-# Keep Jupyter output and metadata from check-in
-*.ipynb filter=strip-notebook-output
-
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
