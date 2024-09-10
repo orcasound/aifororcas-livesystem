@@ -2,7 +2,7 @@
 - Author : Aayush Agrawal (aaagraw@microsoft.com)
 
 ## Model data 
-The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). In specific the model was  trained with the following dataset -
+The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
 
 - [WHOIS09222019_PodCastRound1](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#WHOIS_PodCastRound1) (~6hrs, open data source – Orca call around the planet, Good for generic models)
 - [OrcasoundLab07052019_PodCastRound2](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#OrcasoundLab07052019_PodCastRound2) (~1.2hrs, live hydrophone data - SRKW)
@@ -45,7 +45,8 @@ fastai/data
 
 ## End-To-End development Process
 
-### **Step 1**: Creating a more ML-ready dataset inline with other popular sound dataset - [1_DataCreation.ipynb notebook]()
+### **Step 1 - OPTIONAL**: Creating a more ML-ready dataset inline with other popular sound dataset - [1_DataCreation.ipynb notebook]()
+- NOTE: For Quick Start, you may see *.wav files in train/mldata/all/[negative|positive] and in test/all/[negative|positive]; in this case, there's no need to run this script (i.e. no need to generate new samples)
 - Extracting small audio segments for positive and negative label and store them in positive and negative folder for training  (Filtering any call with less than 1 second duration)
 - Also create 2 sec audio sample from testing data for formal ML evaluation
 
