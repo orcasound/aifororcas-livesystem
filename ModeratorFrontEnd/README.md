@@ -1,3 +1,10 @@
+# Moderator Front End System
+
+This directory contains two moderator front end system implementations:
+
+* AIForOrcas: this implementation is what is currently deployed
+* OrcaHello: this implementation is intended as the future replacement and is not yet deployed
+
 ## AI For Orcas - Moderator Front End System
 
 The moderator front end is responsible for presenting the candidate whale calls to the designated moderators so they can confirm the calls as legitimate or as false positives.
