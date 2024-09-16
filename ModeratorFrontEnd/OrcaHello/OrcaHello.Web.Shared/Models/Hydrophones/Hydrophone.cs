@@ -10,7 +10,7 @@
         [SwaggerSchema("The hydrophone's location name.")]
         public string Name { get; set; }
 
-        [SwaggerSchema("The hydrophone's location logitude.")]
+        [SwaggerSchema("The hydrophone's location longitude.")]
         public double Longitude { get; set; }
 
         [SwaggerSchema("The hydrophone's location latitude.")]
@@ -22,5 +22,6 @@
         [SwaggerSchema("HTML-formatted description of the hydrophone location.")]
         public string IntroHtml { get; set; }
 
+        public override string ToString() => Name;
     }
 }
