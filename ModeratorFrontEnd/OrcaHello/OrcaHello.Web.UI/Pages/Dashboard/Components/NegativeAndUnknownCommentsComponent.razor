@@ -36,7 +36,11 @@
                                 <RadzenCard Variant=Variant.Text Style="width:100%; padding: 0; margin-bottom: 15px;">
                                     <RadzenRow Gap="0">
                                         <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                                            <InlinePlayerComponent @bind-PlaybackId="PlaybackId"
+@*                                             <InlinePlayerComponent @bind-PlaybackId="PlaybackId"
+                                                                   Id=@comment.Id
+                                                                   AudioUri=@comment.AudioUri
+                                                                   SpectrogramUri=@comment.SpectrogramUri /> *@
+                                            <InlinePlayerComponent 
                                                                    Id=@comment.Id
                                                                    AudioUri=@comment.AudioUri
                                                                    SpectrogramUri=@comment.SpectrogramUri />

@@ -43,11 +43,15 @@
                                                     <RadzenCard Variant=Variant.Text Style="width:100%; padding: 0; margin-bottom: 15px;">
                                                         <RadzenRow Gap="0">
                                                             <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                                                                <InlinePlayerComponent 
+@*                                                                 <InlinePlayerComponent 
                                                                     @bind-PlaybackId="PlaybackId" 
                                                                     Id=@detection.Id
                                                                     AudioUri=@detection.AudioUri
-                                                                    SpectrogramUri=@detection.SpectrogramUri/>
+                                                                    SpectrogramUri=@detection.SpectrogramUri/> *@
+                                                                <InlinePlayerComponent 
+                                                                                       Id=@detection.Id
+                                                                                       AudioUri=@detection.AudioUri
+                                                                                       SpectrogramUri=@detection.SpectrogramUri />
                                                             </RadzenColumn>
                                                             <RadzenColumn Size="12" SizeMD="6" SizeLG="9" Style="padding-bottom: 10px; border-bottom: 1px solid var(--cg-dark-gray);">
                                                                 <RadzenStack Orientation=Orientation.Vertical>

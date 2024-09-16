@@ -68,7 +68,7 @@
 
         protected async Task OnApplyFilterClicked()
         {
-            await JSRuntime.InvokeVoidAsync("clearAllHowls");
+            //await JSRuntime.InvokeVoidAsync("clearAllHowls");
             await SetNewDates();
         }
 
@@ -92,7 +92,7 @@
 
         protected async Task OnToggleOpen()
         {
-            await JSRuntime.InvokeVoidAsync("clearAllHowls");
+            //await JSRuntime.InvokeVoidAsync("clearAllHowls");
 
             TagsState.Close();
             PositiveCommentsState.Close();

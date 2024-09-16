@@ -122,7 +122,7 @@
             TotalCount = 0;
             ValidationMessage = null!;
 
-            await JSRuntime.InvokeVoidAsync("clearAllHowls");
+            //await JSRuntime.InvokeVoidAsync("clearAllHowls");
 
             await LoadPaginatedDetectionsAsync();
         }
