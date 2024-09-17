@@ -1,6 +1,12 @@
 name: OrcaHello.Web.Api
 
 on:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api/**
+    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
   push:
     branches:
     - main
@@ -10,7 +16,7 @@ on:
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:
-  DOTNET_VERSION: 6.0.x
+  DOTNET_VERSION: 8.0.x
   DOTNET_RUNTIME: win-x86
   WORKING_DIR: ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api
   PUBLISH_DIR: output
@@ -31,7 +37,7 @@ jobs:
         egress-policy: audit
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Setup .NET Core
+    - name: Set up .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
