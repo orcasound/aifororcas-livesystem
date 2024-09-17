@@ -13,7 +13,7 @@
         [SwaggerSchema("URI of the detection's image file (.png) in blob storage.")]
         public string SpectrogramUri { get; set; }
 
-        [SwaggerSchema("The review state of the detection (Unreviewed, Positive, Negative Unknown).")]
+        [SwaggerSchema("The review state of the detection (Unreviewed, Positive, Negative, or Unknown).")]
         public string State { get; set; }
 
         [SwaggerSchema("The name of the hydrophone's location.")]

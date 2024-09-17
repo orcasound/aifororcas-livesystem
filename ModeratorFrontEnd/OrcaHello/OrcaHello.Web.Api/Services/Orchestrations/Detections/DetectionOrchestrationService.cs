@@ -92,7 +92,7 @@
         public ValueTask<ModerateDetectionsResponse> ModerateDetectionsByIdAsync(ModerateDetectionsRequest request) =>
         TryCatch(async () =>
         {
-            Validate(id, nameof(id));
+            // Validate(id, nameof(id));
             ValidateModerateRequestOnUpdate(request);
 
             ModerateDetectionsResponse response = new()

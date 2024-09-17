@@ -14,7 +14,7 @@
 
         [HttpGet("negative-unknown")]
         [SwaggerOperation(Summary = "Gets a paginated list of comments for negative and unknown Detections for the given timeframe.")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Returns the list of comments for the give timeframe.", typeof(CommentListResponse))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the list of comments for the given timeframe.", typeof(CommentListResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "If the request was malformed (missing parameters).")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
         [AllowAnonymous]

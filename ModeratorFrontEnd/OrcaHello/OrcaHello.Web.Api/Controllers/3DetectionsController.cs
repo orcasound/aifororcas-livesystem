@@ -117,10 +117,10 @@
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
         [AllowAnonymous]
         public async ValueTask<ActionResult<DetectionListResponse>> GetPaginatedDetectionsAsync(
-            [SwaggerParameter("The desired state.", Required = true)] string state,
+ [SwaggerParameter("The desired state: Unreviewed, Negative, Positive, or Unknown.", Required = true)] string state,
             [SwaggerParameter("The start date of the search (MM/DD/YYYY).", Required = true)] DateTime? fromDate,
             [SwaggerParameter("The end date of the search (MM/DD/YYYY).", Required = true)] DateTime? toDate,
-            [SwaggerParameter("The name of the field to sort by (give examples here).", Required = true)] string sortBy,
+            [SwaggerParameter("The name of the field to sort by: date, confidence, moderator, moderateddate.", Required = true)] string sortBy,
             [SwaggerParameter("Flag indicating if the sort order should be descending.", Required = true)] bool isDescending,
             [SwaggerParameter("The page in the list to request.", Required = true)] int page,
             [SwaggerParameter("The page size to request.", Required = true)] int pageSize,

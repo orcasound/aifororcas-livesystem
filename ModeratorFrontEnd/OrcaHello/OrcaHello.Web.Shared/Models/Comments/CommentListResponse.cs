@@ -7,7 +7,7 @@
         [SwaggerSchema("A paginated list of Comments for the given filter information.")]
         public List<Comment> Comments { get; set; }
 
-        [SwaggerSchema("The total number of detections in the list (for pagination).")]
+        [SwaggerSchema("The total number of comments in the list (for pagination).")]
         public int TotalCount { get; set; }
 
         [SwaggerSchema("The number of detections for this page.")]
