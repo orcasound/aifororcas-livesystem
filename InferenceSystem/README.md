@@ -11,7 +11,7 @@ Note: We use Python 3, specifically tested with Python 3.7.4
 # How to run the InferenceSystem locally
 ## Create a virtual environment
 
-1. In your working directory, run `pip install virtualenv && virtualenv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
+1. In your working directory, run `python -m venv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
 2. On Mac or Linux, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
 
     On Windows, activate with `.\inference-venv\Scripts\activate.bat` and `.\inference-venv\Scripts\deactivate.bat` when done
