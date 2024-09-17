@@ -44,18 +44,6 @@ namespace OrcaHello.Web.Api.Services
             }
         }
 
-        protected void ValidateDeleted(bool deleted, string id)
-        {
-            if (!deleted)
-                throw new DetectionNotDeletedException(id);
-        }
-
-        protected void ValidateInserted(bool inserted, string id)
-        {
-            if (!inserted)
-                throw new DetectionNotInsertedException(id);
-        }
-
         protected void ValidatePage(int page)
         {
             if (ValidatorUtilities.IsZeroOrLess(page))

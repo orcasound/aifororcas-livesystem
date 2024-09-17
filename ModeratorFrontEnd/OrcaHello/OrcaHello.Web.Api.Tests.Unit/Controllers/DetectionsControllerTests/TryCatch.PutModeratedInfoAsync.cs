@@ -29,8 +29,7 @@
             _orchestrationServiceMock
                  .Verify(service => service
                     .ModerateDetectionsByIdAsync(It.IsAny<ModerateDetectionsRequest>()),
-                    Times.Exactly(5));
-
+                    Times.Exactly(8));
         }
 
         private async Task ExecuteModerateDetectionById(int count, int statusCode)
