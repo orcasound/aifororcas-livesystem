@@ -1,11 +1,10 @@
--f https://download.pytorch.org/whl/cpu/torch_stable.html
+-f https://download.pytorch.org/whl/torch_stable.html
 fastai==1.0.61
-ffmpeg-python==0.2.0
-librosa==0.10.2.post1
-pydub==0.25.1
+librosa==0.10
+pydub==0.24.1
 pandas
 numpy
-torchaudio==2.4.0
+torchaudio==0.6.0
 git+https://github.com/fastaudio/fastai_audio@0.1
 ipython
 spacy
