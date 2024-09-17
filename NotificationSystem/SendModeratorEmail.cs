@@ -35,6 +35,7 @@ namespace NotificationSystem
 
             var newDocumentCreated = false;
             DateTime? documentTimeStamp = null;
+            string location = null;
 
             foreach (var document in input)
             {
@@ -42,6 +43,7 @@ namespace NotificationSystem
                 {
                     newDocumentCreated = true;
                     documentTimeStamp = document.GetPropertyValue<DateTime>("timestamp");
+                    location = document.GetPropertyValue<string>("location.name");
                     break;
                 }
             }
@@ -53,13 +55,14 @@ namespace NotificationSystem
             }
 
             // TODO: make better email
-            string body = EmailTemplate.GetModeratorEmailBody(documentTimeStamp);
+            string body = EmailTemplate.GetModeratorEmailBody(documentTimeStamp, location);
 
             log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))
             {
+                string emailSubject = string.Format("OrcaHello Candidate at location {0}", location);
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
-                    emailEntity.Email, "Please validate new OrcaHello detection", body);
+                    emailEntity.Email, emailSubject, body);
                 await messageCollector.AddAsync(email);
             }
         }

@@ -8,12 +8,12 @@ namespace NotificationSystem.Template
     // TODO: we should move all html out of code and maybe use a preset email template for better design. 
     public static class EmailTemplate
     {
-        public static string GetModeratorEmailBody(DateTime? timestamp)
+        public static string GetModeratorEmailBody(DateTime? timestamp, string location)
         {
-            return $"<html><head><style>{GetCSS()}</style></head><body>{GetModeratorEmailHtml(timestamp)}</body></html>";
+            return $"<html><head><style>{GetCSS()}</style></head><body>{GetModeratorEmailHtml(timestamp, location)}</body></html>";
         }
 
-        public static string GeSubscriberEmailBody(List<JObject> messages)
+        public static string GetSubscriberEmailBody(List<JObject> messages)
         {
             return $"<html><head><style>{GetCSS()}</style></head><body>{GetSubscriberEmailHtml(messages)}</body></html>";
         }
@@ -26,7 +26,7 @@ namespace NotificationSystem.Template
                 <body>
                 <div class='card'>
                 <h1>
-                Southern Resident Killer Whale Spotted
+                Southern Resident Killer Whale Detected
                 </h1>
                 <p>
                 Dear subscriber, a Southern Resident Killer Whale was most recently detected at around {timeString} PDT. 
@@ -47,7 +47,7 @@ namespace NotificationSystem.Template
                 </p>
                 </div>
                 <footer>
-                  In partnership with Microsoft AI 4 Earth, Orca Sound and Orca Conservancy.
+                  In partnership with Microsoft AI 4 Earth, Orcasound and Orca Conservancy.
                 </footer>
                 </body>
             ";
@@ -101,7 +101,7 @@ namespace NotificationSystem.Template
             }
         }
 
-        private static string GetModeratorEmailHtml(DateTime? timestamp)
+        private static string GetModeratorEmailHtml(DateTime? timestamp, string location)
         {
             string timeString = GetPDTTimestring(timestamp);
 
@@ -109,13 +109,13 @@ namespace NotificationSystem.Template
                 <body>
                 <div class='card'>
                 <h1>
-                Orca Call Identified
+                Orca Call Candidate
                 </h1>
                 <p>
-                Dear moderator, a potential Southern Resident Killer Whale call was detected on {timeString} PDT. 
+                Dear moderator, a potential Southern Resident Killer Whale call was detected on {timeString} PDT at {location} location. 
                 </p>
                 <p>
-                This is a request for your moderation to confirm whether the sound belongs to a Southern Resident Killer Whale on the portal below.
+                This is a request for your moderation to confirm whether the sound was produced by Southern Resident Killer Whale on the portal below.
                 </p>
                 <hr/>
                 <h2>
@@ -131,7 +131,7 @@ namespace NotificationSystem.Template
                 <footer>
                   <br>
                   <center>
-                  In partnership with Microsoft AI 4 Earth, Orca Sound and Orca Conservancy.
+                  In partnership with Microsoft AI 4 Earth, Orcasound and Orca Conservancy.
                   </center>
                 </footer>
                 </body>

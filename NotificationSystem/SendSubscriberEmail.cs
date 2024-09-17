@@ -64,7 +64,7 @@ namespace NotificationSystem
                 await cloudQueue.DeleteMessageAsync(message);
             }
 
-            return EmailTemplate.GeSubscriberEmailBody(messagesJson);
+            return EmailTemplate.GetSubscriberEmailBody(messagesJson);
         }
     }
 }
