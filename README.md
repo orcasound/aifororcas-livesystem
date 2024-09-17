@@ -61,9 +61,10 @@ To contribute a pull request for a specific subsystem, please read the correspon
 
 Current subteams and leads are as follows:
 - Machine Learning and Artificial Intelligence (Lead: Patrick Pastore)
-- Front End (Lead: Mike Cowan)
+- Moderation Portal (Lead: Mike Cowan)
 - User Experience (Lead: Claire Goetschel)
-- Azure Backend (Lead: Dave Thaler): this subteam deals with Azure, CosmosDB, and docker containers.
+- Notification System (Lead: Skander Mzali)
+- Infrastructure (Lead: Dave Thaler): this subteam deals with Azure and GitHub infrastructure
 
 New volunteers are welcome in all subteams.
 
