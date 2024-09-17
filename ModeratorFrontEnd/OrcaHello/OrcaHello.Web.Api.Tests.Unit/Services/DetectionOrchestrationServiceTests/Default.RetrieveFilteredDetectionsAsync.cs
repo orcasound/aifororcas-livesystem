@@ -1,4 +1,8 @@
-﻿namespace OrcaHello.Web.Api.Tests.Unit.Services
+﻿using Moq;
+using OrcaHello.Web.Api.Models;
+using OrcaHello.Web.Shared.Models.Detections;
+
+namespace OrcaHello.Web.Api.Tests.Unit.Services
 {
     public partial class DetectionOrchestrationServiceTests
     {

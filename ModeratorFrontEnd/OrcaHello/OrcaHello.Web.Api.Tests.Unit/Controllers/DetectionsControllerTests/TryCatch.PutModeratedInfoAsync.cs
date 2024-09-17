@@ -8,6 +8,11 @@
             _orchestrationServiceMock
                 .SetupSequence(p => p.ModerateDetectionsByIdAsync(It.IsAny<ModerateDetectionsRequest>()))
 
+                .Throws(new DetectionOrchestrationValidationException(new NotFoundMetadataException("id")))
+
+                .Throws(new DetectionOrchestrationValidationException(new DetectionNotDeletedException("id")))
+                .Throws(new DetectionOrchestrationValidationException(new DetectionNotInsertedException("id")))
+
                 .Throws(new DetectionOrchestrationValidationException(new Exception()))
                 .Throws(new DetectionOrchestrationDependencyValidationException(new Exception()))
 
@@ -16,6 +21,8 @@
 
                 .Throws(new Exception());
 
+            await ExecuteModerateDetectionById(1, StatusCodes.Status404NotFound);
+            await ExecuteModerateDetectionById(2, StatusCodes.Status422UnprocessableEntity);
             await ExecuteModerateDetectionById(2, StatusCodes.Status400BadRequest);
             await ExecuteModerateDetectionById(3, StatusCodes.Status500InternalServerError);
 

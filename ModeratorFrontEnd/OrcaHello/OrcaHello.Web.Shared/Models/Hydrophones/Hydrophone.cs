@@ -22,5 +22,6 @@
         [SwaggerSchema("HTML-formatted description of the hydrophone location.")]
         public string IntroHtml { get; set; }
 
+        public override string ToString() => Name;
     }
 }

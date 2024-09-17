@@ -2,7 +2,7 @@
 - Author : Aayush Agrawal (aaagraw@microsoft.com)
 
 ## Model data 
-The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). In specific the model was  trained with the following dataset -
+The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
 
 - [WHOIS09222019_PodCastRound1](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#WHOIS_PodCastRound1) (~6hrs, open data source – Orca call around the planet, Good for generic models)
 - [OrcasoundLab07052019_PodCastRound2](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#OrcasoundLab07052019_PodCastRound2) (~1.2hrs, live hydrophone data - SRKW)
@@ -45,7 +45,8 @@ fastai/data
 
 ## End-To-End development Process
 
-### **Step 1**: Creating a more ML-ready dataset inline with other popular sound dataset - [1_DataCreation.ipynb notebook]()
+### **Step 1 - OPTIONAL**: Creating a more ML-ready dataset inline with other popular sound dataset - [1_DataCreation.ipynb notebook]()
+- NOTE: For Quick Start, you may see *.wav files in train/mldata/all/[negative|positive] and in test/all/[negative|positive]; in this case, there's no need to run this script (i.e. no need to generate new samples)
 - Extracting small audio segments for positive and negative label and store them in positive and negative folder for training  (Filtering any call with less than 1 second duration)
 - Also create 2 sec audio sample from testing data for formal ML evaluation
 
@@ -64,13 +65,11 @@ The inference.py returns a dictionary -
 - **global_predictions**: A global prediction(1/0) for the clip containing a valid whale call (integer)
 - **global_confidences**: Probability of the prediction being a whale call or not(float)
 
-# All the files generated during process is on [Onedrive](https://microsoft-my.sharepoint.com/:f:/p/aaagraw/EpK2FvtpbRBDt76EwoKPuHoB8ll9WSXNPGhRX63OTg-1Jw?e=550aE2)
+# All the files generated or used during training are [here:](https://portal.azure.com/#@adminorcasound.onmicrosoft.com/resource/subscriptions/c65c3881-6d6b-4210-94db-5301ef484f17/resourceGroups/mldev/providers/Microsoft.Storage/storageAccounts/storagesnap/overview). NOTE: You must hold "Contributor" role assignment in the OrcaSound Azure tenant to access.
 - **Models/stg2-rn18.pkl** - Trained ResNet18 model
 - **mldata.7z** is data used for training the model
 - **All.zip** is testing data for early evaluations
 - **test2Sec.zip** is data used for scoring for official evaluations
-
-
 
 ## Dependencies -
 - [FastAIAudio](https://github.com/mogwai/fastai_audio)

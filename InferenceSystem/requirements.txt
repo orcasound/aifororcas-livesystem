@@ -24,6 +24,5 @@ numba==0.48
 opencv-python
 boto3
 pytz
-json
 opencensus-ext-azure
 orca-hls-utils

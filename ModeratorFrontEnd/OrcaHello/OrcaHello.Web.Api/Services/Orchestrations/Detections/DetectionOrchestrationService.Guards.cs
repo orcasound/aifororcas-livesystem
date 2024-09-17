@@ -1,4 +1,6 @@
-﻿namespace OrcaHello.Web.Api.Services
+﻿using System.Text.RegularExpressions;
+
+namespace OrcaHello.Web.Api.Services
 {
     public partial class DetectionOrchestrationService
     {
@@ -40,6 +42,18 @@
             {
                 throw new NotFoundMetadataException(id);
             }
+        }
+
+        protected void ValidateDeleted(bool deleted, string id)
+        {
+            if (!deleted)
+                throw new DetectionNotDeletedException(id);
+        }
+
+        protected void ValidateInserted(bool inserted, string id)
+        {
+            if (!inserted)
+                throw new DetectionNotInsertedException(id);
         }
 
         protected void ValidatePage(int page)

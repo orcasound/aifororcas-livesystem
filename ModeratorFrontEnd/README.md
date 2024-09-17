@@ -35,11 +35,11 @@ This is a .NET Core Blazor-based web site found in the AIForOrcas.Client.Web pro
 
 ### Deployment
 The AIForOrcas.Server and AIForOrcas.Client.Web projects are built and deployed using GitHub Actions workflows:
-* [AIForOrcas.Server.yaml](/.github/workflow/AIForOrcas.Server.yaml)
-* [AIForOrcas.Client.Web.yaml](/.github/workflow/AIForOrcas.Client.Web.yaml)
+* [AIForOrcas.Server.yaml](/.github/workflows/AIForOrcas.Server.yaml)
+* [AIForOrcas.Client.Web.yaml](/.github/workflows/AIForOrcas.Client.Web.yaml)
 
 ### Additional Projects
-The remaining projects in the solution represent code that is shared between the two projects (i.e. DTOs/Models, Business Logic, etc.)
+The remaining projects in the solution represent code that is shared between the two projects (i.e., DTOs/Models, Business Logic, etc.)
 
 ## Release Notes
 

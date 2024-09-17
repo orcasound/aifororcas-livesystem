@@ -44,7 +44,7 @@ namespace AIForOrcas.DTO.API
 		public DateTime? DateTo { get; set; }
 
 		/// <summary>
-		/// Location of the hydrophone (all, Haro Straight, Port Townsend, etc.).
+		/// Location of the hydrophone (all, Orcasound Lab, Port Townsend, etc.).
 		/// </summary>
 		/// <example>all</example>
 		public string Location { get; set; } = "all";

@@ -11,8 +11,8 @@ Note: We use Python 3, specifically tested with Python 3.7.4
 # How to run the InferenceSystem locally
 ## Create a virtual environment
 
-1. In your working directory, run `python -m venv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
-2. On Mac, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
+1. In your working directory, run `pip install virtualenv && virtualenv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
+2. On Mac or Linux, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
 
     On Windows, activate with `.\inference-venv\Scripts\activate.bat` and `.\inference-venv\Scripts\deactivate.bat` when done
 3. In an active environment, cd to `/InferenceSystem` and run `python -m pip install --upgrade pip && pip install -r requirements.txt` 
@@ -20,7 +20,7 @@ Note: We use Python 3, specifically tested with Python 3.7.4
 ## Model download
 
 1.  Download the current production model from [this link.](https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip)
-2.  Unzip *.zip and extract to `InferenceSystem/model`.
+2.  Unzip *.zip and extract to `InferenceSystem/model` using `unzip 11-15-20.FastAI.R1-12.zip`
 3.  Check the contents of `InferenceSystem/model`.
 There should be 1 file
     * model.pkl
@@ -149,7 +149,20 @@ This can be completed in two ways.
         ```
         AZURE_COSMOSDB_PRIMARY_KEY=<key>
         AZURE_STORAGE_CONNECTION_STRING=<string>
+        INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING=<string>
         ```
+
+## Adding a new hydrophone
+
+1. Create a new config file under the [config](config) folder
+
+2. Update the last line of the [Dockerfile](Dockerfile) to point to the new config file 
+
+3. Create a new deployment YAML under the [deploy](deploy) folder
+
+4. Update [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py) and [src/globals.py](src/globals.py) to add variables for the new hydrophone location 
+
+5. Follow all other steps below until you update the kubernetes cluster with the new namespace
 
 ## Building the docker container for production
 
@@ -163,7 +176,8 @@ docker build . -t live-inference-system -f ./Dockerfile
 
 Note: the config used in the Dockerfile is a Production config.
 
-TODO: fix. For now, you will have to manually create 3 different docker containers for the 3 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend).
+TODO: fix. For now, you will have to manually create 5 different docker containers for the 5 hydrophone locations. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location (OrcasoundLab, BushPoint, PortTownsend, Sunset Bay and Point Robinson).
+
 
 ## Running the docker container
 
@@ -201,15 +215,13 @@ This step pushes your local container to the Azure Container Registry (ACR).  If
 documentation is adapted from 
 [this tutorial](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-tutorial-prepare-acr).
 
-Login to the shared azure directory from the Azure CLI.
+1. Login to the shared azure directory from the Azure CLI.
 
 ```
-az login --tenant ai4orcasoutlook.onmicrosoft.com
+az login --tenant adminorcasound.onmicrosoft.com
 ```
 
-We will be using the orcaconservancycr ACR in the LiveSRKWNotificationSystem Resource Group.
-
-Log in to the container registry.
+2. We will be using the orcaconservancycr ACR in the LiveSRKWNotificationSystem Resource Group. Log in to the container registry.
 
 ```
 az acr login --name orcaconservancycr
@@ -217,7 +229,7 @@ az acr login --name orcaconservancycr
 
 You should receive something similar to `Login succeeded`.
 
-Tag your docker container with the version number. We use the following versioning scheme.
+3. Tag your docker container with the version number. We use the following versioning scheme.
 
 ```
 docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.<hydrophone-location>.v<Major>
@@ -230,7 +242,8 @@ docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-sys
 ```
 
 Look at [deploy-aci.yaml](deploy-aci.yaml) for examples of how previous models were tagged.
-Lastly, push your image to Azure Container Registry for each Orcasound Hydrophone Location.
+
+4. Lastly, push your image to Azure Container Registry for each Orcasound Hydrophone Location.
 
 ```
 docker push orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.<hydrophone-location>.v<Major>
@@ -284,7 +297,7 @@ kubectl create secret generic inference-system -n bush-point \
 4. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one.
 
 ```bash
-kubectl apply -f bush-point.yaml
+kubectl apply -f deploy/bush-point.yaml
 ```
 
 5. To verify that the container is running, check logs:
@@ -300,6 +313,7 @@ kubectl logs -n bush-point inference-system-6d4845c5bc-tfsbw
 <details>
   <summary>Deployment to Azure Container Instances (deprecated)</summary>
 # Deploying an updated docker build to Azure Container Instances
+# This method has been deprecated
 
 ## Prerequisites
 
