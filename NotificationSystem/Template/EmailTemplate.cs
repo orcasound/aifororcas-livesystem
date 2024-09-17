@@ -13,7 +13,7 @@ namespace NotificationSystem.Template
             return $"<html><head><style>{GetCSS()}</style></head><body>{GetModeratorEmailHtml(timestamp)}</body></html>";
         }
 
-        public static string GeSubscriberEmailBody(List<JObject> messages)
+        public static string GetSubscriberEmailBody(List<JObject> messages)
         {
             return $"<html><head><style>{GetCSS()}</style></head><body>{GetSubscriberEmailHtml(messages)}</body></html>";
         }
