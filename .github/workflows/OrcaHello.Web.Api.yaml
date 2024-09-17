@@ -1,0 +1,72 @@
+name: OrcaHello.Web.Api
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api/**
+    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
+  workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
+
+env:
+  DOTNET_VERSION: 6.0.x
+  DOTNET_RUNTIME: win-x86
+  WORKING_DIR: ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api
+  PUBLISH_DIR: output
+  AZURE_APP_NAME: AIForOrcasDetections2
+
+defaults:
+  run:
+    working-directory: ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+      with:
+        egress-policy: audit
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Dependencies
+      run: dotnet restore -r ${{ env.DOTNET_RUNTIME }}
+    - name: Build
+      run: dotnet build --no-restore -c Release -r ${{ env.DOTNET_RUNTIME }}
+    - name: Test
+      run: dotnet test --no-restore -r ${{ env.DOTNET_RUNTIME }}
+    - name: Publish
+      run: dotnet publish --no-restore -c Release -o './${{ env.PUBLISH_DIR }}'
+    - name: Artifacts cache
+      uses: actions/cache@v2
+      with:
+        path: ./${{ env.WORKING_DIR }}/${{ env.PUBLISH_DIR }}
+        key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    permissions:
+      contents: read
+    steps:
+    - uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+      with:
+        egress-policy: audit
+    - name: Artifacts cache
+      uses: actions/cache@v2
+      with:
+        path: ./${{ env.WORKING_DIR}}/${{ env.PUBLISH_DIR }}
+        key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
+    - name: Deploy to azure
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_APP_NAME }}
+        publish-profile: ${{ secrets.AZURE_ORCAHELLODETECTIONS_PUBLISH_PROFILE }}
+        package: ./${{ env.WORKING_DIR }}/${{ env.PUBLISH_DIR }}
