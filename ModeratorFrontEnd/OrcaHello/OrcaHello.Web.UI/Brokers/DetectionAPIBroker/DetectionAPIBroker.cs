@@ -3,14 +3,13 @@
     [ExcludeFromCodeCoverage]
     public partial class DetectionAPIBroker : IDetectionAPIBroker
     {
-        // TODO: Move to an appsettings
-        private readonly string _detectionApiUrn = "https://localhost:5001/api";
-
         private readonly IHttpService _apiClient;
+        private readonly AppSettings _appSettings;
 
-        public DetectionAPIBroker(IHttpService apiClient)
+        public DetectionAPIBroker(IHttpService apiClient, AppSettings appSettings)
         {
             _apiClient = apiClient;
+            _appSettings = appSettings; 
         }
 
         private async ValueTask<T> GetAsync<T>(string relativeUrl) =>
@@ -27,9 +26,11 @@
 
         private string createFullUrl(string relativeUrl)
         {
-            return _detectionApiUrn.EndsWith("/") ?
-                $"{_detectionApiUrn}{relativeUrl}" :
-                $"{_detectionApiUrn}/{relativeUrl}";
+            string detectionApiUrn = _appSettings.APIUrl;
+
+            return detectionApiUrn.EndsWith("/") ?
+                $"{detectionApiUrn}{relativeUrl}" :
+                $"{detectionApiUrn}/{relativeUrl}";
         }
     }
 }
