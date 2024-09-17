@@ -1,0 +1,9 @@
+﻿@inherits ComponentManager
+
+<RadzenStack Orientation="Orientation.Horizontal">
+    <img src=@SpectrogramUri alt="Spectrogram Image" style="height: 30px;">
+    <audio controls style="height:30px;width:250px;" id=@($"audio_{Id}")>
+        <source src=@AudioUri type="audio/wav">
+        Your browser does not support the audio tag.
+    </audio>
+</RadzenStack>

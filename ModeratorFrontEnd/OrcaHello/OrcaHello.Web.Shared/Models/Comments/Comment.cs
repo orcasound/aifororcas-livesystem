@@ -18,5 +18,15 @@
 
         [SwaggerSchema("Date and time of when the detection was reviewed by the human moderator.")]
         public DateTime? Moderated { get; set; }
+
+        [SwaggerSchema("Date and time of when the detection was collected.")]
+        public DateTime Timestamp { get; set; }
+        
+        [SwaggerSchema("URI of the detection's audio file (.wav) in blob storage.")]
+        public string AudioUri { get; set; }
+
+        [SwaggerSchema("URI of the detection's image file (.png) in blob storage.")]
+        public string SpectrogramUri { get; set; }
+
     }
 }

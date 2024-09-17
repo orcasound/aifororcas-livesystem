@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentManager
+<RadzenLayout class="rz-shadow-3" id="container">
+    <RadzenHeader>
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center 
+            JustifyContent=JustifyContent.Left Gap="0" class="px-2">
+            <OrcaIconComponent />
+            <RadzenStack Orientation=Orientation.Vertical>
+                <RadzenText Text="OrcaHello" TextStyle=TextStyle.H1 />
+                <RadzenText Text="By AI for Orcas" TextStyle=TextStyle.Body2 />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenBody class="p-1" Style="overflow-y:hidden;height:calc(100%);">
+        @Body
+    </RadzenBody>
+    <RadzenFooter class="p-0">
+        <div class="rz-background-color-black">
+            <RadzenText TextStyle=TextStyle.Subtitle2 class="rz-color-white mb-0 rz-text-align-center" Style="font-weight:100">©Copyright 2023 OrcaHello | All Rights Reserved</RadzenText>
+        </div>
+    </RadzenFooter>
+</RadzenLayout>

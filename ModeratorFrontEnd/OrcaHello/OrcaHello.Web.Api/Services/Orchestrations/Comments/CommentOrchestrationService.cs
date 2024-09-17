@@ -77,6 +77,9 @@
                 LocationName = metadata.LocationName,
                 Moderator = metadata.Moderator,
                 Moderated = !string.IsNullOrWhiteSpace(metadata.DateModerated) ? DateTime.Parse(metadata.DateModerated) : null,
+                Timestamp = metadata.Timestamp,
+                SpectrogramUri = metadata.ImageUri,
+                AudioUri = metadata.AudioUri
             };
 
             return comment;

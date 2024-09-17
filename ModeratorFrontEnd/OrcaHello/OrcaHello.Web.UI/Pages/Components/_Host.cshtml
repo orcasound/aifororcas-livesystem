@@ -1,0 +1,46 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Web
+@namespace OrcaHello.Web.UI.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/dark-base.css">
+    <link rel="stylesheet" href="css/blazor.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+</head>
+<body>
+    <component type="typeof(App)" render-mode="Server" />
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <!-- Radzen components -->
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+
+    <!-- Bing maps -->
+    <script src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AjPZqXS-Xf1kvUrAxtnogaAA9S1COo2L3md5YFDg7O7HJFOgWMzbprOnpp4epSbv' type='text/javascript'></script>
+
+    <!-- Project-specific JavaScript -->
+    <script src="js/orcahello-web-ui.js"></script>
+
+    <!-- Blazor framework -->
+    <script src="_framework/blazor.server.js"></script>
+
+</body>
+</html>

@@ -22,7 +22,7 @@
                 service.UpdateMetadataAsync(It.IsAny<Metadata>()))
                 .ReturnsAsync(true);
 
-            TagReplaceResponse result = await _orchestrationService.ReplaceTagInAllDetectionsAsync(oldTag, newTag);
+            TagReplaceResponse result = await _orchestrationService.ReplaceTagInAllDetectionsAsync(new ReplaceTagRequest { OldTag = oldTag, NewTag = newTag });
 
             Assert.IsNotNull(result);
             Assert.AreEqual(oldTag, result.OldTag);

@@ -1,0 +1,47 @@
+﻿@inherits ComponentManager
+
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false"
+             AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
+</RadzenAlert>
+
+<RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4 rz-mt-3">
+    <RadzenColumn Size="12" SizeMD="6" SizeLG="6" SizeXL="3">
+
+        <RadzenCard Variant=Variant.Outlined>
+            <RadzenText TextStyle=TextStyle.H6>Detections</RadzenText>
+
+            <LoadingSliderComponent IsLoading=StateView.IsLoading />
+
+            @if (StateView.IsPopulated)
+            {
+                <RadzenChart>
+                    <RadzenDonutSeries Data=StateView.MetricsItemViews CategoryProperty=Name
+                                       ValueProperty=Value Fills=StateView.FillColors InnerRadius=100>
+                        <ChildContent>
+                            <RadzenSeriesDataLabels Visible="true" />
+                        </ChildContent>
+                        <TitleTemplate>
+                            <div class="rz-donut-content">
+                                <div>@StateView.FromDate.UTCToPDTCompact()</div>
+                                <div>to</div>
+                                <div>@StateView.ToDate.UTCToPDTCompact()</div>
+                            </div>
+                        </TitleTemplate>
+                    </RadzenDonutSeries>
+                </RadzenChart>
+            }
+
+            @if (StateView.IsEmpty)
+            {
+                <RadzenAlert AllowClose="false"
+                             AlertStyle=AlertStyle.Warning
+                             Variant=Variant.Flat
+                             Shade=Shade.Lighter>
+                    There are no Detection metrics for the period @StateView.FromDate.UTCToPDTCompact() to @StateView.ToDate.UTCToPDTCompact()
+                </RadzenAlert>
+            }
+
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>

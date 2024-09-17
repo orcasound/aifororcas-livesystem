@@ -1,0 +1,21 @@
+﻿@inherits ComponentManager
+
+<AuthorizeView>
+	<Authorized>
+        <RadzenProfileMenu Click="OnProfileMenuClicked">
+            <Template>
+                <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                    <RadzenText id="large-only" Text=@DisplayName TextStyle=TextStyle.Body1 />
+                    <RadzenIcon Icon="account_circle" Style="font-size: 2.286rem;"/>
+                </RadzenStack>
+            </Template>
+            <ChildContent>
+                <RadzenProfileMenuItem Text="My Metrics" Path="moderator_activity" Icon="area_chart" />
+                <RadzenProfileMenuItem Text="Log Out" onclick="" Icon="logout" />
+            </ChildContent>
+        </RadzenProfileMenu>
+	</Authorized>
+	<NotAuthorized>
+		<RadzenButton Text="Log In" Click=Login Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Style="margin-right:10px;" />
+	</NotAuthorized>
+</AuthorizeView>

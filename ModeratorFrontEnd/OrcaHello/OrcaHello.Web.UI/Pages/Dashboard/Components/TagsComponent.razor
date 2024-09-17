@@ -1,0 +1,94 @@
+﻿@inherits ComponentManager
+
+<RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
+    <RadzenColumn Size="12">
+        <RadzenCard Variant=Variant.Outlined>
+            <RadzenPanel Text="Tags">
+                <HeaderTemplate>
+                    @if (StateView.IsExpanded)
+                    {
+                        <RadzenButton Variant=Variant.Outlined Icon="expand_less" Click="@(() => ToggleTags())" />
+                    }
+                    else
+                    {
+                        <RadzenButton Variant=Variant.Outlined Icon="expand_more" Click="@(() => ToggleTags())" />
+                    }
+                </HeaderTemplate>
+                <ChildContent>
+                    @if (StateView.IsExpanded)
+                    {
+                        <LoadingSliderComponent IsLoading=StateView.IsLoading />
+
+                        @if (!StateView.IsLoading && StateView.IsEmpty)
+                        {
+                            <RadzenAlert AllowClose="false"
+                                         AlertStyle=AlertStyle.Warning
+                                         Variant=Variant.Flat
+                                         Shade=Shade.Lighter>
+                                There are no Tags listed for this timeframe.
+                            </RadzenAlert>
+                        }
+
+                        @if (!StateView.IsLoading && StateView.IsPopulated)
+                        {
+                            <RadzenAccordion Expand=@(args => OnTagExpanded(args))>
+                                <Items>
+                                    @foreach (var tag in StateView.Items)
+                                    {
+                                        <RadzenAccordionItem Text=@tag.ToUpper()>
+                                            @if (TagDetectionsState.IsPopulated)
+                                            {
+                                                foreach (var detection in TagDetectionsState.Items)
+                                                {
+                                                    <RadzenCard Variant=Variant.Text Style="width:100%; padding: 0; margin-bottom: 15px;">
+                                                        <RadzenRow Gap="0">
+                                                            <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+@*                                                                 <InlinePlayerComponent 
+                                                                    @bind-PlaybackId="PlaybackId" 
+                                                                    Id=@detection.Id
+                                                                    AudioUri=@detection.AudioUri
+                                                                    SpectrogramUri=@detection.SpectrogramUri/> *@
+                                                                <InlinePlayerComponent 
+                                                                                       Id=@detection.Id
+                                                                                       AudioUri=@detection.AudioUri
+                                                                                       SpectrogramUri=@detection.SpectrogramUri />
+                                                            </RadzenColumn>
+                                                            <RadzenColumn Size="12" SizeMD="6" SizeLG="9" Style="padding-bottom: 10px; border-bottom: 1px solid var(--cg-dark-gray);">
+                                                                <RadzenStack Orientation=Orientation.Vertical>
+                                                                    <RadzenLink Path=@($"/orca_sounds/{detection.Id}") Target="_blank" Text=@detection.Id />
+
+                                                                    <RadzenText TextStyle=TextStyle.Body2>@($"{detection.Timestamp.UTCToPDTCompact()} at {detection.LocationName} - {detection.State} Orca detection")</RadzenText>
+                                                                        <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@detection.Comments</RadzenText>
+                                                                        @if (!string.IsNullOrWhiteSpace(detection.Moderator))
+                                                                        {
+                                                                        @if (detection.Moderated.HasValue)
+                                                                            {
+                                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {detection.Moderator} ({detection.Moderated.Value.UTCToPDTCompact()})")</RadzenText>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {detection.Moderator}")</RadzenText>
+                                                                            }
+                                                                        }
+                                                                </RadzenStack>
+                                                            </RadzenColumn>
+                                                        </RadzenRow>
+                                                    </RadzenCard>
+                                                }
+
+                                                @if (TagDetectionsState.Items.Count != TagDetectionsState.Count)
+                                                {
+                                                    <RadzenButton Variant=Variant.Outlined Style="margin-bottom: 10px;" Text=@($"Load more (showing {TagDetectionsState.Items.Count} of {TagDetectionsState.Count}) ...") Click=OnLoadMoreTagDetectionsClicked />
+                                                }
+                                            }
+                                        </RadzenAccordionItem>
+                                    }
+                                </Items>
+                            </RadzenAccordion>
+                        }
+                    }
+                </ChildContent>
+            </RadzenPanel>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>

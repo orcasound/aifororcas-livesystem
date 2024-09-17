@@ -1,0 +1,25 @@
+﻿@* @page "/" *@
+@page "/player"
+
+@inject IJSRuntime JSRuntime
+
+<div style="position: relative; display: inline-block;">
+    <img id="spectrogram" src="https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_port_townsend_2020_11_22_12_22_38_PST.png" style="width: 100%;">
+    <div id="playbackLine" style="height: 100%; width: 2px; background-color: white; position: absolute; top: 0; left: 0;"></div>
+</div>
+<audio id="audioElement" controls @ref="audioElement">
+    <source src="https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_port_townsend_2020_11_22_12_22_38_PST.wav" type="audio/wav">
+</audio>
+
+@code {
+    private ElementReference audioElement;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("addAudioEventListeners", audioElement);
+        }
+    }
+}
+

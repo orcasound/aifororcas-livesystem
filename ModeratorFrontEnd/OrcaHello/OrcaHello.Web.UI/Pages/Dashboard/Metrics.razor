@@ -1,0 +1,64 @@
+﻿@inherits ComponentManager
+
+@page "/"
+@page "/index"
+@page "/metrics"
+
+<RadzenLayout Style="height:calc(100%);">
+    <RadzenBody>
+        <PageHeaderComponent Title="Metrics"
+                             Description="Review key system metrics for a given timeframe." />
+
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-5">
+
+            <!-- Timeframe -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Timeframe:" />
+                <RadzenDropDown TValue=Timeframe @bind-Value=@SelectedTimeframe Data=@TimeframeDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false"
+                                Change=OnTimeframeChanged />
+            </RadzenStack>
+
+            <!-- Start and End DateTimes -->
+            @if (SelectedTimeframe == Timeframe.Range)
+            {
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="Start:" />
+                    <RadzenDatePicker @bind-Value=@SelectedStartDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="End:" />
+                    <RadzenDatePicker @bind-Value=@SelectedEndDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+            }
+
+            <!-- Apply Filters button -->
+
+            <RadzenButton Click=OnApplyFilterClicked Variant=Variant.Outlined Text="Apply Filters" />
+
+        </RadzenStack>
+
+        <RadzenStack Gap="1rem" Style="position:relative">
+
+            <!-- Detection donut graph -->
+
+            <DetectionMetricsComponent StateView=MetricsState />
+
+            <!-- Tags -->
+
+            <TagsComponent @bind-PlaybackId="PlaybackId" StateView=TagsState OnToggleOpen=OnToggleOpen />
+
+            <!-- Comments from Positive Detections -->
+
+            <PositiveCommentsComponent StateView=PositiveCommentsState OnToggleOpen=OnToggleOpen />
+
+            <!-- Comments from False Positives and Unknown Detections -->
+
+            <NegativeAndUnknownCommentsComponent StateView=NegativeAndUnknownCommentsState OnToggleOpen=OnToggleOpen />
+
+        </RadzenStack>
+    </RadzenBody>
+</RadzenLayout>

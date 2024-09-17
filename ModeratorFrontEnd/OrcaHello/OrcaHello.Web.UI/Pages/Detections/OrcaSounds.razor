@@ -1,0 +1,127 @@
+﻿@inherits ComponentManager
+
+@page "/orca_sounds"
+
+<RadzenLayout Style="height:calc(100%);">
+    <RadzenBody Style="height:calc(100%);">
+
+        <RadzenRow Gap="0" Class="rz-mt-3">
+            <RadzenColumn Size="11" SizeLG="6">
+                <RadzenFormField Variant=Variant.Text Style="margin-top: -15px; width: 50%;" class="rz-mb-5">
+                    <RadzenDropDown TValue=DetectionState @bind-Value=@SelectedDetectionState Data=@DetectionStateDropdownOptions
+                                    TextProperty=Text ValueProperty=Value
+                                    AllowClear="false" Style="height: 50px;"
+                                    Change=OnDetectionStateChanged>
+                        <Template Context="data">
+                            <RadzenText TextStyle=TextStyle.H2>@data.Text</RadzenText>
+                        </Template>
+                    </RadzenDropDown>
+                </RadzenFormField>
+                <RadzenBadge IsPill="true" BadgeStyle="BadgeStyle.Secondary" Text=@($"{PillCount}") />
+            </RadzenColumn>
+            <RadzenColumn Size="1" SizeLG="6">
+                <RadzenStack Orientation=Orientation.Horizontal Gap="0" AlignItems=AlignItems.Center JustifyContent=JustifyContent.End>
+                    <RadzenButton Disabled=@(SelectedViewMode == ViewMode.TileView)
+                                  Click="OnTileViewClicked" ButtonStyle=ButtonStyle.Primary
+                                  Variant=Variant.Text Size=ButtonSize.Large Icon="rectangle"
+                                  Class="oh-min-button"
+                                  Style="margin-right:0;" />
+                    <RadzenButton id="large-only" Disabled=@(SelectedViewMode == ViewMode.GridView)
+                                  Click="OnGridViewClicked" ButtonStyle=ButtonStyle.Primary
+                                  Variant=Variant.Text Size=ButtonSize.Large Icon="grid_on"
+                                  Class="oh-min-button"
+                                  Style="margin-left:0;" />
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <!-- Filter pulldowns and buttons -->
+
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-5">
+
+            <!-- Sort By -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Sort By:" />
+                <RadzenDropDown TValue=SortBy @bind-Value=@SelectedSortBy Data=@SortByDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Sort Order -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Sort Order:" />
+                <RadzenDropDown TValue=Models.SortOrder @bind-Value=@SelectedSortOrder Data=@SortOrderDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Timeframe -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Timeframe:" />
+                <RadzenDropDown TValue=Timeframe @bind-Value=@SelectedTimeframe Data=@TimeframeDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false"
+                                Change=OnTimeframeChanged />
+            </RadzenStack>
+
+            <!-- Start and End DateTimes -->
+            @if (SelectedTimeframe == Timeframe.Range)
+            {
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="Start:" />
+                    <RadzenDatePicker @bind-Value=@SelectedStartDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="End:" />
+                    <RadzenDatePicker @bind-Value=@SelectedEndDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+            }
+
+            <!-- Hydrophone location -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Hydrophone Location:" />
+                <RadzenDropDown TValue="int" @bind-Value=@SelectedLocation Data=@LocationDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Maximum number of records -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Maximum Records:" />
+                <RadzenDropDown TValue="int" @bind-Value=@SelectedMaxRecords Data=@MaxRecordsDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" />
+            </RadzenStack>
+
+            <!-- Apply Filters button -->
+
+            <RadzenButton Click=OnApplyFilterClicked Variant=Variant.Outlined Text="Apply Filters" />
+
+            <!-- Review button -->
+
+            <AuthorizeView Policy="Moderators">
+
+                <RadzenButton Click=OnReviewClicked Visible=IsReviewButtonVisible
+                              Variant=Variant.Outlined Text="Review" />
+
+            </AuthorizeView>
+
+        </RadzenStack>
+
+        @if (SelectedViewMode == ViewMode.TileView)
+        {
+            <TileViewComponent Filters=PassedFilters 
+                @bind-PillCount="PillCount"
+                @ref=TileView />
+        }
+        else
+        {
+            <GridViewComponent Filters=PassedFilters
+                @bind-PillCount="PillCount"
+                OnShowReviewButton=ShowReviewButton @ref=GridView />
+        }
+
+    </RadzenBody>
+</RadzenLayout>

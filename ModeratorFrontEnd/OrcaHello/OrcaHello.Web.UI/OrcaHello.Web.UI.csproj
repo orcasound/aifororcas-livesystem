@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>43df5476-1126-4a11-8afe-2fd7274b0b32</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\catsk\.nuget\packages\blazorade.msal\2.2.0\contentFiles\any\net6.0\Blazorade-Icon-128.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazorade.Msal" Version="2.2.0" />
+    <PackageReference Include="Radzen.Blazor" Version="4.20.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrcaHello.Web.Shared\OrcaHello.Web.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
+
+

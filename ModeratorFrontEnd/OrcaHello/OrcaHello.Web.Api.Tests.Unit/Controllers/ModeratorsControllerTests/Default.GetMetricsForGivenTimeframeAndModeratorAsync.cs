@@ -5,7 +5,7 @@
         [TestMethod]
         public async Task Default_GetMetricsAsync_Expect_MetricsForModeratorResponse()
         {
-            MetricsForModeratorResponse response = new MetricsForModeratorResponse
+            MetricsForModeratorResponse response = new()
             {
                 FromDate = DateTime.Now,
                 ToDate = DateTime.Now.AddDays(1),
@@ -27,7 +27,7 @@
             Assert.AreEqual(200, contentResult.StatusCode);
 
             Assert.AreEqual(response.Positive,
-                ((MetricsForModeratorResponse)contentResult.Value).Positive);
+                ((MetricsForModeratorResponse)contentResult.Value!).Positive);
 
             _orchestrationServiceMock.Verify(service =>
                 service.RetrieveMetricsForGivenTimeframeAndModeratorAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>()),

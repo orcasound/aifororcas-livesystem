@@ -321,6 +321,39 @@ namespace OrcaHello.Web.Api.Services
             };
         });
 
+        public ValueTask<QueryableMetadataForTimeframeTagAndModerator> RetrieveMetadataForGivenTimeframeTagAndModeratorAsync(DateTime fromDate, DateTime toDate,
+            string moderator, string tag, int page, int pageSize) =>
+        TryCatch(async () =>
+        {
+            Validate(moderator, nameof(moderator));
+            Validate(tag, nameof(tag));
+            Validate(fromDate, nameof(fromDate));
+            Validate(toDate, nameof(toDate));
+
+            fromDate = NormalizeStartDate(fromDate);
+            toDate = NormalizeEndDate(toDate);
+
+            page = NormalizePage(page);
+            pageSize = NormalizePageSize(pageSize);
+
+            ValidateDatesAreWithinRange(fromDate, toDate);
+
+            ListMetadataAndCount queryResults = await _storageBroker.GetMetadataListByTimeframeTagAndModerator
+                (fromDate, toDate, moderator, tag, page, pageSize);
+
+            return new QueryableMetadataForTimeframeTagAndModerator
+            {
+                QueryableRecords = queryResults.PaginatedRecords.AsQueryable(),
+                TotalCount = queryResults.TotalCount,
+                FromDate = fromDate,
+                ToDate = toDate,
+                Page = page,
+                PageSize = pageSize,
+                Moderator = moderator,
+                Tag = tag
+            };
+        });
+
         #endregion
 
         #region tags
@@ -337,6 +370,8 @@ namespace OrcaHello.Web.Api.Services
              ValidateDatesAreWithinRange(fromDate, toDate);
 
              List<string> TagList = await _storageBroker.GetTagListByTimeframe(fromDate, toDate);
+
+             TagList.RemoveAll(x => string.IsNullOrWhiteSpace(x));
 
              return new QueryableTagsForTimeframe
              {
@@ -401,6 +436,7 @@ namespace OrcaHello.Web.Api.Services
         {
             List<string> TagList = await _storageBroker.GetAllTagList();
 
+            TagList.RemoveAll(x => string.IsNullOrWhiteSpace(x));
 
             return new QueryableTags
             {

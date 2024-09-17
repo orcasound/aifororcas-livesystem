@@ -1,0 +1,54 @@
+﻿@inherits LayoutComponentManager
+
+<RadzenLayout class="rz-shadow-3" id="container">
+    <RadzenHeader>
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.SpaceBetween>
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center JustifyContent=JustifyContent.Left Gap="0">
+                <RadzenSidebarToggle Click=@(() => sidebarExpanded = !sidebarExpanded) />
+                <OrcaIconComponent />
+                <RadzenStack Orientation=Orientation.Vertical>
+                    <RadzenText Text="OrcaHello" TextStyle=TextStyle.H1 />
+                    <RadzenText Text="By AI for Orcas" TextStyle=TextStyle.Body2 />
+                </RadzenStack>
+            </RadzenStack>
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center Gap="10px">
+                <CurrentDateTimeComponent />
+                <AuthenticationComponent />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenSidebar @bind-Expanded=@sidebarExpanded>
+        <RadzenPanelMenu>
+@*             <RadzenPanelMenuItem Path="index" Text="Summary" Selected=@isSummarySelected Icon="home" /> *@
+            <RadzenPanelMenuItem Path="index" Text="Metrics" Icon="donut_large" />
+            <RadzenPanelMenuItem Path="orca_sounds" Text="Orca Sounds" Icon="queue_music" />
+            <RadzenPanelMenuItem Path="search_by_tag" Text="Search By Tag" Icon="search" />
+            <RadzenPanelMenuItem Text="Explore" Icon="explore">
+                <RadzenPanelMenuItem Path="hydrophones" Text="Hydrophones" Icon="mic" />
+                <RadzenPanelMenuItem Path="https://live.orcasound.net/" Text="Listen Live" Icon="headphones" Target="_blank" />
+                <RadzenPanelMenuItem Path="http://www.orcaconservancy.org/" Text="Orca Conservancy" Icon="language" Target="_blank" />
+            </RadzenPanelMenuItem>
+            <AuthorizeView Policy="Moderators">
+                <Authorized>
+                    <RadzenPanelMenuItem Text="Curate" Icon="settings_applications">
+                        <RadzenPanelMenuItem Path="curate_tags" Text="Tags" Icon="sell" />
+                        <RadzenPanelMenuItem Path="curate_interest_labels" Text="Interest Labels" Icon="label" />
+                    </RadzenPanelMenuItem>
+                </Authorized>
+            </AuthorizeView>
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+    <RadzenBody class="p-1" Style="overflow-y:hidden;height:calc(100%);">
+        @Body
+    </RadzenBody>
+    <RadzenFooter class="p-0">
+        <div class="rz-background-color-black">
+            <RadzenText TextStyle=TextStyle.Subtitle2 class="rz-color-white mb-0 rz-text-align-center" Style="font-weight:100">©Copyright 2023 OrcaHello | All Rights Reserved</RadzenText>
+        </div>
+    </RadzenFooter>
+</RadzenLayout>
+
+<RadzenDialog />
+<RadzenNotification />
+<RadzenContextMenu />
+<RadzenTooltip />

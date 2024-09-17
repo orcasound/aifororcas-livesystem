@@ -1,0 +1,137 @@
+﻿@inherits ComponentManager
+
+@page "/search_by_tag"
+
+<RadzenLayout Style="height:calc(100%);">
+    <RadzenBody>
+        <PageHeaderComponent Title="Search By Tag"
+                             Description="List all Detections based on a timeframe and selected tag or tags." />
+
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.End Wrap=FlexWrap.Wrap class="rz-mt-5">
+
+            <!-- Timeframe -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Timeframe:" />
+                <RadzenDropDown TValue=Timeframe @bind-Value=@SelectedTimeframe Data=@TimeframeDropdownOptions
+                                TextProperty=Text ValueProperty=Value
+                                Change=OnTimeframeChanged />
+            </RadzenStack>
+
+            <!-- Start and End DateTimes -->
+            @if (SelectedTimeframe == Timeframe.Range)
+            {
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="Start:" />
+                    <RadzenDatePicker @bind-Value=@SelectedStartDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+                <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                    <RadzenText TextStyle=TextStyle.Body1 Text="End:" />
+                    <RadzenDatePicker @bind-Value=@SelectedEndDateTime ShowTime="true" ShowSeconds="true"
+                                      MinutesStep="5" DateFormat="MM/dd/yyyy HH:mm" />
+                </RadzenStack>
+            }
+
+            <!-- Select Tags -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Tags:" />
+                <RadzenDropDown @bind-Value=@SelectedTags Data=@AvailableTags Multiple=true AllowSelectAll=false
+                                AllowClear=true Placeholder="Select one or more tags">
+                </RadzenDropDown>
+            </RadzenStack>
+
+            <!-- Logical Operator -->
+
+            <RadzenStack Orientation=Orientation.Vertical Gap="0">
+                <RadzenText TextStyle=TextStyle.Body1 Text="Operator:" />
+                <RadzenDropDown @bind-Value=@SelectedTagLogic Data=@TagLogicDropdownOptions
+                                TextProperty=Text ValueProperty=Value Placeholder="Select operator">
+                </RadzenDropDown>
+            </RadzenStack>
+
+            <!-- Apply Filters button -->
+
+            <RadzenButton Click=OnApplyFilterClicked Variant=Variant.Outlined Text="Apply Filters" />
+
+        </RadzenStack>
+
+        <RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false"
+                     AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+            @ValidationMessage
+        </RadzenAlert>
+
+        <LoadingSliderComponent IsLoading=IsLoading />
+
+        <div class="rz-mt-3">
+
+            @if (IsEmptyList)
+            {
+                <RadzenAlert AllowClose="false"
+                             AlertStyle=AlertStyle.Warning
+                             Variant=Variant.Flat
+                             Shade=Shade.Lighter>
+                    There are no detections listed for this timeframe and tag filter.
+                </RadzenAlert>
+            }
+
+            @if (IsPopulatedList)
+            {
+                foreach (var detection in DetectionItemViews)
+                {
+                    <RadzenCard Variant=Variant.Text Style="width:100%; padding: 0; margin-bottom: 15px;">
+                        <RadzenRow Gap="0">
+                            <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+@*                                 <InlinePlayerComponent @bind-PlaybackId="PlaybackId"
+                                                       Id=@detection.Id
+                                                       AudioUri=@detection.AudioUri
+                                                       SpectrogramUri=@detection.SpectrogramUri /> *@
+
+                                <InlinePlayerComponent 
+                                                       Id=@detection.Id
+                                                       AudioUri=@detection.AudioUri
+                                                       SpectrogramUri=@detection.SpectrogramUri />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6" SizeLG="9" Style="padding-bottom: 10px; border-bottom: 1px solid var(--cg-dark-gray);">
+                                <RadzenStack Orientation=Orientation.Vertical>
+                                    <RadzenLink Path=@($"/orca_sounds/{detection.Id}") Target="_blank" Text=@detection.Id />
+
+                                    <RadzenText TextStyle=TextStyle.Body2>@($"{detection.Timestamp.UTCToPDTCompact()} at {detection.LocationName} - {detection.State} Orca detection")</RadzenText>
+
+                                    @if (!string.IsNullOrEmpty(detection.Tags))
+                                    {
+                                        <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"Tags: {detection.Tags}")</RadzenText>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(detection.Comments))
+                                    {
+                                        <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@detection.Comments</RadzenText>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(detection.Moderator))
+                                    {
+                                        @if (detection.Moderated.HasValue)
+                                        {
+                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {detection.Moderator} ({detection.Moderated.Value.UTCToPDTCompact()})")</RadzenText>
+                                        }
+                                        else
+                                        {
+                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {detection.Moderator}")</RadzenText>
+                                        }
+                                    }
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+                }
+
+                @if (DetectionItemViews.Count != TotalCount)
+                {
+                    <RadzenButton Variant=Variant.Outlined Style="margin-bottom: 10px;" Text=@($"Load more (showing {DetectionItemViews.Count} of {TotalCount}) ...") Click=OnLoadMoreDetectionsClicked />
+                }
+            }
+        </div>
+
+    </RadzenBody>
+</RadzenLayout>

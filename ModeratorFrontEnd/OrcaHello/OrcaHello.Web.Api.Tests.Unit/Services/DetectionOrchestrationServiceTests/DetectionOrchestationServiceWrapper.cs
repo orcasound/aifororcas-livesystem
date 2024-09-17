@@ -21,13 +21,7 @@
         public new void ValidateStateIsAcceptable(string state) =>
             base.ValidateStateIsAcceptable(state);
 
-        public new void ValidateDeleted(bool deleted, string id) =>
-            base.ValidateDeleted(deleted, id);
-
-        public new void ValidateInserted(bool inserted, string id) =>
-            base.ValidateInserted(inserted, id);
-
-        public new void ValidateModerateRequestOnUpdate(ModerateDetectionRequest request) =>
+        public new void ValidateModerateRequestOnUpdate(ModerateDetectionsRequest request) =>
             base.ValidateModerateRequestOnUpdate(request);
 
         public new ValueTask<T> TryCatch<T>(ReturningGenericFunction<T> returningValueTaskFunction) =>

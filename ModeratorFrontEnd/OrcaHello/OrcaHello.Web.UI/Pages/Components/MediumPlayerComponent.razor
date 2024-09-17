@@ -1,0 +1,9 @@
+﻿@inherits ComponentManager
+
+<div class="oh-spectrogram-player">
+    <img id=@($"spectrogram_{ItemView.Id}") class="oh-spectrogram-image" src=@ItemView.SpectrogramUri alt="Audio image" @ref="imageRef">
+    <div id=@($"playback_line_{ItemView.Id}") style="height: 100%; width: 2px; background-color: white; position: absolute; top: 0; left: 0;"></div>
+</div>
+<audio id=@($"audio_{ItemView.Id}") controls @ref="audioElement" class="rz-mt-2">
+    <source src=@ItemView.AudioUri type="audio/wav">
+</audio>

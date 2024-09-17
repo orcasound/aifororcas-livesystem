@@ -16,13 +16,16 @@ namespace OrcaHello.Web.Api.Services
                 throw new InvalidDetectionOrchestrationException(LoggingUtilities.MissingRequiredProperty(propertyName));
         }
 
-        protected void ValidateModerateRequestOnUpdate(ModerateDetectionRequest request)
+        protected void ValidateModerateRequestOnUpdate(ModerateDetectionsRequest request)
         {
             if (request is null)
                 throw new NullModerateDetectionRequestException();
 
             switch(request)
             {
+                case { } when request.Ids is null || !request.Ids.Any():
+                    throw new InvalidDetectionOrchestrationException(LoggingUtilities.MissingRequiredProperty(nameof(request.Ids)));
+
                 case { } when ValidatorUtilities.IsInvalid(request.State) :
                     throw new InvalidDetectionOrchestrationException(LoggingUtilities.MissingRequiredProperty(nameof(request.State)));
 

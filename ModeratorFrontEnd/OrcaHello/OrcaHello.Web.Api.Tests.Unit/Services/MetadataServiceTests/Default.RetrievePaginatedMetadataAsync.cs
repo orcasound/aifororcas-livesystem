@@ -23,7 +23,7 @@
             DateTime toDate = DateTime.Now.AddDays(1);
 
             var result = await _metadataService.
-                RetrievePaginatedMetadataAsync("Positive", fromDate, toDate, "timestamp", true, "Orcasound Lab", 1, 10);
+                RetrievePaginatedMetadataAsync("Positive", fromDate, toDate, "timestamp", true, "Haro Straight", 1, 10);
 
             Assert.AreEqual(expectedResult.PaginatedRecords.Count(), result.QueryableRecords.Count());
 
@@ -54,7 +54,7 @@
             DateTime toDate = DateTime.Now.AddDays(1);
 
             var result = await _metadataService.
-                RetrievePaginatedMetadataAsync("Positive", fromDate, toDate, "timestamp", true, "Orcasound Lab", -1, -10);
+                RetrievePaginatedMetadataAsync("Positive", fromDate, toDate, "timestamp", true, "Haro Straight", -1, -10);
 
             Assert.AreEqual(expectedResult.PaginatedRecords.Count(), result.QueryableRecords.Count());
 

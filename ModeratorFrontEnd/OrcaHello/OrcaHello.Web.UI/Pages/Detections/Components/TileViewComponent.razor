@@ -1,0 +1,91 @@
+﻿@inherits ComponentManager
+
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false"
+             AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
+</RadzenAlert>
+
+@if (string.IsNullOrEmpty(ValidationMessage) && !IsLoading && DetectionItemViews != null && DetectionItemViews.Count() == 0)
+{
+    <RadzenAlert AllowClose="false"
+                 AlertStyle=AlertStyle.Warning
+                 Variant=Variant.Flat
+                 Shade=Shade.Lighter>
+        There are no Detections listed for this timeframe and filtering conditions.
+    </RadzenAlert>
+}
+
+<RadzenDataList AllowVirtualization="true"
+                WrapItems="false"
+                AllowPaging="false"
+                LoadData=LoadData
+                Data=DetectionItemViews
+                Count=CurrentlySetFilters.MaxRecords
+                TItem=DetectionItemView
+                IsLoading=IsLoading
+                PageSize="1000"
+                PagerHorizontalAlign=HorizontalAlign.Left
+                ShowPagingSummary="true"
+                @ref=DetectionDataList
+                Style="margin-top:20px;">
+
+    <Template Context="item">
+        <RadzenRow Gap="0">
+            <RadzenColumn Size="12" SizeXS="6">
+                <RadzenRow Gap="0">
+                    <RadzenColumn Size="12" SizeXS="12">
+                        <RadzenLink id="large-only" Path=@($"/orca_sounds/{item.Id}") @onclick="@StopAllAudio" Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-h3-font-size)" />
+                        <RadzenLink id="phone-only" Path=@($"/orca_sounds/{item.Id}") @onclick="@StopAllAudio" Target="_blank" Text=@item.Id Style="font-size: var(--rz-text-body1-font-size)" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Gap="0" Class="rz-mt-3">
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="watch_later" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.Timestamp.UTCToPDTFull() />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="map" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.FullLocation />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Gap="0" class="rz-mt-3">
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="headphones" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.DetectionCount />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeXS="6">
+                        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                            <RadzenIcon id="tile-icon" Icon="signal_cellular_alt" IconStyle=IconStyle.Secondary />
+                            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@item.AverageConfidence />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+                <AuthorizeView Policy="Moderators">
+                    <NotAuthorized>
+                        @if (item.State.ToUpper() != DetectionState.Unreviewed.ToString().ToUpper())
+                        {
+                            <EditedModeratorFieldsComponent DetectionItemView=@item />
+                        }
+                    </NotAuthorized>
+                    <Authorized>
+                        <EditableModeratorFieldsComponent 
+                            Moderator=@Moderator 
+                            AvailableTags=@AvailableTags 
+                            DetectionItemView=@item
+                            ReloadCurrentView=ReloadData />
+                    </Authorized>
+                </AuthorizeView>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeXS="6">
+                <MediumPlayerComponent ItemView=@item />
+            </RadzenColumn>
+        </RadzenRow>
+    </Template>
+
+</RadzenDataList>

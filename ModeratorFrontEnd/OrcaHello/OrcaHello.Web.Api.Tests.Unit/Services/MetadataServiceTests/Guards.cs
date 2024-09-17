@@ -26,7 +26,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
             Assert.ThrowsException<InvalidMetadataException>(() =>
                 wrapper.Validate(invalidTag, nameof(invalidTag)));
 
-            Metadata nullMetadata = null;
+            Metadata nullMetadata = null!;
 
             Assert.ThrowsException<NullMetadataException>(() =>
                 wrapper.ValidateMetadataOnCreate(nullMetadata));

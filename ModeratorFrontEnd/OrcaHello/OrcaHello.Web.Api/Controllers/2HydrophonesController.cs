@@ -1,7 +1,7 @@
 ﻿namespace OrcaHello.Web.Api.Controllers
 {
     [Route("api/hydrophones")]
-    [SwaggerTag("This controller is responsible retrieving Hydrophone locations.")]
+    [SwaggerTag("This controller is responsible for retrieving Hydrophone locations.")]
     [ApiController]
     public class HydrophonesController : ControllerBase
     {

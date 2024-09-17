@@ -5,7 +5,7 @@
         [TestMethod]
         public async Task Default_GetTagsForGivenTimePeriodAndModerator_Expect_TagListResponse()
         {
-            TagListForModeratorResponse response = new TagListForModeratorResponse
+            TagListForModeratorResponse response = new()
             {
                 Count = 2,
                 FromDate = DateTime.Now,
@@ -25,8 +25,8 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.AreEqual(response.Tags.Count(),
-                ((TagListResponse)contentResult.Value).Tags.Count());
+            Assert.AreEqual(response.Tags.Count,
+                ((TagListResponse)contentResult.Value!).Tags.Count);
 
             _orchestrationServiceMock.Verify(service =>
                 service.RetrieveTagsForGivenTimePeriodAndModeratorAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>()),

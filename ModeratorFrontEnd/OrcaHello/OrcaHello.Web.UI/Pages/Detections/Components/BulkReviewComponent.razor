@@ -1,0 +1,24 @@
+﻿@inherits ComponentManager
+
+<RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start Gap="0">
+    <RadzenLabel Text="Was there at least one SRKW call in each of the clips?" />
+    <RadzenRadioButtonList @bind-Value=@State TValue="string" 
+        Data=DropdownHelper.DetectionStateDropdownOptions TextProperty=Text
+        ValueProperty=Value Orientation=Orientation.Vertical/>
+    <RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(StateValidationMessage)) AllowClose="false" AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+        @StateValidationMessage
+    </RadzenAlert>
+    <RadzenLabel Text="Tags for all clips" />
+    <RadzenDropDown @bind-Value=@SelectedTags Data=@AvailableTags Chips=true AllowSelectAll=false
+                    Multiple=true AllowClear=true Placeholder="Select tags for all clips"
+                    Style="width: 100%; max-width: 400px; margin-top: 1rem;">
+    </RadzenDropDown>
+    <RadzenLabel Text="And/Or" Style="margin-top: 1rem;" />
+    <RadzenTextBox @bind-Value=@EnteredTags Change=OnChangeEnteredTags Style="width: 100%; margin-top: 1rem;" Placeholder="Add tags for all clips separated by commas or semicolons" />
+   <RadzenLabel Text="Comments for all clips" Style="margin-top: 1rem;" />
+    <RadzenTextArea @bind-Value=@Comments Style="width: 100%; margin-top: 1rem;" Rows="3" Placeholder="Add comments for all clips" />
+</RadzenStack>
+<RadzenStack Orientation=Orientation.Horizontal Style="margin-top: 1rem;">
+    <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Click=OnSubmitClicked Text="Submit" Style="margin-right: 0.5rem;" />
+    <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Click=OnCancelClicked Text="Cancel" />
+</RadzenStack>

@@ -53,6 +53,36 @@
             };
         });
 
+        public ValueTask<DetectionListForModeratorAndTagResponse> RetrieveDetectionsForGivenTimeframeTagAndModeratorAsync(DateTime? fromDate, DateTime? toDate, string moderator, string tag, int page, int pageSize) =>
+        TryCatch(async () =>
+        {
+            Validate(fromDate, nameof(fromDate));
+            Validate(toDate, nameof(toDate));
+            Validate(moderator, nameof(moderator));
+            Validate(tag, nameof(tag));
+            ValidatePage(page);
+            ValidatePageSize(pageSize);
+
+            DateTime nonNullableFromDate = fromDate ?? default;
+            DateTime nonNullableToDate = toDate ?? default;
+
+            QueryableMetadataForTimeframeTagAndModerator results = await _metadataService.RetrieveMetadataForGivenTimeframeTagAndModeratorAsync
+                (nonNullableFromDate, nonNullableToDate, moderator, tag, page, pageSize);
+
+            return new DetectionListForModeratorAndTagResponse
+            {
+                Detections = results.QueryableRecords.Select(r => DetectionOrchestrationService.AsDetection(r)).ToList(),
+                FromDate = results.FromDate,
+                ToDate = results.ToDate,
+                Moderator = results.Moderator,
+                Tag = results.Tag,
+                Page = results.Page,
+                PageSize = results.PageSize,
+                TotalCount = results.TotalCount,
+                Count = results.QueryableRecords.Count()
+            };
+        });
+
         public ValueTask<TagListForModeratorResponse> RetrieveTagsForGivenTimePeriodAndModeratorAsync(DateTime? fromDate, DateTime? toDate, string moderator) =>
         TryCatch(async () =>
         {
@@ -100,7 +130,8 @@
                 PageSize = results.PageSize,
                 TotalCount = results.TotalCount,
                 Count = results.QueryableRecords.Count(),
-                Moderator = moderator
+                Moderator = moderator,
+        
             };
         });
 
@@ -141,6 +172,9 @@
                 LocationName = metadata.LocationName,
                 Moderator = metadata.Moderator,
                 Moderated = !string.IsNullOrWhiteSpace(metadata.DateModerated) ? DateTime.Parse(metadata.DateModerated) : null,
+                Timestamp = metadata.Timestamp,
+                SpectrogramUri = metadata.ImageUri,
+                AudioUri = metadata.AudioUri
             };
 
             return comment;

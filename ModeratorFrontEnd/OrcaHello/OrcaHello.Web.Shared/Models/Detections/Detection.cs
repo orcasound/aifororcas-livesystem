@@ -13,7 +13,7 @@
         [SwaggerSchema("URI of the detection's image file (.png) in blob storage.")]
         public string SpectrogramUri { get; set; }
 
-        [SwaggerSchema("The review state of the detection (Unreviewed, Positive, Negative Unknown).")]
+        [SwaggerSchema("The review state of the detection (Unreviewed, Positive, Negative, or Unknown).")]
         public string State { get; set; }
 
         [SwaggerSchema("The name of the hydrophone's location.")]
@@ -33,6 +33,9 @@
 
         [SwaggerSchema("List of tags entered by the human moderator during review.")]
         public List<string> Tags { get; set; } = new List<string>();
+
+        [SwaggerSchema("A special interest label entered by the human moderator during review.")]
+        public string InterestLabel { get; set; }
 
         [SwaggerSchema("Any text comments entered by the human moderator during review.")]
         public string Comments { get; set; }

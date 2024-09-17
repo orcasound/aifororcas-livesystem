@@ -42,7 +42,7 @@
 
         [HttpGet("bytimeframe")]
         [SwaggerOperation(Summary = "Gets a list of tags for the given timeframe.")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Returns the list of tags for the give timeframe.", typeof(TagListForTimeframeResponse))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the list of tags for the given timeframe.", typeof(TagListForTimeframeResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "If the request was malformed (missing parameters).")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
         [AllowAnonymous]
@@ -106,12 +106,11 @@
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
         [Authorize("Moderators")]
         public async ValueTask<ActionResult<TagReplaceResponse>> ReplaceTagInAllDetectionsAsync(
-            [SwaggerParameter("The old tag to replace.", Required = true)] string oldTag,
-            [SwaggerParameter("The new tag to replace it with.", Required = true)] string newTag)
+            [FromBody][SwaggerParameter("The old and new tag.", Required = true)] ReplaceTagRequest request)
         {
             try
             {
-                var result = await _tagOrchestrationService.ReplaceTagInAllDetectionsAsync(oldTag, newTag);
+                var result = await _tagOrchestrationService.ReplaceTagInAllDetectionsAsync(request);
 
                 return Ok(result);
             }

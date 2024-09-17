@@ -16,18 +16,24 @@
                 TotalReplaced = 2
             };
 
+            var request = new ReplaceTagRequest
+            {
+                OldTag = oldTag,
+                NewTag = newTag,
+            };
+
             _orchestrationServiceMock.Setup(service =>
-                service.ReplaceTagInAllDetectionsAsync(It.IsAny<string>(), It.IsAny<string>()))
+                service.ReplaceTagInAllDetectionsAsync(It.IsAny<ReplaceTagRequest>()))
                 .ReturnsAsync(response);
 
             ActionResult<TagReplaceResponse> actionResult =
-                await _controller.ReplaceTagInAllDetectionsAsync(oldTag, newTag);
+                await _controller.ReplaceTagInAllDetectionsAsync(request);
 
             var contentResult = actionResult.Result as ObjectResult;
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            var result = (TagReplaceResponse)contentResult.Value;
+            var result = (TagReplaceResponse)contentResult.Value!;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(oldTag, result.OldTag);
@@ -36,7 +42,7 @@
             Assert.AreEqual(2, result.TotalReplaced);
 
             _orchestrationServiceMock.Verify(service =>
-                service.ReplaceTagInAllDetectionsAsync(It.IsAny<string>(), It.IsAny<string>()),
+                service.ReplaceTagInAllDetectionsAsync(It.IsAny<ReplaceTagRequest>()),
                 Times.Once);
         }
     }

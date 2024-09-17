@@ -128,7 +128,7 @@ namespace OrcaHello.Web.Api.Brokers.Storages
                 queryText += $"ARRAY_CONTAINS(c.tags, @tag{i}) ";
             }
 
-            queryText += ")";
+            queryText += ") ORDER BY c.timestamp ASC";
 
             var queryDefinition = new QueryDefinition(queryText)
                 .WithParameter("@startTime", CosmosUtilities.FormatDate(fromDate))
@@ -142,9 +142,21 @@ namespace OrcaHello.Web.Api.Brokers.Storages
             return await ExecutePaginatedMetadataQuery(queryDefinition, page, pageSize);
         }
 
+        public async Task<ListMetadataAndCount> GetMetadataListByTimeframeTagAndModerator(DateTime fromDate, DateTime toDate,
+        string moderator, string tag, int page = 1, int pageSize = 10)
+        {
+            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE (c.timestamp BETWEEN @startTime AND @endTime) AND c.moderator = @moderator AND ARRAY_CONTAINS(c.tags, @tag) ORDER BY c.timestamp ASC")
+                .WithParameter("@startTime", CosmosUtilities.FormatDate(fromDate))
+                .WithParameter("@endTime", CosmosUtilities.FormatDate(toDate))
+                .WithParameter("@moderator", moderator)
+                .WithParameter("@tag", tag);
+
+            return await ExecutePaginatedMetadataQuery(queryDefinition, page, pageSize);
+        }
+
         public async Task<ListMetadataAndCount> GetAllMetadataListByTag(string tag)
         {
-            var queryDefinition = new QueryDefinition("SELECT * FROM c WHERE ARRAY_CONTAINS(c.tags, @tag)")
+            var queryDefinition = new QueryDefinition("SELECT * FROM c WHERE ARRAY_CONTAINS(c.tags, @tag) ORDER BY c.timestamp ASC")
                 .WithParameter("@tag", tag);
 
             return await ExecuteMetadataQuery(queryDefinition);
@@ -161,7 +173,7 @@ namespace OrcaHello.Web.Api.Brokers.Storages
         public async Task<ListMetadataAndCount> GetPositiveMetadataListByTimeframe(DateTime fromDate, DateTime toDate,
             int page = 1, int pageSize = 10)
         {
-            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state = '{DetectionState.Positive}' AND (c.timestamp BETWEEN @startTime AND @endTime)")
+            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state = '{DetectionState.Positive}' AND (c.timestamp BETWEEN @startTime AND @endTime) ORDER BY c.timestamp ASC")
                 .WithParameter("@startTime", CosmosUtilities.FormatDate(fromDate))
                 .WithParameter("@endTime", CosmosUtilities.FormatDate(toDate));
 
@@ -171,7 +183,7 @@ namespace OrcaHello.Web.Api.Brokers.Storages
         public async Task<ListMetadataAndCount> GetPositiveMetadataListByTimeframeAndModerator(DateTime fromDate, DateTime toDate,
             string moderator, int page = 1, int pageSize = 10)
         {
-            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state = '{DetectionState.Positive}' AND (c.timestamp BETWEEN @startTime AND @endTime) AND c.moderator = @moderator")
+            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state = '{DetectionState.Positive}' AND (c.timestamp BETWEEN @startTime AND @endTime) AND c.moderator = @moderator ORDER BY c.timestamp ASC")
                 .WithParameter("@startTime", CosmosUtilities.FormatDate(fromDate))
                 .WithParameter("@endTime", CosmosUtilities.FormatDate(toDate))
                 .WithParameter("@moderator", moderator);
@@ -182,7 +194,7 @@ namespace OrcaHello.Web.Api.Brokers.Storages
         public async Task<ListMetadataAndCount> GetNegativeAndUnknownMetadataListByTimeframe(DateTime fromDate, DateTime toDate,
             int page = 1, int pageSize = 10)
         {
-            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state IN ( '{DetectionState.Negative}', '{DetectionState.Unknown}') AND (c.timestamp BETWEEN @startTime AND @endTime)")
+            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state IN ( '{DetectionState.Negative}', '{DetectionState.Unknown}') AND (c.timestamp BETWEEN @startTime AND @endTime) ORDER BY c.timestamp ASC")
                 .WithParameter("@startTime", CosmosUtilities.FormatDate(fromDate))
                 .WithParameter("@endTime", CosmosUtilities.FormatDate(toDate));
 
@@ -192,7 +204,7 @@ namespace OrcaHello.Web.Api.Brokers.Storages
         public async Task<ListMetadataAndCount> GetNegativeAndUnknownMetadataListByTimeframeAndModerator(DateTime fromDate, DateTime toDate,
             string moderator, int page = 1, int pageSize = 10)
         {
-            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state IN ('{DetectionState.Negative}', '{DetectionState.Unknown}') AND (c.timestamp BETWEEN @startTime AND @endTime) AND c.moderator = @moderator")
+            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state IN ('{DetectionState.Negative}', '{DetectionState.Unknown}') AND (c.timestamp BETWEEN @startTime AND @endTime) AND c.moderator = @moderator ORDER BY c.timestamp ASC")
                 .WithParameter("@startTime", CosmosUtilities.FormatDate(fromDate))
                 .WithParameter("@endTime", CosmosUtilities.FormatDate(toDate))
                 .WithParameter("@moderator", moderator);
@@ -203,7 +215,7 @@ namespace OrcaHello.Web.Api.Brokers.Storages
         public async Task<ListMetadataAndCount> GetUnreviewedMetadataListByTimeframe(DateTime fromDate, DateTime toDate,
             int page = 1, int pageSize = 10)
         {
-            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state = '{DetectionState.Unreviewed}' AND (c.timestamp BETWEEN @startTime AND @endTime)")
+            var queryDefinition = new QueryDefinition($"SELECT * FROM c WHERE c.state = '{DetectionState.Unreviewed}' AND (c.timestamp BETWEEN @startTime AND @endTime) ORDER BY c.timestamp ASC")
                 .WithParameter("@startTime", CosmosUtilities.FormatDate(fromDate))
                 .WithParameter("@endTime", CosmosUtilities.FormatDate(toDate));
 

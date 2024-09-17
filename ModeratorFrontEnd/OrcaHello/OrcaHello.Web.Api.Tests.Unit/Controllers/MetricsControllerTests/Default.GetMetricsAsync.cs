@@ -5,7 +5,7 @@
         [TestMethod]
         public async Task Default_GetMetricsAsync_Expect_DetectionListResponse()
         {
-            MetricsResponse response = new MetricsResponse
+            MetricsResponse response = new()
             {
                 FromDate = DateTime.Now,
                 ToDate = DateTime.Now.AddDays(1),
@@ -27,7 +27,7 @@
             Assert.AreEqual(200, contentResult.StatusCode);
 
             Assert.AreEqual(response.Positive,
-                ((MetricsResponse)contentResult.Value).Positive);
+                ((MetricsResponse)contentResult.Value!).Positive);
 
             _orchestrationServiceMock.Verify(service =>
                 service.RetrieveMetricsForGivenTimeframeAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()),

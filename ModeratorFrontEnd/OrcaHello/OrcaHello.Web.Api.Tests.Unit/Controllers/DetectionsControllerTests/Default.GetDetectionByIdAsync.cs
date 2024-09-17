@@ -20,7 +20,7 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.IsNotNull((Detection)contentResult.Value);
+            Assert.IsNotNull((Detection)contentResult.Value!);
 
             _orchestrationServiceMock.Verify(service =>
                service.RetrieveDetectionByIdAsync(It.IsAny<string>()),

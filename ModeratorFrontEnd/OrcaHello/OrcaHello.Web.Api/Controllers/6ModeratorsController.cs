@@ -109,6 +109,41 @@
             }
         }
 
+        [HttpGet("{moderator}/detections/{tag}")]
+        [SwaggerOperation(Summary = "Gets a paginated list of detections for the given timeframe, tag and moderator.")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the list of detections for the give timeframe, tag and moderator.", typeof(DetectionListForModeratorAndTagResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "If the request was malformed (missing parameters).")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
+        [Authorize("Moderators")]
+        public async ValueTask<ActionResult<DetectionListForModeratorAndTagResponse>> GetPaginatedDetectionsForGivenTimeframeTagAndModeratorAsync(
+             [SwaggerParameter("The name of the moderator.", Required = true)] string moderator,
+             [SwaggerParameter("The tag.", Required = true)] string tag,
+             [SwaggerParameter("The start date of the search (MM/DD/YYYY).", Required = true)] DateTime? fromDate,
+             [SwaggerParameter("The end date of the search (MM/DD/YYYY).", Required = true)] DateTime? toDate,
+             [SwaggerParameter("The page in the list to request.", Required = true)] int page,
+             [SwaggerParameter("The page size to request.", Required = true)] int pageSize)
+        {
+            try
+            {
+                var detectionListForModeratorAndTagResponse = await _moderatorOrchestrationService
+                    .RetrieveDetectionsForGivenTimeframeTagAndModeratorAsync(fromDate, toDate, moderator, tag, page, pageSize);
+
+                return Ok(detectionListForModeratorAndTagResponse);
+            }
+            catch (Exception exception)
+            {
+                if (exception is ModeratorOrchestrationValidationException ||
+                    exception is ModeratorOrchestrationDependencyValidationException)
+                    return BadRequest(ValidatorUtilities.GetInnerMessage(exception));
+
+                if (exception is ModeratorOrchestrationDependencyException ||
+                    exception is ModeratorOrchestrationServiceException)
+                    return Problem(exception.Message);
+
+                return Problem(exception.Message);
+            }
+        }
+
         [HttpGet("{moderator}/tags")]
         [SwaggerOperation(Summary = "Gets a list of tags for the given timeframe and moderator.")]
         [SwaggerResponse(StatusCodes.Status200OK, "Returns the list of tags for the give timeframe and moderator.", typeof(CommentListForModeratorResponse))]

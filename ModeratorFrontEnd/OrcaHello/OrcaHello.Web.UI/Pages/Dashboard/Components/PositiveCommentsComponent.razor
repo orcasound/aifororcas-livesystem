@@ -1,0 +1,83 @@
+﻿@inherits ComponentManager
+
+<RadzenRow JustifyContent=JustifyContent.Start AlignItems=AlignItems.Center class="rz-mb-4">
+    <RadzenColumn Size="12">
+        <RadzenCard Variant=Variant.Outlined>
+            <RadzenPanel Text="Comments from Confirmed Detections">
+                <HeaderTemplate>
+                    @if (StateView.IsExpanded)
+                    {
+                        <RadzenButton Variant=Variant.Outlined Icon="expand_less" Click="@(() => TogglePositiveComments())" />
+                    }
+                    else
+                    {
+                        <RadzenButton Variant=Variant.Outlined Icon="expand_more" Click="@(() => TogglePositiveComments())" />
+                    }
+                </HeaderTemplate>
+                <ChildContent>
+                    @if (StateView.IsExpanded)
+                    {
+                        <LoadingSliderComponent IsLoading=StateView.IsLoading />
+
+                        @if (!StateView.IsLoading && StateView.IsEmpty)
+                        {
+                            <RadzenAlert AllowClose="false"
+                                         AlertStyle=AlertStyle.Warning
+                                         Variant=Variant.Flat
+                                         Shade=Shade.Lighter>
+                                There are no Comments listed for this timeframe.
+                            </RadzenAlert>
+                        }
+
+                        @if (!StateView.IsLoading && StateView.IsPopulated)
+                        {
+                            @foreach (var comment in StateView.Items)
+                            {
+                                <RadzenCard Variant=Variant.Text Style="width:100%; padding: 0; margin-bottom: 15px;">
+                                    <RadzenRow Gap="0">
+                                        <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+@*                                             <InlinePlayerComponent @bind-PlaybackId="PlaybackId"
+                                                                   Id=@comment.Id
+                                                                   AudioUri=@comment.AudioUri
+                                                                   SpectrogramUri=@comment.SpectrogramUri /> *@
+
+                                            <InlinePlayerComponent                                                                   Id=@comment.Id
+                                                                   AudioUri=@comment.AudioUri
+                                                                   SpectrogramUri=@comment.SpectrogramUri />
+                                        </RadzenColumn>
+                                        <RadzenColumn Size="12" SizeMD="6" SizeLG="9" Style="padding-bottom: 10px; border-bottom: 1px solid var(--cg-dark-gray);">
+                                            <RadzenStack Orientation=Orientation.Vertical>
+                                                <RadzenLink Path=@($"/orca_sounds/{comment.Id}") Target="_blank" Text=@comment.Id />
+
+                                                <RadzenText TextStyle=TextStyle.Body2>@($"{comment.Timestamp.UTCToPDTCompact()} at {comment.LocationName}")</RadzenText>
+                                                    <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@comment.Comments</RadzenText>
+                                                    @if (!string.IsNullOrWhiteSpace(comment.Moderator))
+                                                    {
+                                                        @if (comment.Moderated.HasValue)
+                                                        {
+                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator} ({comment.Moderated.Value.UTCToPDTCompact()})")</RadzenText>
+                                                        }
+                                                        else
+                                                        {
+                                                            <RadzenText TextStyle=TextStyle.Body1 Style="margin-top: 10px;">@($"-- {comment.Moderator}")</RadzenText>
+                                                        }
+                                                    }
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </RadzenCard>
+                            }
+
+                            <LoadingSliderComponent IsLoading=StateView.IsLoading />
+
+                            @if (StateView.Items.Count != StateView.Count)
+                            {
+                                <RadzenButton Variant=Variant.Outlined Style="margin-bottom: 10px;" Text=@($"Load more (showing {StateView.Items.Count} of {StateView.Count}) ...") Click=OnLoadMorePositiveCommentsClicked />
+                            }
+                        }
+                    }
+                </ChildContent>
+            </RadzenPanel>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>

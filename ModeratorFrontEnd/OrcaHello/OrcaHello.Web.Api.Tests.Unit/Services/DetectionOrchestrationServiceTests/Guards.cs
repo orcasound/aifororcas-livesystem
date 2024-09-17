@@ -31,7 +31,7 @@
             Assert.ThrowsException<InvalidDetectionOrchestrationException>(() =>
                 wrapper.ValidatePageSize(invalidPageSize));
 
-            Metadata nullMetadata = null;
+            Metadata nullMetadata = null!;
 
             Assert.ThrowsException<NotFoundMetadataException>(() =>
                 wrapper.ValidateStorageMetadata(nullMetadata, Guid.NewGuid().ToString()));
@@ -41,26 +41,27 @@
             Assert.ThrowsException<InvalidDetectionOrchestrationException>(() =>
                 wrapper.ValidateStateIsAcceptable(invalidState));
 
-            bool notDeleted = false;
-
-            Assert.ThrowsException<DetectionNotDeletedException>(() =>
-                wrapper.ValidateDeleted(notDeleted, "id"));
-
-            bool notInserted = false;
-
-            Assert.ThrowsException<DetectionNotInsertedException>(() =>
-                wrapper.ValidateInserted(notInserted, "id"));
-
-            ModerateDetectionRequest nullRequest = null;
+            ModerateDetectionsRequest nullRequest = null!;
 
             Assert.ThrowsException<NullModerateDetectionRequestException>(() =>
                 wrapper.ValidateModerateRequestOnUpdate(nullRequest));
 
-            ModerateDetectionRequest invalidRequest = new()
+            ModerateDetectionsRequest invalidRequest = new()
             {
+                Ids = null!,
                 State = string.Empty,
                 Moderator = string.Empty
             };
+
+            Assert.ThrowsException<InvalidDetectionOrchestrationException>(() =>
+                wrapper.ValidateModerateRequestOnUpdate(invalidRequest));
+
+            invalidRequest.Ids = new List<string>();
+
+            Assert.ThrowsException<InvalidDetectionOrchestrationException>(() =>
+                wrapper.ValidateModerateRequestOnUpdate(invalidRequest));
+
+            invalidRequest.Ids = new List<string>() { Guid.NewGuid().ToString() };
 
             Assert.ThrowsException<InvalidDetectionOrchestrationException>(() =>
                 wrapper.ValidateModerateRequestOnUpdate(invalidRequest));

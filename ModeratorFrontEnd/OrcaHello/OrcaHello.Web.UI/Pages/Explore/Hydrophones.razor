@@ -1,0 +1,59 @@
+﻿@inherits ComponentManager
+@page "/hydrophones"
+
+<RadzenLayout Style="height: calc(100%);">
+    <RadzenBody>
+
+        <PageHeaderComponent Title="Hydrophones" 
+                        Description="A list of the locations for all the hydrophones used to collect whale calls for analysis and reporting."/>
+
+        <LoadingSliderComponent IsLoading=@IsLoading />
+
+        @if (HydrophoneItemViews != null && !HydrophoneItemViews.Any())
+        {
+            <RadzenAlert AllowClose="false"
+                         AlertStyle=AlertStyle.Warning
+                         Variant=Variant.Flat
+                         Shade=Shade.Lighter>
+                There are no Hydrophones listed.
+            </RadzenAlert>
+        }
+
+        @if (HydrophoneItemViews != null && HydrophoneItemViews.Any())
+        {
+            @for (int i = 0; i < HydrophoneItemViews.Count; i++)
+            {
+                var item = HydrophoneItemViews[i];
+                var index = i;
+                <RadzenRow>
+                    <RadzenColumn Size="2" class="rz-p-5">
+                        @if (!string.IsNullOrWhiteSpace(@item.ImageUrl))
+                        {
+                            <RadzenImage id="large-only" Path=@item.ImageUrl style="width: 100px; height: 100px; border-radius: 8px; margin-right: 8px; vertical-align:top;" />
+                        }
+                    </RadzenColumn>
+                    <RadzenColumn Size="6" class="rz-p-5">
+                        <RadzenText TextStyle=TextStyle.H3 Text=@item.Name/>
+                        @if (!string.IsNullOrWhiteSpace(item.IntroHtml))
+                        {
+                            <div>@((MarkupString)item.IntroHtml)</div>
+                        }
+                        else
+                        {
+                            <RadzenAlert AllowClose="false"
+                                         AlertStyle=AlertStyle.Warning
+                                         Variant=Variant.Flat
+                                         Shade=Shade.Lighter>
+                                Sorry. There is no description for this Hydrophone.
+                            </RadzenAlert>
+                        }
+                    </RadzenColumn>
+                    <RadzenColumn Size="4" class="rz-p-5">
+                        <SmallMapComponent Id=@index Longitude=@item.Longitude Latitude=@item.Latitude />
+                    </RadzenColumn>
+                </RadzenRow>
+            }
+        }
+
+    </RadzenBody>
+</RadzenLayout>

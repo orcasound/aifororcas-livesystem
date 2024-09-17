@@ -1,0 +1,184 @@
+﻿@inherits ComponentManager
+
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false"
+             AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
+</RadzenAlert>
+
+<RadzenDataGrid @ref=DetectionDataGrid
+                Data=@DetectionItemViews
+                Count=CurrentlySetFilters.MaxRecords
+                LoadData=@LoadData
+                TItem=DetectionItemView
+                AllowVirtualization="true"
+                AllowFiltering="false"
+                AllowRowSelectOnRowClick="true"
+                IsLoading=IsLoading
+                SelectionMode=DataGridSelectionMode.Multiple
+                EditMode=DataGridEditMode.Single
+                @bind-Value=SelectedDetectionItemViews
+                AllowSorting="false"
+                AllowColumnResize="true"
+                Style="margin-top:20px;">
+
+    <!-- Grid is empty (no records) -->
+
+    <EmptyTemplate>
+        <RadzenAlert AllowClose="false"
+                     AlertStyle=AlertStyle.Warning
+                     Variant=Variant.Flat
+                     Shade=Shade.Lighter>
+            There are no Detections listed for this timeframe and filtering conditions.
+        </RadzenAlert>
+    </EmptyTemplate>
+
+    <Columns>
+
+        <!-- Select column -->
+
+        <AuthorizeView Policy="Moderators">
+            <RadzenDataGridColumn OrderIndex="0" TItem=DetectionItemView Width="40px"
+                                  Sortable="false" Filterable="false" CssClass="oh-top">
+                <HeaderTemplate>
+                    <RadzenCheckBox TriState="false" TValue="bool?"
+                                    Value=@(SelectedDetectionItemViews == null || SelectedDetectionItemViews?.Any() != true ? false : !DetectionItemViews.All(i => SelectedDetectionItemViews.Contains(i)) ? null : DetectionItemViews.Any(i => SelectedDetectionItemViews.Contains(i)))
+                                    Change=@((args) => OnAllItemsChanged(args)) />
+                </HeaderTemplate>
+                <Template Context="data">
+                    <RadzenCheckBox TriState="false" Value=@(SelectedDetectionItemViews != null && SelectedDetectionItemViews.Contains(data))
+                                    TValue="bool" />
+                </Template>
+            </RadzenDataGridColumn>
+        </AuthorizeView>
+
+        <!-- Candidate ID column -->
+
+        <RadzenDataGridColumn OrderIndex="1" TItem=DetectionItemView Title="Candidate ID"
+                              MinWidth="285px;" Width="285px;" CssClass="oh-top">
+            <Template Context="data">
+                <RadzenLink Path=@($"/orca_sounds/{data.Id}") @onclick="@StopAllAudio" Target="_blank" Text=@data.Id />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <!-- Timestamp column -->
+
+        <RadzenDataGridColumn OrderIndex="2" TItem=DetectionItemView Title="Timestamp"
+                              MinWidth="140px;" Width="140px;" CssClass="oh-top">
+            <Template Context="data">
+                <RadzenText Text=@(data.Timestamp.UTCToPDTCompact()) />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <!-- Location column-->
+
+        <RadzenDataGridColumn OrderIndex="3" TItem=DetectionItemView
+                              Property=LocationName Title="Location" Width="200px;" CssClass="oh-top" />
+
+        <!-- Detections column -->
+
+        <RadzenDataGridColumn OrderIndex="4" TItem=DetectionItemView Title="Detections"
+                              CssClass="oh-top" Width="90px;">
+            <Template Context="data">
+                <RadzenText Text=@(data.Annotations.Count().ToString()) />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <!-- Confidence column -->
+
+        <RadzenDataGridColumn OrderIndex="5" TItem=DetectionItemView
+                              Property=SmallConfidence Title="Confidence" Width="95px;" CssClass="oh-top" />
+
+        <!-- Spectrogram column -->
+
+        <RadzenDataGridColumn OrderIndex="6" TItem=DetectionItemView Width="400px;" CssClass="oh-top">
+            <Template Context="data">
+                <InlinePlayerComponent AudioUri=@data.AudioUri 
+                    SpectrogramUri=@data.SpectrogramUri Id=@data.Id />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <!-- Call column -->
+
+        <RadzenDataGridColumn OrderIndex="8" TItem=DetectionItemView
+                              Title="SRKW Call?" Width="150px;" CssClass="oh-top">
+            <Template Context="data">
+                @if (data.State != DetectionState.Unreviewed.ToString())
+                {
+                    <RadzenText Text=@data.StateString />
+                }
+            </Template>
+            <EditTemplate Context="data">
+                <RadzenDropDown TValue="string" @bind-Value=data.State Data=DropdownHelper.DetectionStateDropdownOptions
+                                TextProperty=Text ValueProperty=Value AllowClear="false" Style="width:100%;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <!-- Tags column -->
+
+        <RadzenDataGridColumn OrderIndex="9" TItem=DetectionItemView Title="Tags"
+                              Width="200px;" CssClass="oh-top">
+            <Template Context="data">
+                @data.Tags
+            </Template>
+            <EditTemplate Context="data">
+                <RadzenStack Gap="0" Orientation=Orientation.Vertical>
+                    <RadzenDropDown @bind-Value=@data.TagsList Data=@AvailableTags AllowSelectAll=false
+                                    Multiple=true Placeholder="Select tags"
+                                    Style="width: 100%; max-width: 400px;">
+                    </RadzenDropDown>
+                    <RadzenLabel Text="And/Or" Class="rz-my-2" />
+                    <RadzenTextBox @bind-Value=@data.EnteredTags Change=OnEnteredTagsChanged Style ="width: 100%;" Placeholder="Separate with , or ;" />
+                </RadzenStack>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <!-- Comments column -->
+
+        <RadzenDataGridColumn OrderIndex="10" TItem=DetectionItemView Title="Comments" Width="200px;"
+                              CssClass="oh-top oh-wrap">
+            <Template Context="data">
+                @data.Comments
+            </Template>
+            <EditTemplate Context="data">
+                <RadzenTextArea @bind-Value=data.Comments 
+                                Style="width: 100%; display: block;"
+                                Name="Comments" Placeholder="Add comments" Rows="3" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <!-- Inline edit buttons column -->
+
+        <AuthorizeView Policy="Moderators">
+            <RadzenDataGridColumn OrderIndex="11" TItem=DetectionItemView Context="data"
+                                  Filterable="false" Sortable="false" TextAlign=TextAlign.Right
+                                  Width="90px;" CssClass="oh-top">
+                <Template Context="data">
+                    <RadzenButton Icon="edit" ButtonStyle=ButtonStyle.Light Variant=Variant.Flat Size=ButtonSize.Small Click=@(args => OnInlineEditRowClicked(data)) @onclick:stopPropagation="true" />
+                </Template>
+                <EditTemplate Context="data">
+                    <RadzenButton Icon="check" ButtonStyle=ButtonStyle.Success Variant=Variant.Flat Size=ButtonSize.Small Click=@((args) => OnSaveRowClicked(data)) />
+                    <RadzenButton Icon="close" ButtonStyle=ButtonStyle.Light Varint=Variant.Flat Size=ButtonSize.Small class="my-1 ms-1" Click=@((args) => OnCancelEditClicked(data)) />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </AuthorizeView>
+
+    </Columns>
+</RadzenDataGrid>
+<style>
+    .container {
+        position: relative;
+    }
+
+    .spectrogram-image {
+        width: 200px;
+/*         height: 36px; */
+    }
+
+    .audio-control {
+        width: 200px; /* Match spectrogram width */
+        /* height: 36px; */ /* Match spectrogram height */
+        background-color: rgba(255, 255, 255, 0.1); /* Adjust the overlay background color and transparency */
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Optional: Add a box shadow for better visibility */
+    }
+</style>

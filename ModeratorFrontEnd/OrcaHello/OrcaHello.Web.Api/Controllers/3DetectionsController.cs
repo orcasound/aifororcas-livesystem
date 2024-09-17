@@ -117,10 +117,10 @@
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
         [AllowAnonymous]
         public async ValueTask<ActionResult<DetectionListResponse>> GetPaginatedDetectionsAsync(
-            [SwaggerParameter("The desired state.", Required = true)] string state,
+ [SwaggerParameter("The desired state: Unreviewed, Negative, Positive, or Unknown.", Required = true)] string state,
             [SwaggerParameter("The start date of the search (MM/DD/YYYY).", Required = true)] DateTime? fromDate,
             [SwaggerParameter("The end date of the search (MM/DD/YYYY).", Required = true)] DateTime? toDate,
-            [SwaggerParameter("The name of the field to sort by (give examples here).", Required = true)] string sortBy,
+            [SwaggerParameter("The name of the field to sort by: date, confidence, moderator, moderateddate.", Required = true)] string sortBy,
             [SwaggerParameter("Flag indicating if the sort order should be descending.", Required = true)] bool isDescending,
             [SwaggerParameter("The page in the list to request.", Required = true)] int page,
             [SwaggerParameter("The page size to request.", Required = true)] int pageSize,
@@ -147,21 +147,20 @@
             }
         }
 
-        [HttpPut("{detectionId}/moderator")]
-        [SwaggerOperation(Summary = "Perform Moderator-related update of an existing Detection.")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Returns the detection for the given id.", typeof(Detection))]
+        [HttpPut("moderate")]
+        [SwaggerOperation(Summary = "Perform Moderator-related update of one or more existing Detections.")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the detection results for the given ids.", typeof(ModerateDetectionsResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "If the request was malformed (missing parameters).")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "If the detection for the given id was not found.")]
         [SwaggerResponse(StatusCodes.Status422UnprocessableEntity, "If the update failed for some reason.")]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal error reading or processing data from the data source.")]
         [Authorize("Moderators")]
-        public async ValueTask<ActionResult<Detection>> PutModeratedInfoAsync(
-            [SwaggerParameter("The desired id.", Required = true)] string detectionId,
-            [FromBody][SwaggerParameter("The moderator-related fields to update.", Required = true)] ModerateDetectionRequest request)
+        public async ValueTask<ActionResult<ModerateDetectionsResponse>> PutModeratedInfoAsync(
+            [FromBody][SwaggerParameter("The moderator-related fields to update.", Required = true)] ModerateDetectionsRequest request)
         {
             try
             {
-                var detection = await _detectionOrchestrationService.ModerateDetectionByIdAsync(detectionId, request);
+                var detection = await _detectionOrchestrationService.ModerateDetectionsByIdAsync(request);
 
                 return Ok(detection);
             }

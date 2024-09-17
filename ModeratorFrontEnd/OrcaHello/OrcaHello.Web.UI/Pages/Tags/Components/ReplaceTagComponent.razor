@@ -1,0 +1,14 @@
+﻿@inherits ComponentManager
+
+<RadzenText Text=@($"Enter a new tag and click \"Replace\" to replace '{Item.Tag}' in every detection where it occurs.") />
+
+<RadzenTextBox @bind-Value=@NewTag Style="width: 100%; margin-top: 1rem;" Placeholder="Enter a new tag" />
+
+<RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(ValidationMessage)) AllowClose="false" AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+    @ValidationMessage
+</RadzenAlert>
+
+<RadzenStack Orientation=Orientation.Horizontal Style="margin-top: 2rem;" Gap="5px;" AlignItems=AlignItems.Stretch>
+    <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Click=OnReplaceClicked Text="Replace" />
+    <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Secondary Click=OnCancelClicked Text="Cancel" />
+</RadzenStack>

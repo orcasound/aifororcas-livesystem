@@ -1,0 +1,47 @@
+﻿@inherits ComponentManager
+
+@if (DetectionItemView.State != DetectionState.Unreviewed.ToString() && DetectionItemView.Moderated.HasValue)
+{
+    <RadzenRow Gap="0" Class="rz-mt-3">
+        <RadzenColumn Size="12" SizeXS="6">
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                <RadzenIcon id="tile-icon" Icon="event" IconStyle=IconStyle.Secondary />
+                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Moderated.Value.UTCToPDTFull() />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeXS="6">
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                <RadzenIcon id="tile-icon" Icon="person_3" IconStyle=IconStyle.Secondary />
+                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Moderator />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+}
+<RadzenRow Gap="0" class="rz-mt-3 rz-me-3">
+    <RadzenColumn Size="12" SizeXS="12">
+        <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+            <RadzenLabel Text="Was there an SRKW call in this clip?" />
+            <RadzenRadioButtonList @bind-Value=@DetectionItemView.State 
+                        TValue="string"
+                        Data=DropdownHelper.DetectionStateDropdownOptions 
+                        TextProperty=Text
+                        ValueProperty=Value Orientation=Orientation.Vertical />
+
+            <RadzenAlert Visible=@(!string.IsNullOrWhiteSpace(StateValidationMessage)) AllowClose="false" AlertStyle=AlertStyle.Danger Variant=Variant.Flat Size=AlertSize.Small>
+                @StateValidationMessage
+            </RadzenAlert>
+            <RadzenLabel Text="Tags" />
+            <RadzenDropDown @bind-Value=@DetectionItemView.TagsList Data=@AvailableTags Chips=true AllowSelectAll=false
+                            Multiple=true AllowClear=true Placeholder="Select tags"
+                            Style="width: 100%; max-width: 400px; margin-top: 1rem;">
+            </RadzenDropDown>
+            <RadzenLabel Text="And/Or" Style="margin-top: 1rem;" />
+            <RadzenTextBox @bind-Value=@DetectionItemView.EnteredTags Change=OnEnteredTagsChanged Style="width: 100%; margin-top: 1rem;" Placeholder="Add tags separated by commas or semicolons" />
+           <RadzenLabel Text="Comments" Style="margin-top: 1rem;"/>
+            <RadzenTextArea @bind-Value=@DetectionItemView.Comments Style="width: 100%; margin-top: 1rem;" Rows="3" Placeholder="Add comments" />
+        </RadzenStack>
+        <RadzenStack Orientation=Orientation.Horizontal Style="margin-top: 1rem;">
+            <RadzenButton Variant=Variant.Outlined ButtonStyle=ButtonStyle.Primary Click=OnSubmitClicked Text ="Submit" Style="margin-right: 0.5rem;" />
+       </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>

@@ -1,0 +1,141 @@
+﻿@page "/orca_sounds/{Id}"
+
+@layout EmptyLayout
+@inherits ComponentManager
+
+<RadzenLayout Style="height:calc(100%);">
+    <RadzenBody>
+
+        <PageHeaderComponent Title=@($"ID: {Id}") />
+
+        <LoadingSliderComponent IsLoading=@IsLoading />
+
+        @if (ItemView != null)
+        {
+            <RadzenRow Gap="0" class="rz-mt-3">
+                <RadzenColumn Size="12">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="Link to This Record" Style="color: var(--rz-secondary);" />
+                        <RadzenLink Path=@LinkUrl Text=@LinkUrl class="ms-3 rz-text-break" Style="font-size: 1.143rem;" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="0" class="rz-mt-3">
+                <RadzenColumn Size="12">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="Link to Audio File" Style="color: var(--rz-secondary);" />
+                        <RadzenLink Path=@ItemView.AudioUri Text=@ItemView.AudioUri class="ms-3 rz-text-break" Style="font-size: 1.143rem;" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="0" class="rz-mt-3">
+                <RadzenColumn Size="12">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="Link to Spectrogram Image File" Style="color: var(--rz-secondary);" />
+                        <RadzenLink Path=@ItemView.SpectrogramUri Text=@ItemView.SpectrogramUri class="ms-3 rz-text-break" Style="font-size: 1.143rem;" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="0" class="rz-mt-3">
+                <RadzenColumn>
+                    <div style="position: relative; max-width: 1280px;">
+                        <img id="spectrogram" src=@ItemView.SpectrogramUri style="width: 100%;">
+                        @foreach (var annotation in ItemView.Annotations)
+                        {
+                            <div class="oh-spectrogram-marker" style=@($"left: {(annotation.StartTime / 61) * 100}%;") />
+                            <div class="oh-spectrogram-marker" style=@($"left: {(annotation.EndTime / 61) * 100}%;") />
+                        }
+                        <div id="playbackLine" style="height: 100%; width: 2px; background-color: white; position: absolute; top: 0; left: 0;"></div>
+                    </div>
+                    <audio id="audioElement" controls @ref="audioElement" class="rz-mt-2">
+                        <source src=@ItemView.AudioUri type="audio/wav">
+                    </audio>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="0" Class="rz-mt-3">
+                <RadzenColumn Size="12" SizeSM="3">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="Datetime Collected" Style="color: var(--rz-secondary);" />
+                        <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.Timestamp.UTCToPDTFull() />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeSM="3">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="SRKW Call Found?" Style="color: var(--rz-secondary);" />
+                        <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.StateString />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="0" Class="rz-mt-3">
+                <RadzenColumn Size="12" SizeSM="3">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="Detections" Style="color: var(--rz-secondary);" />
+                        <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.Annotations.Count.ToString() />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeSM="3">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="Average Confidence" Style="color: var(--rz-secondary);" />
+                        <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.SmallConfidence />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            if (ItemView.State != DetectionState.Unreviewed.ToString())
+            {
+                <RadzenRow Gap="0" Class="rz-mt-3">
+                    <RadzenColumn Size="12" SizeSM="3">
+                        <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                            <RadzenLabel Text="Moderator" Style="color: var(--rz-secondary);" />
+                            <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.Moderator />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="3">
+                        <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                            <RadzenLabel Text="Date Moderated" Style="color: var(--rz-secondary);" />
+                            <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.Moderated!.Value.UTCToPDTFull() />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow Gap="0" class="rz-mt-3">
+                    <RadzenColumn Size="12">
+                        <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                            <RadzenLabel Text="Tags" Style="color: var(--rz-secondary);" />
+                            <RadzenText TextStyle=TextStyle.H4 class="ms-3" Text=@ItemView.Tags />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow Gap="0" class="rz-mt-3">
+                    <RadzenColumn Size="12">
+                        <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                            <RadzenLabel Text="Comments" Style="color: var(--rz-secondary);" />
+                            <RadzenText TextStyle=TextStyle.H4 class="ms-3 rz-text-wrap" Text=@ItemView.Comments />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+            }
+
+            <RadzenRow Gap="0" class="rz-mt-3">
+                <RadzenColumn Size="12">
+                    <RadzenStack Orientation=Orientation.Vertical AlignItems=AlignItems.Start>
+                        <RadzenLabel Text="Collection Location" Style="color: var(--rz-secondary);" />
+                        <RadzenText TextStyle=TextStyle.H4 class="ms-3 rz-text-wrap" Text=@ItemView.FullLocation />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow class="rz-mt-3">
+                <RadzenColumn Size="12" SizeSM="6" class="ms-3">
+                    <SmallMapComponent Longitude=@ItemView.Location.Longitude Latitude=@ItemView.Location.Latitude />
+                </RadzenColumn>
+            </RadzenRow>
+        }
+    </RadzenBody>
+</RadzenLayout>

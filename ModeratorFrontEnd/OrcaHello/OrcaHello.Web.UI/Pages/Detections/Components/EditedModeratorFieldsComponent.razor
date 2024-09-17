@@ -1,0 +1,47 @@
+﻿<RadzenRow Gap="0" Class="rz-mt-3">
+    <RadzenColumn Size="12" SizeXS="6">
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+            <RadzenIcon id="tile-icon" Icon="event" IconStyle=IconStyle.Secondary />
+            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Moderated!.Value.UTCToPDTFull() />
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeXS="6">
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+            <RadzenIcon id="tile-icon" Icon="person_3" IconStyle=IconStyle.Secondary />
+            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Moderator />
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow Gap="0" class="rz-mt-3">
+    <RadzenColumn Size="12" SizeXS="12">
+        <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+            <RadzenIcon id="tile-icon" Icon="set_meal" IconStyle=IconStyle.Secondary />
+            <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.StateString />
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
+@if (!string.IsNullOrWhiteSpace(DetectionItemView.Tags))
+{
+    <RadzenRow Gap="0" class="rz-mt-3">
+        <RadzenColumn Size="12" SizeXS="12">
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Center>
+                <RadzenIcon id="tile-icon" Icon="sell" IconStyle=IconStyle.Secondary />
+                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Tags />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+}
+
+@if (!string.IsNullOrWhiteSpace(DetectionItemView.Comments))
+{
+    <RadzenRow Gap="0" class="rz-mt-3">
+        <RadzenColumn Size="12" SizeXS="12">
+            <RadzenStack Orientation=Orientation.Horizontal AlignItems=AlignItems.Start>
+                <RadzenIcon id="tile-icon" Icon="comment" IconStyle=IconStyle.Secondary />
+                <RadzenText id="tile-value" TextStyle=TextStyle.Body1 Text=@DetectionItemView.Comments />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+}

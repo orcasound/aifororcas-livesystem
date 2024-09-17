@@ -1,0 +1,62 @@
+﻿@page "/curate_tags"
+
+@attribute [Authorize(Policy="Moderators")]
+@inherits ComponentManager
+
+<RadzenLayout Style="height:calc(100%);">
+    <RadzenBody>
+        <PageHeaderComponent Title="Curate Tags"
+                            Description="Review and curate the moderator-entered tags to better organize tag searches." />
+
+    <RadzenDataGrid @ref=DataGrid
+                Data=@TagItemViews
+                LoadData=@LoadData
+                TItem=TagItemView
+                AllowVirtualization="false"
+                AllowFiltering="false"
+                IsLoading=IsLoading
+                AllowSorting="false"
+                AllowColumnResize="true"
+                Style="margin-top:20px;">
+
+    <!-- Grid is empty (no records) -->
+
+    <EmptyTemplate>
+        <RadzenAlert AllowClose="false"
+                     AlertStyle=AlertStyle.Warning
+                     Variant=Variant.Flat
+                     Shade=Shade.Lighter>
+            There are no Tags listed.
+        </RadzenAlert>
+    </EmptyTemplate>
+
+    <Columns>
+
+        <!-- Tag column -->
+
+        <RadzenDataGridColumn TItem=TagItemView Title="Tag" CssClass="oh-top" Width="200px;">
+            <Template Context="data">
+                <RadzenText Text=@($"'{data.Tag}'") />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <!-- Edit/Delete column -->
+
+        <RadzenDataGridColumn TItem=TagItemView Context="data" TextAlign=TextAlign.Left Title="Actions"
+                        Width="90px;" CssClass="oh-top">
+            <Template Context="data">
+                <RadzenButton Icon="find_replace" ButtonStyle=ButtonStyle.Light Variant=Variant.Flat Size=ButtonSize.Small Click=@(args => ReplaceTagClicked(data)) @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle=ButtonStyle.Light Variant=Variant.Flat Size=ButtonSize.Small Click=@(args => DeleteTagClicked(data)) @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
+
+        <!-- Spacer column -->
+
+        <RadzenDataGridColumn TItem=TagItemView Context="data" TextAlign=TextAlign.Right Width="300px;" CssClass="oh-top" />
+
+    </Columns>
+
+    </RadzenDataGrid>
+
+    </RadzenBody>
+</RadzenLayout>

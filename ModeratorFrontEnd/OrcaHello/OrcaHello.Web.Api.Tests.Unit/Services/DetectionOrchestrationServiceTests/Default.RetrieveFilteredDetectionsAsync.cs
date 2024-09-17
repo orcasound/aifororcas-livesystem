@@ -10,7 +10,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
         public async Task Default_RetrieveFilteredDetectionsAsync_Expect()
         {
             var nullModeratedMetadata = CreateRandomMetadata();
-            nullModeratedMetadata.DateModerated = null;
+            nullModeratedMetadata.DateModerated = null!;
 
             var expectedResults = new QueryableMetadataFiltered
             {
@@ -21,7 +21,7 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
                 Page = 1,
                 PageSize = 10,
                 State = "Positive",
-                Location = "Orcasound Lab",
+                Location = "Haro Straight",
                 SortBy = "timestamp",
                 SortOrder = "DESC"
             };
@@ -32,9 +32,9 @@ namespace OrcaHello.Web.Api.Tests.Unit.Services
                 .ReturnsAsync(expectedResults);
 
             DetectionListResponse result = await _orchestrationService.
-                RetrieveFilteredDetectionsAsync(DateTime.Now, DateTime.Now.AddDays(1), "Positive", "timestamp",true, null, 1, 10);
+                RetrieveFilteredDetectionsAsync(DateTime.Now, DateTime.Now.AddDays(1), "Positive", "timestamp",true, null!, 1, 10);
 
-            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Detections.Count());
+            Assert.AreEqual(expectedResults.QueryableRecords.Count(), result.Detections.Count);
 
             _metadataServiceMock.Verify(service =>
                 service.RetrievePaginatedMetadataAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>(),

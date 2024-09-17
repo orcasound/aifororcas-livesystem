@@ -8,7 +8,7 @@
             DetectionListForInterestLabelResponse response = new()
             {
                 TotalCount = 1,
-                Detections = new List<Detection> { new Detection() },
+                Detections = new List<Detection> { new() },
                 InterestLabel = "test"
             };
 
@@ -23,8 +23,8 @@
             Assert.IsNotNull(contentResult);
             Assert.AreEqual(200, contentResult.StatusCode);
 
-            Assert.AreEqual(response.Detections.Count(),
-                ((DetectionListForInterestLabelResponse)contentResult.Value).Detections.Count());
+            Assert.AreEqual(response.Detections.Count,
+                ((DetectionListForInterestLabelResponse)contentResult.Value!).Detections.Count);
 
             _orchestrationServiceMock.Verify(service =>
                service.RetrieveDetectionsForGivenInterestLabelAsync(It.IsAny<string>()),
