@@ -30,7 +30,6 @@
                  .Verify(service => service
                     .ModerateDetectionsByIdAsync(It.IsAny<ModerateDetectionsRequest>()),
                     Times.Exactly(8));
-
         }
 
         private async Task ExecuteModerateDetectionById(int count, int statusCode)
