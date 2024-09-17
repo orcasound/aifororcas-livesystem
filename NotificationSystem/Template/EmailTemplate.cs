@@ -26,7 +26,7 @@ namespace NotificationSystem.Template
                 <body>
                 <div class='card'>
                 <h1>
-                Southern Resident Killer Whale Spotted
+                Southern Resident Killer Whale Detected
                 </h1>
                 <p>
                 Dear subscriber, a Southern Resident Killer Whale was most recently detected at around {timeString} PDT. 
@@ -47,7 +47,7 @@ namespace NotificationSystem.Template
                 </p>
                 </div>
                 <footer>
-                  In partnership with Microsoft AI 4 Earth, Orca Sound and Orca Conservancy.
+                  In partnership with Microsoft AI 4 Earth, Orcasound and Orca Conservancy.
                 </footer>
                 </body>
             ";
@@ -109,13 +109,13 @@ namespace NotificationSystem.Template
                 <body>
                 <div class='card'>
                 <h1>
-                Orca Call Identified
+                Orca Call Candidate
                 </h1>
                 <p>
                 Dear moderator, a potential Southern Resident Killer Whale call was detected on {timeString} PDT at {location} location. 
                 </p>
                 <p>
-                This is a request for your moderation to confirm whether the sound belongs to a Southern Resident Killer Whale on the portal below.
+                This is a request for your moderation to confirm whether the sound was produced by Southern Resident Killer Whale on the portal below.
                 </p>
                 <hr/>
                 <h2>
@@ -131,7 +131,7 @@ namespace NotificationSystem.Template
                 <footer>
                   <br>
                   <center>
-                  In partnership with Microsoft AI 4 Earth, Orca Sound and Orca Conservancy.
+                  In partnership with Microsoft AI 4 Earth, Orcasound and Orca Conservancy.
                   </center>
                 </footer>
                 </body>
