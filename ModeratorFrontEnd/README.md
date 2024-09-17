@@ -1,3 +1,10 @@
+# Moderator Front End System
+
+This directory contains two separate moderator front end system implementations:
+
+* AIForOrcas: this implementation is what is currently deployed at https://aifororcas.azurewebsites.net/ and https://aifororcasdetections.azurewebsites.net/swagger/index.html
+* OrcaHello: this implementation is intended as the future replacement and is now deployed at https://aifororcasdetections2.azurewebsites.net/swagger/index.html
+
 ## AI For Orcas - Moderator Front End System
 
 The moderator front end is responsible for presenting the candidate whale calls to the designated moderators so they can confirm the calls as legitimate or as false positives.

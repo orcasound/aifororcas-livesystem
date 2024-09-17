@@ -59,6 +59,15 @@ To contribute a pull request for a specific subsystem, please read the correspon
 - InferenceSystem | [README](InferenceSystem/README.md) | [Contributing Guidelines](InferenceSystem/CONTRIBUTING.md)
 - ModelTraining | [README](ModelTraining/README.md) | [Contributing Guidelines](ModelTraining/CONTRIBUTING.md)
 
+Current subteams and leads are as follows:
+- Machine Learning and Artificial Intelligence (Lead: Patrick Pastore)
+- Moderation Portal (Lead: Mike Cowan)
+- User Experience (Lead: Claire Goetschel)
+- Notification System (Lead: Skander Mzali)
+- Infrastructure (Lead: Dave Thaler): this subteam deals with Azure and GitHub infrastructure
+
+New volunteers are welcome in all subteams.
+
 ## General Resources
 [Project Page](https://ai4orcas.net/portfolio/orcahello-live-inference-system/) - contains information about the system and a brief history of the project.
 
@@ -66,3 +75,4 @@ To contribute a pull request for a specific subsystem, please read the correspon
 - [ai4orcas.net](https://ai4orcas.net)
 - [aifororcas-podcast](https://github.com/orcasound/aifororcas-podcast) - A tool to crowdsource labeling of whale calls in Orcasound's hydrophone data.
 - [aifororcas-orcaml](https://github.com/orcasound/aifororcas-orcaml) - Original baseline machine learning model and data preparation code.
+- [orcasite](https://github.com/orcasound/orcasite) - Authoritative site for node information

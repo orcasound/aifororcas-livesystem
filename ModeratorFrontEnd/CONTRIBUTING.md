@@ -5,14 +5,14 @@ You can contribute by
 3. Joining the Orcasound open source organization on Github to edit the wiki and/or help review pull requests.
 
 ## Local Setup
-You can get the ModeratortFrontEnd web client application running on your local machine by following the below steps:
-1. The moderatorFrontend is an ASP.NET Core Blazor Web App, so you need to intall the Visual Studio 2022 (as of this writing).
+You can get the ModeratorFrontEnd web client application running on your local machine by following the below steps:
+1. The ModeratorFrontEnd is an ASP.NET Core Blazor Web App, so you need to intall the Visual Studio 2022 (as of this writing).
    ![blazor get started](../Docs/Images/Blazor.png)  
 2. Select *Visual Studio ASP.NET and Web Development* workload with Visual Studio 2022 download.
-   ![visual studio ASP.NET and Web Development](../Docs/Images/Blazor-download-install.png) 
+   ![Visual Studio ASP.NET and Web Development](../Docs/Images/Blazor-download-install.png) 
 3. Install the downloaded .exe for the setup with the workload selected.
 4. Clone the forked repo to your local machine.
-5. Checkout the *main* branch.
+5. Check out the *main* branch.
 6. Open the project as a solution in Visual Studio 2022 to make changes to the files/project.
-7. Run locally by selecting the *AIForOrcas.Client.Web.csproj* and starting the application from Debug option from the toolbar.
+7. Run locally by selecting the *AIForOrcas.Client.Web.csproj* and starting the application from Debug configuration from the toolbar.
 
