@@ -8,9 +8,9 @@ namespace NotificationSystem.Template
     // TODO: we should move all html out of code and maybe use a preset email template for better design. 
     public static class EmailTemplate
     {
-        public static string GetModeratorEmailBody(DateTime? timestamp)
+        public static string GetModeratorEmailBody(DateTime? timestamp, string location)
         {
-            return $"<html><head><style>{GetCSS()}</style></head><body>{GetModeratorEmailHtml(timestamp)}</body></html>";
+            return $"<html><head><style>{GetCSS()}</style></head><body>{GetModeratorEmailHtml(timestamp, location)}</body></html>";
         }
 
         public static string GetSubscriberEmailBody(List<JObject> messages)
@@ -101,7 +101,7 @@ namespace NotificationSystem.Template
             }
         }
 
-        private static string GetModeratorEmailHtml(DateTime? timestamp)
+        private static string GetModeratorEmailHtml(DateTime? timestamp, string location)
         {
             string timeString = GetPDTTimestring(timestamp);
 
@@ -112,7 +112,7 @@ namespace NotificationSystem.Template
                 Orca Call Identified
                 </h1>
                 <p>
-                Dear moderator, a potential Southern Resident Killer Whale call was detected on {timeString} PDT. 
+                Dear moderator, a potential Southern Resident Killer Whale call was detected on {timeString} PDT at {location} location. 
                 </p>
                 <p>
                 This is a request for your moderation to confirm whether the sound belongs to a Southern Resident Killer Whale on the portal below.
