@@ -52,7 +52,7 @@ In the moderators flow:
 
 - A change in the Cosmos DB metadata store triggers the SendModeratorEmail function
 - If there is a newly detected orca call that requires a moderator to validate, the function fetches the relevant email list
-- The function then calls SendGrid to send emails to moderators
+- The function then calls AWS Simple Email Service to send emails to moderators
 
 In the subscribers flow:
 
@@ -60,7 +60,7 @@ In the subscribers flow:
 - If there is a new orca call that the moderator has validated, the function sends a message to a queue
 - The SendSubscriberEmail function periodically checks the queue
 - If there are items in the queue, the function fetches the relevant email list
-- The function then calls SendGrid to send emails to subscribers
+- The function then calls AWS Simple Email Service to send emails to subscribers
 
 ## Get email list
 
@@ -111,7 +111,6 @@ All resources are located in resource group **LiveSRKWNotificationSystem**.
 1. Storage account with queues, email template images and moderator/subscriber list: orcanotificationstorage
 2. Metadata store (from which some functions are triggered): aifororcasmetadatastore
 3. Azure function app: orcanotification
-4. SendGrid account (for sending emails): aifororcas
 
 ## Run Locally
 It is recommended to go to the "orcanotification" function app, then Settings > Configuration to find the app settings used. 
@@ -127,7 +126,8 @@ Create local.settings.json in the current directory (NotificationSystem) using t
 
         "OrcaNotificationStorageSetting": "<storage account connection string>",
         "aifororcasmetadatastore_DOCUMENTDB": "<cosmos db connection string>",
-        "SendGridKey": "<SendGrid API key>",
+        "AWS_ACCESS_KEY_ID": "<AWS Access Key>",
+        "AWS_SECRET_ACCESS_KEY": "<AWS Secret Key>",
         "SenderEmail": "<email address>"
     }
 }

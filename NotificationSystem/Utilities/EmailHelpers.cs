@@ -9,7 +9,7 @@ using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NotificationSystem.Models;
-using SendGrid.Helpers.Mail;
+using Amazon.SimpleEmail.Model;
 
 namespace NotificationSystem.Utilities
 {
@@ -72,14 +72,22 @@ namespace NotificationSystem.Utilities
             return cloudTable.ExecuteQuery(query);
         }
 
-        public static SendGridMessage CreateEmail(string from, string to, string subject, string body)
+        public static SendEmailRequest CreateEmail(string from, string to, string subject, string body)
         {
-            var message = new SendGridMessage();
-            message.AddTo(to);
-            message.AddContent("text/html", body);
-            message.SetFrom(from);
-            message.SetSubject(subject);
-            return message;
+            var email = new SendEmailRequest();
+            email.Source = from;
+            email.Destination = new Destination(new List<string> { to });
+            //Create message and attach to email request.
+            Message message = new Message();
+            message.Subject = new Content(subject);
+            message.Body = new Body();
+            message.Body.Html = new Content
+            {
+                Charset = "UTF-8",
+                Data = body
+            };
+            email.Message = message;
+            return email;
         }
     }
 }
