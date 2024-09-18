@@ -7,7 +7,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Template;
 using NotificationSystem.Utilities;
-using SendGrid.Helpers.Mail;
+using Amazon;
+using Amazon.SimpleEmail;
 
 namespace NotificationSystem
 {
@@ -24,7 +25,6 @@ namespace NotificationSystem
                 LeaseCollectionPrefix = "moderator",
                 CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> input,
             [Table("EmailList")] CloudTable cloudTable,
-            [SendGrid(ApiKey = "SendGridKey")] IAsyncCollector<SendGridMessage> messageCollector,
             ILogger log)
         {
             if (input == null || input.Count == 0)
@@ -57,13 +57,14 @@ namespace NotificationSystem
             // TODO: make better email
             string body = EmailTemplate.GetModeratorEmailBody(documentTimeStamp, location);
 
-            log.LogInformation("Retrieving email list and sending notifications");
+			var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
+			log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))
             {
                 string emailSubject = string.Format("OrcaHello Candidate at location {0}", location);
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email, emailSubject, body);
-                await messageCollector.AddAsync(email);
+                await aws.SendEmailAsync(email);
             }
         }
     }

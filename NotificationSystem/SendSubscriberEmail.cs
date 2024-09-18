@@ -10,7 +10,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NotificationSystem.Template;
 using NotificationSystem.Utilities;
-using SendGrid.Helpers.Mail;
+using Amazon;
+using Amazon.SimpleEmail;
 
 namespace NotificationSystem
 {
@@ -23,7 +24,6 @@ namespace NotificationSystem
             [TimerTrigger("0 */1 * * * *")] TimerInfo myTimer,
             [Queue("srkwfound")] CloudQueue cloudQueue,
             [Table("EmailList")] CloudTable cloudTable,
-            [SendGrid(ApiKey = "SendGridKey")] IAsyncCollector<SendGridMessage> messageCollector,
             ILogger log)
         {
             log.LogInformation("Checking if there are items in queue");
@@ -38,12 +38,13 @@ namespace NotificationSystem
             log.LogInformation("Creating email message");
             var body = await CreateBody(cloudQueue);
 
-            log.LogInformation("Retrieving email list and sending notifications");
+			var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
+			log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Subscriber"))
             {
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email, "Notification: Orca detected!", body);
-                await messageCollector.AddAsync(email);
+                await aws.SendEmailAsync(email);
             }
         }
 
