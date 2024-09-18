@@ -20,9 +20,9 @@ namespace NotificationSystem
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class SendSubscriberEmail
     {
-		static int SendRate = 14;
+    static int SendRate = 14;
 
-		[FunctionName("SendSubscriberEmail")]
+    [FunctionName("SendSubscriberEmail")]
         // TODO: change timer to once per hour (0 0 * * * *)
         public static async Task Run(
             [TimerTrigger("0 */1 * * * *")] TimerInfo myTimer,
