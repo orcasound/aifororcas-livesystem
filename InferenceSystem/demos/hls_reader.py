@@ -18,10 +18,10 @@ import shutil
 import spectrogram_visualizer
 
 ORCASOUND_STREAMS = {
-    # 'OrcasoundLab': 'https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab'
-    'BushPoint': 'https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_bush_point'
-    # 'PortTownsend': 'https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_port_townsend'
-    'SunsetBay': 'https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_sunset_bay'
+    # 'OrcasoundLab': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab'
+    'BushPoint': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_bush_point'
+    # 'PortTownsend': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_port_townsend'
+    'SunsetBay': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_sunset_bay'
 }
 
 dirname = os.getcwd()

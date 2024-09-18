@@ -142,7 +142,7 @@ if __name__ == "__main__":
 	hls_stream_type = config_params["hls_stream_type"]
 	hls_polling_interval = config_params["hls_polling_interval"]
 	hls_hydrophone_id = config_params["hls_hydrophone_id"]
-	hydrophone_stream_url = 'https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/' + hls_hydrophone_id
+	hydrophone_stream_url = 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/' + hls_hydrophone_id
 	
 	if hls_stream_type == "LiveHLS":
 		hls_stream = HLSStream(hydrophone_stream_url, hls_polling_interval, local_dir)
