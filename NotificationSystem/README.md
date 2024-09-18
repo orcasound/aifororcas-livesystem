@@ -52,7 +52,7 @@ In the moderators flow:
 
 - A change in the Cosmos DB metadata store triggers the SendModeratorEmail function
 - If there is a newly detected orca call that requires a moderator to validate, the function fetches the relevant email list
-- The function then calls AWS Simple Notification Service to send emails to moderators
+- The function then calls AWS Simple Email Service to send emails to moderators
 
 In the subscribers flow:
 
