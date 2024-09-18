@@ -72,22 +72,22 @@ namespace NotificationSystem.Utilities
             return cloudTable.ExecuteQuery(query);
         }
 
-		public static SendEmailRequest CreateEmail(string from, string to, string subject, string body)
-		{
+        public static SendEmailRequest CreateEmail(string from, string to, string subject, string body)
+        {
             var email = new SendEmailRequest();
             email.Source = from;
             email.Destination = new Destination(new List<string> { to });
             //Create message and attach to email request.
-			Message message = new Message();
-			message.Subject = new Content(subject);
-			message.Body = new Body();
-			message.Body.Html = new Content
-			{
-				Charset = "UTF-8",
-				Data = body
-			};
-			email.Message = message;
-			return email;
-		}
-	}
+            Message message = new Message();
+            message.Subject = new Content(subject);
+            message.Body = new Body();
+            message.Body.Html = new Content
+            {
+                Charset = "UTF-8",
+                Data = body
+            };
+            email.Message = message;
+            return email;
+        }
+    }
 }
