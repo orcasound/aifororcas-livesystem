@@ -40,9 +40,9 @@ namespace NotificationSystem
             log.LogInformation("Creating email message");
             var body = await CreateBody(cloudQueue);
 
-			var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
-			var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
-			log.LogInformation("Retrieving email list and sending notifications");
+            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
+            var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
+            log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Subscriber"))
             {
                 await timeConstraint;

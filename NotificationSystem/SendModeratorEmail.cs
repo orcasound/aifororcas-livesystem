@@ -59,12 +59,12 @@ namespace NotificationSystem
             // TODO: make better email
             string body = EmailTemplate.GetModeratorEmailBody(documentTimeStamp, location);
 
-			var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
-			var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
-			log.LogInformation("Retrieving email list and sending notifications");
+            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
+            var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
+            log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))
             {
-				await timeConstraint;
+                await timeConstraint;
 				string emailSubject = string.Format("OrcaHello Candidate at location {0}", location);
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email, emailSubject, body);

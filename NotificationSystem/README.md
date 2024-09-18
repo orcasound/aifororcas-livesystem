@@ -60,7 +60,7 @@ In the subscribers flow:
 - If there is a new orca call that the moderator has validated, the function sends a message to a queue
 - The SendSubscriberEmail function periodically checks the queue
 - If there are items in the queue, the function fetches the relevant email list
-- The function then calls AWS Simple Notification Service to send emails to subscribers
+- The function then calls AWS Simple Email Service to send emails to subscribers
 
 ## Get email list
 
