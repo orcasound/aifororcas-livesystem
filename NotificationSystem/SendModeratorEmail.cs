@@ -9,6 +9,8 @@ using NotificationSystem.Template;
 using NotificationSystem.Utilities;
 using Amazon;
 using Amazon.SimpleEmail;
+using RateLimiter;
+using ComposableAsync;
 
 namespace NotificationSystem
 {
@@ -57,11 +59,13 @@ namespace NotificationSystem
             // TODO: make better email
             string body = EmailTemplate.GetModeratorEmailBody(documentTimeStamp, location);
 
+			var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
 			var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
 			log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))
             {
-                string emailSubject = string.Format("OrcaHello Candidate at location {0}", location);
+				await timeConstraint;
+				string emailSubject = string.Format("OrcaHello Candidate at location {0}", location);
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email, emailSubject, body);
                 await aws.SendEmailAsync(email);

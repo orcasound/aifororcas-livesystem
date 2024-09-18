@@ -12,6 +12,8 @@ using NotificationSystem.Template;
 using NotificationSystem.Utilities;
 using Amazon;
 using Amazon.SimpleEmail;
+using RateLimiter;
+using ComposableAsync;
 
 namespace NotificationSystem
 {
@@ -38,10 +40,12 @@ namespace NotificationSystem
             log.LogInformation("Creating email message");
             var body = await CreateBody(cloudQueue);
 
+			var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
 			var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
 			log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Subscriber"))
             {
+                await timeConstraint;
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email, "Notification: Orca detected!", body);
                 await aws.SendEmailAsync(email);
