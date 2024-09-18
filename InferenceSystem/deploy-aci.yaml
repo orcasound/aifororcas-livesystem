@@ -80,6 +80,36 @@ properties:
         requests:
           cpu: 1.0
           memoryInGB: 3
+  - name: mast-center-live
+    properties:
+      environmentVariables:
+      - name: AZURE_COSMOSDB_PRIMARY_KEY
+        secureValue: '<cosmos_primary_key>'
+      - name: AZURE_STORAGE_CONNECTION_STRING
+        secureValue: '<storage_connection_string>'
+      - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
+        secureValue: '<appinsights_connection_string>'
+      image: orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.MastCenter.v0
+      ports: []
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGB: 3
+  - name: north-sjc-live
+    properties:
+      environmentVariables:
+      - name: AZURE_COSMOSDB_PRIMARY_KEY
+        secureValue: '<cosmos_primary_key>'
+      - name: AZURE_STORAGE_CONNECTION_STRING
+        secureValue: '<storage_connection_string>'
+      - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
+        secureValue: '<appinsights_connection_string>'
+      image: orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.NorthSJC.v0
+      ports: []
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGB: 3
   imageRegistryCredentials:
   - server: orcaconservancycr.azurecr.io
     username: orcaconservancycr
