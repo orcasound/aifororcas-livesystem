@@ -1,4 +1,8 @@
 using System;
+using Amazon;
+using Amazon.SimpleEmail;
+using RateLimiter;
+using ComposableAsync;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos.Table;
@@ -7,16 +11,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Template;
 using NotificationSystem.Utilities;
-using Amazon;
-using Amazon.SimpleEmail;
-using RateLimiter;
-using ComposableAsync;
 
 namespace NotificationSystem
 {
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class SendModeratorEmail
     {
+        static int SendRate = 14;
+
         [FunctionName("SendModeratorEmail")]
         public static async Task Run(
             [CosmosDBTrigger(
@@ -56,10 +58,9 @@ namespace NotificationSystem
                 return;
             }
 
-            // TODO: make better email
             string body = EmailTemplate.GetModeratorEmailBody(documentTimeStamp, location);
 
-            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
+            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
             log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))

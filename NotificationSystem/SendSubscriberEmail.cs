@@ -1,4 +1,8 @@
 using System;
+using Amazon;
+using Amazon.SimpleEmail;
+using RateLimiter;
+using ComposableAsync;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,17 +14,15 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NotificationSystem.Template;
 using NotificationSystem.Utilities;
-using Amazon;
-using Amazon.SimpleEmail;
-using RateLimiter;
-using ComposableAsync;
 
 namespace NotificationSystem
 {
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class SendSubscriberEmail
     {
-        [FunctionName("SendSubscriberEmail")]
+		static int SendRate = 14;
+
+		[FunctionName("SendSubscriberEmail")]
         // TODO: change timer to once per hour (0 0 * * * *)
         public static async Task Run(
             [TimerTrigger("0 */1 * * * *")] TimerInfo myTimer,
@@ -40,7 +42,7 @@ namespace NotificationSystem
             log.LogInformation("Creating email message");
             var body = await CreateBody(cloudQueue);
 
-            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(14, TimeSpan.FromSeconds(1));
+            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
             log.LogInformation("Retrieving email list and sending notifications");
             foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Subscriber"))

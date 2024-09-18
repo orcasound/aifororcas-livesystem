@@ -74,9 +74,9 @@ namespace NotificationSystem.Utilities
 
 		public static SendEmailRequest CreateEmail(string from, string to, string subject, string body)
 		{
-			var email = new SendEmailRequest();
-			email.Source = from;
-			email.Destination = new Destination(new List<string> { to });
+            var email = new SendEmailRequest();
+            email.Source = from;
+            email.Destination = new Destination(new List<string> { to });
             //Create message and attach to email request.
 			Message message = new Message();
 			message.Subject = new Content(subject);
