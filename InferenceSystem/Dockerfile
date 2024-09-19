@@ -29,4 +29,4 @@ RUN rm ./model.zip
 COPY ./src/ ./src
 COPY ./config/ ./config
 
-CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py", "--config", "./config/Production/FastAI_LiveHLS_NorthSJC.yml"]
+CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py", "--config", "./config/Production/FastAI_LiveHLS_OrcasoundLab.yml"]
