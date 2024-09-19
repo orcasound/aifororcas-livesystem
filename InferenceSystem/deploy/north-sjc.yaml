@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference-system
+  namespace: north-sjc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inference-system
+  template:
+    metadata:
+      labels:
+        app: inference-system
+    spec:
+      containers:
+      - name: inference-system
+        image: orcaconservancycr.azurecr.io/live-inference-system:09-19-24.FastAI.R1-12.NorthSJC.v0
+        resources:
+          limits:
+            cpu: 1
+            memory: 3G
+        env:
+          - name: AZURE_COSMOSDB_PRIMARY_KEY
+            valueFrom:
+              secretKeyRef:
+                name: inference-system
+                key: AZURE_COSMOSDB_PRIMARY_KEY
+          - name: AZURE_STORAGE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: inference-system
+                key: AZURE_STORAGE_CONNECTION_STRING
+          - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: inference-system
+                key: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
