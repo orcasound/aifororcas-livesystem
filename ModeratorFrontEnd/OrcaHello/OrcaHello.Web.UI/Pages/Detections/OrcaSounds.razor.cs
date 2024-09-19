@@ -12,7 +12,7 @@
         // Detection State
         protected List<DropdownOption> DetectionStateDropdownOptions = new() {
             new(DetectionState.Unreviewed, "Unreviewed Calls"),
-            new(DetectionState.Positive, "Verfied Calls"),
+            new(DetectionState.Positive, "Verified Calls"),
             new(DetectionState.Negative, "Rejected Calls"),
             new(DetectionState.Unknown, "Unclear Calls" )};
 
