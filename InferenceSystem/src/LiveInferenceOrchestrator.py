@@ -104,6 +104,7 @@ if __name__ == "__main__":
 
 	# logger to app insights
 	app_insights_connection_string = os.getenv('INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING')
+	print("INSTRUMENTATION KEY: ", app_insights_connection_string)
 	logger = logging.getLogger(__name__)
 	if app_insights_connection_string is not None:
 		logger.addHandler(AzureLogHandler(connection_string=app_insights_connection_string))
