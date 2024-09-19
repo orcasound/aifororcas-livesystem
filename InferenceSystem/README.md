@@ -104,7 +104,7 @@ python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_Or
 You should see the following logs in your terminal. Since this is a Test config, no audio is uploaded to Azure and no metadata is written to CosmosDB.
 
 ```
-Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
+Listening to location https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab
 Downloading live879.ts
 live879.ts: 205kB [00:00, 1.17MB/s]                                             
 Downloading live880.ts
@@ -190,7 +190,7 @@ docker run --rm -it --env-file .env live-inference-system
 In addition, you should see something similar to the following in your console.
 
 ```
-Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
+Listening to location https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab
 Downloading live879.ts
 live879.ts: 205kB [00:00, 1.17MB/s]                                             
 Downloading live880.ts
