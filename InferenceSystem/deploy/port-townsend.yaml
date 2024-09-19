@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: inference-system
-        image: orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.PortTownsend.v0
+        image: orcaconservancycr.azurecr.io/live-inference-system:09-18-24.FastAI.R1-12.PortTownsend.v0
         resources:
           limits:
             cpu: 1
