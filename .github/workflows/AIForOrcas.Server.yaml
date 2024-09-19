@@ -28,6 +28,9 @@ defaults:
   run:
     working-directory: ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server
 
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -38,9 +41,9 @@ jobs:
       with:
         egress-policy: audit
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@608ee757cfcce72c2e91e99aca128e0cae67de87 # v1.9.1
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Dependencies
@@ -52,7 +55,7 @@ jobs:
     - name: Publish
       run: dotnet publish --no-restore -c Release -o './${{ env.PUBLISH_DIR }}'
     - name: Artifacts cache
-      uses: actions/cache@v2
+      uses: actions/cache@8492260343ad570701412c2f464a5877dc76bace # v2
       with:
         path: ./${{ env.WORKING_DIR }}/${{ env.PUBLISH_DIR }}
         key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
@@ -68,12 +71,12 @@ jobs:
       with:
         egress-policy: audit
     - name: Artifacts cache
-      uses: actions/cache@v2
+      uses: actions/cache@8492260343ad570701412c2f464a5877dc76bace # v2
       with:
         path: ./${{ env.WORKING_DIR}}/${{ env.PUBLISH_DIR }}
         key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
     - name: Deploy to azure
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@4bfb30bef2c330e36be280cb1e5726d0fac06233 # v2.2.13
       with:
         app-name: ${{ env.AZURE_APP_NAME }}
         publish-profile: ${{ secrets.AZURE_AISFORORCASDETECTIONS_PUBLISH_PROFILE }}

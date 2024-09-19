@@ -75,6 +75,7 @@ properties:
       - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
         secureValue: '<appinsights_connection_string>'
       image: orcaconservancycr.azurecr.io/live-inference-system:09-18-24.FastAI.R1-12.PointRobinson.v0
+<<<<<<< HEAD
       ports: []
       resources:
         requests:
@@ -105,6 +106,8 @@ properties:
       - name: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
         secureValue: '<appinsights_connection_string>'
       image: orcaconservancycr.azurecr.io/live-inference-system:09-19-24.FastAI.R1-12.NorthSJC.v0
+=======
+>>>>>>> main
       ports: []
       resources:
         requests:

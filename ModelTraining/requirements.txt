@@ -4,7 +4,7 @@ librosa==0.10
 pydub==0.24.1
 pandas
 numpy
-torchaudio==0.6.0
+torchaudio==0.7.2
 git+https://github.com/fastaudio/fastai_audio@0.1
 ipython
 spacy
