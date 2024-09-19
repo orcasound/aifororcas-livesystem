@@ -104,7 +104,7 @@ python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_Or
 You should see the following logs in your terminal. Since this is a Test config, no audio is uploaded to Azure and no metadata is written to CosmosDB.
 
 ```
-Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
+Listening to location https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab
 Downloading live879.ts
 live879.ts: 205kB [00:00, 1.17MB/s]                                             
 Downloading live880.ts
@@ -190,7 +190,7 @@ docker run --rm -it --env-file .env live-inference-system
 In addition, you should see something similar to the following in your console.
 
 ```
-Listening to location https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab
+Listening to location https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab
 Downloading live879.ts
 live879.ts: 205kB [00:00, 1.17MB/s]                                             
 Downloading live880.ts
@@ -384,5 +384,5 @@ export PODCAST_AZURE_STORAGE_CONNECTION_STRING="<copied-connection-string>"
 Call the script as follows, substituting appropriate values.
 
 ```
-python PrepareDataForPredictionExplorer.py --start_time "2020-07-25 19:15" --end_time "2020-07-25 20:15" --s3_stream https://s3-us-west-2.amazonaws.com/streaming-orcasound-net/rpi_orcasound_lab --model_path <folder> --annotation_threshold 0.4 --round_id round5 --dataset_folder <path-to-folder>
+python PrepareDataForPredictionExplorer.py --start_time "2020-07-25 19:15" --end_time "2020-07-25 20:15" --s3_stream https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab --model_path <folder> --annotation_threshold 0.4 --round_id round5 --dataset_folder <path-to-folder>
 ```
