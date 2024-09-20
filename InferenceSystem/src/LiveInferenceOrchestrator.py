@@ -221,5 +221,17 @@ if __name__ == "__main__":
 				os.remove(clip_path)
 				os.remove(spectrogram_path)
 
+			if 'log_results' in config_params:
+				if config_params['upload_to_azure']:
+					# override the logging, since it is already deployed
+					pass
+				elif config_params['log_results'] is not None:
+					# log silent trial data to destination folder
+					os.makedirs(config_params['log_results'], exist_ok=True)
+					prediction_results.update({'model_type': config_params['model_type'],'model_name': config_params['model_name'], 'model_path':config_params['model_path']})
+					json_name = os.path.basename(clip_path).replace('.wav', '.json')
+					with open(os.path.join(config_params['log_results'], json_name), 'w+') as f:
+						json.dump(prediction_results, f)
+
 		# get next current_clip_end_time by adding 60 seconds to current_clip_end_time
 		current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
