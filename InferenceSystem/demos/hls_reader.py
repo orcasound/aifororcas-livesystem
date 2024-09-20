@@ -17,10 +17,14 @@ import ffmpeg #ffmpeg-python
 import shutil
 import spectrogram_visualizer
 
+# TODO: get the list from https://live.orcasound.net/api/json/feeds
 ORCASOUND_STREAMS = {
-    # 'OrcasoundLab': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab'
-    'BushPoint': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_bush_point'
-    # 'PortTownsend': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_port_townsend'
+    'BushPoint': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_bush_point',
+    'MaSTCenter': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_mast_center',
+    'NorthSanJuanChannel': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_north_sjc',
+    'OrcasoundLab': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_orcasound_lab',
+    'PointRobinson': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_point_robinson',
+    'PortTownsend': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_port_townsend',
     'SunsetBay': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_sunset_bay'
 }
 
