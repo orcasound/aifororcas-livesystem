@@ -374,3 +374,15 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# AML
+.amlignore
+.amltmp
+.amlignore.amltmp
+.ipynb_checkpoints/
+.ipynb.amltmp
+
+# specific files
+fileshare_setup_Z_linux.txt
+config.json
+
