@@ -374,3 +374,12 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Datasets
+data
+
+# Azure
+.amlignore*
+
+# Jupyter
+.ipynb_*

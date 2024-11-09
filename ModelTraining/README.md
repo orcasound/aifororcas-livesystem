@@ -1,6 +1,25 @@
 # Repo to explain FastAI modeling methodology
 - Author : Aayush Agrawal (aaagraw@microsoft.com)
 
+## Setup
+
+Author: Bruno Grande
+
+```console
+# Navigate to ModelTraining subdirectory
+cd aifororcas-livesystem/ModelTraining
+
+# Create a new conda environment with Python 3.8
+conda create -n <env-name> python=3.8
+conda activate <env-name>
+
+# Install uv (better at resolving package version conflicts)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies using `uv pip` (instead of plain `pip`)
+uv pip install -r requirements.txt
+```
+
 ## Model data 
 The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
 
