@@ -5,6 +5,8 @@
 
 Author: Bruno Grande
 
+The following instructions describe how I was able to install the dependencies for these Jupyter notebooks. I was running into a version conflict with `pip install`. I was able to resolve dependencies using `uv pip install`.
+
 ```console
 # Navigate to ModelTraining subdirectory
 cd aifororcas-livesystem/ModelTraining
@@ -19,6 +21,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Install dependencies using `uv pip` (instead of plain `pip`)
 uv pip install -r requirements.txt
 ```
+
+I'm also including a full list of installed packages and versions in `requirements.lock.txt`, which was generated using `pip freeze`.
 
 ## Model data 
 The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
