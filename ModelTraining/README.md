@@ -1,6 +1,29 @@
 # Repo to explain FastAI modeling methodology
 - Author : Aayush Agrawal (aaagraw@microsoft.com)
 
+## Setup
+
+Author: Bruno Grande
+
+The following instructions describe how I was able to install the dependencies for these Jupyter notebooks. I was running into a version conflict with `pip install`. I was able to resolve dependencies using `uv pip install`.
+
+```console
+# Navigate to ModelTraining subdirectory
+cd aifororcas-livesystem/ModelTraining
+
+# Create a new conda environment with Python 3.8
+conda create -n <env-name> python=3.8
+conda activate <env-name>
+
+# Install uv (better at resolving package version conflicts)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies using `uv pip` (instead of plain `pip`)
+uv pip install -r requirements.txt
+```
+
+I'm also including a full list of installed packages and versions in `requirements.lock.txt`, which was generated using `pip freeze`.
+
 ## Model data 
 The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
 
