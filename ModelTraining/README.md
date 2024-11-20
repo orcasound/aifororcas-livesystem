@@ -5,15 +5,15 @@
 
 Author: Bruno Grande
 
-The following instructions describe how I was able to install the dependencies for these Jupyter notebooks. I was running into a version conflict with `pip install`. I was able to resolve dependencies using `uv pip install`.
+### FastAI v1
 
 ```console
 # Navigate to ModelTraining subdirectory
 cd aifororcas-livesystem/ModelTraining
 
 # Create a new conda environment with Python 3.8
-conda create -n <env-name> python=3.8
-conda activate <env-name>
+conda create -y -n orca-v1-env python=3.8
+conda activate orca-v1-env
 
 # Install uv (better at resolving package version conflicts)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -23,6 +23,22 @@ uv pip install -r requirements.txt
 ```
 
 I'm also including a full list of installed packages and versions in `requirements.lock.txt`, which was generated using `pip freeze`.
+
+### FastAI v2
+
+```console
+# Install CUDA 12.4 using NVIDIA's docs:
+# https://developer.nvidia.com/cuda-12-4-0-download-archive
+
+# Create new conda environment with Python 3.12
+conda create -y -n orca-v2-env python=3.12
+conda activate orca-v2-env
+
+# Install dependencies (combined from FastAI and PyTorch docs)
+conda install -y \
+    -c pytorch -c nvidia -c fastai \
+    pytorch torchvision torchaudio pytorch-cuda=12.4 fastai=2.7.17
+```
 
 ## Model data 
 The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
