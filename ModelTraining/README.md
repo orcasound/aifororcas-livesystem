@@ -36,8 +36,10 @@ conda activate orca-v2-env
 
 # Install dependencies (combined from FastAI and PyTorch docs)
 conda install -y \
-    -c pytorch -c nvidia -c fastai \
-    pytorch torchvision torchaudio pytorch-cuda=12.4 fastai=2.7.17
+    -c pytorch -c nvidia -c fastai -c plotly \
+    pytorch torchvision torchaudio pytorch-cuda=12.4 \
+    fastai=2.7.17 \
+    seaborn pillow ipywidgets
 ```
 
 ## Model data 
