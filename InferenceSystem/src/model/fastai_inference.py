@@ -168,7 +168,7 @@ class FastAIModel():
             local_confidences=list(submission['confidence'])
         )
 
-        result_json['global_prediction'] = int(sum(result_json["local_predictions"]) > self.min_num_positive_calls_threshold)
+        result_json['global_prediction'] = int(sum(result_json["local_predictions"]) >= self.min_num_positive_calls_threshold)
         result_json['global_confidence'] = submission.loc[(submission['confidence'] > self.threshold), 'confidence'].mean()*100
         if pd.isnull(result_json["global_confidence"]):
             result_json["global_confidence"] = 0
