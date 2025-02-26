@@ -1,0 +1,34 @@
+# Automatically opens PRs for dependency updates.
+# Can be turned on and off for org or repository via "Code security and analysis" tab .
+# See https://docs.github.com/en/code-security/dependabot/dependabot-alerts/configuring-dependabot-alerts
+version: 2
+updates:
+  # Updates GHA dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      time: "05:00"
+      timezone: America/Los_Angeles
+    groups:
+      actions:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 3
+
+  # Updates Docker dependencies
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: America/Los_Angeles
+    open-pull-requests-limit: 3
+    ignore:
+      # Ignore odd-numbered node versions because they're not LTS
+      # Have to manage this manually until https://github.com/dependabot/dependabot-core/issues/2247 is resolved
+      # Even-numbered releases also need to be ignored for the first 6 months,
+      # but there's no way to configure that in Dependabot yet
+      - dependency-name: node
+        versions: ["21.x", "23.x", "25.x", "27.x"]
