@@ -1,0 +1,17 @@
+# Automatically opens PRs for dependency updates.
+# Can be turned on and off for org or repository via "Code security and analysis" tab .
+# See https://docs.github.com/en/code-security/dependabot/dependabot-alerts/configuring-dependabot-alerts
+version: 2
+updates:
+  # Updates GHA dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      time: "05:00"
+      timezone: America/Los_Angeles
+    groups:
+      actions:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 3
