@@ -39,13 +39,13 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+    - uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
       with:
         egress-policy: audit
     - name: Checkout
-      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@608ee757cfcce72c2e91e99aca128e0cae67de87 # v1.9.1
+      uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Dependencies
@@ -57,7 +57,7 @@ jobs:
     - name: Publish
       run: dotnet publish --no-restore -c Release -o './${{ env.PUBLISH_DIR }}'
     - name: Artifacts cache
-      uses: actions/cache@8492260343ad570701412c2f464a5877dc76bace # v2
+      uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
       with:
         path: ./${{ env.WORKING_DIR }}/${{ env.PUBLISH_DIR }}
         key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
@@ -69,16 +69,16 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+    - uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
       with:
         egress-policy: audit
     - name: Artifacts cache
-      uses: actions/cache@8492260343ad570701412c2f464a5877dc76bace # v2
+      uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
       with:
         path: ./${{ env.WORKING_DIR}}/${{ env.PUBLISH_DIR }}
         key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
     - name: Deploy to azure
-      uses: azure/webapps-deploy@4bfb30bef2c330e36be280cb1e5726d0fac06233 # v2.2.13
+      uses: azure/webapps-deploy@2fdd5c3ebb4e540834e86ecc1f6fdcd5539023ee # v3.0.2
       with:
         app-name: ${{ env.AZURE_APP_NAME }}
         publish-profile: ${{ secrets.AZURE_AISFORORCAS_PUBLISH_PROFILE }}
