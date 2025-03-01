@@ -7,6 +7,7 @@ on:
     paths:
     - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api/**
     - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
+    - .github/workflows/OrcaHello.Web.Api.yaml
   push:
     branches:
     - main
