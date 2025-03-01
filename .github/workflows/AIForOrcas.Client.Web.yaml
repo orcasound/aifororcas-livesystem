@@ -9,6 +9,7 @@ on:
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Client.BL/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server.BL/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.DTO/**
+    - .github/workflows/AIForOrcas.Client.Web.yaml
   push:
     branches:
     - main

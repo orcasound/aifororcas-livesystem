@@ -8,6 +8,7 @@ on:
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server.BL/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.DTO/**
+    - .github/workflows/AIForOrcas.Server.yaml
   push:
     branches:
     - main
