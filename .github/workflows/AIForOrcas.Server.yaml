@@ -8,6 +8,7 @@ on:
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server.BL/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.DTO/**
+    - .github/workflows/AIForOrcas.Server.yaml
   push:
     branches:
     - main
@@ -15,6 +16,7 @@ on:
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.Server.BL/**
     - ModeratorFrontEnd/AIForOrcas/AIForOrcas.DTO/**
+    - .github/workflows/AIForOrcas.Server.yaml
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:

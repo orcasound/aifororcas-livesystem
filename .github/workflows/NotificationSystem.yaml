@@ -6,11 +6,13 @@ on:
     - main
     paths:
     - NotificationSystem/**
+    - .github/workflows/NotificationSystem.yaml
   push:
     branches:
     - main
     paths:
     - NotificationSystem/**
+    - .github/workflows/NotificationSystem.yaml
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:

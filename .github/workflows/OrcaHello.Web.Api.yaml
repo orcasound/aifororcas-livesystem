@@ -7,12 +7,14 @@ on:
     paths:
     - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api/**
     - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
+    - .github/workflows/OrcaHello.Web.Api.yaml
   push:
     branches:
     - main
     paths:
     - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Api/**
     - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
+    - .github/workflows/OrcaHello.Web.Api.yaml
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:
