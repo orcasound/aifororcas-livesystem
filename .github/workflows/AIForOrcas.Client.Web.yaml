@@ -47,7 +47,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Dependencies
@@ -59,7 +59,7 @@ jobs:
     - name: Publish
       run: dotnet publish --no-restore -c Release -o './${{ env.PUBLISH_DIR }}'
     - name: Artifacts cache
-      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: ./${{ env.WORKING_DIR }}/${{ env.PUBLISH_DIR }}
         key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
@@ -75,7 +75,7 @@ jobs:
       with:
         egress-policy: audit
     - name: Artifacts cache
-      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: ./${{ env.WORKING_DIR}}/${{ env.PUBLISH_DIR }}
         key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
