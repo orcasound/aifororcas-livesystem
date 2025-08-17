@@ -11,10 +11,12 @@ This script:
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
 import pandas as pd
+import pytz
 from detection_types import OrcasoundListenerReport
 
 
@@ -76,6 +78,49 @@ def flatten_detections(reports: List[OrcasoundListenerReport]) -> List[Dict[str,
     return flattened
 
 
+def parse_timestamp_to_pst(timestamp_str: str) -> Dict[str, str]:
+    """Parse UTC timestamp and extract PST date/time components."""
+    pst_fields = {}
+
+    if timestamp_str:
+        try:
+            # Handle timestamp format (remove fractional seconds if present)
+            # e.g. '2025-08-14T01:55:02.48881Z' -> '2025-08-14T01:55:02+00:00'
+            clean_timestamp = (
+                timestamp_str.rsplit(".", 1)[0] + "Z"
+                if "." in timestamp_str
+                else timestamp_str
+            )
+            utc_dt = datetime.fromisoformat(clean_timestamp.replace("Z", "+00:00"))
+
+            # Convert to Pacific time (handles PST/PDT automatically)
+            pacific_tz = pytz.timezone("America/Los_Angeles")
+            pst_dt = utc_dt.astimezone(pacific_tz)
+
+            # Extract PST components
+            pst_fields["detection.date_pst"] = pst_dt.strftime("%Y-%m-%d")
+            pst_fields["detection.time_pst"] = pst_dt.strftime("%H:%M")
+            pst_fields["detection.year_month_pst"] = pst_dt.strftime("%Y-%m")
+            pst_fields["detection.year_pst"] = pst_dt.strftime("%Y")
+            pst_fields["detection.month_pst"] = pst_dt.strftime("%m")
+            pst_fields["detection.hour_pst"] = pst_dt.strftime("%H")
+
+        except Exception as e:
+            print(f"Warning: Failed to parse timestamp '{timestamp_str}': {e}")
+            # Set empty values for failed parsing
+            for field in [
+                "detection.date_pst",
+                "detection.time_pst",
+                "detection.year_month_pst",
+                "detection.year_pst",
+                "detection.month_pst",
+                "detection.hour_pst",
+            ]:
+                pst_fields[field] = None
+
+    return pst_fields
+
+
 def create_dataframe(flattened_data: List[Dict[str, Any]]) -> pd.DataFrame:
     """Create DataFrame with important fields."""
 
@@ -91,6 +136,13 @@ def create_dataframe(flattened_data: List[Dict[str, Any]]) -> pd.DataFrame:
         "feed.id",
         "report.detectionCount",
         "report.id",
+        # PST timestamp fields
+        "detection.date_pst",
+        "detection.time_pst",
+        "detection.year_month_pst",
+        "detection.year_pst",
+        "detection.month_pst",
+        "detection.hour_pst",
     ]
 
     # Extract the important fields
@@ -99,6 +151,12 @@ def create_dataframe(flattened_data: List[Dict[str, Any]]) -> pd.DataFrame:
         row = {}
         for field in important_fields:
             row[field] = entry.get(field)
+
+        # Parse timestamp and add PST fields
+        timestamp_str = entry.get("detection.timestamp", "")
+        pst_fields = parse_timestamp_to_pst(timestamp_str)
+        row.update(pst_fields)
+
         df_data.append(row)
 
     df = pd.DataFrame(df_data)
