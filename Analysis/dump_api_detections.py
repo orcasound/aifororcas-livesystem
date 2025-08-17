@@ -6,6 +6,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+import pandas as pd
 import requests
 from detection_types import ApiResponseV1, Detection
 from requests.adapters import HTTPAdapter
@@ -109,6 +110,45 @@ def get_existing_pages(api_responses_dir: str) -> set:
     return existing_pages
 
 
+def parse_int(value: Optional[str]) -> Optional[int]:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def detections_to_csv(detections: List[Detection], output_path: str) -> None:
+    """Convert detection objects to CSV format, flattening location and excluding annotations."""
+    csv_data = []
+
+    for detection in detections:
+        # Convert detection to dict and flatten location
+        detection_dict = detection.model_dump()
+
+        # Remove annotations field
+        detection_dict.pop("annotations", None)
+
+        # Flatten location fields
+        location = detection_dict.pop("location", {})
+        if location:
+            detection_dict["location.name"] = location.get("name", "")
+            detection_dict["location.longitude"] = location.get("longitude", 0.0)
+            detection_dict["location.latitude"] = location.get("latitude", 0.0)
+        else:
+            detection_dict["location.name"] = ""
+            detection_dict["location.longitude"] = 0.0
+            detection_dict["location.latitude"] = 0.0
+
+        csv_data.append(detection_dict)
+
+    # Create DataFrame and save to CSV
+    df = pd.DataFrame(csv_data)
+    df.to_csv(output_path, index=False, encoding="utf-8")
+    print(f"Saved CSV with {len(detections)} records -> {output_path}")
+
+
 def dump_api_responses(
     base_url: str,
     timeframe: str,
@@ -123,11 +163,16 @@ def dump_api_responses(
 
     # Generate timestamp for this run
     timestamp_slug = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    combined_detections_file = os.path.join(api_responses_dir, "detections_all.json")
 
     # Check if run is already completed
-    if is_completed_run(metadata_file):
+    if is_completed_run(metadata_file) and os.path.exists(combined_detections_file):
         print(f"Run already completed, skipping. Check {metadata_file} for details.")
-        return []
+        combined_detections = [
+            Detection.model_validate(d)
+            for d in json.load(open(combined_detections_file, "r", encoding="utf-8"))
+        ]
+        return combined_detections
 
     # Get existing pages to skip
     existing_pages = get_existing_pages(api_responses_dir)
@@ -250,11 +295,12 @@ def dump_api_responses(
             time.sleep(delay)
 
     # Save combined results
-    combined_file = os.path.join(api_responses_dir, "detections_all.json")
     # Convert Detection objects back to dict for JSON serialization
     combined_dicts = [detection.model_dump() for detection in combined]
-    write_json(combined_file, combined_dicts)
-    print(f"Saved combined results ({len(combined)} records) -> {combined_file}")
+    write_json(combined_detections_file, combined_dicts)
+    print(
+        f"Saved combined results ({len(combined)} records) -> {combined_detections_file}"
+    )
 
     # Write completion metadata entry
     completion_metadata = {
@@ -269,15 +315,6 @@ def dump_api_responses(
     print(f"Completed metadata logging -> {metadata_file}")
 
     return combined
-
-
-def parse_int(value: Optional[str]) -> Optional[int]:
-    if value is None:
-        return None
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
 
 
 def main() -> None:
@@ -320,8 +357,10 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    timestamp_slug = datetime.now(timezone.utc).strftime("%Y%m%d")
-    run_dir_name = f"detections_{args.timeframe}_{timestamp_slug}"
+    # timestamp_slug = datetime.now(timezone.utc).strftime("%Y%m%d")
+    # dump_name_suffix = f"{args.timeframe}_{timestamp_slug}"
+    dump_name_suffix = "all_20250815"
+    run_dir_name = f"detections_{dump_name_suffix}"
     output_dir = os.path.join(args.output_dir, run_dir_name)
     api_responses_dir = os.path.join(output_dir, "api_responses")
     detections_dump_dir = os.path.join(output_dir, "detections_dump")
@@ -347,6 +386,15 @@ def main() -> None:
         metadata_file=metadata_file,
         delay=args.delay,
     )
+
+    # Export detections to CSV
+    if detections_combined:
+        csv_file = os.path.join(
+            detections_dump_dir, f"detections_{dump_name_suffix}.csv"
+        )
+        detections_to_csv(detections_combined, csv_file)
+    else:
+        print("No detections to export to CSV")
 
 
 if __name__ == "__main__":
