@@ -52,3 +52,35 @@ class MetadataEntry(BaseModel):
 
 class ApiResponseV1(BaseModel):
     detections: List[Detection]
+
+
+class OrcasoundDetection(BaseModel):
+    category: Optional[str] = None
+    description: Optional[str] = None
+    feedId: str
+    id: str
+    listenerCount: Optional[int] = None
+    playerOffset: str
+    playlistTimestamp: int
+    source: str
+    sourceIp: Optional[str] = None
+    timestamp: str
+    visible: bool
+
+
+class OrcasoundFeed(BaseModel):
+    id: str
+    name: str
+    nodeName: str
+    slug: str
+
+
+class OrcasoundListenerReport(BaseModel):
+    category: Optional[str] = None
+    detectionCount: int
+    detections: List[OrcasoundDetection]
+    feed: OrcasoundFeed
+    id: str
+    maxTime: str
+    minTime: str
+    visible: bool
