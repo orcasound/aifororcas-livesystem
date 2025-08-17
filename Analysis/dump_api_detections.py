@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
+import pytz
 import requests
 from detection_types import ApiResponseV1, Detection
 from requests.adapters import HTTPAdapter
@@ -119,9 +120,14 @@ def parse_int(value: Optional[str]) -> Optional[int]:
         return None
 
 
-def detections_to_csv(detections: List[Detection], output_path: str) -> None:
-    """Convert detection objects to CSV format, flattening location and excluding annotations."""
+def detections_to_dataframe(detections: List[Detection]) -> pd.DataFrame:
+    """Convert detection objects to DataFrame format, flattening location and excluding annotations.
+    Adds PST timestamp columns based on the UTC timestamp.
+    """
     csv_data = []
+
+    # Define Pacific timezone
+    pacific_tz = pytz.timezone("US/Pacific")
 
     for detection in detections:
         # Convert detection to dict and flatten location
@@ -141,12 +147,37 @@ def detections_to_csv(detections: List[Detection], output_path: str) -> None:
             detection_dict["location.longitude"] = 0.0
             detection_dict["location.latitude"] = 0.0
 
+        # Parse timestamp and add PST columns
+        timestamp_str = detection_dict.get("timestamp", "")
+        if timestamp_str:
+            # Parse UTC timestamp e.g. '2025-08-14T01:55:02.48881Z' -> '2025-08-14T01:55:02+00:00'
+            timestamp_str = timestamp_str.rsplit(".", 1)[0] + "Z"  # remove frac seconds
+            utc_dt = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+
+            # Convert to Pacific time
+            pst_dt = utc_dt.astimezone(pacific_tz)
+
+            # Extract PST components
+            detection_dict["date_pst"] = pst_dt.strftime("%Y-%m-%d")
+            detection_dict["time_pst"] = pst_dt.strftime("%H:%M")
+            detection_dict["year_month_pst"] = pst_dt.strftime("%Y-%m")
+            detection_dict["year_pst"] = pst_dt.strftime("%Y")
+            detection_dict["month_pst"] = pst_dt.strftime("%m")
+            detection_dict["hour_pst"] = pst_dt.strftime("%H")
+        else:
+            # If no timestamp, set empty values
+            detection_dict["date_pst"] = ""
+            detection_dict["time_pst"] = ""
+            detection_dict["year_month_pst"] = ""
+            detection_dict["year_pst"] = ""
+            detection_dict["month_pst"] = ""
+            detection_dict["hour_pst"] = ""
+
         csv_data.append(detection_dict)
 
-    # Create DataFrame and save to CSV
+    # Create and return DataFrame
     df = pd.DataFrame(csv_data)
-    df.to_csv(output_path, index=False, encoding="utf-8")
-    print(f"Saved CSV with {len(detections)} records -> {output_path}")
+    return df
 
 
 def dump_api_responses(
@@ -392,7 +423,9 @@ def main() -> None:
         csv_file = os.path.join(
             detections_dump_dir, f"detections_{dump_name_suffix}.csv"
         )
-        detections_to_csv(detections_combined, csv_file)
+        df = detections_to_dataframe(detections_combined)
+        df.to_csv(csv_file, index=False, encoding="utf-8")
+        print(f"Saved CSV with {len(detections_combined)} records -> {csv_file}")
     else:
         print("No detections to export to CSV")
 
