@@ -180,6 +180,67 @@ def detections_to_dataframe(detections: List[Detection]) -> pd.DataFrame:
     return df
 
 
+def aggregate_detections_daily(df: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate detections by location and date with various counts.
+
+    Args:
+        df: DataFrame with detection data
+
+    Returns:
+        Aggregated DataFrame grouped by location.name and date_pst
+    """
+    # Group by location and date
+    grouped = df.groupby(["location.name", "date_pst"])
+
+    # Create aggregation dictionary
+    agg_data = []
+
+    for (location_name, date_pst), group in grouped:
+        year_month_pst = date_pst.rsplit("-", 1)[0]
+        year_pst, month_pst = year_month_pst.rsplit("-", 1)
+
+        # Basic counts
+        total_count = len(group)
+
+        # Moderation counts
+        count_moderated = len(group[group["reviewed"]])
+        count_unmoderated = len(group[~group["reviewed"]])
+
+        # For positive/false positive, only count reviewed records
+        reviewed_group = group[group["reviewed"]]
+        count_positive = len(reviewed_group[reviewed_group["found"] == "yes"])
+        count_false_positive = len(reviewed_group[reviewed_group["found"] != "yes"])
+
+        # Colon-separated list of IDs
+        ids_list = ";".join(group["id"].astype(str))
+        times_list = ";".join(group["time_pst"].astype(str))
+
+        agg_row = {
+            "location.name": location_name,
+            "date_pst": date_pst,
+            "year_month_pst": year_month_pst,
+            "year_pst": year_pst,
+            "month_pst": month_pst,
+            "ids": ids_list,
+            "times_pst": times_list,
+            "count": total_count,
+            "count_moderated": count_moderated,
+            "count_unmoderated": count_unmoderated,
+            "count_positive": count_positive,
+            "count_false_positive": count_false_positive,
+        }
+
+        agg_data.append(agg_row)
+
+    # Create aggregated DataFrame
+    agg_df = pd.DataFrame(agg_data)
+
+    # Sort by location and date
+    agg_df = agg_df.sort_values(["location.name", "date_pst"]).reset_index(drop=True)
+
+    return agg_df
+
+
 def dump_api_responses(
     base_url: str,
     timeframe: str,
@@ -418,14 +479,24 @@ def main() -> None:
         delay=args.delay,
     )
 
-    # Export detections to CSV
     if detections_combined:
+        # Export detections to CSV
         csv_file = os.path.join(
             detections_dump_dir, f"detections_{dump_name_suffix}.csv"
         )
         df = detections_to_dataframe(detections_combined)
         df.to_csv(csv_file, index=False, encoding="utf-8")
         print(f"Saved CSV with {len(detections_combined)} records -> {csv_file}")
+
+        # Export daily aggregated data
+        daily_agg_file = os.path.join(
+            detections_dump_dir, f"detections_{dump_name_suffix}_daily_aggregated.csv"
+        )
+        agg_df = aggregate_detections_daily(df)
+        agg_df.to_csv(daily_agg_file, index=False, encoding="utf-8")
+        print(
+            f"Saved daily aggregated CSV with {len(agg_df)} records -> {daily_agg_file}"
+        )
     else:
         print("No detections to export to CSV")
 
