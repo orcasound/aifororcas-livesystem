@@ -164,6 +164,80 @@ def create_dataframe(flattened_data: List[Dict[str, Any]]) -> pd.DataFrame:
     return df
 
 
+def aggregate_reports_daily(df: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate detections by feed and date with various counts.
+
+    Args:
+        df: DataFrame with detection data
+
+    Returns:
+        Aggregated DataFrame grouped by feed.name and detection.date_pst
+    """
+    # Group by feed and date
+    grouped = df.groupby(["feed.name", "detection.date_pst"])
+
+    # Create aggregation data
+    agg_data = []
+
+    for (feed_name, date_pst), group in grouped:
+        # Extract date components
+        year_month_pst = date_pst.rsplit("-", 1)[0] if date_pst else ""
+        if year_month_pst:
+            year_pst, month_pst = year_month_pst.rsplit("-", 1)
+        else:
+            year_pst, month_pst = "", ""
+
+        # Basic counts
+        total_count = len(group)
+
+        # Count by source (all records)
+        source_counts = group["detection.source"].value_counts().to_dict()
+        count_source_human = source_counts.get("HUMAN", 0)
+        count_source_other = sum(v for k, v in source_counts.items() if k != "HUMAN")
+
+        # Count by category (only HUMAN source records)
+        human_records = group[group["detection.source"] == "HUMAN"]
+        category_counts = human_records["detection.category"].value_counts().to_dict()
+        count_category_whale = category_counts.get("WHALE", 0)
+        count_category_vessel = category_counts.get("VESSEL", 0)
+        count_category_other = category_counts.get("OTHER", 0)
+
+        # ID lists (semicolon-separated)
+        report_ids = ";".join(group["report.id"].unique().astype(str))
+        detection_ids = ";".join(group["detection.id"].astype(str))
+        detection_times_pst = ";".join(group["detection.time_pst"].astype(str))
+
+        agg_row = {
+            "feed.name": feed_name,
+            "detection.date_pst": date_pst,
+            "detection.year_month_pst": year_month_pst,
+            "detection.year_pst": year_pst,
+            "detection.month_pst": month_pst,
+            "count": total_count,
+            "count_source_human": count_source_human,
+            "count_source_other": count_source_other,
+            "count_category_whale": count_category_whale,
+            "count_category_vessel": count_category_vessel,
+            "count_category_other": count_category_other,
+            "report_ids": report_ids,
+            "detection_ids": detection_ids,
+            "detection_times_pst": detection_times_pst,
+        }
+
+        agg_data.append(agg_row)
+
+    # Create aggregated DataFrame
+    agg_df = pd.DataFrame(agg_data)
+
+    # Sort by date first, then by feed name
+    agg_df = agg_df.sort_values(["detection.date_pst", "feed.name"]).reset_index(
+        drop=True
+    )
+
+    print(f"Created daily aggregated DataFrame with {len(agg_df)} rows")
+    return agg_df
+
+
 def process_file(input_file: Path) -> tuple[List[Dict[str, Any]], pd.DataFrame]:
     """Process a single JSON file and return the results."""
     print(f"\n=== Processing {input_file} ===")
@@ -219,7 +293,7 @@ def main():
 
     files_to_process = [Path(f) for f in args.files]
 
-    # Track all results for aggregation
+    # Track all results to combine
     all_flattened_data = []
     all_dataframes = []
     processed_files = []
@@ -242,44 +316,44 @@ def main():
 
             traceback.print_exc()
 
-    # Aggregate results if we have processed files
-    if len(processed_files) > 1:
-        print(f"\n=== Aggregating results from {len(processed_files)} files ===")
+    # Combine processed files
+    print(f"\n=== Combining results from {len(processed_files)} files ===")
 
-        # Determine output directory at the same level as the parent directory
-        parent_dir = processed_files[0].parent
-        output_dir = parent_dir.parent / f"{parent_dir.name}_parsed"
+    # Determine output directory at the same level as the parent directory
+    parent_dir = processed_files[0].parent
+    output_dir = parent_dir.parent / f"{parent_dir.name}_parsed"
 
-        # Save combined flattened JSON
-        combined_json_path = output_dir / "reports_combined.json"
-        with open(combined_json_path, "w") as f:
-            json.dump(all_flattened_data, f, indent=2)
-        print(f"Saved combined flattened JSON to: {combined_json_path}")
+    # Save combined flattened JSON
+    combined_json_path = output_dir / "reports_combined.json"
+    with open(combined_json_path, "w") as f:
+        json.dump(all_flattened_data, f, indent=2)
+    print(f"Saved combined flattened JSON to: {combined_json_path}")
 
-        # Combine all DataFrames
-        combined_df = pd.concat(all_dataframes, ignore_index=True)
+    # Combine all DataFrames
+    combined_df = pd.concat(all_dataframes, ignore_index=True)
 
-        # Save combined CSV
-        combined_csv_path = output_dir / "reports_combined.csv"
-        combined_df.to_csv(combined_csv_path, index=False)
-        print(f"Saved combined CSV to: {combined_csv_path}")
+    # Save combined CSV
+    combined_csv_path = output_dir / "reports_combined.csv"
+    combined_df.to_csv(combined_csv_path, index=False)
+    print(f"Saved combined CSV to: {combined_csv_path}")
 
-        # Print combined summary stats
-        print("\nCombined Summary:")
-        print(f"  Total files processed: {len(processed_files)}")
-        print(f"  Total detections: {len(all_flattened_data)}")
-        if len(combined_df) > 0:
-            print(
-                f"  Date range: {combined_df['detection.timestamp'].min()} to {combined_df['detection.timestamp'].max()}"
-            )
-            print(f"  Unique feeds: {combined_df['feed.name'].nunique()}")
-            print(f"  Files processed: {[f.name for f in processed_files]}")
+    # Create and save daily aggregated data
+    combined_agg_df = aggregate_reports_daily(combined_df)
+    combined_agg_csv_path = output_dir / "reports_combined_daily_aggregated.csv"
+    combined_agg_df.to_csv(combined_agg_csv_path, index=False)
+    print(f"Saved combined daily aggregated CSV to: {combined_agg_csv_path}")
 
-    elif len(processed_files) == 1:
-        print(f"\nProcessed single file: {processed_files[0].name}")
-    else:
-        print("\nNo files were successfully processed.")
-        sys.exit(1)
+    # Print combined summary stats
+    print("\nCombined Summary:")
+    print(f"  Total files processed: {len(processed_files)}")
+    print(f"  Total detections: {len(all_flattened_data)}")
+    if len(combined_df) > 0:
+        print(
+            f"  Date range: {combined_df['detection.timestamp'].min()} to {combined_df['detection.timestamp'].max()}"
+        )
+        print(f"  Unique feeds: {combined_df['feed.name'].nunique()}")
+        print(f"  Files processed: {[f.name for f in processed_files]}")
+        print(f"  Daily aggregated records: {len(combined_agg_df)}")
 
 
 if __name__ == "__main__":
