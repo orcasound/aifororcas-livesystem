@@ -128,7 +128,9 @@ Create local.settings.json in the current directory (NotificationSystem) using t
         "aifororcasmetadatastore_DOCUMENTDB": "<cosmos db connection string>",
         "AWS_ACCESS_KEY_ID": "<AWS Access Key>",
         "AWS_SECRET_ACCESS_KEY": "<AWS Secret Key>",
-        "SenderEmail": "<email address>"
+        "SenderEmail": "<email address>",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+        "FUNCTIONS_INPROC_NET8_ENABLED": "1"
     }
 }
 ```
