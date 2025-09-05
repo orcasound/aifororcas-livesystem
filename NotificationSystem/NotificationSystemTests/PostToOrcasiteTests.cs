@@ -102,6 +102,42 @@ public class PostToOrcasiteTests
     }
 
     /// <summary>
+    /// Get the path to the Azure Functions CLI (func.exe or func.ps1)
+    /// and the arguments to start it.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="FileNotFoundException"></exception>
+    private static (string executable, string arguments) ResolveFuncCommand()
+    {
+        // Prefer func.ps1 from npm global install if it exists.
+        string funcPs1 = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "npm", "func.ps1");
+        if (!File.Exists(funcPs1))
+        {
+            funcPs1 = "C:\\npm\\prefix\\func.ps1"; // Fallback location used by github.
+        }
+        if (File.Exists(funcPs1))
+        {
+            string pwshPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "PowerShell", "7", "pwsh.exe");
+            string shell = File.Exists(pwshPath) ? "pwsh" : "powershell";
+            return (shell, $"-ExecutionPolicy Bypass -File \"{funcPs1}\" start");
+        }
+
+        // Check if it's available in PATH.
+        string? funcFromPath = Environment.GetEnvironmentVariable("PATH")?
+            .Split(Path.PathSeparator)
+            .Select(dir => Path.Combine(dir, "func.exe"))
+            .FirstOrDefault(File.Exists);
+        if (!string.IsNullOrEmpty(funcFromPath))
+        {
+            return (funcFromPath, "start");
+        }
+
+        throw new FileNotFoundException("Azure Functions CLI not found in PATH or npm global install.");
+    }
+
+    /// <summary>
     /// This test updates a Cosmos DB item to trigger the Azure Function and verifies that it runs successfully.
     /// Since the Azure Function runs out of process, the Orcasite API is not mocked
     /// so this relies on environment variable configuration for the post to succeed.
@@ -133,24 +169,31 @@ public class PostToOrcasiteTests
         // Start Azure function process from the function host directory.
         string workingDirectory = FunctionHostDirectory;
         Console.WriteLine($"Function host working directory: {workingDirectory}");
+        var (executable, arguments) = ResolveFuncCommand();
+        Console.WriteLine($"Function host path: {executable}");
+        Console.WriteLine($"Function host args: {arguments}");
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 WorkingDirectory = workingDirectory,
-                FileName = "func",
-                Arguments = "start",
+                FileName = executable,
+                Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
             }
         };
         int postsAttempted = 0;
         int postsSucceeded = 0;
         process.OutputDataReceived += (sender, args) =>
         {
-            string data = args.Data ?? "";
+            if (args.Data == null) {
+                return;
+            }
+            string data = args.Data;
+            Console.WriteLine($"[stdout] {data}");
             if (data.Contains("Executing 'PostToOrcasite'"))
             {
                 postsAttempted++;
@@ -161,12 +204,20 @@ public class PostToOrcasiteTests
                 postsSucceeded++;
             }
         };
+        process.ErrorDataReceived += (sender, args) =>
+        {
+            if (args.Data != null)
+            {
+                Console.WriteLine($"[stderr] {args.Data}");
+            }
+        };
         bool processStarted = false;
         try
         {
             processStarted = process.Start();
             Assert.True(processStarted);
             process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
 
             var item = JsonConvert.DeserializeObject<dynamic>(_sampleOrcaHelloDetection);
             if (item == null)
@@ -186,25 +237,40 @@ public class PostToOrcasiteTests
             Console.WriteLine($"Cosmos DB Emulator returned status: {httpStatusCode}");
             Assert.True(httpStatusCode >= 200 && httpStatusCode < 300, $"Cosmos DB update failed with status {httpStatusCode}");
 
-            // Wait up to 20 seconds for the Azure function to execute.
-            const int maxSeconds = 20;
-            for (int seconds = 0; seconds < maxSeconds && postsSucceeded == oldPostsSucceeded; seconds++)
+            // Wait up to 30 seconds for the Azure function to execute.
+            const int maxSeconds = 30;
+            int seconds;
+            for (seconds = 0; seconds < maxSeconds && postsSucceeded == oldPostsSucceeded; seconds++)
             {
                 Console.Write(".");
                 await Task.Delay(1000); // Wait one second before checking again.
             }
+            Console.WriteLine($"Waited for {seconds} seconds");
 
             // Verify it ran.
-            Assert.True(postsAttempted > oldPostsAttempted, $"Incorrect posts attempted: {postsAttempted}");
-            Assert.True(postsSucceeded > oldPostsSucceeded, $"Incorrect posts succeeded: {postsSucceeded}");
+            Assert.True(postsAttempted > oldPostsAttempted, $"Incorrect posts attempted: {postsAttempted} after {seconds} seconds");
+            Assert.True(postsSucceeded > oldPostsSucceeded, $"Incorrect posts succeeded: {postsSucceeded} after {seconds} seconds");
         }
         finally
         {
             if (processStarted && !process.HasExited)
             {
+                foreach (var proc in Process.GetProcessesByName("func"))
+                {
+                    try
+                    {
+                        proc.Kill(true);
+                        proc.WaitForExit(5000);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to kill func.exe: {ex.Message}");
+                    }
+                }
+
                 // Clean up: kill the function host process.
                 process.Kill(true); // true = kill entire process tree
-                process.WaitForExit();
+                process.WaitForExit(5000);
             }
         }
     }

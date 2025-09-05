@@ -81,7 +81,9 @@ jobs:
     - name: Install Azure Functions Core Tools
       run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
     - name: Check func CLI
-      run: func --version
+      run: |
+        Get-Command func
+        func --version
     - name: Test
       working-directory: NotificationSystem/NotificationSystemTests
       run: dotnet test
