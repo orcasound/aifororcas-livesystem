@@ -24,6 +24,7 @@ namespace NotificationSystem.Models
 
         /// <summary>
         /// URI of Orcasite API to post a machine detection.
+        /// See https://live.orcasound.net/api/json/swaggerui for details.
         /// </summary>
         public string OrcasitePostDetectionUri
         {
@@ -35,6 +36,7 @@ namespace NotificationSystem.Models
 
         /// <summary>
         /// URI of Orcasite API to query feeds metadata.
+        /// See https://live.orcasound.net/api/json/swaggerui for details.
         /// </summary>
         public string OrcasiteGetFeedsUri
         {
