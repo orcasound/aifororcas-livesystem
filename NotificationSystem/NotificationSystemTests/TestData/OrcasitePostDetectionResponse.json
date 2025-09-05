@@ -1,0 +1,38 @@
+{
+  "data": {
+    "attributes": {
+      "timestamp": "2025-08-03T17:24:48.499077Z",
+      "visible": true,
+      "description": "TEST",
+      "source": "machine",
+      "category": "whale",
+      "playlist_timestamp": 1754204417,
+      "feed_id": "feed_02u8r4EOo8cuSHdC7xDqMI",
+      "candidate_id": "cand_030whyG4Jx2KmrRCTzgnHh",
+      "listener_count": 0,
+      "player_offset": "37471.499",
+      "source_ip": "73.83.230.165"
+    },
+    "id": "det_030x4xmSsR53v4eubAO9w5",
+    "links": {},
+    "meta": {},
+    "type": "detection",
+    "relationships": {
+      "feed": {
+        "links": {},
+        "meta": {}
+      },
+      "candidate": {
+        "links": {},
+        "meta": {}
+      }
+    }
+  },
+  "links": {
+    "self": "https://beta.orcasound.net/api/json/detections?fields%5Bdetection%5D=id%2Csource_ip%2Cplaylist_timestamp%2Cplayer_offset%2Clistener_count%2Ctimestamp%2Cdescription%2Cvisible%2Csource%2Ccategory%2Ccandidate_id%2Cfeed_id"
+  },
+  "meta": {},
+  "jsonapi": {
+    "version": "1.0"
+  }
+}
