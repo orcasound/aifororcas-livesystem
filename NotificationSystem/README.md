@@ -8,7 +8,9 @@ The notification system is a set of azure functions responsible for:
 
 ### Update Orcasite
 
-One Azure Function is used to notify Orcasite of any machine detections.
+![post to Orcasite architecture](img/post-to-orcasite.png)
+
+One Azure Function is used to notify the [Orcasite JSON API](https://live.orcasound.net/api/json/swaggerui) of any machine detections.
 
 - A change in the Cosmos DB metadata store triggers the PostToOrcasite function
 - The Orcasite feeds API is used to map an OrcaHello location id to an Orcasite feed id
