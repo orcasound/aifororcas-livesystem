@@ -1,7 +1,5 @@
-using Azure;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
@@ -13,33 +11,48 @@ using System.Net;
 
 public class PostToOrcasiteTests
 {
-    private readonly string _sampleOrcaHelloDetection = """
+    private string _solutionDirectory;
+    private string _sampleOrcaHelloDetection;
+    private string _sampleOrcasiteFeeds;
+    private string _sampleOrcasitePostDetectionResponse;
+
+    public PostToOrcasiteTests()
+    {
+        _solutionDirectory = FindSolutionDirectory() ?? throw new Exception("Could not find solution directory");
+        _sampleOrcaHelloDetection = GetStringFromFile("OrcaHelloDetection.json");
+        _sampleOrcasiteFeeds = GetStringFromFile("OrcasiteFeeds.json");
+        _sampleOrcasitePostDetectionResponse = GetStringFromFile("OrcasitePostDetectionResponse.json");
+    }
+
+    /// <summary>
+    /// Find the solution directory.
+    /// </summary>
+    /// <returns>Directory, or null if not found</returns>
+    string? FindSolutionDirectory()
+    {
+        string? currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        while (currentDirectory != null)
         {
-            "id": "965dd6e0-eb52-4e34-a717-67fa44e32ed4",
-            "modelId": "FastAI",
-            "audioUri": "https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_sunset_bay_2023_10_13_15_43_10_PDT.wav",
-            "imageUri": "https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_sunset_bay_2023_10_13_15_43_10_PDT.png",
-            "reviewed": true,
-            "timestamp": "2025-08-31T15:13:53.250260Z",
-            "whaleFoundConfidence": 65.90525077448952,
-            "location": {
-                "id": "rpi_bush_point",
-                "name": "Bush Point",
-                "longitude": -122.3339,
-                "latitude": 47.86497
-            },
-            "source_guid": "rpi_bush_point",
-            "predictions": [
-                { "id": 0, "startTime": 7.636363636363636, "duration": 1.0909090909090908, "confidence": 0.8597837686538696 },
-                { "id": 1, "startTime": 8.727272727272727, "duration": 1.0909090909090908, "confidence": 0.8878474533557892 }
-            ],
-            "SRKWFound": "no",
-            "comments": "Test signal",
-            "dateModerated": "2023-10-14T00:20:33Z",
-            "moderator": "dbaing17@gmail.com",
-            "tags": ""
+            string path = Path.Combine(currentDirectory, "NotificationSystem.sln");
+            if (File.Exists(path))
+            {
+                return currentDirectory;
+            }
+
+            currentDirectory = Directory.GetParent(currentDirectory)?.FullName;
         }
-        """;
+        return null;
+    }
+
+    /// <summary>
+    /// Get the contents of a TestData file as a string.
+    /// </summary>
+    /// <param name="filename">Name of file to load</param>
+    /// <returns>String contents</returns>
+    private string GetStringFromFile(string filename)
+    {
+        return File.ReadAllText(Path.Combine(_solutionDirectory, "NotificationSystemTests", "TestData", filename));
+    }
 
     /// <summary>
     /// This test mocks the Orcasite API and verifies that a detection can be posted successfully.
@@ -54,387 +67,38 @@ public class PostToOrcasiteTests
 
         // Mock the GET request to fetch feeds.
         mockHttp.When(HttpMethod.Get, "https://beta.orcasound.net/api/json/feeds?fields%5Bfeed%5D=id%2Cname%2Cnode_name%2Cslug%2Clocation_point%2Cintro_html%2Cimage_url%2Cvisible%2Cbucket%2Cbucket_region%2Ccloudfront_url%2Cdataplicity_id%2Corcahello_id")
- .Respond("application/json", """
-                                {
-                  "data": [
-                    {
-                      "attributes": {
-                        "name": "Orcasound Lab",
-                        "visible": true,
-                        "node_name": "rpi_orcasound_lab",
-                        "slug": "orcasound-lab",
-                        "bucket": "audio-orcasound-net",
-                        "bucket_region": "us-west-2",
-                        "location_point": {
-                          "coordinates": [
-                            -123.1735774,
-                            48.5583362
-                          ],
-                          "crs": {
-                            "properties": {
-                              "name": "EPSG:4326"
-                            },
-                            "type": "name"
-                          },
-                          "type": "Point"
-                        },
-                        "dataplicity_id": "84bb6fee-b38c-488e-adac-1a36bbb9a4da",
-                        "orcahello_id": null,
-                        "intro_html": "<p>Centered with in the summertime habitat of the endangered Southern Resident killer whales, Orcasound Lab is a good place to listen for orcas, as well as ships passing through Haro Strait and boats traveling along the west side of San Juan Island. In the late fall you can hear humpbacks, and in the summer male harbor seals vocalize nearby.</p>\n\n<p>Hydrophones have been deployed here since 2002, usually just outside the kelp, less than 30m offshore. Orcasound Lab is hosted by Val and Leslie Veirs and funded by <a href=\"http://www.beamreach.blue/\" target=\"_blank\">Beam Reach</a>.</p>\n\n<p><strong>Status update 3/29/2025: </strong>60Hz hum suggests a cable failure. A-team will investigate this week and aim to repair by 4/4/25....</p>\n<p><strong>Status update 12/23/2024:</strong> A new binaural stand with Aquarian hydrophones on 60m cables built by Val was deployed between winter rain storms by David Howitt with shoreside assistance from ?? and Tom Hogan. Can you hear whether sounds are to your left (south) or right (north)?</p>\n<p><strong>Status update 12/05/2024:</strong> Thanks to diver David Howitt, we know the cable was severed. The stream is now offline as we await new Aquarian hydrophones and a weather window to deploy them.</p>\n<p><strong>Status update 11/20/2024:</strong> The windstorm has damaged the HTI hydrophone. Please stand by while we work on a repair or replacement plan...</p>\n<p><strong>Status update:12/26/2023:</strong> The current hydrophone is an HTI at a depth of about 5 meters with intertidal tie-downs. It starting buzzing sometime recently. We will bring it back on line soon. </p>\n\n<p><a href=\"http://www.orcasound.net/portfolio/orcasound-lab-hydrophone/\" target=\"_blank\">Learn more about the Orcasound Lab node</a>.</p>",
-                        "image_url": "https://s3-us-west-2.amazonaws.com/orcasite/rpi_orcasound_lab/thumbnail.png",
-                        "cloudfront_url": null,
-                        "maintainer_emails": null,
-                        "lat_lng": {
-                          "lng": -123.1735774,
-                          "lat": 48.5583362
-                        }
-                      },
-                      "id": "feed_02u8r4ELz2xkCjPTc4yLWE",
-                      "links": {},
-                      "meta": {},
-                      "type": "feed",
-                      "relationships": {
-                        "audio_images": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_streams": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_segments": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "bouts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "listener_counts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "latest_listener_count": {
-                          "links": {},
-                          "meta": {}
-                        }
-                      }
-                    },
-                    {
-                      "attributes": {
-                        "name": "Bush Point",
-                        "visible": true,
-                        "node_name": "rpi_bush_point",
-                        "slug": "bush-point",
-                        "bucket": "audio-orcasound-net",
-                        "bucket_region": "us-west-2",
-                        "location_point": {
-                          "coordinates": [
-                            -122.6040035,
-                            48.0336664
-                          ],
-                          "crs": {
-                            "properties": {
-                              "name": "EPSG:4326"
-                            },
-                            "type": "name"
-                          },
-                          "type": "Point"
-                        },
-                        "dataplicity_id": "408e935e-746b-47d6-b6ab-b3bd88ce0449",
-                        "orcahello_id": null,
-                        "intro_html": "<p>This is a great place to listen for the Southern Resident killer whales who pass through Admiralty Inlet about once a month in search of salmon. Other common sounds here come from ships heading to and from the Ports of Seattle and Tacoma, and recreational vessels using the adjacent boat ramp.</p>\n\n<p>A hydrophone system designed by Lon Brocklehurst and Ken Balcomb was deployed in 2018, with 3 elements deployed 200m offshore at a depth of 16.5m by diver Florian Grainer. After only a month, the long cable failed. Since then, 1-2 hydrophones have been deployed at the base of the deepest pilings. Their depth is only ~1m, so they dry at some negative tides and you may then hear seabird sounds!</p>\n\n<p>The Bush Point node is hosted by <a href=\"https://orcanetwork.org/\">Orca Network</a> with logistical support from Bush Point Wharf and financial support from <a href=\"https://www.whidbeytel.com/giving-back/\">WhidbeyTel</a> (Internet service and monetary donations).</p>\n\n<p><a href=\"http://www.orcasound.net/portfolio/bush-point-hydrophone/\">Learn more about the Bush Point node</a></p>\n\n<p><strong>Status update 5/28/2025:</strong> A new hydrophone has been successfully deployed by Trevor Snow.</p>\n\n<p><strong>Status update 4/29/2025:</strong> Hydrophone is under repair and not streaming. Trevor and field assistants are working on a replacement for the old hydrophone that was causing strong 60Hz hum system noise.</p>\n\n<p><strong>Status update 11/16/2023:</strong> Thanks to Trevor Snow of Orca Network supported by WhidbeyTel, the Bush Point hydrophone system has been overhauled with new equipment funded by WDFW (see below). The wharf was badly damaged over the winter of 2022-23 and repairs will likely enable a deeper deployment in 2024.</p>\n\n<p>A 2023 upgrade to this node was funded by Washington Department of Fish and Wildlife through The Department of Ecology’s Equipment Grant program to improve location detection of Southern Resident Killer Whales and other marine mammals during oil spills (SPPREG-2123-WaSDFW-00025).</p>",
-                        "image_url": "https://s3-us-west-2.amazonaws.com/orcasite/rpi_bush_point/thumbnail.png",
-                        "cloudfront_url": null,
-                        "maintainer_emails": null,
-                        "lat_lng": {
-                          "lng": -122.6040035,
-                          "lat": 48.0336664
-                        }
-                      },
-                      "id": "feed_02u8r4EOo8cuSHdC7xDqMI",
-                      "links": {},
-                      "meta": {},
-                      "type": "feed",
-                      "relationships": {
-                        "audio_images": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_streams": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_segments": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "bouts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "listener_counts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "latest_listener_count": {
-                          "links": {},
-                          "meta": {}
-                        }
-                      }
-                    },
-                    {
-                      "attributes": {
-                        "name": "North San Juan Channel",
-                        "visible": true,
-                        "node_name": "rpi_north_sjc",
-                        "slug": "north-sjc",
-                        "bucket": "audio-orcasound-net",
-                        "bucket_region": "us-west-2",
-                        "location_point": {
-                          "coordinates": [
-                            -123.058779,
-                            48.591294
-                          ],
-                          "crs": {
-                            "properties": {
-                              "name": "EPSG:4326"
-                            },
-                            "type": "name"
-                          },
-                          "type": "Point"
-                        },
-                        "dataplicity_id": "e5a0cb44-f37f-48e8-9eed-15230d7c4b5a",
-                        "orcahello_id": null,
-                        "intro_html": "<p>\nThis an ideal location for hearing sounds made by orcas, humpbacks, and other marine life -- including fish. Bigg's killer whales frequent this location year round, and Southern Resident killer whales have been regularly transiting San Juan Channel in recent years from October-March. You may also hear the inter-island ferry and other sources of vessel noise.\n</p>\n\n<p>\nA single CRT SQ26-08 hydrophone was first deployed in spring 2023 at a depth of 5-10 meters. The hydrophone is hosted and maintained by the <a href=\"https://www.orcabehaviorinstitute.org\" target=\"_blank\">Orca Behavior Institute</a>. The closest public access for viewing the area is Reuben Tarte County Park.\n</p>\n\n<p><strong>Status updates:</strong> 7/28/25: hydrophone or cable failure. Repair being planned for September...</p>\n\n<p>6/10/24: new 60-m CRT-40 hydrophone deployed, deeper and with electronics further from the inter-tidal zone! 12/6/23: system failure due to less-than-waterproof box, so A-team is planning a spring redeployment. 10/25/2023: The A-team has replaced the hydrophone that failed in early October. The first one, installed by SCUBA diver David Howitt, was a single CRT SQ26-08 that lasted about 6 months (April-October).</p>\n\n<p>This node was funded in 2023 by Washington Department of Fish and Wildlife through The Department of Ecology’s Equipment Grant program to improve location detection of Southern Resident Killer Whales and other marine mammals during oil spills (SPPREG-2123-WaSDFW-00025).</p>",
-                        "image_url": "https://s3-us-west-2.amazonaws.com/orcasite/rpi_north_sjc/thumbnail.png",
-                        "cloudfront_url": null,
-                        "maintainer_emails": null,
-                        "lat_lng": {
-                          "lng": -123.058779,
-                          "lat": 48.591294
-                        }
-                      },
-                      "id": "feed_02u8r4EQ4icI5bWdEhXDOT",
-                      "links": {},
-                      "meta": {},
-                      "type": "feed",
-                      "relationships": {
-                        "audio_images": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_streams": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_segments": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "bouts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "listener_counts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "latest_listener_count": {
-                          "links": {},
-                          "meta": {}
-                        }
-                      }
-                    },
-                    {
-                      "attributes": {
-                        "name": "Port Townsend",
-                        "visible": true,
-                        "node_name": "rpi_port_townsend",
-                        "slug": "port-townsend",
-                        "bucket": "audio-orcasound-net",
-                        "bucket_region": "us-west-2",
-                        "location_point": {
-                          "coordinates": [
-                            -122.760614,
-                            48.135743
-                          ],
-                          "crs": {
-                            "properties": {
-                              "name": "EPSG:4326"
-                            },
-                            "type": "name"
-                          },
-                          "type": "Point"
-                        },
-                        "dataplicity_id": "2881d3c2-4c57-41eb-9cde-5f10b4e8933a",
-                        "orcahello_id": null,
-                        "intro_html": "<p>This is a great location to hear the Southern Resident killer whales as they pass through Admiralty Inlet in search of salmon. This can happen any time of year, but is more common in the fall when coho and chum salmon return to Puget Sound rivers.</p>\n\n<p>You will also hear ships bound for the Ports of Seattle and Tacoma, and the ferry that runs between Port Townsend and Whidbey Island. Occasionally we've heard Bigg's orcas and male harbor seals vocalize in the summer months. Can you be the first to hear a gray or humpback whale here?</p>\n\n<p>Two Labcore-40 hydrophones were first deployed at a depth of about 7 meters in 2006 underneath the pier that supports aquariums and a teaching classroom.  Especially when the tide is low, you can hear the aquarium overflow splashing down on the sea surface. The node is hosted by the <a href=\"http://www.ptmsc.org/\" target=\"_blank\">Port Townsend Marine Science Center</a>.</p>\n\n<p><a href=\"https://www.orcasound.net/portfolio/port-townsend-hydrophone/\">Learn more about the Port Townsend node</a></p>\n\n<p><strong>Status update 5/28/25:</strong> Only one hydrophone is still working, but Eric McRae is planning a new deployment of CRT and/or Aquarian elements with support from WDFW.</p>\n\n<p>A 2023 upgrade to this node was funded by Washington Department of Fish and Wildlife through The Department of Ecology’s Equipment Grant program to improve location detection of Southern Resident Killer Whales and other marine mammals during oil spills (SPPREG-2123-WaSDFW-00025).</p>",
-                        "image_url": "https://s3-us-west-2.amazonaws.com/orcasite/rpi_port_townsend/thumbnail.png",
-                        "cloudfront_url": null,
-                        "maintainer_emails": null,
-                        "lat_lng": {
-                          "lng": -122.760614,
-                          "lat": 48.135743
-                        }
-                      },
-                      "id": "feed_02u8r4EPCPy95hn4R4tQfN",
-                      "links": {},
-                      "meta": {},
-                      "type": "feed",
-                      "relationships": {
-                        "audio_images": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_streams": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_segments": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "bouts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "listener_counts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "latest_listener_count": {
-                          "links": {},
-                          "meta": {}
-                        }
-                      }
-                    },
-                    {
-                      "attributes": {
-                        "name": "Beach Camp at Sunset Bay",
-                        "visible": true,
-                        "node_name": "rpi_sunset_bay",
-                        "slug": "sunset-bay",
-                        "bucket": "audio-orcasound-net",
-                        "bucket_region": "us-west-2",
-                        "location_point": {
-                          "coordinates": [
-                            -122.33393605795372,
-                            47.86497296593844
-                          ],
-                          "crs": {
-                            "properties": {
-                              "name": "EPSG:4326"
-                            },
-                            "type": "name"
-                          },
-                          "type": "Point"
-                        },
-                        "dataplicity_id": "de353bfe-b252-4259-a944-285942290953",
-                        "orcahello_id": null,
-                        "intro_html": "<p>\nLocated halfway between Edmonds and Mukilteo, this is a good place to listen to central Puget Sound. You may hear sounds from marine life like killer whales, seals, and possibly humpback or gray whales. You will also hear human-made noise from ferries, vessels passing through Possession Sound, and even trains! (Tracks run along the top of the beach here, only 100m from the hydrophone).\n</p>\n\n<p>\nA single hydrophone was first deployed in fall 2021 and redeployed in winter 2022 and spring 2023 by securing it to the base of an intertidal ladder on the southwest corner of the wharf at a depth of about -0.5 meters (relative to mean lowest low tidal height). The Sunset Bay location is hosted by <a href=\"https://www.sunsetbaywharf.com\" target=\"_blank\">Beach Camp at Sunset Bay</a> and maintained by <a href=\"https://www.orcaconservancy.org\" target=\"_blank\">Orca Conservancy</a>.\n</p>\n\n<p><strong>Status updates:</strong></p>\n<p><strong>11/21/24 17:30</strong>: Power is restored, along with live-streaming!</p>\n<p><strong>11/20/24</strong>: Windstorm caused power outage, so streaming system is down temporarily. Stand by...</p>\n<p><strong>10/20/23</strong>: The hydrophone streaming computer has been replaced by Tamara, Joel, and Scott. </p>\n<p><strong>6/5/23</strong>: Joel, Dave, and Scott re deployed a single WDFW-funded CRT SQ26-08 hydrophone to the base of a new ladder, this time armoring it with Paul Spong's trick -- a garden hose. Thanks to Jeffrey and the Beach Camp staff for repairing the severe damage from the windstorm last fall.</p>\n\n<p><a href=\"https://www.orcasound.net/portfolio/sunset-bay-hydrophone/\">Learn more about the Sunset Bay node</a></p>\n\n<p>This node was funded in 2023 by Washington Department of Fish and Wildlife through The Department of Ecology’s Equipment Grant program to improve location detection of Southern Resident Killer Whales and other marine mammals during oil spills (SPPREG-2123-WaSDFW-00025).</p>",
-                        "image_url": "https://s3-us-west-2.amazonaws.com/orcasite/rpi_sunset_bay/thumbnail.png",
-                        "cloudfront_url": null,
-                        "maintainer_emails": null,
-                        "lat_lng": {
-                          "lng": -122.33393605795372,
-                          "lat": 47.86497296593844
-                        }
-                      },
-                      "id": "feed_02u8r4EPgmlYQmh6gzlGIL",
-                      "links": {},
-                      "meta": {},
-                      "type": "feed",
-                      "relationships": {
-                        "audio_images": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_streams": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "feed_segments": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "bouts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "listener_counts": {
-                          "links": {},
-                          "meta": {}
-                        },
-                        "latest_listener_count": {
-                          "links": {},
-                          "meta": {}
-                        }
-                      }
-                    }
-                  ],
-                  "links": {
-                    "self": "https://beta.orcasound.net/api/json/feeds"
-                  },
-                  "meta": {},
-                  "jsonapi": {
-                    "version": "1.0"
-                  }
-                }
-                """);
+                .Respond("application/json", _sampleOrcasiteFeeds);
 
         // Mock the POST request to create a detection.
         mockHttp.When(HttpMethod.Post, "https://beta.orcasound.net/api/json/detections?fields%5Bdetection%5D=id%2Csource_ip%2Cplaylist_timestamp%2Cplayer_offset%2Clistener_count%2Ctimestamp%2Cdescription%2Cvisible%2Csource%2Ccategory%2Ccandidate_id%2Cfeed_id")
-                 //.WithContent("{\"key\":\"value\"}") // Optional: match request body
-                 .Respond(HttpStatusCode.Created, "application/json", """
-                 {
-                   "data": {
-                     "attributes": {
-                       "timestamp": "2025-08-03T17:24:48.499077Z",
-                       "visible": true,
-                       "description": "TEST",
-                       "source": "machine",
-                       "category": "whale",
-                       "playlist_timestamp": 1754204417,
-                       "feed_id": "feed_02u8r4EOo8cuSHdC7xDqMI",
-                       "candidate_id": "cand_030whyG4Jx2KmrRCTzgnHh",
-                       "listener_count": 0,
-                       "player_offset": "37471.499",
-                       "source_ip": "73.83.230.165"
-                     },
-                     "id": "det_030x4xmSsR53v4eubAO9w5",
-                     "links": {},
-                     "meta": {},
-                     "type": "detection",
-                     "relationships": {
-                       "feed": {
-                         "links": {},
-                         "meta": {}
-                       },
-                       "candidate": {
-                         "links": {},
-                         "meta": {}
-                       }
-                     }
-                   },
-                   "links": {
-                     "self": "https://beta.orcasound.net/api/json/detections?fields%5Bdetection%5D=id%2Csource_ip%2Cplaylist_timestamp%2Cplayer_offset%2Clistener_count%2Ctimestamp%2Cdescription%2Cvisible%2Csource%2Ccategory%2Ccandidate_id%2Cfeed_id"
-                   },
-                   "meta": {},
-                   "jsonapi": {
-                     "version": "1.0"
-                   }
-                 }
-                 """);
+              //.WithContent("{\"key\":\"value\"}") // Optional: match request body
+                .Respond(HttpStatusCode.Created, "application/json", _sampleOrcasitePostDetectionResponse);
 
         var httpClient = mockHttp.ToHttpClient();
         var orcasiteHelper = new OrcasiteHelper(mockLogger.Object, httpClient);
 
         var document = JsonConvert.DeserializeObject<Microsoft.Azure.Documents.Document>(_sampleOrcaHelloDetection);
+        if (document == null)
+        {
+            return;
+        }
         var documents = new List<Document> { document };
 
         // Process it like the Azure function would.
         await PostToOrcasite.ProcessDocumentsAsync(documents, orcasiteHelper, mockLogger.Object);
+    }
+
+    /// <summary>
+    /// Directory in which the Azure Function host can be started.
+    /// </summary>
+    string FunctionHostDirectory
+    {
+        get
+        {
+            string? solutionDirectory = FindSolutionDirectory();
+            string functionHostDirectory = Path.Combine(solutionDirectory ?? "", "NotificationSystem");
+            return functionHostDirectory;
+        }
     }
 
     /// <summary>
@@ -444,7 +108,7 @@ public class PostToOrcasiteTests
     /// Such configuration should use beta.orcasound.net (the default).
     /// </summary>
     /// <returns></returns>
-    [Fact]
+    [Fact(Timeout = 60000)] // 60 seconds max
     public async Task UpdateCosmosDb()
     {
         // Use the Azure Cosmos DB Emulator connection string for local testing.
@@ -465,12 +129,14 @@ public class PostToOrcasiteTests
             id: "leases",
             partitionKeyPath: "/id");
 
-        // Start Azure function process.
+        // Start Azure function process from the function host directory.
+        string workingDirectory = FunctionHostDirectory;
+        Console.WriteLine($"Function host working directory: {workingDirectory}");
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                WorkingDirectory = @"..\..\..\..\NotificationSystem",
+                WorkingDirectory = workingDirectory,
                 FileName = "func",
                 Arguments = "start",
                 RedirectStandardOutput = true,
@@ -494,28 +160,50 @@ public class PostToOrcasiteTests
                 postsSucceeded++;
             }
         };
-        bool ok = process.Start();
-        Assert.True(ok);
-        process.BeginOutputReadLine();
+        try
+        {
+            bool ok = process.Start();
+            Assert.True(ok);
+            process.BeginOutputReadLine();
 
-        var item = JsonConvert.DeserializeObject<dynamic>(_sampleOrcaHelloDetection);
+            var item = JsonConvert.DeserializeObject<dynamic>(_sampleOrcaHelloDetection);
+            if (item == null)
+            {
+                return;
+            }
 
-        // Randomize a value to ensure it will be updated.
-        var random = new Random();
-        item.whaleFoundConfidence = random.NextDouble() * 30 + 50;
+            // Randomize a value to ensure it will be updated.
+            var random = new Random();
+            item.whaleFoundConfidence = random.NextDouble() * 30 + 50;
 
-        int oldPostsAttempted = postsAttempted;
-        int oldPostsSucceeded = postsSucceeded;
+            int oldPostsAttempted = postsAttempted;
+            int oldPostsSucceeded = postsSucceeded;
 
-        dynamic? result = await metadataContainer.UpsertItemAsync(item);
-        int httpStatusCode = (int)result.StatusCode;
-        Assert.True(httpStatusCode >= 200 && httpStatusCode < 300);
+            dynamic? result = await metadataContainer.UpsertItemAsync(item);
+            int httpStatusCode = (int)result.StatusCode;
+            Console.WriteLine($"Cosmos DB Emulator returned status: {httpStatusCode}");
+            Assert.True(httpStatusCode >= 200 && httpStatusCode < 300, $"Cosmos DB update failed with status {httpStatusCode}");
 
-        // Wait 10 seconds for the Azure function to execute.
-        await Task.Delay(10000);
+            // Wait up to 20 seconds for the Azure function to execute.
+            const int maxSeconds = 20;
+            for (int seconds = 0; seconds < maxSeconds && postsSucceeded == oldPostsSucceeded; seconds++)
+            {
+                Console.Write(".");
+                await Task.Delay(1000); // Wait one second before checking again.
+            }
 
-        // Verify it ran.
-        Assert.True(postsAttempted > oldPostsAttempted);
-        Assert.True(postsSucceeded > oldPostsSucceeded);
+            // Verify it ran.
+            Assert.True(postsAttempted > oldPostsAttempted, $"Incorrect posts attempted: {postsAttempted}");
+            Assert.True(postsSucceeded > oldPostsSucceeded, $"Incorrect posts succeeded: {postsSucceeded}");
+        }
+        finally
+        {
+            // Clean up: kill the function host process.
+            if (!process.HasExited)
+            {
+                process.Kill(true); // true = kill entire process tree
+                process.WaitForExit();
+            }
+        }
     }
 }
