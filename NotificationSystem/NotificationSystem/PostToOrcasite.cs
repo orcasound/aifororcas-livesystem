@@ -15,6 +15,33 @@ namespace NotificationSystem
     {
         static int SendRate = 14; // Max 14 posts per second.
 
+        public static async Task ProcessDocumentsAsync(
+            IReadOnlyList<Document> input,
+            OrcasiteHelper orcasiteHelper,
+            ILogger log)
+        {
+            if (input == null || input.Count == 0)
+            {
+                log.LogInformation("No updated records");
+                return;
+            }
+
+            await orcasiteHelper.InitializeAsync();
+
+            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
+            int remaining = input.Count;
+
+            foreach (Document document in input)
+            {
+                await orcasiteHelper.PostDetectionAsync(document.ToString());
+                remaining--;
+                if (remaining > 0)
+                {
+                    await timeConstraint;
+                }
+            }
+        }
+
         [FunctionName("PostToOrcasite")]
         public static async Task Run(
             [CosmosDBTrigger(
@@ -26,29 +53,8 @@ namespace NotificationSystem
                 CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> input,
             ILogger log)
         {
-            if (input == null || input.Count == 0)
-            {
-                log.LogInformation("No updated records");
-                return;
-            }
-
             var orcasiteHelper = new OrcasiteHelper(log);
-            await orcasiteHelper.InitializeAsync();
-
-            var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
-            int remaining = input.Count;
-            foreach (Document document in input)
-            {
-                // Post the detection to Orcasite.
-                await orcasiteHelper.PostDetectionAsync(document.ToString());
-
-                // If there are more to process, wait to respect rate limit.
-                remaining--;
-                if (remaining > 0)
-                {
-                    await timeConstraint;
-                }
-            }
+            await ProcessDocumentsAsync(input, orcasiteHelper, log);
         }
     }
 }

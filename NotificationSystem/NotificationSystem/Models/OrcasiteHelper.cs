@@ -10,17 +10,21 @@ namespace NotificationSystem.Models
 {
     public class OrcasiteHelper
     {
-        private static HttpClient _httpClient = new HttpClient();
+        private static HttpClient _httpClient;
         private string _orcasiteHostname;
         private string? _orcasiteApiKey;
         private JsonElement? _orcasiteFeedsArray;
         private readonly ILogger _logger;
 
-        public OrcasiteHelper(ILogger log)
+        public OrcasiteHelper(ILogger log, HttpClient httpClient = null)
         {
             _logger = log;
+            _httpClient = httpClient ?? new HttpClient();
         }
 
+        /// <summary>
+        /// URI of Orcasite API to post a machine detection.
+        /// </summary>
         public string OrcasitePostDetectionUri
         {
             get
@@ -29,6 +33,9 @@ namespace NotificationSystem.Models
             }
         }
 
+        /// <summary>
+        /// URI of Orcasite API to query feeds metadata.
+        /// </summary>
         public string OrcasiteGetFeedsUri
         {
             get
@@ -37,6 +44,11 @@ namespace NotificationSystem.Models
             }
         }
 
+        /// <summary>
+        /// Get an array of data from a JSON API endpoint.
+        /// </summary>
+        /// <param name="uri">URI to fetch</param>
+        /// <returns>JsonElement representing the JSON array</returns>
         private async Task<JsonElement?> GetDataArrayAsync(string uri)
         {
             try
@@ -67,6 +79,16 @@ namespace NotificationSystem.Models
             }
         }
 
+        /// <summary>
+        /// Initialize the OrcasiteHelper object.  Currently this entails
+        /// fetching the feeds metadata from Orcasite so that we can convert
+        /// a node name to a feed ID.
+        ///
+        /// TODO: In the future, we could store this info in OrcaHello, or
+        /// make the Orcasite API accept OrcaHello feed IDs, and avoid this
+        /// extra query.
+        /// </summary>
+        /// <returns></returns>
         public async Task InitializeAsync()
         {
             _orcasiteApiKey = Environment.GetEnvironmentVariable("ORCASITE_APIKEY");
@@ -75,10 +97,15 @@ namespace NotificationSystem.Models
             if (_orcasiteFeedsArray == null)
             {
                 _logger.LogError("Failed to retrieve orcasite feeds.");
-                return;
             }
         }
 
+        /// <summary>
+        /// Convert a node name to a feed ID.
+        /// </summary>
+        /// <param name="nodeNameToFind">Node name to find</param>
+        /// <param name="feedsArray">Feeds array to look in</param>
+        /// <returns></returns>
         private string? GetFeedId(string nodeNameToFind, JsonElement feedsArray)
         {
             foreach (JsonElement feed in feedsArray.EnumerateArray())
@@ -125,6 +152,10 @@ namespace NotificationSystem.Models
             return null;
         }
 
+        /// <summary>
+        /// Given an OrcaHello detection (in JSON), report it to Orcasite.
+        /// </summary>
+        /// <param name="json">OrcaHello detection</param>
         public async Task PostDetectionAsync(string json)
         {
             JsonElement orcaHelloDetection = JsonDocument.Parse(json).RootElement;
