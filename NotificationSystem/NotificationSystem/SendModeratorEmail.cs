@@ -17,7 +17,7 @@ namespace NotificationSystem
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class SendModeratorEmail
     {
-        static int SendRate = 14;
+        const int SendRate = 14;
 
         [FunctionName("SendModeratorEmail")]
         public static async Task Run(

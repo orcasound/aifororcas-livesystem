@@ -88,7 +88,7 @@ namespace NotificationSystem.Models
         /// make the Orcasite API accept OrcaHello feed IDs, and avoid this
         /// extra query.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task InitializeAsync()
         {
             _orcasiteApiKey = Environment.GetEnvironmentVariable("ORCASITE_APIKEY");
@@ -105,7 +105,7 @@ namespace NotificationSystem.Models
         /// </summary>
         /// <param name="nodeNameToFind">Node name to find</param>
         /// <param name="feedsArray">Feeds array to look in</param>
-        /// <returns></returns>
+        /// <returns>Feed ID, or null if not found</returns>
         private string? GetFeedId(string nodeNameToFind, JsonElement feedsArray)
         {
             foreach (JsonElement feed in feedsArray.EnumerateArray())
@@ -153,83 +153,106 @@ namespace NotificationSystem.Models
         }
 
         /// <summary>
-        /// Given an OrcaHello detection (in JSON), report it to Orcasite.
+        /// Parse JSON representing an OrcaHello detection into just the fields we need.
         /// </summary>
-        /// <param name="json">OrcaHello detection</param>
-        public async Task PostDetectionAsync(string json)
+        /// <param name="json">JSON to parse</param>
+        /// <param name="timestampString">Timestamp in the detection</param>
+        /// <param name="feedId">Feed ID for the hydrophone node in the detection</param>
+        /// <param name="commentsString">Comments in the detection</param>
+        /// <returns>true on success, false on failure</returns>
+        private bool ParseOrcaHelloDetection(string json, out string? timestampString, out string? feedId, out string? commentsString)
         {
+            timestampString = null;
+            feedId = null;
+            commentsString = null;
+
             JsonElement orcaHelloDetection = JsonDocument.Parse(json).RootElement;
             if (!orcaHelloDetection.TryGetProperty("id", out var id))
             {
                 _logger.LogError($"Missing id in ExecuteTask result");
-                return;
+                return false;
             }
             if (id.ValueKind != JsonValueKind.String)
             {
                 _logger.LogError($"Invalid id kind in ExecuteTask: {id.ValueKind}");
-                return;
+                return false;
             }
 
             if (!orcaHelloDetection.TryGetProperty("location", out var location))
             {
                 _logger.LogError($"Missing location in ExecuteTask result");
-                return;
+                return false;
             }
             if (location.ValueKind != JsonValueKind.Object)
             {
                 _logger.LogError($"Invalid location kind in ExecuteTask: {location.ValueKind}");
-                return;
+                return false;
             }
 
             if (!location.TryGetProperty("id", out var locationId))
             {
                 _logger.LogError($"Missing location.id in ExecuteTask result");
-                return;
+                return false;
             }
             if (locationId.ValueKind != JsonValueKind.String)
             {
                 _logger.LogError($"Invalid location.id kind in ExecuteTask: {locationId.ValueKind}");
-                return;
+                return false;
             }
             string? locationIdString = locationId.GetString();
             if (locationIdString == null)
             {
                 _logger.LogError($"Couldn't get location ID as a string");
-                return;
+                return false;
             }
 
             // Get feed ID from location ID.
-            string? feedId = GetFeedId(locationIdString, _orcasiteFeedsArray.Value);
+            feedId = GetFeedId(locationIdString, _orcasiteFeedsArray.Value);
             if (feedId == null)
             {
                 _logger.LogError($"Couldn't find feed id for: {locationIdString}");
-                return;
+                return false;
             }
 
             // Get timestamp according to OrcaHello.
             if (!orcaHelloDetection.TryGetProperty("timestamp", out var timestamp))
             {
                 _logger.LogError($"Missing timestamp in ExecuteTask result");
-                return;
+                return false;
             }
             if (timestamp.ValueKind != JsonValueKind.String)
             {
                 _logger.LogError($"Invalid timestamp kind in ExecuteTask: {timestamp.ValueKind}");
-                return;
+                return false;
             }
-            if (!DateTime.TryParse(timestamp.GetString(), out DateTime dateTime))
+            timestampString = timestamp.GetString();
+            if (!DateTime.TryParse(timestampString, out DateTime dateTime))
             {
                 _logger.LogError($"Invalid timestamp ExecuteTask: {timestamp}");
-                return;
+                return false;
             }
 
             // Get comments from OrcaHello.
             if (!orcaHelloDetection.TryGetProperty("comments", out var comments))
             {
                 _logger.LogError($"Missing comments in ExecuteTask result");
+                return false;
+            }
+            commentsString = comments.ValueKind == JsonValueKind.String ? comments.GetString() : null;
+            return true;
+        }
+
+        /// <summary>
+        /// Given an OrcaHello detection (in JSON), report it to Orcasite.
+        /// </summary>
+        /// <param name="json">OrcaHello detection</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public async Task PostDetectionAsync(string json)
+        {
+            if (!ParseOrcaHelloDetection(json, out var timestamp, out var feedId, out var comments))
+            {
                 return;
             }
-            string? commentsString = comments.ValueKind == JsonValueKind.String ? comments.GetString() : null;
 
             // We assume that the Azure function lease mechanism ensures that each
             // detection is processed only once, so we don't need to check for duplicates.
@@ -270,8 +293,6 @@ namespace NotificationSystem.Models
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _orcasiteApiKey);
 
             HttpResponseMessage response = await _httpClient.SendAsync(request);
-
-            // Optionally handle response
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation($"Detection for {timestamp} posted successfully!");

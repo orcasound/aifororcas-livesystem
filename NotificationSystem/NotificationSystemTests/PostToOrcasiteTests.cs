@@ -1,16 +1,52 @@
+using Azure;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
 using NotificationSystem;
 using NotificationSystem.Models;
 using RichardSzalay.MockHttp;
+using System.Diagnostics;
 using System.Net;
-using Document = Microsoft.Azure.Documents.Document;
 
 public class PostToOrcasiteTests
 {
+    private readonly string _sampleOrcaHelloDetection = """
+        {
+            "id": "965dd6e0-eb52-4e34-a717-67fa44e32ed4",
+            "modelId": "FastAI",
+            "audioUri": "https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_sunset_bay_2023_10_13_15_43_10_PDT.wav",
+            "imageUri": "https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_sunset_bay_2023_10_13_15_43_10_PDT.png",
+            "reviewed": true,
+            "timestamp": "2025-08-31T15:13:53.250260Z",
+            "whaleFoundConfidence": 65.90525077448952,
+            "location": {
+                "id": "rpi_bush_point",
+                "name": "Bush Point",
+                "longitude": -122.3339,
+                "latitude": 47.86497
+            },
+            "source_guid": "rpi_bush_point",
+            "predictions": [
+                { "id": 0, "startTime": 7.636363636363636, "duration": 1.0909090909090908, "confidence": 0.8597837686538696 },
+                { "id": 1, "startTime": 8.727272727272727, "duration": 1.0909090909090908, "confidence": 0.8878474533557892 }
+            ],
+            "SRKWFound": "no",
+            "comments": "Test signal",
+            "dateModerated": "2023-10-14T00:20:33Z",
+            "moderator": "dbaing17@gmail.com",
+            "tags": ""
+        }
+        """;
+
+    /// <summary>
+    /// This test mocks the Orcasite API and verifies that a detection can be posted successfully.
+    /// </summary>
+    /// <returns></returns>
     [Fact]
-    public async Task ProcessDocumentsAsync_ProcessesAllDocuments()
+    public async Task PostToOrcasite_ProcessDocumentsAsync()
     {
         var mockLogger = new Mock<ILogger>();
 
@@ -349,7 +385,7 @@ public class PostToOrcasiteTests
 
         // Mock the POST request to create a detection.
         mockHttp.When(HttpMethod.Post, "https://beta.orcasound.net/api/json/detections?fields%5Bdetection%5D=id%2Csource_ip%2Cplaylist_timestamp%2Cplayer_offset%2Clistener_count%2Ctimestamp%2Cdescription%2Cvisible%2Csource%2Ccategory%2Ccandidate_id%2Cfeed_id")
-                         //.WithContent("{\"key\":\"value\"}") // Optional: match request body
+                 //.WithContent("{\"key\":\"value\"}") // Optional: match request body
                  .Respond(HttpStatusCode.Created, "application/json", """
                  {
                    "data": {
@@ -394,36 +430,92 @@ public class PostToOrcasiteTests
         var httpClient = mockHttp.ToHttpClient();
         var orcasiteHelper = new OrcasiteHelper(mockLogger.Object, httpClient);
 
-        // Create a sample OrcaHello detection.
-        string json = @"{
-            ""id"": ""965dd6e0-eb52-4e34-a717-67fa44e32ed4"",
-            ""modelId"": ""FastAI"",
-            ""audioUri"": ""https://livemlaudiospecstorage.blob.core.windows.net/audiowavs/rpi_sunset_bay_2023_10_13_15_43_10_PDT.wav"",
-            ""imageUri"": ""https://livemlaudiospecstorage.blob.core.windows.net/spectrogramspng/rpi_sunset_bay_2023_10_13_15_43_10_PDT.png"",
-            ""reviewed"": true,
-            ""timestamp"": ""2025-08-31T15:13:53.250260Z"",
-            ""whaleFoundConfidence"": 65.90525077448952,
-            ""location"": {
-                ""id"": ""rpi_bush_point"",
-                ""name"": ""Bush Point"",
-                ""longitude"": -122.3339,
-                ""latitude"": 47.86497
-            },
-            ""source_guid"": ""rpi_bush_point"",
-            ""predictions"": [
-                { ""id"": 0, ""startTime"": 7.636363636363636, ""duration"": 1.0909090909090908, ""confidence"": 0.8597837686538696 },
-                { ""id"": 1, ""startTime"": 8.727272727272727, ""duration"": 1.0909090909090908, ""confidence"": 0.8878474533557892 }
-            ],
-            ""SRKWFound"": ""no"",
-            ""comments"": ""Test signal"",
-            ""dateModerated"": ""2023-10-14T00:20:33Z"",
-            ""moderator"": ""dbaing17@gmail.com"",
-            ""tags"": """"
-        }";
-        var document = JsonConvert.DeserializeObject<Document>(json);
+        var document = JsonConvert.DeserializeObject<Microsoft.Azure.Documents.Document>(_sampleOrcaHelloDetection);
         var documents = new List<Document> { document };
 
         // Process it like the Azure function would.
         await PostToOrcasite.ProcessDocumentsAsync(documents, orcasiteHelper, mockLogger.Object);
+    }
+
+    /// <summary>
+    /// This test updates a Cosmos DB item to trigger the Azure Function and verifies that it runs successfully.
+    /// Since the Azure Function runs out of process, the Orcasite API is not mocked
+    /// so this relies on environment variable configuration for the post to succeed.
+    /// Such configuration should use beta.orcasound.net (the default).
+    /// </summary>
+    /// <returns></returns>
+    [Fact]
+    public async Task UpdateCosmosDb()
+    {
+        // Use the Azure Cosmos DB Emulator connection string for local testing.
+        using CosmosClient client = new(
+            accountEndpoint: "https://localhost:8081/",
+            authKeyOrResourceToken: "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+
+        Microsoft.Azure.Cosmos.Database database = await client.CreateDatabaseIfNotExistsAsync(
+            id: "predictions",
+             throughput: 400);
+
+        Container metadataContainer = await database.CreateContainerIfNotExistsAsync(
+            id: "metadata",
+            partitionKeyPath: "/source_guid"
+        );
+
+        Container leasesContainer = await database.CreateContainerIfNotExistsAsync(
+            id: "leases",
+            partitionKeyPath: "/id");
+
+        // Start Azure function process.
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                WorkingDirectory = @"..\..\..\..\NotificationSystem",
+                FileName = "func",
+                Arguments = "start",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        int postsAttempted = 0;
+        int postsSucceeded = 0;
+        process.OutputDataReceived += (sender, args) =>
+        {
+            string data = args.Data ?? "";
+            if (data.Contains("Executing 'PostToOrcasite'"))
+            {
+                postsAttempted++;
+            }
+
+            if (data.Contains("posted successfully"))
+            {
+                postsSucceeded++;
+            }
+        };
+        bool ok = process.Start();
+        Assert.True(ok);
+        process.BeginOutputReadLine();
+
+        var item = JsonConvert.DeserializeObject<dynamic>(_sampleOrcaHelloDetection);
+
+        // Randomize a value to ensure it will be updated.
+        var random = new Random();
+        item.whaleFoundConfidence = random.NextDouble() * 30 + 50;
+
+        int oldPostsAttempted = postsAttempted;
+        int oldPostsSucceeded = postsSucceeded;
+
+        dynamic? result = await metadataContainer.UpsertItemAsync(item);
+        int httpStatusCode = (int)result.StatusCode;
+        Assert.True(httpStatusCode >= 200 && httpStatusCode < 300);
+
+        // Wait 10 seconds for the Azure function to execute.
+        await Task.Delay(10000);
+
+        // Verify it ran.
+        Assert.True(postsAttempted > oldPostsAttempted);
+        Assert.True(postsSucceeded > oldPostsSucceeded);
     }
 }

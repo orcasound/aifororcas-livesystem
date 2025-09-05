@@ -13,7 +13,7 @@ namespace NotificationSystem
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class PostToOrcasite
     {
-        static int SendRate = 14; // Max 14 posts per second.
+        const int SendRate = 14; // Max 14 posts per second.
 
         public static async Task ProcessDocumentsAsync(
             IReadOnlyList<Document> input,
