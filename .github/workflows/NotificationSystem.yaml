@@ -81,10 +81,13 @@ jobs:
     - name: Install Azure Functions Core Tools
       run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
     - name: Check func CLI
-      run: func --version
+      run: |
+        Get-Command func
+        func --version
     - name: Test
       working-directory: NotificationSystem/NotificationSystemTests
-      run: dotnet test
+      # TODO: Make the Cosmos test run in a github hosted runner
+      run: dotnet test --filter "Category!=Cosmos"
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
