@@ -109,6 +109,7 @@ public class PostToOrcasiteTests
     /// </summary>
     /// <returns></returns>
     [Fact(Timeout = 60000)] // 60 seconds max
+    [Trait("Category", "Cosmos")]
     public async Task UpdateCosmosDb()
     {
         // Use the Azure Cosmos DB Emulator connection string for local testing.
@@ -160,10 +161,11 @@ public class PostToOrcasiteTests
                 postsSucceeded++;
             }
         };
+        bool processStarted = false;
         try
         {
-            bool ok = process.Start();
-            Assert.True(ok);
+            processStarted = process.Start();
+            Assert.True(processStarted);
             process.BeginOutputReadLine();
 
             var item = JsonConvert.DeserializeObject<dynamic>(_sampleOrcaHelloDetection);
@@ -198,9 +200,9 @@ public class PostToOrcasiteTests
         }
         finally
         {
-            // Clean up: kill the function host process.
-            if (!process.HasExited)
+            if (processStarted && !process.HasExited)
             {
+                // Clean up: kill the function host process.
                 process.Kill(true); // true = kill entire process tree
                 process.WaitForExit();
             }

@@ -12,7 +12,7 @@ namespace NotificationSystem.Models
     {
         private static HttpClient _httpClient;
         private string _orcasiteHostname;
-        private string? _orcasiteApiKey;
+        private string _orcasiteApiKey;
         private JsonElement? _orcasiteFeedsArray;
         private readonly ILogger _logger;
 
@@ -108,7 +108,7 @@ namespace NotificationSystem.Models
         /// <param name="nodeNameToFind">Node name to find</param>
         /// <param name="feedsArray">Feeds array to look in</param>
         /// <returns>Feed ID, or null if not found</returns>
-        private string? GetFeedId(string nodeNameToFind, JsonElement feedsArray)
+        private string GetFeedId(string nodeNameToFind, JsonElement feedsArray)
         {
             foreach (JsonElement feed in feedsArray.EnumerateArray())
             {
@@ -162,7 +162,7 @@ namespace NotificationSystem.Models
         /// <param name="feedId">Feed ID for the hydrophone node in the detection</param>
         /// <param name="commentsString">Comments in the detection</param>
         /// <returns>true on success, false on failure</returns>
-        private bool ParseOrcaHelloDetection(string json, out string? timestampString, out string? feedId, out string? commentsString)
+        private bool ParseOrcaHelloDetection(string json, out string timestampString, out string feedId, out string commentsString)
         {
             timestampString = null;
             feedId = null;
@@ -201,7 +201,7 @@ namespace NotificationSystem.Models
                 _logger.LogError($"Invalid location.id kind in ExecuteTask: {locationId.ValueKind}");
                 return false;
             }
-            string? locationIdString = locationId.GetString();
+            string locationIdString = locationId.GetString();
             if (locationIdString == null)
             {
                 _logger.LogError($"Couldn't get location ID as a string");
