@@ -51,6 +51,14 @@ Once you've chosen an issue and want to contribute code:
 3. Submit a PR (don't review your own)!
     - To maintain a consistent style, we recommend running [Prettier](https://github.com/prettier/prettier), and `mix format` before submission.
 
+#### C# Style Guidelines
+
+For C# code contributions, please follow established style conventions to maintain code consistency:
+
+- [Microsoft C# Identifier Naming Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names) - Guidelines for naming classes, methods, variables, and other identifiers
+- [Microsoft C# Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions) - Best practices for formatting, commenting, and structuring C# code
+- [Google C# Style Guide](https://google.github.io/styleguide/csharp-style.html) - Additional style recommendations from Google's engineering teams
+
 ### Submitting a Pull Request
 
 For all but the absolute simplest changes, first find an existing GitHub issue or
