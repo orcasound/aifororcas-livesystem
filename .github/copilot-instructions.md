@@ -20,7 +20,7 @@ This repository contains multiple interconnected components:
 - **.NET 6+**: Main framework for web applications and APIs
 - **C#**: Primary programming language for backend services
 - **Blazor**: Frontend framework for web UI components
-- **Azure**: Cloud platform (CosmosDB, App Services, Container Instances)
+- **Azure**: Cloud platform (CosmosDB,  Storage, App Services, Kubernetes)
 - **Python**: ML/AI model training and inference
 - **FastAPI/TensorFlow**: AI/ML frameworks
 
