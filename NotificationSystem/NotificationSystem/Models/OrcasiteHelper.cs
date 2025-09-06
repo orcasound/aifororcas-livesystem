@@ -248,12 +248,12 @@ namespace NotificationSystem.Models
         /// Given an OrcaHello detection (in JSON), report it to Orcasite.
         /// </summary>
         /// <param name="json">OrcaHello detection</param>
-        /// <returns>A task that represents the asynchronous operation</returns>
-        public async Task PostDetectionAsync(string json)
+        /// <returns>true on success, false on failure</returns>
+        public async Task<bool> PostDetectionAsync(string json)
         {
             if (!ParseOrcaHelloDetection(json, out var timestamp, out var feedId, out var comments))
             {
-                return;
+                return false;
             }
 
             // We assume that the Azure function lease mechanism ensures that each
@@ -292,17 +292,22 @@ namespace NotificationSystem.Models
             };
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.api+json");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.api+json"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _orcasiteApiKey);
+            if (_orcasiteApiKey != null)
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _orcasiteApiKey);
+            }
 
             HttpResponseMessage response = await _httpClient.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation($"Detection for {timestamp} posted successfully!");
+                return true;
             }
             else
             {
                 string message = await response.Content.ReadAsStringAsync();
                 _logger.LogError($"Error: {response.StatusCode} - {message}");
+                return false;
             }
         }
     }
