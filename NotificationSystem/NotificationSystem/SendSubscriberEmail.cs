@@ -20,7 +20,7 @@ namespace NotificationSystem
     [StorageAccount("OrcaNotificationStorageSetting")]
     public static class SendSubscriberEmail
     {
-        static int SendRate = 14;
+        const int SendRate = 14;
 
         [FunctionName("SendSubscriberEmail")]
         // TODO: change timer to once per hour (0 0 * * * *)
