@@ -51,7 +51,7 @@ public class PostToOrcasiteTests
     /// <returns>String contents</returns>
     private string GetStringFromFile(string filename)
     {
-        return File.ReadAllText(Path.Combine(_solutionDirectory, "NotificationSystem.Api.Tests.Unit", "TestData", filename));
+        return File.ReadAllText(Path.Combine(_solutionDirectory, "NotificationSystem.Tests.Unit", "TestData", filename));
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class PostToOrcasiteTests
         get
         {
             string? solutionDirectory = FindSolutionDirectory();
-            string functionHostDirectory = Path.Combine(solutionDirectory ?? "", "NotificationSystem.Api");
+            string functionHostDirectory = Path.Combine(solutionDirectory ?? "", "NotificationSystem");
             return functionHostDirectory;
         }
     }
