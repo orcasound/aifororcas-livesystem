@@ -15,3 +15,12 @@ updates:
         patterns:
           - "*"
     open-pull-requests-limit: 3
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: "saturday"
+    groups:
+      actions:
+        patterns:
+          - "*"
