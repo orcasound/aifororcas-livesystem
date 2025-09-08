@@ -48,9 +48,9 @@ jobs:
       run: dotnet restore -r ${{ env.DOTNET_RUNTIME }}
     - name: Build
       run: dotnet build --no-restore -c Release -r ${{ env.DOTNET_RUNTIME }} --self-contained
-    - name: Test
-      working-directory: NotificationSystem/NotificationSystemTests
-      run: dotnet test --filter "Category!=Cosmos"
+    - name: Unit Tests
+      working-directory: NotificationSystem/NotificationSystem.Tests.Unit
+      run: dotnet test
     - name: Publish
       run: dotnet publish --no-restore -c Release -o './${{ env.PUBLISH_DIR }}'
     - name: Artifacts cache
@@ -84,9 +84,8 @@ jobs:
       run: |
         Get-Command func
         func --version
-    - name: Test
-      working-directory: NotificationSystem/NotificationSystemTests
-      # TODO: Make the Cosmos test run in a github hosted runner
+    - name: Unit Tests
+      working-directory: NotificationSystem/NotificationSystem.Tests.Unit
       run: dotnet test --filter "Category!=Cosmos"
   deploy:
     if: github.ref == 'refs/heads/main'

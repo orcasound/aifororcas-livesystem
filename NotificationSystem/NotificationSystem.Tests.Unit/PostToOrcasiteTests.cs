@@ -51,7 +51,7 @@ public class PostToOrcasiteTests
     /// <returns>String contents</returns>
     private string GetStringFromFile(string filename)
     {
-        return File.ReadAllText(Path.Combine(_solutionDirectory, "NotificationSystemTests", "TestData", filename));
+        return File.ReadAllText(Path.Combine(_solutionDirectory, "NotificationSystem.Tests.Unit", "TestData", filename));
     }
 
     /// <summary>
