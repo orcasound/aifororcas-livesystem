@@ -16,7 +16,7 @@ updates:
           - "*"
     open-pull-requests-limit: 3
   - package-ecosystem: nuget
-    directory: /
+    directory: "/NotificationSystem"
     schedule:
       interval: weekly
       day: "saturday"
