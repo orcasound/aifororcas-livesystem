@@ -1,36 +1,45 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Azure.Data.Tables;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Extensions.Tables;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Models;
 using NotificationSystem.Utilities;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace NotificationSystem
 {
-    [StorageAccount("OrcaNotificationStorageSetting")]
-    public static class ModeratorEmail
+    public class ModeratorEmailFunctions
     {
-        [FunctionName("SubscribeToModeratorEmail")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post", "delete")] HttpRequest req,
-            [Table("EmailList")] CloudTable cloudTable,
-            ILogger log)
+        private readonly ILogger _logger;
+
+        public ModeratorEmailFunctions(ILogger<ModeratorEmailFunctions> logger)
         {
-            return await EmailHelpers.UpdateEmailList<ModeratorEmailEntity>(req, cloudTable, log);
+            _logger = logger;
         }
 
-        [FunctionName("ListModeratorEmails")]
-        public static IEnumerable<string> List(
-            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
-            [Table("EmailList")] CloudTable cloudTable,
-            ILogger log)
+        [Function("SubscribeToModeratorEmail")]
+        public async Task<HttpResponseData> Subscribe(
+            [HttpTrigger(AuthorizationLevel.Function, "post", "delete")] HttpRequestData req,
+            [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient,
+            FunctionContext context)
         {
-            return EmailHelpers.GetEmailEntities(cloudTable, "Moderator").Select(e => e.Email);
+            var response = await EmailHelpers.UpdateEmailListAsync<ModeratorEmailEntity>(req, tableClient, _logger);
+            return response;
+        }
+
+        [Function("ListModeratorEmails")]
+        public async Task<HttpResponseData> List(
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req,
+            [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient,
+            FunctionContext context)
+        {
+            var emails = await EmailHelpers.GetEmailEntitiesAsync<ModeratorEmailEntity>(tableClient, "Moderator");
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            await response.WriteAsJsonAsync(emails.Select(e => e.Email));
+            return response;
         }
     }
 }

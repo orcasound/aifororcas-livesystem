@@ -1,4 +1,3 @@
-using Microsoft.Azure.Documents;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NotificationSystem.Models;
@@ -16,13 +15,13 @@ namespace NotificationSystem.Tests.Unit
         [Fact]
         public async Task PostToOrcasite_ProcessDocumentsAsync()
         {
-            var mockLogger = new Mock<ILogger>();
+            var mockLogger = new Mock<ILogger<PostToOrcasite>>();
             OrcasiteHelper orcasiteHelper = OrcasiteTestHelper.GetMockOrcasiteHelper(mockLogger.Object);
-            List<Document> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
+            List<dynamic> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
 
             // Process it like the Azure function would.
-            var postToOrcasite = new PostToOrcasite(orcasiteHelper);
-            bool ok = await postToOrcasite.ProcessDocumentsAsync(documents, mockLogger.Object);
+            var postToOrcasite = new PostToOrcasite(orcasiteHelper, mockLogger.Object);
+            bool ok = await postToOrcasite.ProcessDocumentsAsync(documents);
             Assert.True(ok, "PostToOrcasite.ProcessDocumentsAsync failed");
         }
     }

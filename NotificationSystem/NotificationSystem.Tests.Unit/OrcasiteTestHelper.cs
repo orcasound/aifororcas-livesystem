@@ -69,12 +69,12 @@ namespace NotificationSystem.Tests.Common
             return orcasiteHelper;
         }
 
-        public static List<Document> GetSampleOrcaHelloDetections()
+        public static List<dynamic> GetSampleOrcaHelloDetections()
         {
             string sampleOrcaHelloDetection = GetStringFromFile("OrcaHelloDetection.json");
             var parsed = JObject.Parse(sampleOrcaHelloDetection);
-            var testDocument = JsonConvert.DeserializeObject<Document>(parsed.ToString());
-            var documents = new List<Document> { testDocument };
+            var testDocument = JsonConvert.DeserializeObject<dynamic>(parsed.ToString());
+            var documents = new List<dynamic> { testDocument };
             return documents;
         }
     }
