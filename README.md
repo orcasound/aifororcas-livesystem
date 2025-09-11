@@ -12,7 +12,7 @@ Learn more about OrcaHello via:
 - **[OrcaHello wiki](https://github.com/orcasound/aifororcas-livesystem/wiki)** (for system administrators and moderators)
 - **This README** (for developers and data scientists) 
 
-This repository contains the implementations for the following  components that make up the OrcaHello real time inference system:
+This repository contains the implementations for the following components that make up the OrcaHello real time inference system:
 - [ModeratorFrontEnd](ModeratorFrontEnd) - Frontend code for the [Moderator Portal](https://aifororcas.azurewebsites.net/).
 - [NotificationSystem](NotificationSystem) - Code to trigger email notifications.
 - [InferenceSystem](InferenceSystem) - Code to perform inference with the trained model.
@@ -60,10 +60,8 @@ To contribute a pull request for a specific subsystem, please read the correspon
 - ModelTraining | [README](ModelTraining/README.md) | [Contributing Guidelines](ModelTraining/CONTRIBUTING.md)
 
 Current subteams and leads are as follows:
-- Machine Learning and Artificial Intelligence (Lead: Patrick Pastore)
-- Moderation Portal (Lead: Mike Cowan)
-- User Experience (Lead: Claire Goetschel)
-- Notification System (Lead: Skander Mzali)
+- Machine Learning and Artificial Intelligence (Lead: Patrick Pastore): this subteam deals with the ModelTraining subsystem
+- Notification System (Lead: Dave Thaler): this subteam deals with the NotificationSystem subsystem
 - Infrastructure (Lead: Dave Thaler): this subteam deals with Azure and GitHub infrastructure
 
 New volunteers are welcome in all subteams.
