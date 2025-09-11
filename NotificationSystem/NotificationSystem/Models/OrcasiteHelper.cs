@@ -234,13 +234,12 @@ namespace NotificationSystem.Models
                 return false;
             }
 
-            // Get comments from OrcaHello.
-            if (!orcaHelloDetection.TryGetProperty("comments", out var comments))
+            // Get comments from OrcaHello.  This property will only be present
+            // if the detection was already moderated within OrcaHello.
+            if (orcaHelloDetection.TryGetProperty("comments", out var comments))
             {
-                _logger.LogError($"Missing comments in ExecuteTask result");
-                return false;
+                commentsString = comments.ValueKind == JsonValueKind.String ? comments.GetString() : null;
             }
-            commentsString = comments.ValueKind == JsonValueKind.String ? comments.GetString() : null;
             return true;
         }
 
