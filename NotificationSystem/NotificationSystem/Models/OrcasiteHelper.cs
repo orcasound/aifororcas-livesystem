@@ -158,12 +158,14 @@ namespace NotificationSystem.Models
         /// Parse JSON representing an OrcaHello detection into just the fields we need.
         /// </summary>
         /// <param name="json">JSON to parse</param>
+        /// <param name="id">ID of the detection</param>
         /// <param name="timestampString">Timestamp in the detection</param>
         /// <param name="feedId">Feed ID for the hydrophone node in the detection</param>
         /// <param name="commentsString">Comments in the detection</param>
         /// <returns>true on success, false on failure</returns>
-        private bool ParseOrcaHelloDetection(string json, out string timestampString, out string feedId, out string commentsString)
+        private bool ParseOrcaHelloDetection(string json, out string idString, out string timestampString, out string feedId, out string commentsString)
         {
+            idString = null;
             timestampString = null;
             feedId = null;
             commentsString = null;
@@ -177,6 +179,12 @@ namespace NotificationSystem.Models
             if (id.ValueKind != JsonValueKind.String)
             {
                 _logger.LogError($"Invalid id kind in ExecuteTask: {id.ValueKind}");
+                return false;
+            }
+            idString = id.GetString();
+            if (idString == null)
+            {
+                _logger.LogError($"Couldn't get ID as a string");
                 return false;
             }
 
@@ -250,7 +258,7 @@ namespace NotificationSystem.Models
         /// <returns>true on success, false on failure</returns>
         public async Task<bool> PostDetectionAsync(string json)
         {
-            if (!ParseOrcaHelloDetection(json, out var timestamp, out var feedId, out var comments))
+            if (!ParseOrcaHelloDetection(json, out var id, out var timestamp, out var feedId, out var comments))
             {
                 return false;
             }
@@ -270,6 +278,7 @@ namespace NotificationSystem.Models
                         ["description"] = JsonValue.Create(comments),
                         ["feed_id"] = JsonValue.Create(feedId),
                         ["timestamp"] = JsonValue.Create(timestamp),
+                        ["idempotency_key"] = JsonValue.Create(id),
 
                         // "source": "machine" is implied by a POST.
                         //
