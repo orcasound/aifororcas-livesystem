@@ -86,7 +86,10 @@ jobs:
         func --version
     - name: Unit Tests
       working-directory: NotificationSystem/NotificationSystem.Tests.Unit
-      run: dotnet test --filter "Category!=Cosmos"
+      run: dotnet test
+    - name: Integration Tests
+      working-directory: NotificationSystem/NotificationSystem.Tests.Integration
+      run: dotnet test
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

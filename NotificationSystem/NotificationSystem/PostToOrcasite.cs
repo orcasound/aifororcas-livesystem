@@ -6,44 +6,65 @@ using NotificationSystem.Models;
 using RateLimiter;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NotificationSystem
 {
     [StorageAccount("OrcaNotificationStorageSetting")]
-    public static class PostToOrcasite
+    public class PostToOrcasite
     {
+        private readonly OrcasiteHelper _helper;
+
+        public PostToOrcasite(OrcasiteHelper helper)
+        {
+            _helper = helper;
+        }
+
         const int SendRate = 14; // Max 14 posts per second.
 
-        public static async Task ProcessDocumentsAsync(
+        /// <summary>
+        /// Process a list of documents from Cosmos DB and post them to Orcasite.
+        /// </summary>
+        /// <param name="input">List of documents from Cosmos DB</param>
+        /// <param name="log"></param>
+        /// <returns>true on success, false on failure</returns>
+        public async Task<bool> ProcessDocumentsAsync(
             IReadOnlyList<Document> input,
-            OrcasiteHelper orcasiteHelper,
             ILogger log)
         {
             if (input == null || input.Count == 0)
             {
                 log.LogInformation("No updated records");
-                return;
+                return true;
             }
 
-            await orcasiteHelper.InitializeAsync();
+            await _helper.InitializeAsync();
 
             var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             int remaining = input.Count;
 
             foreach (Document document in input)
             {
-                await orcasiteHelper.PostDetectionAsync(document.ToString());
+                bool ok = await _helper.PostDetectionAsync(document.ToString());
+                if (!ok)
+                {
+                    return false;
+                }
                 remaining--;
                 if (remaining > 0)
                 {
                     await timeConstraint;
                 }
             }
+            return true;
         }
 
+        int _successfulRuns = 0;
+        public int SuccessfulRuns => _successfulRuns;
+
         [FunctionName("PostToOrcasite")]
-        public static async Task Run(
+        public async Task Run(
             [CosmosDBTrigger(
                 databaseName: "predictions",
                 collectionName: "metadata",
@@ -53,8 +74,11 @@ namespace NotificationSystem
                 CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> input,
             ILogger log)
         {
-            var orcasiteHelper = new OrcasiteHelper(log);
-            await ProcessDocumentsAsync(input, orcasiteHelper, log);
+            bool ok = await ProcessDocumentsAsync(input, log);
+            if (ok)
+            {
+                Interlocked.Increment(ref _successfulRuns);
+            }
         }
     }
 }
