@@ -24,3 +24,10 @@ updates:
       actions:
         patterns:
           - "*"
+    labels:
+      - "dependencies"
+      - "notification system"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
