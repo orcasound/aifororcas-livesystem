@@ -1,5 +1,6 @@
 using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Utilities;
 using System;
@@ -37,11 +38,18 @@ namespace NotificationSystem
                 int numberSent = 0;
                 foreach (var item in input)
                 {
-                    if (item?.SRKWFound?.ToString()?.ToLower() == "yes")
+                    try
                     {
-                        await queueClient.SendMessageAsync(StringHelpers.Base64Encode(item.ToString()));
-                        _logger.LogInformation($"Document with id {item.id} sent");
-                        numberSent++;
+                        if (item?.SRKWFound?.ToString()?.ToLower() == "yes")
+                        {
+                            await queueClient.SendMessageAsync(StringHelpers.Base64Encode(item.ToString()));
+                            _logger.LogInformation($"Document with id {item.id} sent");
+                            numberSent++;
+                        }
+                    }
+                    catch (RuntimeBinderException)
+                    {
+                        // Property doesn't exist, so this hasn't been moderated.
                     }
                 }
 

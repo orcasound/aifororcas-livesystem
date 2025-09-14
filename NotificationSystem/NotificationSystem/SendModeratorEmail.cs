@@ -3,6 +3,7 @@ using Amazon.SimpleEmail;
 using Azure.Data.Tables;
 using ComposableAsync;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Models;
 using NotificationSystem.Template;
@@ -10,6 +11,7 @@ using NotificationSystem.Utilities;
 using RateLimiter;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NotificationSystem
@@ -47,12 +49,19 @@ namespace NotificationSystem
 
             foreach (var document in input)
             {
-                if (document.reviewed == false)
+                // Check whether the "reviewed" property exists.
+                try
                 {
+                    var reviewed = (bool)document.reviewed;
+                    // Already moderated, go on to the next one.
+                    continue;
+                }
+                catch (RuntimeBinderException)
+                {
+                    // Property doesn't exist, so this hasn't been moderated.
                     newDocumentCreated = true;
                     documentTimeStamp = document.timestamp;
                     location = document["location.name"];
-                    break;
                 }
             }
 
