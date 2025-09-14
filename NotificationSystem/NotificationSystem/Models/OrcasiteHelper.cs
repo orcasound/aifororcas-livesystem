@@ -10,16 +10,16 @@ namespace NotificationSystem.Models
 {
     public class OrcasiteHelper
     {
-        private static HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
         private string _orcasiteHostname;
         private string _orcasiteApiKey;
         private JsonElement? _orcasiteFeedsArray;
         private readonly ILogger _logger;
 
-        public OrcasiteHelper(ILogger log, HttpClient httpClient = null)
+        public OrcasiteHelper(ILogger log, HttpClient httpClient)
         {
             _logger = log;
-            _httpClient = httpClient ?? new HttpClient();
+            _httpClient = httpClient;
         }
 
         /// <summary>
