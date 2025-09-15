@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Models;
 using NotificationSystem.Tests.Common;
+using RichardSzalay.MockHttp;
 using System.Text.Json;
 
 namespace NotificationSystem.Tests.Integration
@@ -14,12 +15,16 @@ namespace NotificationSystem.Tests.Integration
         private readonly IHost _host;
         private readonly IServiceProvider _serviceProvider;
         private readonly string _solutionDirectory;
+        private readonly MockHttpMessageHandler _mockHttp;
 
         public PostToOrcasiteIntegrationTests()
         {
             _solutionDirectory = OrcasiteTestHelper.FindSolutionDirectory() ?? throw new Exception("Could not find solution directory");
             _host = CreateHostBuilder().Build();
             _serviceProvider = _host.Services;
+            
+            // Get the mock HTTP handler for verification purposes
+            _mockHttp = _serviceProvider.GetRequiredService<MockHttpMessageHandler>();
         }
 
         /// <summary>
@@ -66,10 +71,26 @@ namespace NotificationSystem.Tests.Integration
                     // Register services that would normally be injected in Azure Functions.
                     services.AddSingleton<ILoggerFactory, LoggerFactory>();
                     services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
-                    services.AddSingleton<OrcasiteHelper>(provider =>
+                    
+                    // Register the container that holds both the helper and mock
+                    services.AddSingleton<OrcasiteTestHelper.MockOrcasiteHelperContainer>(provider =>
                     {
                         var logger = provider.GetRequiredService<ILogger<OrcasiteHelper>>();
-                        return OrcasiteTestHelper.GetMockOrcasiteHelper(logger);
+                        return new OrcasiteTestHelper.MockOrcasiteHelperContainer(logger);
+                    });
+                    
+                    // Register OrcasiteHelper by extracting from the container
+                    services.AddSingleton<OrcasiteHelper>(provider =>
+                    {
+                        var container = provider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
+                        return container.Helper;
+                    });
+                    
+                    // Register MockHttpMessageHandler by extracting from the container
+                    services.AddSingleton<MockHttpMessageHandler>(provider =>
+                    {
+                        var container = provider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
+                        return container.MockHttp;
                     });
                     services.AddTransient<PostToOrcasite>(provider =>
                     {
@@ -123,6 +144,32 @@ namespace NotificationSystem.Tests.Integration
 
             // Assert - Verify the function succeeded.
             Assert.True(ok, "PostToOrcasite failed");
+            
+            // Verify that HTTP calls were made to the mock
+            _mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        /// <summary>
+        /// Integration test that verifies HTTP calls are made during document processing.
+        /// This test does not require Cosmos DB and focuses on verifying the mock HTTP client is called.
+        /// </summary>
+        [Fact]
+        public async Task PostToOrcasite_ProcessDocuments_VerifiesHttpCallsMade()
+        {
+            // Arrange - Get services from DI container.
+            var postToOrcasite = _serviceProvider.GetRequiredService<PostToOrcasite>();
+
+            // Create test data.
+            List<JsonElement> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
+
+            // Act - Test the actual function logic using DI services.
+            bool ok = await postToOrcasite.ProcessDocumentsAsync(documents);
+
+            // Assert - Verify the function succeeded.
+            Assert.True(ok, "PostToOrcasite failed");
+            
+            // Verify that all expected HTTP calls were made to the mock
+            _mockHttp.VerifyNoOutstandingExpectation();
         }
 
         /// <summary>
@@ -151,6 +198,9 @@ namespace NotificationSystem.Tests.Integration
             // Assert - Verify the function executed without throwing.
             Assert.NotEqual(oldRunCount, postToOrcasite.SuccessfulRuns);
             logger.LogInformation($"Successfully executed PostToOrcasite Azure Function");
+            
+            // Verify that HTTP calls were made to the mock
+            _mockHttp.VerifyNoOutstandingExpectation();
         }
 
         public void Dispose()

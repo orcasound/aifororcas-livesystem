@@ -311,12 +311,10 @@ namespace NotificationSystem.Models
                 _logger.LogInformation($"Detection for {timestamp} posted successfully!");
                 return true;
             }
-            else
-            {
-                string message = await response.Content.ReadAsStringAsync();
-                _logger.LogError($"Error: {response.StatusCode} - {message}");
-                return false;
-            }
+
+            string message = await response.Content.ReadAsStringAsync();
+            _logger.LogError($"Error: {response.StatusCode} - {message}");
+            return false;
         }
     }
 }

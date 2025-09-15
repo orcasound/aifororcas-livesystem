@@ -52,6 +52,17 @@ namespace NotificationSystem.Tests.Common
 
         public static OrcasiteHelper GetMockOrcasiteHelper(ILogger<OrcasiteHelper> logger)
         {
+            var (orcasiteHelper, _) = GetMockOrcasiteHelperWithVerification(logger);
+            return orcasiteHelper;
+        }
+
+        /// <summary>
+        /// Get a mock OrcasiteHelper along with the MockHttpMessageHandler for verification.
+        /// </summary>
+        /// <param name="logger">Logger instance</param>
+        /// <returns>Tuple containing the OrcasiteHelper and MockHttpMessageHandler for verification</returns>
+        public static (OrcasiteHelper helper, MockHttpMessageHandler mockHttp) GetMockOrcasiteHelperWithVerification(ILogger<OrcasiteHelper> logger)
+        {
             var mockHttp = new MockHttpMessageHandler();
             string sampleOrcasiteFeeds = GetStringFromFile("OrcasiteFeeds.json");
             string sampleOrcasitePostDetectionResponse = GetStringFromFile("OrcasitePostDetectionResponse.json");
@@ -67,7 +78,24 @@ namespace NotificationSystem.Tests.Common
 
             var httpClient = mockHttp.ToHttpClient();
             var orcasiteHelper = new OrcasiteHelper(logger, httpClient);
-            return orcasiteHelper;
+            return (orcasiteHelper, mockHttp);
+        }
+
+        /// <summary>
+        /// Wrapper class to hold both OrcasiteHelper and MockHttpMessageHandler together
+        /// for dependency injection scenarios.
+        /// </summary>
+        public class MockOrcasiteHelperContainer
+        {
+            public OrcasiteHelper Helper { get; }
+            public MockHttpMessageHandler MockHttp { get; }
+
+            public MockOrcasiteHelperContainer(ILogger<OrcasiteHelper> logger)
+            {
+                var (helper, mockHttp) = GetMockOrcasiteHelperWithVerification(logger);
+                Helper = helper;
+                MockHttp = mockHttp;
+            }
         }
 
         public static List<JsonElement> GetSampleOrcaHelloDetections()
