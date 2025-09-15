@@ -5,6 +5,7 @@ using NotificationSystem.Models;
 using RateLimiter;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace NotificationSystem
         }
 
         public async Task<bool> ProcessDocumentsAsync(
-            IReadOnlyList<dynamic> input)
+            IReadOnlyList<JsonElement> input)
         {
             if (input == null || input.Count == 0)
             {
@@ -63,7 +64,7 @@ namespace NotificationSystem
                 Connection = "aifororcasmetadatastore_DOCUMENTDB",
                 LeaseContainerName = "leases",
                 LeaseContainerPrefix = "orcasite",
-                CreateLeaseContainerIfNotExists = true)] IReadOnlyList<dynamic> input)
+                CreateLeaseContainerIfNotExists = true)] IReadOnlyList<JsonElement> input)
         {
             bool ok = await ProcessDocumentsAsync(input);
             if (ok)

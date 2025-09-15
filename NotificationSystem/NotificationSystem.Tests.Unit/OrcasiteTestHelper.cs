@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using NotificationSystem.Models;
 using RichardSzalay.MockHttp;
 using System.Net;
+using System.Text.Json;
 
 namespace NotificationSystem.Tests.Common
 {
@@ -49,7 +50,7 @@ namespace NotificationSystem.Tests.Common
             return File.ReadAllText(Path.Combine(solutionDirectory, "TestData", filename));
         }
 
-        public static OrcasiteHelper GetMockOrcasiteHelper(ILogger logger)
+        public static OrcasiteHelper GetMockOrcasiteHelper(ILogger<OrcasiteHelper> logger)
         {
             var mockHttp = new MockHttpMessageHandler();
             string sampleOrcasiteFeeds = GetStringFromFile("OrcasiteFeeds.json");
@@ -69,12 +70,11 @@ namespace NotificationSystem.Tests.Common
             return orcasiteHelper;
         }
 
-        public static List<dynamic> GetSampleOrcaHelloDetections()
+        public static List<JsonElement> GetSampleOrcaHelloDetections()
         {
             string sampleOrcaHelloDetection = GetStringFromFile("OrcaHelloDetection.json");
-            var parsed = JObject.Parse(sampleOrcaHelloDetection);
-            var testDocument = JsonConvert.DeserializeObject<dynamic>(parsed.ToString());
-            var documents = new List<dynamic> { testDocument };
+            JsonElement testDocument = JsonDocument.Parse(sampleOrcaHelloDetection).RootElement;
+            var documents = new List<JsonElement> { testDocument };
             return documents;
         }
     }

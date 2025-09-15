@@ -14,9 +14,9 @@ namespace NotificationSystem.Models
         private string _orcasiteHostname;
         private string _orcasiteApiKey;
         private JsonElement? _orcasiteFeedsArray;
-        private readonly ILogger _logger;
+        private readonly ILogger<OrcasiteHelper> _logger;
 
-        public OrcasiteHelper(ILogger log, HttpClient httpClient)
+        public OrcasiteHelper(ILogger<OrcasiteHelper> log, HttpClient httpClient)
         {
             _logger = log;
             _httpClient = httpClient;

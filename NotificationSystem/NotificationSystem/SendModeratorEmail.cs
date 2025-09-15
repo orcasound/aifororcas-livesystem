@@ -3,7 +3,6 @@ using Amazon.SimpleEmail;
 using Azure.Data.Tables;
 using ComposableAsync;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Models;
 using NotificationSystem.Template;
@@ -34,7 +33,7 @@ namespace NotificationSystem
                 Connection = "aifororcasmetadatastore_DOCUMENTDB",
                 LeaseContainerName = "leases",
                 LeaseContainerPrefix = "moderator",
-                CreateLeaseContainerIfNotExists = true)] IReadOnlyList<dynamic> input,
+                CreateLeaseContainerIfNotExists = true)] IReadOnlyList<JsonElement> input,
             [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient)
         {
             if (input == null || input.Count == 0)
@@ -50,18 +49,12 @@ namespace NotificationSystem
             foreach (var document in input)
             {
                 // Check whether the "reviewed" property exists.
-                try
+                JsonElement reviewed = document.GetProperty("reviewed");
+                if (reviewed.ValueKind != JsonValueKind.True)
                 {
-                    var reviewed = (bool)document.reviewed;
-                    // Already moderated, go on to the next one.
-                    continue;
-                }
-                catch (RuntimeBinderException)
-                {
-                    // Property doesn't exist, so this hasn't been moderated.
                     newDocumentCreated = true;
-                    documentTimeStamp = document.timestamp;
-                    location = document["location.name"];
+                    documentTimeStamp = document.GetProperty("timestamp").GetDateTime();
+                    location = document.GetProperty("location").GetProperty("name").GetString();
                 }
             }
 
