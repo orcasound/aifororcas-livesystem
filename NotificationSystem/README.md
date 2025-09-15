@@ -1,6 +1,6 @@
 ## AI For Orcas - Notification System
 
-The notification system is a set of azure functions responsible for:
+The notification system is a set of Azure functions responsible for:
 - Facilitating adding/removing moderators and subscribers
 - Identifying changes in the database and sending alerts
 
@@ -150,3 +150,14 @@ Create local.settings.json in the current directory (NotificationSystem) using t
 1. Go to the "orcanotification" function app (link 3 above). 
 2. On the "Overview" tab, make sure the status of the function shows running.
 3. On the "Functions" tab, you should see all the functions of the notification system. Enable/Disable as needed.
+
+## Directory structure
+
+The directories in this system are organized as follows:
+
+* img: Contains images used in this README
+* NotificationSystem: Contains the source code for the Azure functions
+* NotificationSystem.Tests.Unit: Contains unit tests
+* NotificationSystem.Tests.Integration: Contains integration tests
+* PostBackfillToOrcasite: Contains a console app to post the history of machine detections to the Orcasite detection API
+* TestData: Contains data files used by the tests
