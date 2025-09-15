@@ -66,8 +66,6 @@ jobs:
     - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
       with:
         egress-policy: audit
-    - name: Start Azure Cosmos DB Emulator for testing
-      uses: southpolesteve/cosmos-emulator-github-action@v1
     - name: Checkout
       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
     - name: Set up .NET Core
@@ -78,12 +76,6 @@ jobs:
       run: dotnet restore -r ${{ env.DOTNET_RUNTIME }}
     - name: Build
       run: dotnet build --no-restore -c Release -r ${{ env.DOTNET_RUNTIME }} --self-contained
-    - name: Install Azure Functions Core Tools
-      run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
-    - name: Check func CLI
-      run: |
-        Get-Command func
-        func --version
     - name: Unit Tests
       working-directory: NotificationSystem/NotificationSystem.Tests.Unit
       run: dotnet test

@@ -1,23 +1,32 @@
+using Azure.Storage.Queues;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
+using NotificationSystem.Utilities;
 using System;
 using System.Collections.Generic;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Logging;
-using Azure.Storage.Queues;
-using NotificationSystem.Utilities;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace NotificationSystem
-{ 
-    public static class DbToQueue
+{
+    public class DbToQueue
     {
-        [FunctionName("DbToQueue")]
-        public static void Run([CosmosDBTrigger(
-            databaseName: "predictions",
-            collectionName: "metadata",
-            ConnectionStringSetting = "aifororcasmetadatastore_DOCUMENTDB",
-            LeaseCollectionName = "leases",
-            LeaseCollectionPrefix = "subscriber",
-            CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> input, ILogger log)
+        private readonly ILogger _logger;
+
+        public DbToQueue(ILogger<DbToQueue> logger)
+        {
+            _logger = logger;
+        }
+
+        [Function("DbToQueue")]
+        public async Task Run(
+            [CosmosDBTrigger(
+                databaseName: "predictions",
+                containerName: "metadata",
+                Connection = "aifororcasmetadatastore_DOCUMENTDB",
+                LeaseContainerName = "leases",
+                LeaseContainerPrefix = "subscriber",
+                CreateLeaseContainerIfNotExists = true)] IReadOnlyList<JsonElement> input)
         {
             // Instantiate a QueueClient which will be used to create and manipulate the queue
             string connectionString = Environment.GetEnvironmentVariable("OrcaNotificationStorageSetting");
@@ -29,16 +38,18 @@ namespace NotificationSystem
                 int numberSent = 0;
                 foreach (var item in input)
                 {
-                    if (item.GetPropertyValue<string>("SRKWFound").ToLower() == "yes")
+                    if (item.TryGetProperty("SRKWFound", out JsonElement srkwFound) &&
+                        srkwFound.GetString()?.ToLower() == "yes")
                     {
-                        queueClient.SendMessage(StringHelpers.Base64Encode(item.ToString()));
-                        log.LogInformation($"Document with id {item.Id} sent");
+                        string id = item.GetProperty("id").GetString();
+                        await queueClient.SendMessageAsync(StringHelpers.Base64Encode(item.GetRawText()));
+                        _logger.LogInformation($"Document with id {id} sent");
                         numberSent++;
                     }
                 }
 
-                log.LogInformation($"Number of initial documents : {input.Count}");
-                log.LogInformation($"Number of documents added: {numberSent}");
+                _logger.LogInformation($"Number of initial documents: {input.Count}");
+                _logger.LogInformation($"Number of documents added: {numberSent}");
             }
         }
     }

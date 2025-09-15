@@ -1,39 +1,44 @@
-using System;
 using Amazon;
 using Amazon.SimpleEmail;
-using RateLimiter;
+using Azure.Data.Tables;
 using ComposableAsync;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using NotificationSystem.Models;
 using NotificationSystem.Template;
 using NotificationSystem.Utilities;
+using RateLimiter;
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace NotificationSystem
 {
-    [StorageAccount("OrcaNotificationStorageSetting")]
-    public static class SendModeratorEmail
+    public class SendModeratorEmail
     {
+        private readonly ILogger _logger;
         const int SendRate = 14;
 
-        [FunctionName("SendModeratorEmail")]
-        public static async Task Run(
+        public SendModeratorEmail(ILogger<SendModeratorEmail> logger)
+        {
+            _logger = logger;
+        }
+
+        [Function("SendModeratorEmail")]
+        public async Task Run(
             [CosmosDBTrigger(
                 databaseName: "predictions",
-                collectionName: "metadata",
-                ConnectionStringSetting = "aifororcasmetadatastore_DOCUMENTDB",
-                LeaseCollectionName = "leases",
-                LeaseCollectionPrefix = "moderator",
-                CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> input,
-            [Table("EmailList")] CloudTable cloudTable,
-            ILogger log)
+                containerName: "metadata",
+                Connection = "aifororcasmetadatastore_DOCUMENTDB",
+                LeaseContainerName = "leases",
+                LeaseContainerPrefix = "moderator",
+                CreateLeaseContainerIfNotExists = true)] IReadOnlyList<JsonElement> input,
+            [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient)
         {
             if (input == null || input.Count == 0)
             {
-                log.LogInformation("No updated records");
+                _logger.LogInformation("No updated records");
                 return;
             }
 
@@ -43,18 +48,19 @@ namespace NotificationSystem
 
             foreach (var document in input)
             {
-                if (!document.GetPropertyValue<bool>("reviewed"))
+                // Check whether the "reviewed" property exists.
+                JsonElement reviewed = document.GetProperty("reviewed");
+                if (reviewed.ValueKind != JsonValueKind.True)
                 {
                     newDocumentCreated = true;
-                    documentTimeStamp = document.GetPropertyValue<DateTime>("timestamp");
-                    location = document.GetPropertyValue<string>("location.name");
-                    break;
+                    documentTimeStamp = document.GetProperty("timestamp").GetDateTime();
+                    location = document.GetProperty("location").GetProperty("name").GetString();
                 }
             }
 
             if (!newDocumentCreated)
             {
-                log.LogInformation("No unreviewed records");
+                _logger.LogInformation("No unreviewed records");
                 return;
             }
 
@@ -62,11 +68,11 @@ namespace NotificationSystem
 
             var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
-            log.LogInformation("Retrieving email list and sending notifications");
-            foreach (var emailEntity in EmailHelpers.GetEmailEntities(cloudTable, "Moderator"))
+            _logger.LogInformation("Retrieving email list and sending notifications");
+            foreach (var emailEntity in await EmailHelpers.GetEmailEntitiesAsync<ModeratorEmailEntity>(tableClient, "Moderator"))
             {
                 await timeConstraint;
-				string emailSubject = string.Format("OrcaHello Candidate at location {0}", location);
+                string emailSubject = $"OrcaHello Candidate at location {(string.IsNullOrEmpty(location) ? "Unknown" : location)}";
                 var email = EmailHelpers.CreateEmail(Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email, emailSubject, body);
                 await aws.SendEmailAsync(email);
