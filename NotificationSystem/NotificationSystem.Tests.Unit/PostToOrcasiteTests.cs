@@ -17,7 +17,7 @@ namespace NotificationSystem.Tests.Unit
         public async Task PostToOrcasite_ProcessDocumentsAsync()
         {
             var mockOrcasiteLogger = new Mock<ILogger<OrcasiteHelper>>();
-            var (orcasiteHelper, mockHttp) = OrcasiteTestHelper.GetMockOrcasiteHelperWithVerification(mockOrcasiteLogger.Object);
+            var (orcasiteHelper, mockHttp, getFeedsRequest, postDetectionRequest) = OrcasiteTestHelper.GetMockOrcasiteHelperWithRequestVerification(mockOrcasiteLogger.Object);
             List<JsonElement> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
 
             // Process it like the Azure function would.
@@ -30,6 +30,10 @@ namespace NotificationSystem.Tests.Unit
             
             // Verify that all expected HTTP calls were made.
             mockHttp.VerifyNoOutstandingExpectation();
+            
+            // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
+            Assert.Equal(1, mockHttp.GetMatchCount(getFeedsRequest));
+            Assert.Equal(1, mockHttp.GetMatchCount(postDetectionRequest));
         }
     }
 }

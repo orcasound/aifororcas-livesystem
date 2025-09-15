@@ -52,7 +52,7 @@ namespace NotificationSystem.Tests.Common
 
         public static OrcasiteHelper GetMockOrcasiteHelper(ILogger<OrcasiteHelper> logger)
         {
-            var (orcasiteHelper, _) = GetMockOrcasiteHelperWithVerification(logger);
+            var (orcasiteHelper, _, _, _) = GetMockOrcasiteHelperWithRequestVerification(logger);
             return orcasiteHelper;
         }
 
@@ -60,25 +60,25 @@ namespace NotificationSystem.Tests.Common
         /// Get a mock OrcasiteHelper along with the MockHttpMessageHandler for verification.
         /// </summary>
         /// <param name="logger">Logger instance</param>
-        /// <returns>Tuple containing the OrcasiteHelper and MockHttpMessageHandler for verification</returns>
-        public static (OrcasiteHelper helper, MockHttpMessageHandler mockHttp) GetMockOrcasiteHelperWithVerification(ILogger<OrcasiteHelper> logger)
+        /// <returns>Tuple containing the OrcasiteHelper, MockHttpMessageHandler, GetFeeds request, and PostDetection request for verification</returns>
+        public static (OrcasiteHelper helper, MockHttpMessageHandler mockHttp, MockedRequest getFeedsRequest, MockedRequest postDetectionRequest) GetMockOrcasiteHelperWithRequestVerification(ILogger<OrcasiteHelper> logger)
         {
             var mockHttp = new MockHttpMessageHandler();
             string sampleOrcasiteFeeds = GetStringFromFile("OrcasiteFeeds.json");
             string sampleOrcasitePostDetectionResponse = GetStringFromFile("OrcasitePostDetectionResponse.json");
 
             // Mock the GET request to fetch feeds.
-            mockHttp.When(HttpMethod.Get, "https://beta.orcasound.net/api/json/feeds?fields%5Bfeed%5D=id%2Cname%2Cnode_name%2Cslug%2Clocation_point%2Cintro_html%2Cimage_url%2Cvisible%2Cbucket%2Cbucket_region%2Ccloudfront_url%2Cdataplicity_id%2Corcahello_id")
+            var getFeedsRequest = mockHttp.When(HttpMethod.Get, "https://beta.orcasound.net/api/json/feeds?fields%5Bfeed%5D=id%2Cname%2Cnode_name%2Cslug%2Clocation_point%2Cintro_html%2Cimage_url%2Cvisible%2Cbucket%2Cbucket_region%2Ccloudfront_url%2Cdataplicity_id%2Corcahello_id")
                     .Respond("application/json", sampleOrcasiteFeeds);
 
             // Mock the POST request to create a detection.
-            mockHttp.When(HttpMethod.Post, "https://beta.orcasound.net/api/json/detections?fields%5Bdetection%5D=id%2Csource_ip%2Cplaylist_timestamp%2Cplayer_offset%2Clistener_count%2Ctimestamp%2Cdescription%2Cvisible%2Csource%2Ccategory%2Ccandidate_id%2Cfeed_id")
+            var postDetectionRequest = mockHttp.When(HttpMethod.Post, "https://beta.orcasound.net/api/json/detections?fields%5Bdetection%5D=id%2Csource_ip%2Cplaylist_timestamp%2Cplayer_offset%2Clistener_count%2Ctimestamp%2Cdescription%2Cvisible%2Csource%2Ccategory%2Ccandidate_id%2Cfeed_id")
                     //.WithContent("{\"key\":\"value\"}") // Optional: match request body
                     .Respond(HttpStatusCode.Created, "application/json", sampleOrcasitePostDetectionResponse);
 
             var httpClient = mockHttp.ToHttpClient();
             var orcasiteHelper = new OrcasiteHelper(logger, httpClient);
-            return (orcasiteHelper, mockHttp);
+            return (orcasiteHelper, mockHttp, getFeedsRequest, postDetectionRequest);
         }
 
         /// <summary>
@@ -89,12 +89,16 @@ namespace NotificationSystem.Tests.Common
         {
             public OrcasiteHelper Helper { get; }
             public MockHttpMessageHandler MockHttp { get; }
+            public MockedRequest GetFeedsRequest { get; }
+            public MockedRequest PostDetectionRequest { get; }
 
             public MockOrcasiteHelperContainer(ILogger<OrcasiteHelper> logger)
             {
-                var (helper, mockHttp) = GetMockOrcasiteHelperWithVerification(logger);
+                var (helper, mockHttp, getFeedsRequest, postDetectionRequest) = GetMockOrcasiteHelperWithRequestVerification(logger);
                 Helper = helper;
                 MockHttp = mockHttp;
+                GetFeedsRequest = getFeedsRequest;
+                PostDetectionRequest = postDetectionRequest;
             }
         }
 

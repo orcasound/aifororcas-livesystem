@@ -16,6 +16,8 @@ namespace NotificationSystem.Tests.Integration
         private readonly IServiceProvider _serviceProvider;
         private readonly string _solutionDirectory;
         private readonly MockHttpMessageHandler _mockHttp;
+        private readonly MockedRequest _getFeedsRequest;
+        private readonly MockedRequest _postDetectionRequest;
 
         public PostToOrcasiteIntegrationTests()
         {
@@ -23,8 +25,11 @@ namespace NotificationSystem.Tests.Integration
             _host = CreateHostBuilder().Build();
             _serviceProvider = _host.Services;
             
-            // Get the mock HTTP handler for verification purposes.
-            _mockHttp = _serviceProvider.GetRequiredService<MockHttpMessageHandler>();
+            // Get the mock HTTP handler and individual requests for verification purposes.
+            var container = _serviceProvider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
+            _mockHttp = container.MockHttp;
+            _getFeedsRequest = container.GetFeedsRequest;
+            _postDetectionRequest = container.PostDetectionRequest;
         }
 
         /// <summary>
@@ -147,6 +152,10 @@ namespace NotificationSystem.Tests.Integration
             
             // Verify that HTTP calls were made to the mock.
             _mockHttp.VerifyNoOutstandingExpectation();
+            
+            // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
+            Assert.Equal(1, _mockHttp.GetMatchCount(_getFeedsRequest));
+            Assert.Equal(1, _mockHttp.GetMatchCount(_postDetectionRequest));
         }
 
         /// <summary>
@@ -178,6 +187,10 @@ namespace NotificationSystem.Tests.Integration
             
             // Verify that HTTP calls were made to the mock.
             _mockHttp.VerifyNoOutstandingExpectation();
+            
+            // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
+            Assert.Equal(1, _mockHttp.GetMatchCount(_getFeedsRequest));
+            Assert.Equal(1, _mockHttp.GetMatchCount(_postDetectionRequest));
         }
 
         public void Dispose()
