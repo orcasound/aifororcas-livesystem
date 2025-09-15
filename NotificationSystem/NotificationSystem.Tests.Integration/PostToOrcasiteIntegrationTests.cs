@@ -23,7 +23,7 @@ namespace NotificationSystem.Tests.Integration
             _host = CreateHostBuilder().Build();
             _serviceProvider = _host.Services;
             
-            // Get the mock HTTP handler for verification purposes
+            // Get the mock HTTP handler for verification purposes.
             _mockHttp = _serviceProvider.GetRequiredService<MockHttpMessageHandler>();
         }
 
@@ -146,29 +146,6 @@ namespace NotificationSystem.Tests.Integration
             Assert.True(ok, "PostToOrcasite failed");
             
             // Verify that HTTP calls were made to the mock
-            _mockHttp.VerifyNoOutstandingExpectation();
-        }
-
-        /// <summary>
-        /// Integration test that verifies HTTP calls are made during document processing.
-        /// This test does not require Cosmos DB and focuses on verifying the mock HTTP client is called.
-        /// </summary>
-        [Fact]
-        public async Task PostToOrcasite_ProcessDocuments_VerifiesHttpCallsMade()
-        {
-            // Arrange - Get services from DI container.
-            var postToOrcasite = _serviceProvider.GetRequiredService<PostToOrcasite>();
-
-            // Create test data.
-            List<JsonElement> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
-
-            // Act - Test the actual function logic using DI services.
-            bool ok = await postToOrcasite.ProcessDocumentsAsync(documents);
-
-            // Assert - Verify the function succeeded.
-            Assert.True(ok, "PostToOrcasite failed");
-            
-            // Verify that all expected HTTP calls were made to the mock
             _mockHttp.VerifyNoOutstandingExpectation();
         }
 
