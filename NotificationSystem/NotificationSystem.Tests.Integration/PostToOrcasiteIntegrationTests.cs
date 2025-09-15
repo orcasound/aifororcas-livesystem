@@ -72,21 +72,21 @@ namespace NotificationSystem.Tests.Integration
                     services.AddSingleton<ILoggerFactory, LoggerFactory>();
                     services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
                     
-                    // Register the container that holds both the helper and mock
+                    // Register the container that holds both the helper and mock.
                     services.AddSingleton<OrcasiteTestHelper.MockOrcasiteHelperContainer>(provider =>
                     {
                         var logger = provider.GetRequiredService<ILogger<OrcasiteHelper>>();
                         return new OrcasiteTestHelper.MockOrcasiteHelperContainer(logger);
                     });
                     
-                    // Register OrcasiteHelper by extracting from the container
+                    // Register OrcasiteHelper by extracting from the container.
                     services.AddSingleton<OrcasiteHelper>(provider =>
                     {
                         var container = provider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
                         return container.Helper;
                     });
                     
-                    // Register MockHttpMessageHandler by extracting from the container
+                    // Register MockHttpMessageHandler by extracting from the container.
                     services.AddSingleton<MockHttpMessageHandler>(provider =>
                     {
                         var container = provider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
@@ -145,7 +145,7 @@ namespace NotificationSystem.Tests.Integration
             // Assert - Verify the function succeeded.
             Assert.True(ok, "PostToOrcasite failed");
             
-            // Verify that HTTP calls were made to the mock
+            // Verify that HTTP calls were made to the mock.
             _mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -176,7 +176,7 @@ namespace NotificationSystem.Tests.Integration
             Assert.NotEqual(oldRunCount, postToOrcasite.SuccessfulRuns);
             logger.LogInformation($"Successfully executed PostToOrcasite Azure Function");
             
-            // Verify that HTTP calls were made to the mock
+            // Verify that HTTP calls were made to the mock.
             _mockHttp.VerifyNoOutstandingExpectation();
         }
 
