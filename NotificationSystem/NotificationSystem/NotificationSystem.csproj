@@ -4,7 +4,7 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.401.11" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.501.7" />
     <PackageReference Include="Azure.Storage.Queues" Version="12.23.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.CosmosDB" Version="3.0.10" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="4.0.5" />
