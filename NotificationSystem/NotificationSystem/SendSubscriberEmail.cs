@@ -78,7 +78,8 @@ namespace NotificationSystem
                 if (message == null || string.IsNullOrEmpty(message.MessageText))
                     break;
 
-                messagesJson.Add(JsonConvert.DeserializeObject<JObject>(message.MessageText));
+                var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
+                messagesJson.Add(JsonConvert.DeserializeObject<JObject>(decoded));
                 await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
             }
 
