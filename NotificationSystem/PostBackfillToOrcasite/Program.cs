@@ -20,6 +20,9 @@ namespace PostBackfillToOrcasite
                 Console.WriteLine("""
 Usage: PostBackfillToOrcasite <ISO8601 timestamp>
 
+where <ISO8601 timestamp> represents a minimum timestamp
+after which any detections are to be posted to Orcasite.
+
 The following environment variables must be set:
  * aifororcasmetadatastore_DOCUMENTDB
      Must be set to the OrcaHello cosmosdb connection string.
@@ -31,6 +34,9 @@ The following environment variables must be set:
 
 Example:
     PostBackfillToOrcasite 2025-07-30T00:00:00Z
+
+    This example will copy all detections since July 30, 2025
+    to Orcasite.
 """);
                 return;
             }
@@ -64,7 +70,10 @@ Example:
 
             // Start reading OrcaHello detections.
             Console.WriteLine($"Querying for detections with timestamp after {isoTimestamp}");
-            var query = container.GetItemQueryIterator<JObject>($"SELECT * FROM c WHERE c.timestamp > '{isoTimestamp}'");
+            var query = container.GetItemQueryIterator<JObject>(
+                new QueryDefinition("SELECT * FROM c WHERE c.timestamp > @startTime")
+                    .WithParameter("@startTime", isoTimestamp));
+
             int count = 0;
             int successes = 0;
             while (query.HasMoreResults)
