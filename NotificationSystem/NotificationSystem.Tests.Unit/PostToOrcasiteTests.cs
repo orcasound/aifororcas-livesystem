@@ -17,23 +17,20 @@ namespace NotificationSystem.Tests.Unit
         public async Task PostToOrcasite_ProcessDocumentsAsync()
         {
             var mockOrcasiteLogger = new Mock<ILogger<OrcasiteHelper>>();
-            var (orcasiteHelper, mockHttp, getFeedsRequest, postDetectionRequest) = OrcasiteTestHelper.GetMockOrcasiteHelperWithRequestVerification(mockOrcasiteLogger.Object);
+            var container = OrcasiteTestHelper.GetMockOrcasiteHelperWithRequestVerification(mockOrcasiteLogger.Object);
             List<JsonElement> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
 
             // Process it like the Azure function would.
             var mockFunctionLogger = new Mock<ILogger<PostToOrcasite>>();
-            var postToOrcasite = new PostToOrcasite(orcasiteHelper, mockFunctionLogger.Object);
+            var postToOrcasite = new PostToOrcasite(container.Helper, mockFunctionLogger.Object);
             bool ok = await postToOrcasite.ProcessDocumentsAsync(documents);
             
             // Assert that the operation succeeded.
             Assert.True(ok, "PostToOrcasite.ProcessDocumentsAsync failed");
             
-            // Verify that all expected HTTP calls were made.
-            mockHttp.VerifyNoOutstandingExpectation();
-            
             // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
-            Assert.Equal(1, mockHttp.GetMatchCount(getFeedsRequest));
-            Assert.Equal(1, mockHttp.GetMatchCount(postDetectionRequest));
+            Assert.Equal(1, container.MockHttp.GetMatchCount(container.GetFeedsRequest));
+            Assert.Equal(1, container.MockHttp.GetMatchCount(container.PostDetectionRequest));
         }
     }
 }

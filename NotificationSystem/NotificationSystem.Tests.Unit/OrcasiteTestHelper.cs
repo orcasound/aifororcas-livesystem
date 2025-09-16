@@ -52,16 +52,16 @@ namespace NotificationSystem.Tests.Common
 
         public static OrcasiteHelper GetMockOrcasiteHelper(ILogger<OrcasiteHelper> logger)
         {
-            var (orcasiteHelper, _, _, _) = GetMockOrcasiteHelperWithRequestVerification(logger);
-            return orcasiteHelper;
+            var container = GetMockOrcasiteHelperWithRequestVerification(logger);
+            return container.Helper;
         }
 
         /// <summary>
         /// Get a mock OrcasiteHelper along with the MockHttpMessageHandler for verification.
         /// </summary>
         /// <param name="logger">Logger instance</param>
-        /// <returns>Tuple containing the OrcasiteHelper, MockHttpMessageHandler, GetFeeds request, and PostDetection request for verification</returns>
-        public static (OrcasiteHelper helper, MockHttpMessageHandler mockHttp, MockedRequest getFeedsRequest, MockedRequest postDetectionRequest) GetMockOrcasiteHelperWithRequestVerification(ILogger<OrcasiteHelper> logger)
+        /// <returns>MockOrcasiteHelperContainer containing all mock components for verification</returns>
+        public static MockOrcasiteHelperContainer GetMockOrcasiteHelperWithRequestVerification(ILogger<OrcasiteHelper> logger)
         {
             var mockHttp = new MockHttpMessageHandler();
             string sampleOrcasiteFeeds = GetStringFromFile("OrcasiteFeeds.json");
@@ -78,7 +78,7 @@ namespace NotificationSystem.Tests.Common
 
             var httpClient = mockHttp.ToHttpClient();
             var orcasiteHelper = new OrcasiteHelper(logger, httpClient);
-            return (orcasiteHelper, mockHttp, getFeedsRequest, postDetectionRequest);
+            return new MockOrcasiteHelperContainer(orcasiteHelper, mockHttp, getFeedsRequest, postDetectionRequest);
         }
 
         /// <summary>
@@ -92,13 +92,21 @@ namespace NotificationSystem.Tests.Common
             public MockedRequest GetFeedsRequest { get; }
             public MockedRequest PostDetectionRequest { get; }
 
-            public MockOrcasiteHelperContainer(ILogger<OrcasiteHelper> logger)
+            public MockOrcasiteHelperContainer(OrcasiteHelper helper, MockHttpMessageHandler mockHttp, MockedRequest getFeedsRequest, MockedRequest postDetectionRequest)
             {
-                var (helper, mockHttp, getFeedsRequest, postDetectionRequest) = GetMockOrcasiteHelperWithRequestVerification(logger);
                 Helper = helper;
                 MockHttp = mockHttp;
                 GetFeedsRequest = getFeedsRequest;
                 PostDetectionRequest = postDetectionRequest;
+            }
+
+            public MockOrcasiteHelperContainer(ILogger<OrcasiteHelper> logger)
+            {
+                var container = GetMockOrcasiteHelperWithRequestVerification(logger);
+                Helper = container.Helper;
+                MockHttp = container.MockHttp;
+                GetFeedsRequest = container.GetFeedsRequest;
+                PostDetectionRequest = container.PostDetectionRequest;
             }
         }
 

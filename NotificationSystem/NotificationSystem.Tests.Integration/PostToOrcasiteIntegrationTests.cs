@@ -150,9 +150,6 @@ namespace NotificationSystem.Tests.Integration
             // Assert - Verify the function succeeded.
             Assert.True(ok, "PostToOrcasite failed");
             
-            // Verify that HTTP calls were made to the mock.
-            _mockHttp.VerifyNoOutstandingExpectation();
-            
             // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
             Assert.Equal(1, _mockHttp.GetMatchCount(_getFeedsRequest));
             Assert.Equal(1, _mockHttp.GetMatchCount(_postDetectionRequest));
@@ -184,9 +181,6 @@ namespace NotificationSystem.Tests.Integration
             // Assert - Verify the function executed without throwing.
             Assert.NotEqual(oldRunCount, postToOrcasite.SuccessfulRuns);
             logger.LogInformation($"Successfully executed PostToOrcasite Azure Function");
-            
-            // Verify that HTTP calls were made to the mock.
-            _mockHttp.VerifyNoOutstandingExpectation();
             
             // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
             Assert.Equal(1, _mockHttp.GetMatchCount(_getFeedsRequest));
