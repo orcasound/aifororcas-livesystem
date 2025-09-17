@@ -93,12 +93,15 @@ namespace NotificationSystem.Models
         /// <returns>A task that represents the asynchronous operation</returns>
         public async Task InitializeAsync()
         {
-            _orcasiteApiKey = Environment.GetEnvironmentVariable("ORCASITE_APIKEY");
-            _orcasiteHostname = Environment.GetEnvironmentVariable("ORCASITE_HOSTNAME") ?? "beta.orcasound.net";
-            _orcasiteFeedsArray = await GetDataArrayAsync(OrcasiteGetFeedsUri);
             if (_orcasiteFeedsArray == null)
             {
-                _logger.LogError("Failed to retrieve orcasite feeds.");
+                _orcasiteApiKey = Environment.GetEnvironmentVariable("ORCASITE_APIKEY");
+                _orcasiteHostname = Environment.GetEnvironmentVariable("ORCASITE_HOSTNAME") ?? "beta.orcasound.net";
+                _orcasiteFeedsArray = await GetDataArrayAsync(OrcasiteGetFeedsUri);
+                if (_orcasiteFeedsArray == null)
+                {
+                    _logger.LogError("Failed to retrieve orcasite feeds.");
+                }
             }
         }
 
