@@ -34,7 +34,7 @@ This will also allow us to better coordinate our efforts and minimize duplicated
 
 ## Contributing Code
 
-Orcasite is currently covered by the [MIT License](https://github.com/orcasound/aifororcas-livesystem/tree/main?tab=MIT-1-ov-file#readme).
+The Notification System is currently covered by the [MIT License](https://github.com/orcasound/aifororcas-livesystem/tree/main?tab=MIT-1-ov-file#readme).
 
 If you are willing to follow the conditions of this license, check out the following link
 to find an unassigned item to contribute to:
