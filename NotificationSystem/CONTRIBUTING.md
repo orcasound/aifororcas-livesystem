@@ -15,7 +15,7 @@ Please read and make sure you understand our [Code of Conduct](/CODE_OF_CONDUCT.
 ## Reporting Bugs
 
 First, **ensure the bug was not already reported** by searching on GitHub under
-[Issues](https://github.com/orcasound/orcasite/issues).
+[Issues](https://github.com/orcasound/aifororcas-livesystem/issues).
 
 If you found a bug, you can help us by
 [submitting a GitHub Issue](https://github.com/orcasound/aifororcas-livesystem/issues/new).
