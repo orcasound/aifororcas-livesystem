@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Models;
 using NotificationSystem.Tests.Common;
+using RichardSzalay.MockHttp;
 using System.Text.Json;
 
 namespace NotificationSystem.Tests.Integration
@@ -14,12 +15,21 @@ namespace NotificationSystem.Tests.Integration
         private readonly IHost _host;
         private readonly IServiceProvider _serviceProvider;
         private readonly string _solutionDirectory;
+        private readonly MockHttpMessageHandler _mockHttp;
+        private readonly MockedRequest _getFeedsRequest;
+        private readonly MockedRequest _postDetectionRequest;
 
         public PostToOrcasiteIntegrationTests()
         {
             _solutionDirectory = OrcasiteTestHelper.FindSolutionDirectory() ?? throw new Exception("Could not find solution directory");
             _host = CreateHostBuilder().Build();
             _serviceProvider = _host.Services;
+            
+            // Get the mock HTTP handler and individual requests for verification purposes.
+            var container = _serviceProvider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
+            _mockHttp = container.MockHttp;
+            _getFeedsRequest = container.GetFeedsRequest;
+            _postDetectionRequest = container.PostDetectionRequest;
         }
 
         /// <summary>
@@ -66,10 +76,26 @@ namespace NotificationSystem.Tests.Integration
                     // Register services that would normally be injected in Azure Functions.
                     services.AddSingleton<ILoggerFactory, LoggerFactory>();
                     services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
-                    services.AddSingleton<OrcasiteHelper>(provider =>
+                    
+                    // Register the container that holds both the helper and mock.
+                    services.AddSingleton<OrcasiteTestHelper.MockOrcasiteHelperContainer>(provider =>
                     {
                         var logger = provider.GetRequiredService<ILogger<OrcasiteHelper>>();
-                        return OrcasiteTestHelper.GetMockOrcasiteHelper(logger);
+                        return new OrcasiteTestHelper.MockOrcasiteHelperContainer(logger);
+                    });
+                    
+                    // Register OrcasiteHelper by extracting from the container.
+                    services.AddSingleton<OrcasiteHelper>(provider =>
+                    {
+                        var container = provider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
+                        return container.Helper;
+                    });
+                    
+                    // Register MockHttpMessageHandler by extracting from the container.
+                    services.AddSingleton<MockHttpMessageHandler>(provider =>
+                    {
+                        var container = provider.GetRequiredService<OrcasiteTestHelper.MockOrcasiteHelperContainer>();
+                        return container.MockHttp;
                     });
                     services.AddTransient<PostToOrcasite>(provider =>
                     {
@@ -123,6 +149,10 @@ namespace NotificationSystem.Tests.Integration
 
             // Assert - Verify the function succeeded.
             Assert.True(ok, "PostToOrcasite failed");
+            
+            // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
+            Assert.Equal(1, _mockHttp.GetMatchCount(_getFeedsRequest));
+            Assert.Equal(1, _mockHttp.GetMatchCount(_postDetectionRequest));
         }
 
         /// <summary>
@@ -151,6 +181,10 @@ namespace NotificationSystem.Tests.Integration
             // Assert - Verify the function executed without throwing.
             Assert.NotEqual(oldRunCount, postToOrcasite.SuccessfulRuns);
             logger.LogInformation($"Successfully executed PostToOrcasite Azure Function");
+            
+            // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
+            Assert.Equal(1, _mockHttp.GetMatchCount(_getFeedsRequest));
+            Assert.Equal(1, _mockHttp.GetMatchCount(_postDetectionRequest));
         }
 
         public void Dispose()

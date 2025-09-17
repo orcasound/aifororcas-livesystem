@@ -306,17 +306,15 @@ namespace NotificationSystem.Models
             }
 
             HttpResponseMessage response = await _httpClient.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                _logger.LogInformation($"Detection for {timestamp} posted successfully!");
-                return true;
-            }
-            else
+            if (!response.IsSuccessStatusCode)
             {
                 string message = await response.Content.ReadAsStringAsync();
                 _logger.LogError($"Error: {response.StatusCode} - {message}");
                 return false;
             }
+
+            _logger.LogInformation($"Detection for {timestamp} posted successfully!");
+            return true;
         }
     }
 }
