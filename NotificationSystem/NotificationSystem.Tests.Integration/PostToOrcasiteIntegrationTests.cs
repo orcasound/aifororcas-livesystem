@@ -1,4 +1,3 @@
-using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -103,16 +102,6 @@ namespace NotificationSystem.Tests.Integration
                         var orcasiteHelper = provider.GetRequiredService<OrcasiteHelper>();
                         return new PostToOrcasite(orcasiteHelper, logger);
                     });
-                    
-                    // Register Cosmos DB services if connection string is available.
-                    var connectionString = context.Configuration["aifororcasmetadatastore_DOCUMENTDB"];
-                    if (!string.IsNullOrEmpty(connectionString) && connectionString != "UseDevelopmentStorage=true")
-                    {
-                        services.AddSingleton<CosmosClient>(provider =>
-                        {
-                            return new CosmosClient(connectionString);
-                        });
-                    }
                 })
                 .ConfigureLogging(logging =>
                 {
@@ -122,53 +111,15 @@ namespace NotificationSystem.Tests.Integration
         }
 
         /// <summary>
-        /// Integration test for UpdateCosmosDb following DI pattern.
-        /// This test uses the actual services configured through dependency injection,
-        /// similar to how they would be used in the Azure Functions runtime.
-        /// </summary>
-        [SkippableFact]
-        public async Task UpdateCosmosDb_WithDependencyInjection()
-        {
-            // Arrange - Get services from DI container.
-            var postToOrcasite = _serviceProvider.GetRequiredService<PostToOrcasite>();
-            var configuration = _serviceProvider.GetRequiredService<IConfiguration>();
-
-            // Skip test if no real Cosmos DB connection is available.
-            var connectionString = configuration["aifororcasmetadatastore_DOCUMENTDB"];
-            Skip.If(string.IsNullOrEmpty(connectionString) || connectionString == "UseDevelopmentStorage=true", "no Cosmos DB connection string configured");
-
-            // Get Cosmos DB client from DI container.
-            var cosmosClient = _serviceProvider.GetService<CosmosClient>();
-            Skip.If(cosmosClient == null, "Cosmos DB client not available");
-
-            // Create test data.
-            List<JsonElement> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
-
-            // Act - Test the actual function logic using DI services.
-            bool ok = await postToOrcasite.ProcessDocumentsAsync(documents);
-
-            // Assert - Verify the function succeeded.
-            Assert.True(ok, "PostToOrcasite failed");
-            
-            // Verify that the expected number of HTTP calls were made (1 GET feeds + 1 POST detection).
-            Assert.Equal(1, _mockHttp.GetMatchCount(_getFeedsRequest));
-            Assert.Equal(1, _mockHttp.GetMatchCount(_postDetectionRequest));
-        }
-
-        /// <summary>
         /// Integration test that calls the actual PostToOrcasite Azure Function entry point.
         /// This test invokes the [FunctionName("PostToOrcasite")] method directly.
         /// </summary>
-        [SkippableFact]
+        [Fact]
         public async Task PostToOrcasite_AzureFunctionEntryPoint_WithDependencyInjection()
         {
             // Arrange - Get services from DI container.
             var logger = _serviceProvider.GetRequiredService<ILogger<PostToOrcasiteIntegrationTests>>();
             var configuration = _serviceProvider.GetRequiredService<IConfiguration>();
-
-            // Skip test if no real Cosmos DB connection is available.
-            var connectionString = configuration["aifororcasmetadatastore_DOCUMENTDB"];
-            Skip.If(string.IsNullOrEmpty(connectionString) || connectionString == "UseDevelopmentStorage=true", "no Cosmos DB connection string configured");
 
             List<JsonElement> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
 

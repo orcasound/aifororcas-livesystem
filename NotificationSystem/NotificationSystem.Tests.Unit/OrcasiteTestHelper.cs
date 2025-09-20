@@ -50,12 +50,6 @@ namespace NotificationSystem.Tests.Common
             return File.ReadAllText(Path.Combine(solutionDirectory, "TestData", filename));
         }
 
-        public static OrcasiteHelper GetMockOrcasiteHelper(ILogger<OrcasiteHelper> logger)
-        {
-            var container = GetMockOrcasiteHelperWithRequestVerification(logger);
-            return container.Helper;
-        }
-
         /// <summary>
         /// Get a mock OrcasiteHelper along with the MockHttpMessageHandler for verification.
         /// </summary>
