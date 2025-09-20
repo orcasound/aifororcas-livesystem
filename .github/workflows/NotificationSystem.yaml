@@ -21,7 +21,6 @@ env:
   WORKING_DIR: NotificationSystem/NotificationSystem
   PUBLISH_DIR: output
   AZURE_APP_NAME: orcanotification
-  aifororcasmetadatastore_DOCUMENTDB: ${{ secrets.AIFORORCASMETADATASTORE_DOCUMENTDB }}
 
 defaults:
   run:
