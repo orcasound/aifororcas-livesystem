@@ -102,6 +102,7 @@ Example:
             }
 
             Console.WriteLine($"Total items read: {count}");
+            Console.WriteLine($"Total items posted: {successes}");
         }
     }
 }
