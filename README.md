@@ -61,6 +61,7 @@ To contribute a pull request for a specific subsystem, please read the correspon
 
 Current subteams and leads are as follows:
 - Machine Learning and Artificial Intelligence (Lead: Patrick Pastore): this subteam deals with the ModelTraining subsystem
+- Inference System (Lead: Sofia Yang): this subteam deals with the InferenceSystem subsystem
 - Notification System (Lead: Dave Thaler): this subteam deals with the NotificationSystem subsystem
 - Infrastructure (Lead: Dave Thaler): this subteam deals with Azure and GitHub infrastructure
 
