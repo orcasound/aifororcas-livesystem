@@ -5,6 +5,7 @@ using NotificationSystem.Models;
 using RateLimiter;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,7 +67,12 @@ namespace NotificationSystem
                 LeaseContainerPrefix = "orcasite",
                 CreateLeaseContainerIfNotExists = true)] IReadOnlyList<JsonElement> input)
         {
-            bool ok = await ProcessDocumentsAsync(input);
+            // Currently all data in the OrcaHello database has incorrect timestamps.
+            // We correct for that here.
+            // TODO(issue #219): Remove this workaround when the data is fixed.
+            IReadOnlyList<JsonElement> correctedInput = await _helper.FixTimestampsAsync(input);
+
+            bool ok = await ProcessDocumentsAsync(correctedInput);
             if (ok)
             {
                 Interlocked.Increment(ref _successfulRuns);
