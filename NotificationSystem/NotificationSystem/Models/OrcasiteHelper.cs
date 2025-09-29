@@ -1,5 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Amazon;
+using Amazon.S3;
+using Amazon.S3.Model;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -158,6 +163,69 @@ namespace NotificationSystem.Models
         }
 
         /// <summary>
+        /// Given a detection, extract the nominal timestamp from it.
+        /// </summary>
+        /// <param name="orcaHelloDetection">Detection to look in</param>
+        /// <returns>Timestamp in DateTime format, or null on error</returns>
+        DateTime? TryGetTimestamp(JsonElement orcaHelloDetection)
+        {
+            if (!orcaHelloDetection.TryGetProperty("timestamp", out var timestamp))
+            {
+                _logger.LogError($"Missing timestamp in ExecuteTask result");
+                return null;
+            }
+            if (timestamp.ValueKind != JsonValueKind.String)
+            {
+                _logger.LogError($"Invalid timestamp kind in ExecuteTask: {timestamp.ValueKind}");
+                return null;
+            }
+            string timestampString = timestamp.GetString();
+            if (!DateTime.TryParse(timestampString, out DateTime dateTime))
+            {
+                _logger.LogError($"Invalid timestamp ExecuteTask: {timestamp}");
+                return null;
+            }
+            return dateTime;
+        }
+
+        /// <summary>
+        /// Given a detection, extract the location id (e.g., "rpi_orcasound_lab") from it.
+        /// </summary>
+        /// <param name="orcaHelloDetection">Detection to look in</param>
+        /// <returns>Location ID as used by S3 and Orcasite</returns>
+        string TryGetLocationIdString(JsonElement orcaHelloDetection)
+        {
+            if (!orcaHelloDetection.TryGetProperty("location", out var location))
+            {
+                _logger.LogError($"Missing location in ExecuteTask result");
+                return null;
+            }
+            if (location.ValueKind != JsonValueKind.Object)
+            {
+                _logger.LogError($"Invalid location kind in ExecuteTask: {location.ValueKind}");
+                return null;
+            }
+
+            if (!location.TryGetProperty("id", out var locationId))
+            {
+                _logger.LogError($"Missing location.id in ExecuteTask result");
+                return null;
+            }
+            if (locationId.ValueKind != JsonValueKind.String)
+            {
+                _logger.LogError($"Invalid location.id kind in ExecuteTask: {locationId.ValueKind}");
+                return null;
+            }
+            string locationIdString = locationId.GetString();
+            if (locationIdString == null)
+            {
+                _logger.LogError($"Couldn't get location ID as a string");
+                return null;
+            }
+            return locationIdString;
+        }
+
+        /// <summary>
         /// Parse JSON representing an OrcaHello detection into just the fields we need.
         /// </summary>
         /// <param name="json">JSON to parse</param>
@@ -191,31 +259,9 @@ namespace NotificationSystem.Models
                 return false;
             }
 
-            if (!orcaHelloDetection.TryGetProperty("location", out var location))
-            {
-                _logger.LogError($"Missing location in ExecuteTask result");
-                return false;
-            }
-            if (location.ValueKind != JsonValueKind.Object)
-            {
-                _logger.LogError($"Invalid location kind in ExecuteTask: {location.ValueKind}");
-                return false;
-            }
-
-            if (!location.TryGetProperty("id", out var locationId))
-            {
-                _logger.LogError($"Missing location.id in ExecuteTask result");
-                return false;
-            }
-            if (locationId.ValueKind != JsonValueKind.String)
-            {
-                _logger.LogError($"Invalid location.id kind in ExecuteTask: {locationId.ValueKind}");
-                return false;
-            }
-            string locationIdString = locationId.GetString();
+            string locationIdString = TryGetLocationIdString(orcaHelloDetection);
             if (locationIdString == null)
             {
-                _logger.LogError($"Couldn't get location ID as a string");
                 return false;
             }
 
@@ -228,22 +274,12 @@ namespace NotificationSystem.Models
             }
 
             // Get timestamp according to OrcaHello.
-            if (!orcaHelloDetection.TryGetProperty("timestamp", out var timestamp))
+            DateTime? dateTime = TryGetTimestamp(orcaHelloDetection);
+            if (dateTime == null)
             {
-                _logger.LogError($"Missing timestamp in ExecuteTask result");
                 return false;
             }
-            if (timestamp.ValueKind != JsonValueKind.String)
-            {
-                _logger.LogError($"Invalid timestamp kind in ExecuteTask: {timestamp.ValueKind}");
-                return false;
-            }
-            timestampString = timestamp.GetString();
-            if (!DateTime.TryParse(timestampString, out DateTime dateTime))
-            {
-                _logger.LogError($"Invalid timestamp ExecuteTask: {timestamp}");
-                return false;
-            }
+            timestampString = dateTime.Value.ToString("o"); // ISO 8601 format
 
             // Get comments from OrcaHello.  This property will only be present
             // if the detection was already moderated within OrcaHello.
@@ -318,6 +354,131 @@ namespace NotificationSystem.Models
 
             _logger.LogInformation($"Detection for {timestamp} posted successfully!");
             return true;
+        }
+
+        Dictionary<string, List<string>> _s3FoldersCache = new Dictionary<string, List<string>>();
+
+        /// <summary>
+        /// Get the list of folders (representing .ts segment start times) for
+        /// a given location ID from the public S3 bucket.
+        /// </summary>
+        /// <param name="locationIdString">Location ID to look in</param>
+        /// <returns>List of folder names representing HLS start times</returns>
+        public async Task<List<string>> GetPublicS3FoldersAsync(string locationIdString)
+        {
+            // First try using a cached value.
+            if (_s3FoldersCache.TryGetValue(locationIdString, out var cachedFolders))
+            {
+                return cachedFolders;
+            }
+
+            var config = new AmazonS3Config
+            {
+                RegionEndpoint = RegionEndpoint.USWest2
+            };
+
+            var client = new AmazonS3Client(new Amazon.Runtime.AnonymousAWSCredentials(), config);
+            var allFolders = new List<string>();
+            string continuationToken = null;
+
+            do
+            {
+                var request = new ListObjectsV2Request
+                {
+                    BucketName = "audio-orcasound-net",
+                    Prefix = locationIdString + "/hls/",
+                    Delimiter = "/", // Group by folders
+                    ContinuationToken = continuationToken
+                };
+
+                var response = await client.ListObjectsV2Async(request);
+
+                var folderNames = response.CommonPrefixes
+                    .Select(prefix => prefix.TrimEnd('/').Split('/').Last())
+                    .ToList();
+
+                allFolders.AddRange(folderNames);
+
+                continuationToken = response.IsTruncated ?? false
+                    ? response.NextContinuationToken
+                    : null;
+            } while (continuationToken != null);
+
+            _s3FoldersCache[locationIdString] = allFolders;
+            return allFolders;
+        }
+
+        /// <summary>
+        /// Take a list of detections with incorrect timestamps and return an updated
+        /// list with the corrected timestamps.  This can take several seconds since it
+        /// requires querying S3 to find the .ts folders.  Hence, this should only be
+        /// done when it is known that the timestamps are incorrect.
+        /// </summary>
+        /// <param name="originalInput">List of detections to process</param>
+        /// <returns>List of corrected detections</returns>
+        public async Task<List<JsonElement>> FixTimestampsAsync(IReadOnlyList<JsonElement> originalInput)
+        {
+            var correctedInput = new List<JsonElement>();
+
+            foreach (JsonElement originalDetection in originalInput)
+            {
+                DateTime? originalDateTime = TryGetTimestamp(originalDetection);
+                if (originalDateTime == null)
+                {
+                    continue;
+                }
+
+                // Convert dateTime to Unix time (seconds since 1970-01-01).
+                var originalDateTimeOffset = new DateTimeOffset(originalDateTime.Value);
+                long originalUnixTimeSeconds = originalDateTimeOffset.ToUnixTimeSeconds();
+
+                // Fix the Unix time.  The originalDateTime is incorrect and
+                // was computed based on clips being 11 seconds long instead
+                // of 10 seconds long.  We can correct this once we know the
+                // .ts folder date to start calculating the drift based on.
+
+                string locationIdString = TryGetLocationIdString(originalDetection);
+                if (string.IsNullOrEmpty(locationIdString))
+                {
+                    continue;
+                }
+
+                List<string> folders = await GetPublicS3FoldersAsync(locationIdString);
+
+                // Find the most recent folder older than originalUnixTimeSeconds.
+                long folderTimeSeconds = 0;
+                foreach (var folderName in folders)
+                {
+                    if (long.TryParse(folderName, out long unixTime))
+                    {
+                        if (unixTime <= originalUnixTimeSeconds && unixTime > folderTimeSeconds)
+                        {
+                            folderTimeSeconds = unixTime;
+                        }
+                    }
+                }
+                if (folderTimeSeconds == 0)
+                {
+                    // No folder found.
+                    continue;
+                }
+
+                long originalSecondsIntoFolder = originalUnixTimeSeconds - folderTimeSeconds;
+                long originalClipIndex = originalSecondsIntoFolder / 11;
+                long correctedSecondsIntoFolder = originalClipIndex * 10;
+                long correctedUnixTimeSeconds = folderTimeSeconds + correctedSecondsIntoFolder;
+                DateTimeOffset correctedDateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(correctedUnixTimeSeconds);
+                string correctedTimestampString = correctedDateTimeOffset.ToUniversalTime()
+                    .ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'");
+
+                JsonObject obj = JsonNode.Parse(originalDetection.GetRawText())!.AsObject();
+                obj["timestamp"] = correctedTimestampString;
+
+                string updatedJson = obj.ToJsonString();
+                using JsonDocument doc = JsonDocument.Parse(updatedJson);
+                correctedInput.Add(doc.RootElement.Clone());
+            }
+            return correctedInput;
         }
     }
 }

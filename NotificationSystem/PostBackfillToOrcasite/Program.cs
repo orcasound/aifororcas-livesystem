@@ -89,7 +89,13 @@ Example:
                     // Try posting the detection to Orcasite.
                     // This will fail if it is already present there.
                     var documents = new List<JsonElement> { element };
-                    bool ok = await postToOrcasite.ProcessDocumentsAsync(documents);
+
+                    // Currently all data in the OrcaHello database has incorrect timestamps.
+                    // We correct for that here.
+                    // TODO(issue #219): Update this workaround when the data is fixed.
+                    IReadOnlyList<JsonElement> correctedDocuments = await orcasiteHelper.FixTimestampsAsync(documents);
+
+                    bool ok = await postToOrcasite.ProcessDocumentsAsync(correctedDocuments);
                     if (ok)
                     {
                         successes++;
