@@ -31,3 +31,10 @@ updates:
       - dependency-name: "*"
         update-types:
           - "version-update:semver-major"
+  - package-ecosystem: "pip"
+    directory: "/InferenceSystem"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+    allow:
+      - dependency-type: "direct"
