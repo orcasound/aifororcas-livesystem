@@ -8,14 +8,29 @@ This document describes the following steps
 
 Note: We use Python 3, specifically tested with Python 3.7.4
 
+**Important:** Python 3.8 or earlier is required. The dependencies (particularly torchaudio==0.6.0 and older versions of librosa, fastai) are not compatible with Python 3.9 or later. If you encounter installation errors with newer Python versions, please use Python 3.7 or 3.8.
+
 # How to run the InferenceSystem locally
 ## Create a virtual environment
 
-1. In your working directory, run `python -m venv inference-venv`. This creates a directory `inference-venv` with relevant files/scripts. 
+1. In your working directory, run `python -m venv inference-venv` using Python 3.7 or 3.8. This creates a directory `inference-venv` with relevant files/scripts. 
 2. On Mac or Linux, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
 
     On Windows, activate with `.\inference-venv\Scripts\activate.bat` and `.\inference-venv\Scripts\deactivate.bat` when done
-3. In an active environment, cd to `/InferenceSystem` and run `python -m pip install --upgrade pip && pip install -r requirements.txt` 
+3. In an active environment, cd to `/InferenceSystem` and run `python -m pip install --upgrade pip && pip install -r requirements.txt`
+
+**Troubleshooting:** If you encounter dependency conflicts with standard `pip install`, you can use `uv` which is better at resolving package version conflicts:
+
+```bash
+# Install uv (on Mac/Linux)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# On Windows, use pip to install uv first
+pip install uv
+
+# Then install dependencies using uv pip
+uv pip install -r requirements.txt
+``` 
 
 ## Model download
 
