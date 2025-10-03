@@ -97,6 +97,7 @@ def populate_metadata_json(
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--config", type=str, help="config.yml", required=True)
+	parser.add_argument("--max_iterations", type=int, help="maximum number of clips to process", default=None)
 	args = parser.parse_args()
 
 	# read config
@@ -169,7 +170,13 @@ if __name__ == "__main__":
 	# Adding a 10 second addition because there is logic in HLSStream that checks if now < current_clip_end_time
 	current_clip_end_time = datetime.utcnow() + timedelta(0,10)
 
+	max_iterations = args.max_iterations
+	iteration_count = 0
 	while not hls_stream.is_stream_over():
+		if max_iterations is not None and iteration_count >= max_iterations:
+			break
+		iteration_count += 1
+
 		#TODO (@prgogia) prepend hydrophone friendly name to clip and remove slashes
 		clip_path, start_timestamp, current_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
 
