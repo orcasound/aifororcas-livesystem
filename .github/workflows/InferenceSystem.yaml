@@ -1,0 +1,125 @@
+name: InferenceSystem
+
+on:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - InferenceSystem/**
+    - .github/workflows/InferenceSystem.yaml
+  push:
+    branches:
+    - main
+    paths:
+    - InferenceSystem/**
+    - .github/workflows/InferenceSystem.yaml
+  workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
+
+env:
+  DOTNET_VERSION: 8.0.x
+  DOTNET_RUNTIME: win-x86
+  WORKING_DIR: InferenceSystem
+
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
+
+jobs:
+  test-local:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+    - name: Download model
+      working-directory: InferenceSystem
+      run: |
+        curl -o 11-15-20.FastAI.R1-12.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+        unzip 11-15-20.FastAI.R1-12.zip
+        ls -l model
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Create environment
+      working-directory: InferenceSystem
+      run: |
+        python -m venv inference-venv
+
+    - name: Set up environment for Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      working-directory: InferenceSystem
+      run: |
+        call .\inference-venv\Scripts\activate.bat && python -m pip install --upgrade pip && pip install -r requirements.txt
+
+    - name: Set up environment for Ubuntu
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      working-directory: InferenceSystem
+      run: |
+        source bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+
+    - name: Run live inference locally on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      working-directory: InferenceSystem
+      run: |
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
+
+    - name: Run live inference locally on Ubuntu
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      working-directory: InferenceSystem
+      run: |
+        source inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
+
+  test-docker:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+    - name: Download model
+      working-directory: InferenceSystem
+      run: |
+        curl -o model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+
+    - name: Create environment variable file
+      working-directory: InferenceSystem
+      run: |
+        touch inference-system/.env
+
+    - name: Build docker container
+      working-directory: InferenceSystem
+      run: |
+        docker build . -t live-inference-system -f ./Dockerfile
+
+    - name: Test docker container
+      working-directory: InferenceSystem
+      run: |
+        docker run --rm -it --env-file .env live-inference-system
