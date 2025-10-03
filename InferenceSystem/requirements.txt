@@ -1,5 +1,5 @@
 -f https://download.pytorch.org/whl/torch_stable.html
-fastai==1.0.61
+fastai==2.7.19
 librosa==0.8.0
 pydub==0.24.1
 pandas
