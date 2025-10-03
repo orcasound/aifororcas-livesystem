@@ -1,7 +1,7 @@
 -f https://download.pytorch.org/whl/torch_stable.html
 fastai==1.0.61
 librosa==0.8.0
-pydub==0.24.1
+pydub==0.25.1
 pandas<2.0
 numpy==1.19.5
 torchaudio==0.6.0
