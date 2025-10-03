@@ -2,7 +2,7 @@
 fastai==1.0.61
 librosa==0.8.0
 pydub==0.24.1
-pandas
+pandas<2.0
 numpy==1.21.6
 torchaudio==0.6.0
 git+https://github.com/fastaudio/fastai_audio@0.1

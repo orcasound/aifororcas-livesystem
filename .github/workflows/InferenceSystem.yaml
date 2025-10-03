@@ -25,34 +25,19 @@ permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
-  test-local:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-
-    permissions:
-      contents: read
-
+  test-windows:
+    runs-on: windows-latest
     steps:
-    - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
-      with:
-        egress-policy: audit
-
-    - name: Checkout
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    - name: Check out
+      uses: actions/checkout@v5
 
     - name: Download model
-      working-directory: InferenceSystem
+      id: model-path
       run: |
-        curl -o 11-15-20.FastAI.R1-12.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
-        unzip 11-15-20.FastAI.R1-12.zip
-        ls -l model
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.8'
+        mkdir -p InferenceSystem/model
+        curl -o InferenceSystem/model/model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+        unzip InferenceSystem/model/model.zip -d InferenceSystem/model
+        echo "path=InferenceSystem/model" >> $GITHUB_OUTPUT
 
     - name: Cache pip
       uses: actions/cache@v4
@@ -62,44 +47,69 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
+
+    - name: Install FFmpeg
+      run: choco install ffmpeg -y
+
     - name: Create environment
       working-directory: InferenceSystem
       run: |
         python -m venv inference-venv
 
-    - name: Set up environment for Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+    - name: Set up environment
       working-directory: InferenceSystem
       shell: cmd
       run: |
         call .\inference-venv\Scripts\activate.bat && python -m pip install --upgrade pip && pip install -r requirements.txt
 
-    - name: Set up environment for Ubuntu
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      working-directory: InferenceSystem
-      run: |
-        source ./inference-venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-
-    - name: Install FFmpeg on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        choco install ffmpeg -y
-
-    - name: Install FFmpeg on Ubuntu
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ffmpeg
-
-    - name: Run live inference locally on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+    - name: Test live inference locally
       working-directory: InferenceSystem
       shell: cmd
       run: |
         call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
 
-    - name: Run live inference locally on Ubuntu
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out
+      uses: actions/checkout@v5
+
+    - name: Download model
+      id: model-path
+      run: |
+        mkdir -p InferenceSystem/model
+        curl -o InferenceSystem/model/model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+        unzip InferenceSystem/model/model.zip -d InferenceSystem/model
+        echo "path=InferenceSystem/model" >> $GITHUB_OUTPUT
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
+
+    - name: Install FFmpeg
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+
+    - name: Set up environment
+      working-directory: InferenceSystem
+      run: |
+        source ./inference-venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+
+    - name: Test live inference locally
       working-directory: InferenceSystem
       run: |
         source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
