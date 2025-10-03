@@ -35,8 +35,8 @@ jobs:
       id: model-path
       run: |
         mkdir -p InferenceSystem/model
-        curl -o InferenceSystem/model/model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
-        unzip InferenceSystem/model/model.zip -d InferenceSystem/model
+        curl -o InferenceSystem/model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+        unzip InferenceSystem/model.zip -d InferenceSystem
         echo "path=InferenceSystem/model" >> $GITHUB_OUTPUT
 
     - name: Cache pip
@@ -82,8 +82,8 @@ jobs:
       id: model-path
       run: |
         mkdir -p InferenceSystem/model
-        curl -o InferenceSystem/model/model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
-        unzip InferenceSystem/model/model.zip -d InferenceSystem/model
+        curl -o InferenceSystem/model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+        unzip InferenceSystem/model.zip -d InferenceSystem
         echo "path=InferenceSystem/model" >> $GITHUB_OUTPUT
 
     - name: Cache pip
@@ -103,6 +103,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y ffmpeg
+
+    - name: Create environment
+      working-directory: InferenceSystem
+      run: |
+        python -m venv inference-venv
 
     - name: Set up environment
       working-directory: InferenceSystem
