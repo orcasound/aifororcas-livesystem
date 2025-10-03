@@ -19,6 +19,7 @@ import spectrogram_visualizer
 
 # TODO: get the list from https://live.orcasound.net/api/json/feeds
 ORCASOUND_STREAMS = {
+    'AndrewsBay': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_andrews_bay',
     'BushPoint': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_bush_point',
     'MaSTCenter': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_mast_center',
     'NorthSanJuanChannel': 'https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_north_sjc',
