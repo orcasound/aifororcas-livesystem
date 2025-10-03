@@ -70,7 +70,7 @@ jobs:
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
 
   test-ubuntu:
     runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
     - name: Test live inference locally
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
 
   test-docker:
     runs-on: ubuntu-latest
