@@ -15,10 +15,11 @@ on:
     - .github/workflows/InferenceSystem.yaml
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
-env:
-  DOTNET_VERSION: 8.0.x
-  DOTNET_RUNTIME: win-x86
-  WORKING_DIR: InferenceSystem
+concurrency:
+  # Cancel any CI/CD workflow currently in progress for the same PR.
+  # Allow running concurrently with any other commits.
+  group: build-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
@@ -76,7 +77,7 @@ jobs:
       if: ${{ matrix.os == 'ubuntu-latest' }}
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/Scripts/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+        source ./inference-venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
 
     - name: Run live inference locally on Windows
       if: ${{ matrix.os == 'windows-latest' }}
@@ -88,7 +89,7 @@ jobs:
       if: ${{ matrix.os == 'ubuntu-latest' }}
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/Scripts/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
 
   test-docker:
     runs-on: ubuntu-latest
