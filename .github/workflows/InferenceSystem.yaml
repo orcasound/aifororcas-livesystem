@@ -70,6 +70,7 @@ jobs:
     - name: Set up environment for Windows
       if: ${{ matrix.os == 'windows-latest' }}
       working-directory: InferenceSystem
+      shell: cmd
       run: |
         call .\inference-venv\Scripts\activate.bat && python -m pip install --upgrade pip && pip install -r requirements.txt
 
@@ -82,6 +83,7 @@ jobs:
     - name: Run live inference locally on Windows
       if: ${{ matrix.os == 'windows-latest' }}
       working-directory: InferenceSystem
+      shell: cmd
       run: |
         call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
 
