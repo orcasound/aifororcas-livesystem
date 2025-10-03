@@ -38,3 +38,13 @@ updates:
       day: "saturday"
     allow:
       - dependency-type: "direct"
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "inference system"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
