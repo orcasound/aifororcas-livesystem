@@ -205,7 +205,7 @@ def main():
         help="End time in PST in following format 2020-07-25 20:15")
     # TODO: get list of streams from https://live.orcasound.net/api/json/feeds instead of hard coding it
     parser.add_argument("--s3_stream", type=str, required=True, \
-        help="Hydrophone stream (bush_point/mast_center/north_sjc/orcasound_lab/point_robinson/port_townsend/sunset_bay)")
+        help="Hydrophone stream (andrews_bay/bush_point/mast_center/north_sjc/orcasound_lab/point_robinson/port_townsend/sunset_bay)")
     parser.add_argument("--model_path", type=str, required=True, \
         help="Path to the model folder that contains weights and mean, invstd")
     parser.add_argument("--annotation_threshold", type=float, required=True, \
