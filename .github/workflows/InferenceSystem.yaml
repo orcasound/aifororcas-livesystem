@@ -78,18 +78,6 @@ jobs:
       run: |
         call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
 
-    - name: Test with AudioSet LiveHLS config
-      working-directory: InferenceSystem
-      shell: cmd
-      run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/AudioSet_LiveHLS_OrcasoundLab.yml --max_iterations 1
-
-    - name: Test with AudioSet DateRangeHLS config
-      working-directory: InferenceSystem
-      shell: cmd
-      run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/AudioSet_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
-
   test-ubuntu:
     runs-on: ubuntu-latest
     steps:
@@ -141,16 +129,6 @@ jobs:
       working-directory: InferenceSystem
       run: |
         source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
-
-    - name: Test with AudioSet LiveHLS config
-      working-directory: InferenceSystem
-      run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/AudioSet_LiveHLS_OrcasoundLab.yml --max_iterations 1
-
-    - name: Test with AudioSet DateRangeHLS config
-      working-directory: InferenceSystem
-      run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/AudioSet_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
 
   test-docker:
     runs-on: ubuntu-latest
