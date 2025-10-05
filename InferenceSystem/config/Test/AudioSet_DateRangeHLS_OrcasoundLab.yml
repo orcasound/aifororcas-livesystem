@@ -1,8 +1,8 @@
-model_type: "AudioSet"
+model_type: "FastAI"
 model_local_threshold: 0.7
 model_global_threshold: 3
 model_path: "./model"
-model_name: ""
+model_name: "model.pkl"
 hls_stream_type: "DateRangeHLS"
 hls_polling_interval: 60
 hls_start_time_pst: "2020-09-01 15:13"

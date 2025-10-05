@@ -27,6 +27,13 @@ permissions:  # added using https://github.com/step-security/secure-repo
 jobs:
   test-windows:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        config:
+          - FastAI_LiveHLS_OrcasoundLab.yml
+          - FastAI_DateRangeHLS_OrcasoundLab.yml
+          - AudioSet_LiveHLS_OrcasoundLab.yml
+          - AudioSet_DateRangeHLS_OrcasoundLab.yml
     steps:
     - name: Check out
       uses: actions/checkout@v5
@@ -70,10 +77,17 @@ jobs:
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/${{ matrix.config }} --max_iterations 1
 
   test-ubuntu:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+          - FastAI_LiveHLS_OrcasoundLab.yml
+          - FastAI_DateRangeHLS_OrcasoundLab.yml
+          - AudioSet_LiveHLS_OrcasoundLab.yml
+          - AudioSet_DateRangeHLS_OrcasoundLab.yml
     steps:
     - name: Check out
       uses: actions/checkout@v5
@@ -117,7 +131,7 @@ jobs:
     - name: Test live inference locally
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/${{ matrix.config }} --max_iterations 1
 
   test-docker:
     runs-on: ubuntu-latest
