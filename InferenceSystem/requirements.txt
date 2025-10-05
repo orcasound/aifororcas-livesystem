@@ -20,7 +20,7 @@ azure-cosmos
 azure-cosmosdb-table
 azure-storage-blob
 ffmpeg-python
-numba>=0.48,<0.59.0
+numba>=0.51.0,<0.59.0
 opencv-python
 boto3
 pytz

@@ -8,7 +8,7 @@ The InferenceSystem uses Python 3.8 and runs on Ubuntu 18.04 in production (Dock
 
 | Package | Constraint | Reasoning |
 |---------|-----------|-----------|
-| `numba` | `>=0.48,<0.59.0` | Versions 0.59.0+ require Python 3.9+. Max version 0.58.1 is confirmed working. |
+| `numba` | `>=0.51.0,<0.59.0` | Versions 0.59.0+ require Python 3.9+. Max version 0.58.1 is confirmed working. Minimum 0.51.0 required by librosa 0.10.x. |
 | `numpy` | `>=1.19.5,<1.25.0` | Versions 1.25.0+ require Python 3.9+. Max version 1.24.4 is confirmed working. |
 | `spacy` | `>=3.5.4,<3.8.3` | Version 3.8.7 doesn't have wheels for Python 3.8. Max version 3.8.2 is confirmed available. |
 | `librosa` | `>=0.8.0,<0.11.0` | Version 0.11.0+ requires numba 0.51.0+, which may have compatibility issues. Version 0.10.0 is confirmed working. |
