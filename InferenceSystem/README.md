@@ -268,6 +268,27 @@ docker push orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployme
 
 **Note:** You only need to build and push one container image now, regardless of the number of hydrophones. Each hydrophone deployment references the same image but runs in a different namespace, which the container detects to load the appropriate configuration.
 
+## Migration from Hydrophone-Specific Images
+
+If you're currently using the old hydrophone-specific container images (e.g., tags like `09-19-24.FastAI.R1-12.BushPoint.v0`), you can migrate to the common container image approach:
+
+1. **Build and push a new common container image** using the instructions above (note the new tag format without hydrophone location).
+
+2. **Update each deployment YAML file** in the [deploy](./deploy/) folder to reference the new common image tag. For example:
+   ```yaml
+   image: orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.v0
+   ```
+   (Note: no `.BushPoint`, `.OrcasoundLab`, etc. suffix)
+
+3. **Apply the updated deployment** for each hydrophone:
+   ```bash
+   kubectl apply -f deploy/bush-point.yaml
+   kubectl apply -f deploy/orcasound-lab.yaml
+   # etc. for other hydrophones
+   ```
+
+The container will automatically detect which namespace it's running in and load the appropriate configuration. The old hydrophone-specific images will continue to work, but using the common image approach will significantly reduce build times and simplify maintenance.
+
 # Deploying an updated docker build to Azure Kubernetes Service
 
 We are deploying one hydrophone per namespace. The container automatically detects its namespace and loads the appropriate configuration at runtime. To deploy a hydrophone, the following Kubernetes resources need to be created:

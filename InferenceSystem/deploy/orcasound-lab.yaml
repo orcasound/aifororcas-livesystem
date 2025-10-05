@@ -15,6 +15,9 @@ spec:
     spec:
       containers:
       - name: inference-system
+        # NOTE: This is the old hydrophone-specific image. When using the new common container image,
+        # update to a tag without the hydrophone location suffix (e.g., 11-15-20.FastAI.R1-12.v0)
+        # The container will automatically detect the namespace and load the appropriate config.
         image: orcaconservancycr.azurecr.io/live-inference-system:09-18-24.FastAI.R1-12.OrcasoundLab.v0
         resources:
           limits:
