@@ -100,7 +100,7 @@ def get_config_path():
 	
 	Priority:
 	1. Command line --config argument (for backward compatibility and local testing)
-	2. Kubernetes namespace detection (for production deployments)
+	2. Kubernetes namespace detection with ConfigMap (for production deployments)
 	
 	Returns:
 		str: Path to the config file
@@ -121,32 +121,21 @@ def get_config_path():
 			with open(namespace_file, "r") as f:
 				namespace = f.read().strip()
 			
-			# Map namespace to config file
-			# Namespace format: "bush-point", "orcasound-lab", etc.
-			# Config format: "FastAI_LiveHLS_BushPoint.yml", "FastAI_LiveHLS_OrcasoundLab.yml", etc.
-			namespace_to_config = {
-				"bush-point": "./config/Production/FastAI_LiveHLS_BushPoint.yml",
-				"mast-center": "./config/Production/FastAI_LiveHLS_MastCenter.yml",
-				"north-sjc": "./config/Production/FastAI_LiveHLS_NorthSJC.yml",
-				"orcasound-lab": "./config/Production/FastAI_LiveHLS_OrcasoundLab.yml",
-				"point-robinson": "./config/Production/FastAI_LiveHLS_PointRobinson.yml",
-				"port-townsend": "./config/Production/FastAI_LiveHLS_PortTownsend.yml",
-				"sunset-bay": "./config/Production/FastAI_LiveHLS_SunsetBay.yml"
-			}
+			# Config files are mounted from ConfigMap at /config/{namespace}.yml
+			config_path = f"/config/{namespace}.yml"
 			
-			config_path = namespace_to_config.get(namespace)
-			if config_path:
+			if os.path.exists(config_path):
 				print(f"Detected Kubernetes namespace: {namespace}")
-				print(f"Using config: {config_path}")
+				print(f"Using config from ConfigMap: {config_path}")
 				return config_path, args
 			else:
-				raise ValueError(f"Unknown namespace: {namespace}. Cannot map to config file.")
+				raise ValueError(f"Config file not found for namespace '{namespace}' at {config_path}. Ensure ConfigMap is properly mounted.")
 		except Exception as e:
-			print(f"Error reading namespace: {e}")
+			print(f"Error reading namespace or config: {e}")
 			raise
 	
 	# If neither config argument nor namespace detection works, raise error
-	raise ValueError("No config file specified. Either provide --config argument or run in Kubernetes with namespace.")
+	raise ValueError("No config file specified. Either provide --config argument or run in Kubernetes with namespace and ConfigMap mounted at /config.")
 
 if __name__ == "__main__":
 	# Get config path

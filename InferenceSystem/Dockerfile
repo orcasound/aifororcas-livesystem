@@ -27,6 +27,5 @@ RUN rm ./model.zip
 
 # Move source code to app working directory
 COPY ./src/ ./src
-COPY ./config/ ./config
 
 CMD ["python3", "-u", "./src/LiveInferenceOrchestrator.py"]

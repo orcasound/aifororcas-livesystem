@@ -171,17 +171,19 @@ This can be completed in two ways.
 
 **Note:** With the new common container image approach, adding a new hydrophone is now much simpler and no longer requires building a separate Docker image.
 
-1. Create a new config file under the [config/Production](config/Production) folder following the naming convention `FastAI_LiveHLS_<HydrophoneName>.yml` where `<HydrophoneName>` is in PascalCase (e.g., `BushPoint`, `OrcasoundLab`).
+1. Add the new hydrophone configuration to the ConfigMap in [deploy/configmap.yaml](deploy/configmap.yaml). The key should be `{namespace}.yml` where namespace is in kebab-case (e.g., `new-hydrophone.yml`).
 
-2. Update [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py) and [src/globals.py](src/globals.py) to add variables for the new hydrophone location.
+2. Update [src/globals.py](src/globals.py) to add variables for the new hydrophone location.
 
-3. Add the namespace-to-config mapping in [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py) in the `get_config_path()` function. The namespace should be in kebab-case (e.g., `bush-point`, `orcasound-lab`).
+3. Create a new deployment YAML under the [deploy](deploy) folder using the namespace as the filename (e.g., `new-hydrophone.yaml`). Use an existing deployment file as a template.
 
-4. Create a new deployment YAML under the [deploy](deploy) folder using the namespace as the filename (e.g., `bush-point.yaml`).
+4. Follow the deployment steps in the "Deploying an updated docker build to Azure Kubernetes Service" section below to:
+   - Create the namespace
+   - Update or create the ConfigMap with the new configuration
+   - Create the secret
+   - Apply the deployment
 
-5. Follow the deployment steps in the "Deploying an updated docker build to Azure Kubernetes Service" section below to create the namespace, secret, and deployment.
-
-**Important:** The container image is now common across all hydrophones. The hydrophone-specific configuration is determined by the Kubernetes namespace name, which is automatically detected by the container at runtime.
+**Important:** The container image is now common across all hydrophones. Configuration files are stored in a Kubernetes ConfigMap and mounted into the container at `/config/`. The container reads the namespace and loads the corresponding config file (e.g., namespace `bush-point` loads `/config/bush-point.yml`).
 
 ## Building the docker container for production
 
@@ -193,7 +195,7 @@ should take a much shorter time in future builds.
 docker build . -t live-inference-system -f ./Dockerfile
 ```
 
-**Important:** The Docker container is now common across all hydrophones. The container automatically detects which hydrophone it's serving by reading the Kubernetes namespace and loading the appropriate configuration file. You no longer need to edit the Dockerfile or build separate images for each hydrophone location.
+**Important:** The Docker container is now common across all hydrophones and does not include configuration files. The container automatically detects which hydrophone it's serving by reading the Kubernetes namespace and loading the configuration from a ConfigMap mounted at `/config/`. You no longer need to edit the Dockerfile or build separate images for each hydrophone location.
 
 
 ## Running the docker container
@@ -291,13 +293,14 @@ The container will automatically detect which namespace it's running in and load
 
 # Deploying an updated docker build to Azure Kubernetes Service
 
-We are deploying one hydrophone per namespace. The container automatically detects its namespace and loads the appropriate configuration at runtime. To deploy a hydrophone, the following Kubernetes resources need to be created:
+We are deploying one hydrophone per namespace. The container automatically detects its namespace and loads the configuration from a ConfigMap at runtime. To deploy a hydrophone, the following Kubernetes resources need to be created:
 
 1. Namespace: used to group resources and identify which hydrophone configuration to use
-2. Secret: holds connection strings used by inference system
-3. Deployment: forces one instance of inference system to remain running at all times
+2. ConfigMap: holds the configuration files for all hydrophones (shared across namespaces)
+3. Secret: holds connection strings used by inference system
+4. Deployment: forces one instance of inference system to remain running at all times
 
-**Important:** The namespace name must match one of the supported hydrophone identifiers (e.g., `bush-point`, `orcasound-lab`, `mast-center`, `north-sjc`, `point-robinson`, `port-townsend`, `sunset-bay`). The container reads the namespace at runtime to determine which configuration file to load.
+**Important:** Configuration files are stored in a Kubernetes ConfigMap and mounted at `/config/` in the container. The container reads the namespace (e.g., `bush-point`) and loads the corresponding config file (e.g., `/config/bush-point.yml`).
 
 ## Prerequisites
 
@@ -324,12 +327,34 @@ Verify it is successful. You should see a list of VM names and no error message.
 kubectl get nodes
 ```
 
-3. If deploying a new hydrophone, create a new namespace and secret. Skip this step if not bringing up a new hydrophone.
-
-**Important:** The namespace name must match a supported hydrophone identifier and correspond to a config file in `config/Production/`. For example, namespace `bush-point` maps to `FastAI_LiveHLS_BushPoint.yml`.
+3. Create or update the ConfigMap with hydrophone configurations. This ConfigMap is shared across all namespaces and contains configurations for all hydrophones.
 
 ```bash
-# replace "bush-point" with hydrophone identifier (must match namespace-to-config mapping in LiveInferenceOrchestrator.py)
+# Create or update the ConfigMap (this applies to all namespaces)
+kubectl apply -f deploy/configmap.yaml
+```
+
+The ConfigMap should contain entries like:
+```yaml
+data:
+  bush-point.yml: |
+    model_type: "FastAI"
+    hls_hydrophone_id: "rpi_bush_point"
+    # ... other config parameters
+  orcasound-lab.yml: |
+    model_type: "FastAI"
+    hls_hydrophone_id: "rpi_orcasound_lab"
+    # ... other config parameters
+```
+
+See [deploy/configmap.yaml](deploy/configmap.yaml) for the complete example.
+
+4. If deploying a new hydrophone, create a new namespace and secret. Skip this step if not bringing up a new hydrophone.
+
+**Important:** The namespace name must match a config key in the ConfigMap. For example, namespace `bush-point` must have a corresponding `bush-point.yml` entry in the ConfigMap.
+
+```bash
+# replace "bush-point" with hydrophone identifier (must match a key in the ConfigMap)
 kubectl create namespace bush-point
 
 kubectl create secret generic inference-system -n bush-point \
@@ -338,15 +363,15 @@ kubectl create secret generic inference-system -n bush-point \
     --from-literal=INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING='<appinsights_connection_string>'
 ```
 
-4. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one. Update the image tag in the deployment file to use the common container image (without hydrophone-specific tag).
+5. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one. The deployment file should reference the ConfigMap volume mount.
 
 ```bash
 kubectl apply -f deploy/bush-point.yaml
 ```
 
-**Note:** All deployment files should now reference the same container image. The container determines which hydrophone it's serving based on the namespace it's running in.
+**Note:** All deployment files now reference the same container image and mount the ConfigMap at `/config/`. The container determines which hydrophone it's serving based on the namespace and loads the corresponding config file from the ConfigMap.
 
-5. To verify that the container is running, check logs:
+6. To verify that the container is running, check logs:
 
 ```bash
 # get pod name

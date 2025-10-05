@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hydrophone-configs
+data:
+  # Bush Point configuration
+  bush-point.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_bush_point"
+    upload_to_azure: True
+    delete_local_wavs: True
+
+  # Mast Center configuration
+  mast-center.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_mast_center"
+    upload_to_azure: True
+    delete_local_wavs: True
+
+  # North San Juan Channel configuration
+  north-sjc.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_north_sjc"
+    upload_to_azure: True
+    delete_local_wavs: True
+
+  # Orcasound Lab configuration
+  orcasound-lab.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_orcasound_lab"
+    upload_to_azure: True
+    delete_local_wavs: True
+
+  # Point Robinson configuration
+  point-robinson.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_point_robinson"
+    upload_to_azure: True
+    delete_local_wavs: True
+
+  # Port Townsend configuration
+  port-townsend.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_port_townsend"
+    upload_to_azure: True
+    delete_local_wavs: True
+
+  # Sunset Bay configuration
+  sunset-bay.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_sunset_bay"
+    upload_to_azure: True
+    delete_local_wavs: True
