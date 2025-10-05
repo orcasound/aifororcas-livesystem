@@ -203,10 +203,10 @@ docker build . -t live-inference-system -f ./Dockerfile
 From the `InferenceSystem` directory, run the following command. You need to specify the `--config` argument when running locally since the container won't be in a Kubernetes environment with namespace detection.
 
 ```
-docker run --rm -it --env-file .env live-inference-system python3 -u ./src/LiveInferenceOrchestrator.py --config ./config/Production/FastAI_LiveHLS_OrcasoundLab.yml
+docker run --rm -it --env-file .env live-inference-system python3 -u ./src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml
 ```
 
-**Note:** When deployed to Kubernetes, the container automatically detects its namespace and loads the appropriate configuration. The `--config` argument is only needed for local testing.
+**Note:** When deployed to Kubernetes, the container automatically detects its namespace and loads the configuration from the ConfigMap. The `--config` argument is only needed for local testing.
 
 In addition, you should see something similar to the following in your console.
 
