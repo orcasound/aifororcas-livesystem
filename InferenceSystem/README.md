@@ -169,15 +169,19 @@ This can be completed in two ways.
 
 ## Adding a new hydrophone
 
-1. Create a new config file under the [config](config) folder
+**Note:** With the new common container image approach, adding a new hydrophone is now much simpler and no longer requires building a separate Docker image.
 
-2. Update the last line of the [Dockerfile](Dockerfile) to point to the new config file 
+1. Create a new config file under the [config/Production](config/Production) folder following the naming convention `FastAI_LiveHLS_<HydrophoneName>.yml` where `<HydrophoneName>` is in PascalCase (e.g., `BushPoint`, `OrcasoundLab`).
 
-3. Create a new deployment YAML under the [deploy](deploy) folder
+2. Update [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py) and [src/globals.py](src/globals.py) to add variables for the new hydrophone location.
 
-4. Update [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py) and [src/globals.py](src/globals.py) to add variables for the new hydrophone location 
+3. Add the namespace-to-config mapping in [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py) in the `get_config_path()` function. The namespace should be in kebab-case (e.g., `bush-point`, `orcasound-lab`).
 
-5. Follow all other steps below until you update the kubernetes cluster with the new namespace
+4. Create a new deployment YAML under the [deploy](deploy) folder using the namespace as the filename (e.g., `bush-point.yaml`).
+
+5. Follow the deployment steps in the "Deploying an updated docker build to Azure Kubernetes Service" section below to create the namespace, secret, and deployment.
+
+**Important:** The container image is now common across all hydrophones. The hydrophone-specific configuration is determined by the Kubernetes namespace name, which is automatically detected by the container at runtime.
 
 ## Building the docker container for production
 
@@ -189,18 +193,18 @@ should take a much shorter time in future builds.
 docker build . -t live-inference-system -f ./Dockerfile
 ```
 
-Note: the config used in the Dockerfile is a Production config.
-
-TODO: fix. For now, you will have to manually create a different docker container for each hydrophone location. Each time you will need to edit the Dockerfile and replace the config for each hydrophone location.
+**Important:** The Docker container is now common across all hydrophones. The container automatically detects which hydrophone it's serving by reading the Kubernetes namespace and loading the appropriate configuration file. You no longer need to edit the Dockerfile or build separate images for each hydrophone location.
 
 
 ## Running the docker container
 
-From the `InferenceSystem` directory, run the following command.
+From the `InferenceSystem` directory, run the following command. You need to specify the `--config` argument when running locally since the container won't be in a Kubernetes environment with namespace detection.
 
 ```
-docker run --rm -it --env-file .env live-inference-system
+docker run --rm -it --env-file .env live-inference-system python3 -u ./src/LiveInferenceOrchestrator.py --config ./config/Production/FastAI_LiveHLS_OrcasoundLab.yml
 ```
+
+**Note:** When deployed to Kubernetes, the container automatically detects its namespace and loads the appropriate configuration. The `--config` argument is only needed for local testing.
 
 In addition, you should see something similar to the following in your console.
 
@@ -244,33 +248,35 @@ az acr login --name orcaconservancycr
 
 You should receive something similar to `Login succeeded`.
 
-3. Tag your docker container with the version number. We use the following versioning scheme.
+3. Tag your docker container with the version number. We use the following versioning scheme (note: hydrophone location is no longer part of the tag since we now use a common image).
 
 ```
-docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.<hydrophone-location>.v<Major>
+docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.v<Major>
 ```
 
 So, for example your command may look like
 
 ```
-docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.OrcasoundLab.v0
+docker tag live-inference-system orcaconservancycr.azurecr.io/live-inference-system:11-15-20.FastAI.R1-12.v0
 ```
 
-Look at [deploy-aci.yaml](deploy-aci.yaml) for examples of how previous models were tagged.
-
-4. Lastly, push your image to Azure Container Registry for each Orcasound Hydrophone Location.
+4. Push your image to Azure Container Registry once. This single image will be used by all hydrophone deployments.
 
 ```
-docker push orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.<hydrophone-location>.v<Major>
+docker push orcaconservancycr.azurecr.io/live-inference-system:<date-of-deployment>.<model-type>.<Rounds-trained-on>.v<Major>
 ```
+
+**Note:** You only need to build and push one container image now, regardless of the number of hydrophones. Each hydrophone deployment references the same image but runs in a different namespace, which the container detects to load the appropriate configuration.
 
 # Deploying an updated docker build to Azure Kubernetes Service
 
-We are deploying one hydrophone per namespace. To deploy a hydrophone, the following Kubernetes resources need to be created:
+We are deploying one hydrophone per namespace. The container automatically detects its namespace and loads the appropriate configuration at runtime. To deploy a hydrophone, the following Kubernetes resources need to be created:
 
-1. Namespace: used to group resources
+1. Namespace: used to group resources and identify which hydrophone configuration to use
 2. Secret: holds connection strings used by inference system
 3. Deployment: forces one instance of inference system to remain running at all times
+
+**Important:** The namespace name must match one of the supported hydrophone identifiers (e.g., `bush-point`, `orcasound-lab`, `mast-center`, `north-sjc`, `point-robinson`, `port-townsend`, `sunset-bay`). The container reads the namespace at runtime to determine which configuration file to load.
 
 ## Prerequisites
 
@@ -299,8 +305,10 @@ kubectl get nodes
 
 3. If deploying a new hydrophone, create a new namespace and secret. Skip this step if not bringing up a new hydrophone.
 
+**Important:** The namespace name must match a supported hydrophone identifier and correspond to a config file in `config/Production/`. For example, namespace `bush-point` maps to `FastAI_LiveHLS_BushPoint.yml`.
+
 ```bash
-# replace "bush-point" with hydrophone identifier
+# replace "bush-point" with hydrophone identifier (must match namespace-to-config mapping in LiveInferenceOrchestrator.py)
 kubectl create namespace bush-point
 
 kubectl create secret generic inference-system -n bush-point \
@@ -309,11 +317,13 @@ kubectl create secret generic inference-system -n bush-point \
     --from-literal=INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING='<appinsights_connection_string>'
 ```
 
-4. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one.
+4. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one. Update the image tag in the deployment file to use the common container image (without hydrophone-specific tag).
 
 ```bash
 kubectl apply -f deploy/bush-point.yaml
 ```
+
+**Note:** All deployment files should now reference the same container image. The container determines which hydrophone it's serving based on the namespace it's running in.
 
 5. To verify that the container is running, check logs:
 
