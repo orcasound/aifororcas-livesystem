@@ -147,3 +147,15 @@ jobs:
       working-directory: InferenceSystem
       run: |
         docker build . -t live-inference-system -f ./Dockerfile
+
+    - name: Save docker container to tar file
+      working-directory: InferenceSystem
+      run: |
+        docker save live-inference-system -o live-inference-system.tar
+
+    - name: Upload docker container as artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v3.pre.node20
+      with:
+        name: live-inference-system-docker-image
+        path: InferenceSystem/live-inference-system.tar
+        retention-days: 5
