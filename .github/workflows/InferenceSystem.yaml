@@ -66,7 +66,7 @@ jobs:
       run: |
         call .\inference-venv\Scripts\activate.bat && python -m pip install --upgrade pip && pip install -r requirements.txt
 
-    - name: Test live inference locally
+    - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       shell: cmd
       run: |
@@ -132,7 +132,7 @@ jobs:
       run: |
         source ./inference-venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
 
-    - name: Test live inference locally
+    - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       run: |
         source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
