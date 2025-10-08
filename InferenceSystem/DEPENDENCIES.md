@@ -9,10 +9,10 @@ The InferenceSystem uses Python 3.8 and runs on Ubuntu 18.04 in production (Dock
 | Package | Constraint | Reasoning |
 |---------|-----------|-----------|
 | `numba` | `>=0.51.0,<0.59.0` | Versions 0.59.0+ require Python 3.9+. Max version 0.58.1 is confirmed working. Minimum 0.51.0 required by librosa 0.10.x. |
-| `numpy` | `>=1.19.5,<1.25.0` | Versions 1.25.0+ require Python 3.9+. Max version 1.24.4 is confirmed working. |
+| `numpy` | `>=1.19.5,<1.20.0` | Versions 1.20.0+ require Python 3.7+, but Docker uses Ubuntu 18.04 with Python 3.6. Constrained to 1.19.x for compatibility. |
 | `spacy` | `>=3.5.4,<3.8.3` | Version 3.8.7 doesn't have wheels for Python 3.8. Max version 3.8.2 is confirmed available. |
 | `librosa` | `>=0.8.0,<0.11.0` | Version 0.11.0+ requires numba 0.51.0+, which may have compatibility issues. Version 0.10.0 is confirmed working. |
-| `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with numpy 1.x and Python 3.8. |
+| `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with numpy 1.x and Python 3.6+. |
 
 ## Dependabot Configuration
 
@@ -48,18 +48,26 @@ When testing dependency updates locally or in CI:
 
 ## Verified Working Versions
 
-See `ModelTraining/requirements.lock.txt` for a full list of verified working versions that pass tests.
+See `ModelTraining/requirements.lock.txt` for a full list of verified working versions that pass tests with Python 3.8+.
 
 Key versions confirmed working:
-- `numba==0.58.1`
-- `numpy==1.24.4`
-- `spacy==3.7.5`
-- `librosa==0.10.0`
+- `numba==0.58.1` (for Python 3.8+)
+- `numpy==1.19.5` (for Python 3.6-3.8 compatibility)
+- `spacy==3.7.5` (for Python 3.8+)
+- `librosa==0.10.0` (for Python 3.8+)
+
+**Note**: The InferenceSystem Docker build uses Ubuntu 18.04 with Python 3.6, which constrains numpy to 1.19.x. The CI tests use Python 3.8 and can support newer versions, but we constrain to the lowest common denominator for compatibility.
 
 ## Future Migration Path
 
-When the InferenceSystem is upgraded to Python 3.9 or later:
-1. Update the Docker base image from Ubuntu 18.04
+When the InferenceSystem Docker is upgraded to Python 3.7 or later:
+1. Update the Docker base image from Ubuntu 18.04 to Ubuntu 20.04+ (which has Python 3.8+)
+2. Relax numpy constraint to `>=1.19.5,<1.25.0` to allow versions up to 1.24.4
+3. Consider updating other constraints as well
+4. Test thoroughly before deploying to production
+
+When upgrading to Python 3.9+:
+1. Complete the Python 3.7+ migration first
 2. Update CI workflows to use Python 3.9+
-3. Relax version constraints to allow newer versions
+3. Further relax version constraints to allow newer package versions
 4. Test thoroughly before deploying to production
