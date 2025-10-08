@@ -1,0 +1,98 @@
+name: InferenceSystem-deploy
+
+on:
+  push:
+    tags:
+      - 'InferenceSystem.v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
+
+concurrency:
+  # Cancel any CI/CD workflow currently in progress for the same PR.
+  # Allow running concurrently with any other commits.
+  group: InferenceSystem-deploy-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: live-inference-system
+      ACR_REGISTRY: orcaconservancycr.azurecr.io
+    steps:
+    - name: Install GitHub CLI
+      run: sudo apt-get install gh
+
+    - name: Get latest successful run ID
+      id: get_run
+      run: |
+        RUN_ID=$(gh run list \
+          --repo "${{ github.repository }}" \
+          --workflow "InferenceSystem" \
+          --branch main \
+          --status success \
+          --limit 1 \
+          --json databaseId \
+          --jq '.[0].databaseId')
+        echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check if run ID was found
+      if: ${{ steps.get_run.outputs.run_id == '' }}
+      run: echo "No successful run found for InferenceSystem on main branch" && exit 1
+
+    - name: Check if ACR secrets are set
+      run: |
+        if [ -z "${{ secrets.ACR_USERNAME }}" ] || [ -z "${{ secrets.ACR_PASSWORD }}" ]; then
+          echo "ACR credentials are missing"
+          exit 1
+        else
+          echo "ACR credentials are set"
+        fi
+
+    - name: Download Docker image artifact from latest run
+      uses: actions/download-artifact@v4
+      with:
+        name: live-inference-system-docker-image
+        path: ./image-artifact
+        run-id: ${{ steps.get_run.outputs.run_id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Load Docker image
+      run: |
+        docker load --input ./image-artifact/live-inference-system.tar
+
+    - name: List Docker images
+      run: docker images
+
+    - name: Get image name
+      run: |
+        IMAGE_NAME=$(docker images --format "{{.Repository}}" | head -n 1)
+        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+    - name: Get image creation date in MM-DD-YYYY
+      run: |
+        IMAGE_ID=$(docker images --format "{{.ID}}" | head -n 1)
+        CREATED=$(docker inspect --format='{{.Created}}' $IMAGE_ID)
+        DATE_STRING=$(date -d "$CREATED" +"%m-%d-%Y")
+        echo "DATE_STRING=$DATE_STRING" >> $GITHUB_ENV
+
+    - name: Define full image tag
+      run: |
+        IMAGE_TAG="$ACR_REGISTRY/live-inference-system:$DATE_STRING.FastAI.R1-12.v0"
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+    - name: Tag docker container
+      run: |
+        docker tag $IMAGE_NAME $IMAGE_TAG
+
+    - name: Docker login to ACR
+      run: |
+        echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ env.ACR_REGISTRY }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+    - name: Push docker container to ACR
+      run: |
+        docker push $IMAGE_TAG
