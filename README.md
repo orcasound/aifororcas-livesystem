@@ -24,11 +24,53 @@ The diagram below describes the flow of data through OrcaHello and the technolog
 
 ![System Overview](Docs/Images/SystemOverview.png)
 
-As of September, 2022, the data flow steps include:
+As of September, 2025, the data flow steps include:
 1. **Live streaming of audio data via AWS** (from Raspberry Pis running [orcanode code](https://github.com/orcasound/orcanode) to [Orcaound's S3 open data registry buckets](https://registry.opendata.aws/orcasound/))
 2. **Azure-based analysis** (via AKS in 2021-2, ICI 2019-2020; ingestion of 10-second segments from S3, inference on 2-second samples using the current OrcaHello binary call classifier, concatenation of raw audio into 60-second WAV files and spectrogram generation) 
 3. **Moderation** of model detections by orca call experts (moderator notification, authentication in moderator portal, annotation and validation)
 4. **Notification** of confirmed calls from endangered orcas for a wide range of subscribers (researchers, community scientists, managers, outreach/education network nodes, marine mammal observers, dynamic mitigation systems, oil spill response agencies, enforcement agencies, Naval POCs for sonar testing/training situational awareness, etc.)
+
+A more detailed audio data flow is:
+
+```mermaid
+flowchart LR
+    A[Audio Jack]
+
+    subgraph "RPI /tmp/$NODE_NAME/"
+        B1["hls/$timestamp/*.ts"]
+        B2["flac/*.flac"]
+    end
+
+    subgraph "S3 audio-orcasound-net/$NODE_NAME/"
+        C1[("hls/$timestamp/*.ts")]
+        C2[("flac/*.flac")]
+    end
+
+    W[Orcasite]
+
+    subgraph "Azure Blob Storage"
+        D1[("livemlaudiospecstorage audiowavs/*.wav")]
+        D2[("livemlaudiospecstorage spectrogramspng/*.png")]
+    end
+
+    E["aifororcas-livesystem LiveInferenceOrchestrator.py"]
+
+    M[Orcanode Monitor]
+
+    A -->|orcanode stream.sh| B1
+    A -.->|orcanode stream.sh| B2
+
+    B1 -->|upload_s3.py| C1
+    B2 -.->|upload_flac_s3.py| C2
+
+    C1 --> E
+
+    E --> D1
+    E --> D2
+
+    C1 --> M
+    C1 --> W
+```
 
 Each overlapping 2-second data segment is classified as a whale call or / not. Shown below is a 1-minute segment of hydrophone audio visualized as a spectrogram with whale calls detected by the model (delineated by white boundaries).
 
