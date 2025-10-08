@@ -7,7 +7,7 @@ numpy==1.19.5
 torchaudio==0.6.0
 git+https://github.com/fastaudio/fastai_audio@0.1
 ipython
-spacy>=3.5.4,<3.8.3
+spacy>=3.5.4,<3.7.0
 awscli
 requests
 bs4

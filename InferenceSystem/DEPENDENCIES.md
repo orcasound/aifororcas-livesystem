@@ -10,7 +10,7 @@ The InferenceSystem uses Python 3.8 and runs on Ubuntu 18.04 in production (Dock
 |---------|-----------|-----------|
 | `numba` | `>=0.51.0,<0.59.0` | Versions 0.59.0+ require Python 3.9+. Max version 0.58.1 is confirmed working. Minimum 0.51.0 required by librosa 0.10.x. |
 | `numpy` | `==1.19.5` | Pinned to 1.19.5 for Python 3.6 compatibility (Docker uses Ubuntu 18.04). numpy 1.20+ requires Python 3.7+. This is the only stable version that works across Python 3.6-3.8. |
-| `spacy` | `>=3.5.4,<3.8.3` | Version 3.8.7 doesn't have wheels for Python 3.8. Max version 3.8.2 is confirmed available. |
+| `spacy` | `>=3.5.4,<3.7.0` | Versions 3.7.0+ require Python 3.7+, but Docker uses Python 3.6. Constrained to 3.6.x for compatibility. |
 | `librosa` | `>=0.8.0,<0.11.0` | Version 0.11.0+ requires numba 0.51.0+, which may have compatibility issues. Version 0.10.0 is confirmed working. |
 | `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with numpy 1.x and Python 3.6+. |
 
@@ -43,6 +43,8 @@ For example, Dependabot previously suggested:
 
 **Note on numpy**: Due to Docker using Python 3.6, numpy must be pinned to 1.19.5 (the last version supporting Python 3.6 before numpy 1.20+ required Python 3.7+). While CI uses Python 3.8, we must satisfy the lowest common denominator.
 
+**Note on spacy**: Similarly, spacy is constrained to `<3.7.0` because spacy 3.7.0+ requires Python 3.7+, but Docker uses Python 3.6.
+
 By using version ranges with upper bounds (and pinned versions where necessary), we prevent these invalid updates while still allowing Dependabot to suggest updates within the safe range.
 
 ## Testing Dependency Updates
@@ -63,10 +65,14 @@ See `ModelTraining/requirements.lock.txt` for a full list of verified working ve
 Key versions confirmed working:
 - `numba==0.58.1` (for Python 3.8+)
 - `numpy==1.19.5` (for Python 3.6-3.8 compatibility)
-- `spacy==3.7.5` (for Python 3.8+)
+- `spacy==3.6.1` (for Python 3.6 compatibility; 3.7.5 requires Python 3.7+)
 - `librosa==0.10.0` (for Python 3.8+)
 
-**Note**: The InferenceSystem Docker build uses Ubuntu 18.04 with Python 3.6, which constrains numpy to 1.19.x. The CI tests use Python 3.8 and can support newer versions, but we constrain to the lowest common denominator for compatibility.
+**Note**: The InferenceSystem Docker build uses Ubuntu 18.04 with Python 3.6, which constrains:
+- numpy to 1.19.x (1.20+ requires Python 3.7+)
+- spacy to 3.6.x (3.7+ requires Python 3.7+)
+
+The CI tests use Python 3.8 and can support newer versions, but we constrain to the lowest common denominator for compatibility.
 
 ## Future Migration Path
 
