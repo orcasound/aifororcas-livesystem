@@ -13,6 +13,7 @@ The InferenceSystem uses Python 3.8 and runs on Ubuntu 18.04 in production (Dock
 | `spacy` | `>=3.5.4,<3.7.0` | Versions 3.7.0+ require Python 3.7+, but Docker uses Python 3.6. Constrained to 3.6.x for compatibility. |
 | `librosa` | `>=0.8.0,<0.11.0` | Version 0.11.0+ requires numba 0.51.0+, which may have compatibility issues. Version 0.10.0 is confirmed working. |
 | `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with numpy 1.x and Python 3.6+. |
+| `torchaudio` | `>=0.6.0,<0.14.0` | Version range allows pip to select platform-specific versions. Version 0.6.0 works on Linux but Windows requires 0.8.0+. Upper bound prevents major API changes. |
 
 ## Dependabot Configuration
 
