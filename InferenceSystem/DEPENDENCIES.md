@@ -9,7 +9,7 @@ The InferenceSystem uses Python 3.8 and runs on Ubuntu 18.04 in production (Dock
 | Package | Constraint | Reasoning |
 |---------|-----------|-----------|
 | `numba` | `>=0.51.0,<0.59.0` | Versions 0.59.0+ require Python 3.9+. Max version 0.58.1 is confirmed working. Minimum 0.51.0 required by librosa 0.10.x. |
-| `numpy` | `>=1.19.5,<1.20.0` | Versions 1.20.0+ require Python 3.7+, but Docker uses Ubuntu 18.04 with Python 3.6. Constrained to 1.19.x for compatibility. |
+| `numpy` | `==1.19.5` | Pinned to 1.19.5 for Python 3.6 compatibility (Docker uses Ubuntu 18.04). numpy 1.20+ requires Python 3.7+. This is the only stable version that works across Python 3.6-3.8. |
 | `spacy` | `>=3.5.4,<3.8.3` | Version 3.8.7 doesn't have wheels for Python 3.8. Max version 3.8.2 is confirmed available. |
 | `librosa` | `>=0.8.0,<0.11.0` | Version 0.11.0+ requires numba 0.51.0+, which may have compatibility issues. Version 0.10.0 is confirmed working. |
 | `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with numpy 1.x and Python 3.6+. |
@@ -31,9 +31,11 @@ Dependabot doesn't validate whether proposed versions:
 For example, Dependabot previously suggested:
 - `numba==0.60.0` - doesn't exist for Python 3.8 (only goes up to 0.58.1)
 - `spacy==3.8.7` - doesn't have wheels for Python 3.8 (latest is 3.8.2)
-- `numpy==1.26.4` - doesn't support Python 3.8 (max is 1.24.4)
+- `numpy==1.26.4` - doesn't support Python 3.6 (Docker constraint) or Python 3.8
 
-By using version ranges with upper bounds, we prevent these invalid updates while still allowing Dependabot to suggest updates within the safe range.
+**Note on numpy**: Due to Docker using Python 3.6, numpy must be pinned to 1.19.5 (the last version supporting Python 3.6 before numpy 1.20+ required Python 3.7+). While CI uses Python 3.8, we must satisfy the lowest common denominator.
+
+By using version ranges with upper bounds (and pinned versions where necessary), we prevent these invalid updates while still allowing Dependabot to suggest updates within the safe range.
 
 ## Testing Dependency Updates
 
