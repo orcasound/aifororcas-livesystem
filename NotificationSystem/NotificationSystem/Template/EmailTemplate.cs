@@ -87,18 +87,9 @@ namespace NotificationSystem.Template
 
         private static string GetMapUri(string locationName)
         {
-            if (locationName.ToLower() == "haro strait")
-            {
-                return "https://orcanotificationstorage.blob.core.windows.net/images/haropoint.jpg";
-            }
-            else if (locationName.ToLower() == "bush point")
-            {
-                return "https://orcanotificationstorage.blob.core.windows.net/images/bushpoint.jpg";
-            }
-            else
-            {
-                return "https://orcanotificationstorage.blob.core.windows.net/images/porttownsend.jpg";
-            }
+            // Convert location name to lowercase and replace spaces with hyphens
+            string fileName = locationName.ToLower().Replace(" ", "-");
+            return $"https://orcanotificationstorage.blob.core.windows.net/images/{fileName}.jpg";
         }
 
         private static string GetModeratorEmailHtml(DateTime? timestamp, string location)
