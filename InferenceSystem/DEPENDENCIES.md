@@ -21,6 +21,14 @@ The `.github/dependabot.yml` file includes `versioning-strategy: increase` for t
 - Rather than replace ranges with pinned versions
 - This prevents Dependabot from suggesting versions that don't exist for our Python version
 
+## PyTorch Index Configuration
+
+The `requirements.txt` uses `--extra-index-url https://download.pytorch.org/whl/torch_stable.html` to access PyTorch wheels. This is specified as an extra index (not `--find-links`) to ensure pip can still access PyPI for all other packages while using the PyTorch-specific index for torch, torchvision, and torchaudio.
+
+**Note**: Using `--extra-index-url` instead of `-f` (or `--find-links`) is critical because:
+- `--find-links` can cause pip to look ONLY at the specified URL first, potentially breaking resolution for packages not found there
+- `--extra-index-url` adds the URL as an additional package index alongside PyPI, ensuring all packages can be found
+
 ## Why These Constraints Matter
 
 Dependabot doesn't validate whether proposed versions:
