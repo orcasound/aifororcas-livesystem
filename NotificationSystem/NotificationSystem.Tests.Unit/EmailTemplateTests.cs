@@ -1,7 +1,10 @@
 using Newtonsoft.Json.Linq;
+using NotificationSystem.Models;
 using NotificationSystem.Template;
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace NotificationSystem.Tests.Unit
 {
@@ -42,8 +45,8 @@ namespace NotificationSystem.Tests.Unit
 
             string expectedMapUrl = $"https://orcanotificationstorage.blob.core.windows.net/images/{expectedFileName}";
 
-            // Act
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages);
+            // Act - without OrcasiteHelper, it falls back to simple transformation
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, null);
 
             // Assert
             Assert.Contains(expectedMapUrl, emailBody);
@@ -73,8 +76,8 @@ namespace NotificationSystem.Tests.Unit
                 })
             };
 
-            // Act
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages);
+            // Act - without OrcasiteHelper, it falls back to simple transformation
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, null);
 
             // Assert - the URI should use hyphens
             Assert.Contains("north-san-juan-channel.jpg", emailBody);
@@ -107,8 +110,8 @@ namespace NotificationSystem.Tests.Unit
                 })
             };
 
-            // Act
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages);
+            // Act - without OrcasiteHelper, it falls back to simple transformation
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, null);
 
             // Assert
             Assert.Contains("Southern Resident Killer Whale Detected", emailBody);
@@ -118,6 +121,51 @@ namespace NotificationSystem.Tests.Unit
             Assert.Contains("Jane Doe", emailBody);
             Assert.Contains("Clear SRKW calls detected", emailBody);
             Assert.Contains("https://orcanotificationstorage.blob.core.windows.net/images/sunset-bay.jpg", emailBody);
+        }
+
+        /// <summary>
+        /// Tests that GetSubscriberEmailBody uses OrcasiteHelper to lookup the correct slug when provided.
+        /// </summary>
+        [Fact]
+        public void GetSubscriberEmailBody_UsesOrcasiteHelperSlug_WhenProvided()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                JObject.FromObject(new
+                {
+                    timestamp = DateTime.UtcNow,
+                    location = new
+                    {
+                        name = "North San Juan Channel",
+                        latitude = 48.591294,
+                        longitude = -123.058779,
+                        id = "rpi_north_sjc"
+                    },
+                    moderator = "Test Moderator",
+                    comments = "Test comments"
+                })
+            };
+
+            // Mock OrcasiteHelper that returns the actual slug
+            var mockOrcasiteHelper = new Mock<OrcasiteHelper>(
+                new Mock<ILogger<OrcasiteHelper>>().Object,
+                new System.Net.Http.HttpClient()
+            );
+            mockOrcasiteHelper.Setup(x => x.GetSlugByLocationName(It.IsAny<string>()))
+                .Returns<string>(locationName => 
+                {
+                    if (locationName == "North San Juan Channel") return "north-sjc";
+                    return null;
+                });
+            
+            // Act
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, mockOrcasiteHelper.Object);
+
+            // Assert - should use "north-sjc" from OrcasiteHelper, not "north-san-juan-channel"
+            Assert.Contains("north-sjc.jpg", emailBody);
+            Assert.DoesNotContain("north-san-juan-channel.jpg", emailBody);
+            Assert.Contains("North San Juan Channel", emailBody);
         }
     }
 }

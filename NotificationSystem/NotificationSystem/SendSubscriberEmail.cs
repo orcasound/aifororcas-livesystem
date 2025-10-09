@@ -22,11 +22,13 @@ namespace NotificationSystem
     public class SendSubscriberEmail
     {
         private readonly ILogger _logger;
+        private readonly OrcasiteHelper _orcasiteHelper;
         const int SendRate = 14;
 
-        public SendSubscriberEmail(ILogger<SendSubscriberEmail> logger)
+        public SendSubscriberEmail(ILogger<SendSubscriberEmail> logger, OrcasiteHelper orcasiteHelper)
         {
             _logger = logger;
+            _orcasiteHelper = orcasiteHelper;
         }
 
         [Function("SendSubscriberEmail")]
@@ -35,6 +37,9 @@ namespace NotificationSystem
             [TimerTrigger("0 */1 * * * *")] string timerInfo,
             [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient)
         {
+            // Initialize OrcasiteHelper to fetch feeds data
+            await _orcasiteHelper.InitializeAsync();
+            
             string queueConnection = Environment.GetEnvironmentVariable("OrcaNotificationStorageSetting");
             var queueClient = new QueueClient(queueConnection, "srkwfound");
 
@@ -83,7 +88,7 @@ namespace NotificationSystem
                 await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
             }
 
-            return EmailTemplate.GetSubscriberEmailBody(messagesJson);
+            return EmailTemplate.GetSubscriberEmailBody(messagesJson, _orcasiteHelper);
         }
     }
 }
