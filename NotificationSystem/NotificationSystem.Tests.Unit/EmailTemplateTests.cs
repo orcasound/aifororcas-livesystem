@@ -13,11 +13,12 @@ namespace NotificationSystem.Tests.Unit
         /// <summary>
         /// Tests that GetSubscriberEmailBody generates correct map URIs for various locations
         /// by verifying the generated HTML contains the expected image URLs.
+        /// Uses mocked OrcasiteHelper to simulate production behavior.
         /// </summary>
         [Theory]
         [InlineData("Sunset Bay", "sunset-bay.jpg")]
         [InlineData("Mast Center", "mast-center.jpg")]
-        [InlineData("North San Juan Channel", "north-san-juan-channel.jpg")]
+        [InlineData("North San Juan Channel", "north-sjc.jpg")]
         [InlineData("Point Robinson", "point-robinson.jpg")]
         [InlineData("Bush Point", "bush-point.jpg")]
         [InlineData("Haro Strait", "haro-strait.jpg")]
@@ -43,10 +44,26 @@ namespace NotificationSystem.Tests.Unit
                 })
             };
 
+            // Mock OrcasiteHelper to simulate production behavior
+            var mockOrcasiteHelper = new Mock<OrcasiteHelper>(
+                new Mock<ILogger<OrcasiteHelper>>().Object,
+                new System.Net.Http.HttpClient()
+            );
+            
+            // Setup slug mappings based on actual Orcasite feeds
+            mockOrcasiteHelper.Setup(x => x.GetSlugByLocationName(It.IsAny<string>()))
+                .Returns<string>(name =>
+                {
+                    // Return actual slugs from Orcasite for locations where they differ from simple transformation
+                    if (name == "North San Juan Channel") return "north-sjc";
+                    // For other locations, return null to fall back to simple transformation
+                    return null;
+                });
+
             string expectedMapUrl = $"https://orcanotificationstorage.blob.core.windows.net/images/{expectedFileName}";
 
-            // Act - without OrcasiteHelper, it falls back to simple transformation
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, null);
+            // Act - with OrcasiteHelper as in production
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, mockOrcasiteHelper.Object);
 
             // Assert
             Assert.Contains(expectedMapUrl, emailBody);
@@ -76,13 +93,54 @@ namespace NotificationSystem.Tests.Unit
                 })
             };
 
+            // Mock OrcasiteHelper to return the correct slug
+            var mockOrcasiteHelper = new Mock<OrcasiteHelper>(
+                new Mock<ILogger<OrcasiteHelper>>().Object,
+                new System.Net.Http.HttpClient()
+            );
+            mockOrcasiteHelper.Setup(x => x.GetSlugByLocationName("North San Juan Channel"))
+                .Returns("north-sjc");
+
+            // Act - with OrcasiteHelper as in production
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, mockOrcasiteHelper.Object);
+
+            // Assert - the URI should use "north-sjc" from OrcasiteHelper
+            Assert.Contains("north-sjc.jpg", emailBody);
+            Assert.DoesNotContain("north-san-juan-channel.jpg", emailBody);
+            // The location name should still display with spaces
+            Assert.Contains("North San Juan Channel", emailBody);
+        }
+
+        /// <summary>
+        /// Tests that the fallback behavior works when OrcasiteHelper is not available.
+        /// </summary>
+        [Fact]
+        public void GetSubscriberEmailBody_FallsBackToSimpleTransformation_WhenOrcasiteHelperNotProvided()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                JObject.FromObject(new
+                {
+                    timestamp = DateTime.UtcNow,
+                    location = new
+                    {
+                        name = "Sunset Bay",
+                        latitude = 47.86497296593844,
+                        longitude = -122.33393605795372,
+                        id = "rpi_sunset_bay"
+                    },
+                    moderator = "Test Moderator",
+                    comments = "Test comments"
+                })
+            };
+
             // Act - without OrcasiteHelper, it falls back to simple transformation
             string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, null);
 
-            // Assert - the URI should use hyphens
-            Assert.Contains("north-san-juan-channel.jpg", emailBody);
-            // The location name should still display with spaces
-            Assert.Contains("North San Juan Channel", emailBody);
+            // Assert - should use simple transformation
+            Assert.Contains("sunset-bay.jpg", emailBody);
+            Assert.Contains("Sunset Bay", emailBody);
         }
 
         /// <summary>
