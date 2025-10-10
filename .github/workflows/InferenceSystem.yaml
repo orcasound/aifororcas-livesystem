@@ -66,11 +66,17 @@ jobs:
       run: |
         call .\inference-venv\Scripts\activate.bat && python -m pip install --upgrade pip && pip install -r requirements.txt
 
-    - name: Test live inference locally
+    - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       shell: cmd
       run: |
         call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+
+    - name: Test with FastAI DateRangeHLS config
+      working-directory: InferenceSystem
+      shell: cmd
+      run: |
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
 
   test-ubuntu:
     runs-on: ubuntu-latest
@@ -114,10 +120,15 @@ jobs:
       run: |
         source ./inference-venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
 
-    - name: Test live inference locally
+    - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       run: |
         source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+
+    - name: Test with FastAI DateRangeHLS config
+      working-directory: InferenceSystem
+      run: |
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
 
   test-docker:
     runs-on: ubuntu-latest
