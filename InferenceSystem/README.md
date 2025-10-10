@@ -236,6 +236,18 @@ This step pushes your local container to the Azure Container Registry (ACR).  If
 documentation is adapted from 
 [this tutorial](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-tutorial-prepare-acr).
 
+The github repository contains a workflow that can push the latest image
+build from the `main` branch to ACR.  This is done when the main branch is
+tagged with a tag of the form "InferenceSystem.v#.#.#" where `#.#.#` is a
+semantic version number like "0.9.1" or "1.0.0".  For example:
+
+```
+git tag InferenceSystem.v0.9.1
+git push --tags
+```
+
+The same operations can be done manually as follows, but this is not recommended:
+
 1. Login to the shared azure directory from the Azure CLI.
 
 ```
