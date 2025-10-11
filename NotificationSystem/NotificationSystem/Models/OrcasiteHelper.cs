@@ -163,6 +163,54 @@ namespace NotificationSystem.Models
         }
 
         /// <summary>
+        /// Get the slug for a location by searching the feeds array by location name.
+        /// </summary>
+        /// <param name="locationName">Location name to find (e.g., "Bush Point", "North San Juan Channel")</param>
+        /// <returns>Slug string (e.g., "bush-point", "north-sjc"), or null if not found or feeds not initialized</returns>
+        public virtual string GetSlugByLocationName(string locationName)
+        {
+            if (_orcasiteFeedsArray == null)
+            {
+                _logger.LogWarning($"Feeds array not initialized when looking up slug for: {locationName}");
+                return null;
+            }
+
+            foreach (JsonElement feed in _orcasiteFeedsArray.Value.EnumerateArray())
+            {
+                if (!feed.TryGetProperty("attributes", out var attributes))
+                {
+                    continue;
+                }
+                if (attributes.ValueKind != JsonValueKind.Object)
+                {
+                    continue;
+                }
+                if (!attributes.TryGetProperty("name", out var name))
+                {
+                    continue;
+                }
+                if (name.ValueKind != JsonValueKind.String)
+                {
+                    continue;
+                }
+                string feedName = name.GetString();
+                
+                // Match location name (case-insensitive)
+                if (string.Equals(feedName, locationName, StringComparison.OrdinalIgnoreCase) || 
+                    feedName.Contains(locationName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (attributes.TryGetProperty("slug", out var slug) && slug.ValueKind == JsonValueKind.String)
+                    {
+                        return slug.GetString();
+                    }
+                }
+            }
+            
+            _logger.LogWarning($"Could not find slug for location: {locationName}");
+            return null;
+        }
+
+        /// <summary>
         /// Given a detection, extract the nominal timestamp from it.
         /// </summary>
         /// <param name="orcaHelloDetection">Detection to look in</param>

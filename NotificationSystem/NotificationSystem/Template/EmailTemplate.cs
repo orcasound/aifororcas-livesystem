@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using NotificationSystem.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,12 +14,12 @@ namespace NotificationSystem.Template
             return $"<html><head><style>{GetCSS()}</style></head><body>{GetModeratorEmailHtml(timestamp, location)}</body></html>";
         }
 
-        public static string GetSubscriberEmailBody(List<JObject> messages)
+        public static string GetSubscriberEmailBody(List<JObject> messages, OrcasiteHelper orcasiteHelper = null)
         {
-            return $"<html><head><style>{GetCSS()}</style></head><body>{GetSubscriberEmailHtml(messages)}</body></html>";
+            return $"<html><head><style>{GetCSS()}</style></head><body>{GetSubscriberEmailHtml(messages, orcasiteHelper)}</body></html>";
         }
 
-        private static string GetSubscriberEmailHtml(List<JObject> messages)
+        private static string GetSubscriberEmailHtml(List<JObject> messages, OrcasiteHelper orcasiteHelper)
         {
             string timeString = GetPDTTimestring((DateTime?) messages[0]["timestamp"]);
 
@@ -41,7 +42,7 @@ namespace NotificationSystem.Template
                 <p>
                 <center>
                   <table style='width:70%;'>
-                  {GetDetectedSectionHtml(messages)}
+                  {GetDetectedSectionHtml(messages, orcasiteHelper)}
                   </table>
                 </center>
                 </p>
@@ -53,7 +54,7 @@ namespace NotificationSystem.Template
             ";
         }
 
-        private static string GetDetectedSectionHtml(List<JObject> messages)
+        private static string GetDetectedSectionHtml(List<JObject> messages, OrcasiteHelper orcasiteHelper)
         {
             string rows = "";
             foreach (JObject message in messages)
@@ -63,7 +64,7 @@ namespace NotificationSystem.Template
                 rows += $@"
                   <tr>
                     <td>
-                      <img src='{GetMapUri((string) message["location"]["name"])}'>
+                      <img src='{GetMapUri((string) message["location"]["name"], orcasiteHelper)}'>
                     </td>
                     <td>
                       <ul>
@@ -85,20 +86,18 @@ namespace NotificationSystem.Template
             return rows;
         }
 
-        private static string GetMapUri(string locationName)
+        private static string GetMapUri(string locationName, OrcasiteHelper orcasiteHelper)
         {
-            if (locationName.ToLower() == "haro strait")
+            // Try to get the slug from OrcasiteHelper first
+            string slug = orcasiteHelper?.GetSlugByLocationName(locationName);
+            
+            if (string.IsNullOrEmpty(slug))
             {
-                return "https://orcanotificationstorage.blob.core.windows.net/images/haropoint.jpg";
+                // Fall back to converting location name to lowercase and replacing spaces with hyphens
+                slug = locationName.ToLower().Replace(" ", "-");
             }
-            else if (locationName.ToLower() == "bush point")
-            {
-                return "https://orcanotificationstorage.blob.core.windows.net/images/bushpoint.jpg";
-            }
-            else
-            {
-                return "https://orcanotificationstorage.blob.core.windows.net/images/porttownsend.jpg";
-            }
+            
+            return $"https://orcanotificationstorage.blob.core.windows.net/images/{slug}.jpg";
         }
 
         private static string GetModeratorEmailHtml(DateTime? timestamp, string location)
