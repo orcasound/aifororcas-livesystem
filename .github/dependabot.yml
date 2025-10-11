@@ -36,6 +36,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "saturday"
+    versioning-strategy: increase
     allow:
       - dependency-type: "direct"
     groups:
