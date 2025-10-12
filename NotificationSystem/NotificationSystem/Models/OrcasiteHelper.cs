@@ -226,6 +226,61 @@ namespace NotificationSystem.Models
         }
 
         /// <summary>
+        /// Get the start time offset, in seconds, of the best prediction.
+        /// </summary>
+        /// <param name="orcaHelloDetection">OrcaHello detection to check</param>
+        /// <returns>Start time offset, in seconds, or null on error</returns>
+        double? TryGetBestStartTime(JsonElement orcaHelloDetection)
+        {
+            if (!orcaHelloDetection.TryGetProperty("predictions", out var predictions))
+            {
+                _logger.LogError($"Missing predictions");
+                return null;
+            }
+            if (predictions.ValueKind != JsonValueKind.Array)
+            {
+                _logger.LogError($"Invalid predictions kind in ExecuteTask: {predictions.ValueKind}");
+                return null;
+            }
+            double bestConfidence = 0;
+            double startTime = 0;
+            foreach (JsonElement prediction in predictions.EnumerateArray())
+            {
+                if (!prediction.TryGetProperty("confidence", out var confidenceElement))
+                {
+                    _logger.LogError($"Missing confidence");
+                    return null;
+                }
+                if (!confidenceElement.TryGetDouble(out var confidence))
+                {
+                    _logger.LogError($"Invalid confidence in ExecuteTask: {confidenceElement.ValueKind}");
+                    return null;
+                }
+                if (confidence <= bestConfidence)
+                {
+                    continue;
+                }
+                if (!prediction.TryGetProperty("startTime", out var startTimeElement))
+                {
+                    _logger.LogError($"Missing startTime");
+                    return null;
+                }
+                if (!startTimeElement.TryGetDouble(out startTime))
+                {
+                    _logger.LogError($"Invalid startTime in ExecuteTask: {startTimeElement.ValueKind}");
+                    return null;
+                }
+                bestConfidence = confidence;
+            }
+            if (bestConfidence == 0)
+            {
+                // No predictions found.
+                return null;
+            }
+            return startTime;
+        }
+
+        /// <summary>
         /// Parse JSON representing an OrcaHello detection into just the fields we need.
         /// </summary>
         /// <param name="json">JSON to parse</param>
@@ -279,6 +334,15 @@ namespace NotificationSystem.Models
             {
                 return false;
             }
+
+            // Get offset of best prediction.
+            double? startTime = TryGetBestStartTime(orcaHelloDetection);
+            if (startTime != null)
+            {
+                // Adjust the timestamp by the start time of the best prediction.
+                dateTime = dateTime.Value.AddSeconds(startTime.Value);
+            }
+
             timestampString = dateTime.Value.ToString("o"); // ISO 8601 format
 
             // Get comments from OrcaHello.  This property will only be present
