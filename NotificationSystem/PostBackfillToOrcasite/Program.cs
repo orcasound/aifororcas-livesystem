@@ -3,6 +3,7 @@
 // analysis purposes.
 
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NotificationSystem;
@@ -47,6 +48,16 @@ Example:
             }
             string isoTimestamp = startTime.ToString("o"); // ISO 8601 format
 
+            // Create a test configuration
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    ["CURRENT_EPOCH_START"] = Environment.GetEnvironmentVariable("CURRENT_EPOCH_START"),
+                    ["ORCASITE_APIKEY"] = Environment.GetEnvironmentVariable("ORCASITE_APIKEY"),
+                    ["ORCASITE_HOSTNAME"] = Environment.GetEnvironmentVariable("ORCASITE_HOSTNAME")
+                })
+                .Build();
+
             // Set up Orcasite client.
             var loggerFactory = LoggerFactory.Create(builder =>
             {
@@ -56,9 +67,9 @@ Example:
             var helperLogger = loggerFactory.CreateLogger<OrcasiteHelper>();
             var httpClient = new HttpClient();
             var orcasiteHelper = new OrcasiteHelper(helperLogger, httpClient);
-            await orcasiteHelper.InitializeAsync();
+            await orcasiteHelper.InitializeAsync(configuration);
             var functionLogger = loggerFactory.CreateLogger<PostToOrcasite>();
-            var postToOrcasite = new PostToOrcasite(orcasiteHelper, functionLogger);
+            var postToOrcasite = new PostToOrcasite(orcasiteHelper, functionLogger, configuration);
 
             // Set up Cosmos DB client.
             string connectionString = Environment.GetEnvironmentVariable("aifororcasmetadatastore_DOCUMENTDB")
@@ -90,9 +101,8 @@ Example:
                     // This will fail if it is already present there.
                     var documents = new List<JsonElement> { element };
 
-                    // Currently all data in the OrcaHello database has incorrect timestamps.
-                    // We correct for that here.
-                    // TODO(issue #219): Update this workaround when the data is fixed.
+                    // Data in the OrcaHello database from before the current epoch has
+                    // incorrect timestamps, so correct for that here.
                     IReadOnlyList<JsonElement> correctedDocuments = await orcasiteHelper.FixTimestampsAsync(documents);
 
                     bool ok = await postToOrcasite.ProcessDocumentsAsync(correctedDocuments);
