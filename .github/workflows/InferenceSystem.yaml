@@ -228,6 +228,7 @@ jobs:
       run: |
         docker run --rm \
           --env-file .env \
+          -v $PWD/config:/config \
           live-inference-system \
           python3 -u ./src/LiveInferenceOrchestrator.py \
           --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml \
