@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NotificationSystem.Models;
@@ -20,9 +21,19 @@ namespace NotificationSystem.Tests.Unit
             var container = OrcasiteTestHelper.GetMockOrcasiteHelperWithRequestVerification(mockOrcasiteLogger.Object);
             List<JsonElement> documents = OrcasiteTestHelper.GetSampleOrcaHelloDetections();
 
+            // Create a test configuration
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    ["CURRENT_EPOCH_START"] = "2025-10-12T14:23:00Z",
+                    ["ORCASITE_APIKEY"] = "test-key",
+                    ["ORCASITE_HOSTNAME"] = "beta.orcasound.net"
+                })
+                .Build();
+
             // Process it like the Azure function would.
             var mockFunctionLogger = new Mock<ILogger<PostToOrcasite>>();
-            var postToOrcasite = new PostToOrcasite(container.Helper, mockFunctionLogger.Object);
+            var postToOrcasite = new PostToOrcasite(container.Helper, mockFunctionLogger.Object, configuration);
             bool ok = await postToOrcasite.ProcessDocumentsAsync(documents);
             
             // Assert that the operation succeeded.

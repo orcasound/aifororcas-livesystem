@@ -1,11 +1,11 @@
 using ComposableAsync;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NotificationSystem.Models;
 using RateLimiter;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,12 +16,14 @@ namespace NotificationSystem
     {
         private readonly OrcasiteHelper _helper;
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
         const int SendRate = 14; // Max 14 posts per second.
 
-        public PostToOrcasite(OrcasiteHelper helper, ILogger<PostToOrcasite> logger)
+        public PostToOrcasite(OrcasiteHelper helper, ILogger<PostToOrcasite> logger, IConfiguration configuration)
         {
             _helper = helper;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task<bool> ProcessDocumentsAsync(
@@ -33,7 +35,7 @@ namespace NotificationSystem
                 return true;
             }
 
-            await _helper.InitializeAsync();
+            await _helper.InitializeAsync(_configuration);
 
             var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             int remaining = input.Count;
@@ -67,9 +69,10 @@ namespace NotificationSystem
                 LeaseContainerPrefix = "orcasite",
                 CreateLeaseContainerIfNotExists = true)] IReadOnlyList<JsonElement> input)
         {
-            // Currently all data in the OrcaHello database has incorrect timestamps.
-            // We correct for that here.
-            // TODO(issue #219): Remove this workaround when the data is fixed.
+            await _helper.InitializeAsync(_configuration);
+
+            // Data in the OrcaHello database from before the current epoch has
+            // incorrect timestamps, so correct for that here.
             IReadOnlyList<JsonElement> correctedInput = await _helper.FixTimestampsAsync(input);
 
             bool ok = await ProcessDocumentsAsync(correctedInput);

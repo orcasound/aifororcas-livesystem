@@ -141,6 +141,9 @@ Create local.settings.json in the current directory (NotificationSystem) using t
         "SenderEmail": "<email address>",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet",
         "FUNCTIONS_INPROC_NET8_ENABLED": "1"
+        "ORCASITE_HOSTNAME": "live.orcasound.net",
+        "ORCASITE_APIKEY": "<orcasite API key>",
+        "CURRENT_EPOCH_START": "<timestamp of current epoch>"
     }
 }
 ```
