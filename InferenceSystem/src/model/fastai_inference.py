@@ -33,6 +33,26 @@ def _patched_torchaudio_load(filepath, *args, **kwargs):
 torchaudio.load = _patched_torchaudio_load
 
 
+# Monkey-patch torchaudio.save to avoid torchcodec dependency
+# torchaudio 2.9.0+ defaults to torchcodec backend which requires additional installation
+# This patch uses soundfile directly which is already installed
+_original_torchaudio_save = torchaudio.save
+
+def _patched_torchaudio_save(filepath, src, sample_rate, *args, **kwargs):
+    """Wrapper for torchaudio.save that uses soundfile directly instead of torchcodec"""
+    import soundfile as sf
+    import numpy as np
+    
+    # Convert torch tensor to numpy array
+    # src is expected to be (channels, samples), soundfile expects (samples, channels)
+    audio_data = src.numpy().T if src.ndim > 1 else src.numpy().reshape(-1, 1)
+    
+    # Save audio using soundfile
+    sf.write(str(filepath), audio_data, sample_rate)
+
+torchaudio.save = _patched_torchaudio_save
+
+
 # Monkey-patch torch.load to use weights_only=False for compatibility with fastai models
 # PyTorch 2.6+ changed the default to weights_only=True for security, but fastai models
 # require weights_only=False to load functools.partial and other objects
