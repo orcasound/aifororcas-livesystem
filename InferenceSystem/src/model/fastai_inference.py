@@ -1,3 +1,14 @@
+import os
+import shutil
+import tempfile
+
+# Configure torchaudio to use soundfile backend instead of torchcodec
+# torchaudio 2.9.0+ defaults to torchcodec which requires additional installation
+# The soundfile backend is the legacy backend that works with existing installations
+# Set this BEFORE importing torchaudio
+os.environ['TORCHAUDIO_USE_BACKEND_DISPATCHER'] = '1'
+
+import torch
 from fastai.basic_train import load_learner
 import pandas as pd
 from pydub import AudioSegment
@@ -5,17 +16,6 @@ from librosa import get_duration
 from pathlib import Path
 from numpy import floor
 from audio.data import AudioConfig, SpectrogramConfig, AudioList
-import os
-import shutil
-import tempfile
-import torch
-import torchaudio
-
-
-# Configure torchaudio to use soundfile backend instead of torchcodec
-# torchaudio 2.9.0+ defaults to torchcodec which requires additional installation
-# The soundfile backend is the legacy backend that works with existing installations
-torchaudio.set_audio_backend("soundfile")
 
 
 # Monkey-patch torch.load to use weights_only=False for compatibility with fastai models
