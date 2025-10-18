@@ -6,18 +6,31 @@ This document describes the following steps
 1. How to run the InferenceSystem locally.
 2. Deploying an updated docker build to Azure Container Instances.
 
-Note: We use Python 3, specifically tested with Python 3.7.4
+Note: We use Python 3, specifically tested with Python 3.11.3
 
-**Important:** Python 3.8 or earlier is required. The dependencies (particularly torchaudio==0.6.0 and older versions of librosa, fastai) are not compatible with Python 3.9 or later. If you encounter installation errors with newer Python versions, please use Python 3.7 or 3.8.
+**Important:** Python 3.11 or later is now supported. The dependencies have been updated to support Python 3.11, including updated versions of torch, torchaudio, librosa, numpy, and other packages.
 
 # How to run the InferenceSystem locally
 ## Create a virtual environment
 
-1. In your working directory, run `python -m venv inference-venv` using Python 3.7 or 3.8. This creates a directory `inference-venv` with relevant files/scripts. 
+1. In your working directory, run `python -m venv inference-venv` using Python 3.11 or later. This creates a directory `inference-venv` with relevant files/scripts. 
 2. On Mac or Linux, activate this environment with `source inference-venv/bin/activate` and when you're done, `deactivate`
 
     On Windows, activate with `.\inference-venv\Scripts\activate.bat` and `.\inference-venv\Scripts\deactivate.bat` when done
 3. In an active environment, cd to `/InferenceSystem` and run `python -m pip install --upgrade pip && pip install -r requirements.txt`
+4. **Python 3.11+ Compatibility Patch**: After installing dependencies, you need to patch the fastai_audio package for Python 3.11+ compatibility:
+   
+   On Mac or Linux:
+   ```bash
+   bash patch_fastai_audio.sh
+   ```
+   
+   On Windows:
+   ```cmd
+   patch_fastai_audio.bat
+   ```
+   
+   This patch fixes a dataclass compatibility issue with Python 3.11+ where mutable default values are not allowed without using `field(default_factory=...)`.
 
 **Troubleshooting:** If you encounter dependency conflicts with standard `pip install`, you can use `uv` which is better at resolving package version conflicts:
 
