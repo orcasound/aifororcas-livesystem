@@ -29,7 +29,7 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v5
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: Download model
       id: model-path
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v5
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: Download model
       id: model-path
@@ -158,6 +158,17 @@ jobs:
       working-directory: InferenceSystem
       run: |
         docker build . -t live-inference-system -f ./Dockerfile
+
+    - name: Test docker container
+      working-directory: InferenceSystem
+      run: |
+        docker run --rm \
+          --env-file .env \
+          -v $PWD/config:/config \
+          live-inference-system \
+          python3 -u ./src/LiveInferenceOrchestrator.py \
+          --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml \
+          --max_iterations 1
 
     - name: Save docker container to tar file
       working-directory: InferenceSystem
