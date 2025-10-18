@@ -3,11 +3,19 @@ REM Script to patch fastai_audio for Python 3.11+ compatibility on Windows
 
 echo Applying Python 3.11 compatibility patch to fastai_audio...
 
-REM Find the fastai_audio installation directory
-for /f "delims=" %%i in ('python -c "import audio.data; import os; print(os.path.abspath(audio.data.__file__))"') do set AUDIO_DATA_FILE=%%i
+REM Find the site-packages directory
+for /f "delims=" %%i in ('python -c "import sys; import site; print([p for p in sys.path if 'site-packages' in p][0])"') do set AUDIO_PACKAGE_DIR=%%i
 
-if "%AUDIO_DATA_FILE%"=="" (
-    echo Error: Could not find audio.data module
+if "%AUDIO_PACKAGE_DIR%"=="" (
+    echo Error: Could not find site-packages directory
+    exit /b 1
+)
+
+REM Build path to audio/data.py
+set AUDIO_DATA_FILE=%AUDIO_PACKAGE_DIR%\audio\data.py
+
+if not exist "%AUDIO_DATA_FILE%" (
+    echo Error: Could not find audio/data.py at %AUDIO_DATA_FILE%
     exit /b 1
 )
 

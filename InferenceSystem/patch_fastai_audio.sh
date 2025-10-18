@@ -1,15 +1,21 @@
 #!/bin/bash
 # Script to patch fastai_audio for Python 3.11+ compatibility
 
-set -e
-
 echo "Applying Python 3.11 compatibility patch to fastai_audio..."
 
-# Find the fastai_audio installation directory
-AUDIO_DATA_FILE=$(python -c "import audio.data; import os; print(os.path.abspath(audio.data.__file__))" 2>/dev/null)
+# Find the fastai_audio installation directory using pip show
+AUDIO_PACKAGE_DIR=$(python -c "import sys; import site; print([p for p in sys.path if 'site-packages' in p][0])" 2>/dev/null)
 
-if [ -z "$AUDIO_DATA_FILE" ]; then
-    echo "Error: Could not find audio.data module"
+if [ -z "$AUDIO_PACKAGE_DIR" ]; then
+    echo "Error: Could not find site-packages directory"
+    exit 1
+fi
+
+# Look for the audio package
+AUDIO_DATA_FILE="${AUDIO_PACKAGE_DIR}/audio/data.py"
+
+if [ ! -f "$AUDIO_DATA_FILE" ]; then
+    echo "Error: Could not find audio/data.py at $AUDIO_DATA_FILE"
     exit 1
 fi
 
