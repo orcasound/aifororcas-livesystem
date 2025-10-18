@@ -14,14 +14,21 @@ import torchaudio
 
 # Monkey-patch torchaudio.load to avoid torchcodec dependency
 # torchaudio 2.9.0+ defaults to torchcodec backend which requires additional installation
-# This patch forces use of soundfile backend which is already installed
+# This patch uses soundfile directly which is already installed
 _original_torchaudio_load = torchaudio.load
 
 def _patched_torchaudio_load(filepath, *args, **kwargs):
-    """Wrapper for torchaudio.load that uses soundfile backend instead of torchcodec"""
-    # Import soundfile backend functions
-    from torchaudio.backend import soundfile_backend
-    return soundfile_backend.load(filepath, *args, **kwargs)
+    """Wrapper for torchaudio.load that uses soundfile directly instead of torchcodec"""
+    import soundfile as sf
+    import torch as t
+    
+    # Load audio using soundfile
+    data, samplerate = sf.read(str(filepath), dtype='float32')
+    
+    # Convert to torch tensor and ensure shape is (channels, samples)
+    waveform = t.from_numpy(data.T if data.ndim > 1 else data.reshape(1, -1))
+    
+    return waveform, samplerate
 
 torchaudio.load = _patched_torchaudio_load
 
