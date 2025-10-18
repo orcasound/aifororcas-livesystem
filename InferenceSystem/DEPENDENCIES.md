@@ -9,10 +9,10 @@ The InferenceSystem uses Python 3.11+ and is no longer constrained by Python 3.6
 | Package | Constraint | Reasoning |
 |---------|-----------|-----------|
 | `numba` | `>=0.57.0` | Versions 0.57.0+ are compatible with Python 3.11. No upper bound to allow updates. |
-| `numpy` | `>=1.21.0` | numpy 1.21+ is compatible with Python 3.9+ and works well with Python 3.11. |
+| `numpy` | `>=1.21.0,<2.0` | numpy 1.21+ is compatible with Python 3.9+. Upper bound <2.0 required for compatibility with pandas <2.0. |
 | `spacy` | `>=3.5.4` | spacy 3.5.4+ supports Python 3.11. No upper bound to allow updates. |
 | `librosa` | `>=0.10.0` | Version 0.10.0+ is compatible with Python 3.11 and modern numpy/numba. |
-| `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with existing code. |
+| `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with existing code and numpy <2.0. |
 | `torchaudio` | `>=2.1.0` | Version 2.1.0+ is compatible with Python 3.11. |
 
 ## Dependabot Configuration
@@ -54,16 +54,17 @@ When testing dependency updates locally or in CI:
 
 Key versions confirmed working with Python 3.11+:
 - `numba>=0.57.0` (for Python 3.11+)
-- `numpy>=1.21.0` (for Python 3.9+ compatibility)
+- `numpy>=1.21.0,<2.0` (for Python 3.9+ compatibility; <2.0 constraint for pandas compatibility)
 - `spacy>=3.5.4` (for Python 3.11+ compatibility)
 - `librosa>=0.10.0` (for Python 3.11+)
 - `torchaudio>=2.1.0` (for Python 3.11+)
+- `pandas>=1.1.0,<2.0` (constrained to <2.0 for numpy 1.x compatibility)
 
 ## Migration from Python 3.8
 
 This version of the InferenceSystem has been upgraded from Python 3.8 to Python 3.11.3. Key changes:
 1. Removed Python 3.6 compatibility constraints
-2. Updated numpy from pinned 1.19.5 to >=1.21.0
+2. Updated numpy from pinned 1.19.5 to `>=1.21.0,<2.0` (upper bound for pandas <2.0 compatibility)
 3. Removed spacy upper bound constraint (<3.7.0)
 4. Updated librosa from <0.11.0 to >=0.10.0
 5. Updated torchaudio from <0.14.0 to >=2.1.0
