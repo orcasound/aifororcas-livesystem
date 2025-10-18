@@ -69,3 +69,16 @@ This version of the InferenceSystem has been upgraded from Python 3.8 to Python 
 4. Updated librosa from <0.11.0 to >=0.10.0
 5. Updated torchaudio from <0.14.0 to >=2.1.0
 6. Updated numba from <0.59.0 to >=0.57.0
+7. Added patch for fastai_audio Python 3.11+ compatibility (dataclass mutable default fix)
+
+### fastai_audio Compatibility Patch
+
+The `fastai_audio` package uses a dataclass pattern that is incompatible with Python 3.11+ (mutable default values). A patch script is automatically applied during CI/CD testing to fix this issue. If running tests locally with Python 3.11+, run:
+
+```bash
+# On Linux/Mac
+bash InferenceSystem/patch_fastai_audio.sh
+
+# On Windows
+InferenceSystem\patch_fastai_audio.bat
+```

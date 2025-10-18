@@ -66,6 +66,12 @@ jobs:
       run: |
         call .\inference-venv\Scripts\activate.bat && python -m pip install --upgrade pip && pip install -r requirements.txt
 
+    - name: Patch fastai_audio for Python 3.11+ compatibility
+      working-directory: InferenceSystem
+      shell: cmd
+      run: |
+        call .\inference-venv\Scripts\activate.bat && patch_fastai_audio.bat
+
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       shell: cmd
@@ -119,6 +125,11 @@ jobs:
       working-directory: InferenceSystem
       run: |
         source ./inference-venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+
+    - name: Patch fastai_audio for Python 3.11+ compatibility
+      working-directory: InferenceSystem
+      run: |
+        source ./inference-venv/bin/activate && bash patch_fastai_audio.sh
 
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
