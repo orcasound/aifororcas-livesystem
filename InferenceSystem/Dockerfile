@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 # Install sudo apt-get requirements
 RUN apt-get update && apt-get install -y \
