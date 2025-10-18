@@ -16,8 +16,6 @@ This repository contains the implementations for the following components that m
 - [ModeratorFrontEnd](ModeratorFrontEnd) - Frontend code for the [Moderator Portal](https://aifororcas.azurewebsites.net/).
 - [NotificationSystem](NotificationSystem) - Code to trigger email notifications.
 - [InferenceSystem](InferenceSystem) - Code to perform inference with the trained model.
-- [ModelTraining](ModelTraining) - Data preparation and model training.
-- [ModelEvaluation](ModelEvaluation) - Benchmarking trained models on test sets.
 
 ## System overview
 The diagram below describes the flow of data through OrcaHello and the technologies used. 
@@ -99,10 +97,8 @@ To contribute a pull request for a specific subsystem, please read the correspon
 - ModeratorFrontEnd | [README](ModeratorFrontEnd/README.md)  | [Contributing Guidelines](ModeratorFrontEnd/CONTRIBUTING.md)
 - NotificationSystem | [README](NotificationSystem/README.md) | [Contributing Guidelines](NotificationSystem/CONTRIBUTING.md)
 - InferenceSystem | [README](InferenceSystem/README.md) | [Contributing Guidelines](InferenceSystem/CONTRIBUTING.md)
-- ModelTraining | [README](ModelTraining/README.md) | [Contributing Guidelines](ModelTraining/CONTRIBUTING.md)
 
 Current subteams and leads are as follows:
-- Machine Learning and Artificial Intelligence (Lead: Patrick Pastore): this subteam deals with the ModelTraining subsystem
 - Inference System (Lead: Sofia Yang): this subteam deals with the InferenceSystem subsystem
 - Notification System (Lead: Dave Thaler): this subteam deals with the NotificationSystem subsystem
 - Infrastructure (Lead: Dave Thaler): this subteam deals with Azure and GitHub infrastructure
