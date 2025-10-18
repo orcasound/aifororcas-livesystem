@@ -8,6 +8,21 @@ from audio.data import AudioConfig, SpectrogramConfig, AudioList
 import os
 import shutil
 import tempfile
+import torch
+
+
+# Monkey-patch torch.load to use weights_only=False for compatibility with fastai models
+# PyTorch 2.6+ changed the default to weights_only=True for security, but fastai models
+# require weights_only=False to load functools.partial and other objects
+_original_torch_load = torch.load
+
+def _patched_torch_load(*args, **kwargs):
+    """Wrapper for torch.load that defaults to weights_only=False for fastai compatibility"""
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return _original_torch_load(*args, **kwargs)
+
+torch.load = _patched_torch_load
 
 
 def load_model(mPath, mName="stg2-rn18.pkl"):
