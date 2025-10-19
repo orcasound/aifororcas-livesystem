@@ -50,7 +50,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.8'
+        python-version: '3.11'
 
     - name: Install FFmpeg
       run: choco install ffmpeg -y
@@ -65,6 +65,12 @@ jobs:
       shell: cmd
       run: |
         call .\inference-venv\Scripts\activate.bat && python -m pip install --upgrade pip && pip install -r requirements.txt
+
+    - name: Patch fastai_audio for Python 3.11+ compatibility
+      working-directory: InferenceSystem
+      shell: cmd
+      run: |
+        call .\inference-venv\Scripts\activate.bat && patch_fastai_audio.bat
 
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
@@ -103,12 +109,26 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.8'
+        python-version: '3.11'
 
     - name: Install FFmpeg
       run: |
         sudo apt-get update
         sudo apt-get install -y ffmpeg
+
+    - name: Free up disk space
+      run: |
+        echo "Disk space before cleanup:"
+        df -h
+        # Remove unnecessary packages to free up space for pip install
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf /usr/local/lib/android
+        sudo apt-get clean
+        sudo apt-get autoremove -y
+        echo "Disk space after cleanup:"
+        df -h
 
     - name: Create environment
       working-directory: InferenceSystem
@@ -119,6 +139,11 @@ jobs:
       working-directory: InferenceSystem
       run: |
         source ./inference-venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+
+    - name: Patch fastai_audio for Python 3.11+ compatibility
+      working-directory: InferenceSystem
+      run: |
+        source ./inference-venv/bin/activate && bash patch_fastai_audio.sh
 
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
@@ -144,6 +169,26 @@ jobs:
     - name: Checkout
       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
+    - name: Free up disk space
+      run: |
+        echo "Disk space before cleanup:"
+        df -h
+        # Remove unnecessary packages and cached files
+        sudo apt-get clean
+        sudo apt-get autoremove -y
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo rm -rf /usr/local/.ghcup
+        sudo rm -rf /usr/share/swift
+        # Clean up Docker
+        docker system prune -af
+        echo "Disk space after cleanup:"
+        df -h
+
     - name: Download model
       working-directory: InferenceSystem
       run: |
@@ -162,11 +207,11 @@ jobs:
     - name: Save docker container to tar file
       working-directory: InferenceSystem
       run: |
-        docker save live-inference-system -o live-inference-system.tar
+        docker save live-inference-system | gzip > live-inference-system.tar.gz
 
     - name: Upload docker container as artifact
       uses: actions/upload-artifact@v4
       with:
         name: live-inference-system-docker-image
-        path: InferenceSystem/live-inference-system.tar
+        path: InferenceSystem/live-inference-system.tar.gz
         retention-days: 5
