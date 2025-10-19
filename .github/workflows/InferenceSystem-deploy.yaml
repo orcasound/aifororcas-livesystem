@@ -63,7 +63,7 @@ jobs:
 
     - name: Load Docker image
       run: |
-        docker load --input ./image-artifact/live-inference-system.tar
+        gunzip -c ./image-artifact/live-inference-system.tar.gz | docker load
 
     - name: List Docker images
       run: docker images
