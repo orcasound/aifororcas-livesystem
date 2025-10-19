@@ -116,6 +116,20 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ffmpeg
 
+    - name: Free up disk space
+      run: |
+        echo "Disk space before cleanup:"
+        df -h
+        # Remove unnecessary packages to free up space for pip install
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf /usr/local/lib/android
+        sudo apt-get clean
+        sudo apt-get autoremove -y
+        echo "Disk space after cleanup:"
+        df -h
+
     - name: Create environment
       working-directory: InferenceSystem
       run: |
