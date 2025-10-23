@@ -1,6 +1,7 @@
 import datetime
 
 S3_STREAM_URLS = {
+    "andrews_bay": "https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_andrews_bay",
     "bush_point": "https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_bush_point",
     "mast_center": "https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_mast_center",
     "north_sjc": "https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_north_sjc",
