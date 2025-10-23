@@ -76,7 +76,7 @@ jobs:
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
 
     - name: Test with FastAI DateRangeHLS config
       working-directory: InferenceSystem
@@ -148,7 +148,7 @@ jobs:
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
 
     - name: Test with FastAI DateRangeHLS config
       working-directory: InferenceSystem
