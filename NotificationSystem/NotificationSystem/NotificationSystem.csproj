@@ -6,11 +6,11 @@
     <UserSecretsId>8b84a2b2-204f-4152-85e4-8860e457738c</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.S3" Version="4.0.7.12" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="4.0.1.9" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.7.14" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="4.0.1.10" />
     <PackageReference Include="Azure.Storage.Queues" Version="12.24.0" />
   <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.54.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.2.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" Version="4.14.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Tables" Version="1.5.0" />
