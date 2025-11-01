@@ -165,7 +165,7 @@ jobs:
         docker save live-inference-system -o live-inference-system.tar
 
     - name: Upload docker container as artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: live-inference-system-docker-image
         path: InferenceSystem/live-inference-system.tar
