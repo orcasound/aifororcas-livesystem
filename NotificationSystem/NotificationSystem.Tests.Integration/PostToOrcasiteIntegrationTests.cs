@@ -45,7 +45,8 @@ namespace NotificationSystem.Tests.Integration
                     {
                         ["aifororcasmetadatastore_DOCUMENTDB"] = Environment.GetEnvironmentVariable("aifororcasmetadatastore_DOCUMENTDB") ?? "UseDevelopmentStorage=true",
                         ["ORCASITE_HOSTNAME"] = Environment.GetEnvironmentVariable("ORCASITE_HOSTNAME") ?? "beta.orcasound.net",
-                        ["ORCASITE_APIKEY"] = Environment.GetEnvironmentVariable("ORCASITE_APIKEY") ?? "test-key"
+                        ["ORCASITE_APIKEY"] = Environment.GetEnvironmentVariable("ORCASITE_APIKEY") ?? "test-key",
+                        ["CURRENT_EPOCH_START"] = Environment.GetEnvironmentVariable("CURRENT_EPOCH_START") ?? "2025-10-12T14:23:00Z"
                     });
 
                     // Load configuration from local.settings.json.
@@ -100,7 +101,8 @@ namespace NotificationSystem.Tests.Integration
                     {
                         var logger = provider.GetRequiredService<ILogger<PostToOrcasite>>();
                         var orcasiteHelper = provider.GetRequiredService<OrcasiteHelper>();
-                        return new PostToOrcasite(orcasiteHelper, logger);
+                        var configuration = provider.GetRequiredService<IConfiguration>();
+                        return new PostToOrcasite(orcasiteHelper, logger, configuration);
                     });
                 })
                 .ConfigureLogging(logging =>
@@ -127,6 +129,8 @@ namespace NotificationSystem.Tests.Integration
             // This tests the [FunctionName("PostToOrcasite")] method directly.
             var postToOrcasite = _serviceProvider.GetRequiredService<PostToOrcasite>();
             int oldRunCount = postToOrcasite.SuccessfulRuns;
+            var orcasiteHelper = _serviceProvider.GetRequiredService<OrcasiteHelper>();
+            await orcasiteHelper.InitializeAsync(configuration);
             await postToOrcasite.Run(documents);
 
             // Assert - Verify the function executed without throwing.
