@@ -5,6 +5,7 @@ using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using ComposableAsync;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -22,11 +23,15 @@ namespace NotificationSystem
     public class SendSubscriberEmail
     {
         private readonly ILogger _logger;
+        private readonly OrcasiteHelper _orcasiteHelper;
+        private readonly IConfiguration _configuration;
         const int SendRate = 14;
 
-        public SendSubscriberEmail(ILogger<SendSubscriberEmail> logger)
+        public SendSubscriberEmail(ILogger<SendSubscriberEmail> logger, OrcasiteHelper orcasiteHelper, IConfiguration configuration)
         {
             _logger = logger;
+            _orcasiteHelper = orcasiteHelper;
+            _configuration = configuration;
         }
 
         [Function("SendSubscriberEmail")]
@@ -35,6 +40,9 @@ namespace NotificationSystem
             [TimerTrigger("0 */1 * * * *")] string timerInfo,
             [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient)
         {
+            // Initialize OrcasiteHelper to fetch feeds data
+            await _orcasiteHelper.InitializeAsync(_configuration);
+            
             string queueConnection = Environment.GetEnvironmentVariable("OrcaNotificationStorageSetting");
             var queueClient = new QueueClient(queueConnection, "srkwfound");
 
@@ -83,7 +91,7 @@ namespace NotificationSystem
                 await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
             }
 
-            return EmailTemplate.GetSubscriberEmailBody(messagesJson);
+            return EmailTemplate.GetSubscriberEmailBody(messagesJson, _orcasiteHelper);
         }
     }
 }

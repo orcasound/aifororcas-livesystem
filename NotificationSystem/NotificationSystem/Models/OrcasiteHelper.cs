@@ -1,6 +1,7 @@
 ﻿using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace NotificationSystem.Models
         private string _orcasiteApiKey;
         private JsonElement? _orcasiteFeedsArray;
         private readonly ILogger<OrcasiteHelper> _logger;
+        private DateTime? _currentEpochStart;
+        private bool _initialized = false;
 
         public OrcasiteHelper(ILogger<OrcasiteHelper> log, HttpClient httpClient)
         {
@@ -96,18 +99,32 @@ namespace NotificationSystem.Models
         /// extra query.
         /// </summary>
         /// <returns>A task that represents the asynchronous operation</returns>
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(IConfiguration configuration)
         {
+            if (_initialized)
+            {
+                return;
+            }
             if (_orcasiteFeedsArray == null)
             {
-                _orcasiteApiKey = Environment.GetEnvironmentVariable("ORCASITE_APIKEY");
-                _orcasiteHostname = Environment.GetEnvironmentVariable("ORCASITE_HOSTNAME") ?? "beta.orcasound.net";
+                _orcasiteApiKey = configuration["ORCASITE_APIKEY"];
+                _orcasiteHostname = configuration["ORCASITE_HOSTNAME"] ?? "beta.orcasound.net";
                 _orcasiteFeedsArray = await GetDataArrayAsync(OrcasiteGetFeedsUri);
                 if (_orcasiteFeedsArray == null)
                 {
                     _logger.LogError("Failed to retrieve orcasite feeds.");
                 }
+
+                string? currentEpochStart = configuration["CURRENT_EPOCH_START"];
+                if (currentEpochStart != null)
+                {
+                    if (DateTime.TryParse(currentEpochStart, out DateTime parsedDate))
+                    {
+                        _currentEpochStart = parsedDate;
+                    }
+                }
             }
+            _initialized = true;
         }
 
         /// <summary>
@@ -159,6 +176,54 @@ namespace NotificationSystem.Models
 
                 return feedId.GetString();
             }
+            return null;
+        }
+
+        /// <summary>
+        /// Get the slug for a location by searching the feeds array by location name.
+        /// </summary>
+        /// <param name="locationName">Location name to find (e.g., "Bush Point", "North San Juan Channel")</param>
+        /// <returns>Slug string (e.g., "bush-point", "north-sjc"), or null if not found or feeds not initialized</returns>
+        public virtual string GetSlugByLocationName(string locationName)
+        {
+            if (_orcasiteFeedsArray == null)
+            {
+                _logger.LogWarning($"Feeds array not initialized when looking up slug for: {locationName}");
+                return null;
+            }
+
+            foreach (JsonElement feed in _orcasiteFeedsArray.Value.EnumerateArray())
+            {
+                if (!feed.TryGetProperty("attributes", out var attributes))
+                {
+                    continue;
+                }
+                if (attributes.ValueKind != JsonValueKind.Object)
+                {
+                    continue;
+                }
+                if (!attributes.TryGetProperty("name", out var name))
+                {
+                    continue;
+                }
+                if (name.ValueKind != JsonValueKind.String)
+                {
+                    continue;
+                }
+                string feedName = name.GetString();
+                
+                // Match location name (case-insensitive)
+                if (string.Equals(feedName, locationName, StringComparison.OrdinalIgnoreCase) || 
+                    feedName.Contains(locationName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (attributes.TryGetProperty("slug", out var slug) && slug.ValueKind == JsonValueKind.String)
+                    {
+                        return slug.GetString();
+                    }
+                }
+            }
+            
+            _logger.LogWarning($"Could not find slug for location: {locationName}");
             return null;
         }
 
@@ -473,10 +538,10 @@ namespace NotificationSystem.Models
         }
 
         /// <summary>
-        /// Take a list of detections with incorrect timestamps and return an updated
-        /// list with the corrected timestamps.  This can take several seconds since it
-        /// requires querying S3 to find the .ts folders.  Hence, this should only be
-        /// done when it is known that the timestamps are incorrect.
+        /// Check the list of detections for those with incorrect timestamps and return an
+        /// updated list with the corrected timestamps.  This can take several seconds since
+        /// it requires querying S3 to find the .ts folders.  Hence, this should only be
+        /// done for the old epoch, where it is known that the timestamps are incorrect.
         /// </summary>
         /// <param name="originalInput">List of detections to process</param>
         /// <returns>List of corrected detections</returns>
@@ -492,6 +557,13 @@ namespace NotificationSystem.Models
                 DateTime? originalDateTime = TryGetTimestamp(originalDetection);
                 if (originalDateTime == null)
                 {
+                    continue;
+                }
+
+                // If the timestamp is in the current epoch, it is already correct.
+                if ((_currentEpochStart != null) && (originalDateTime >= _currentEpochStart))
+                {
+                    correctedInput.Add(originalDetection.Clone());
                     continue;
                 }
 
