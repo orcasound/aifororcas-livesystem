@@ -54,7 +54,7 @@ jobs:
         fi
 
     - name: Download Docker image artifact from latest run
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: live-inference-system-docker-image
         path: ./image-artifact
