@@ -1,3 +1,7 @@
+import os
+import shutil
+import tempfile
+import torch
 from fastai.basic_train import load_learner
 import pandas as pd
 from pydub import AudioSegment
@@ -5,9 +9,62 @@ from librosa import get_duration
 from pathlib import Path
 from numpy import floor
 from audio.data import AudioConfig, SpectrogramConfig, AudioList
-import os
-import shutil
-import tempfile
+import torchaudio
+
+
+# Monkey-patch torchaudio.load to avoid torchcodec dependency
+# torchaudio 2.9.0+ defaults to torchcodec backend which requires additional installation
+# This patch uses soundfile directly which is already installed
+_original_torchaudio_load = torchaudio.load
+
+def _patched_torchaudio_load(filepath, *args, **kwargs):
+    """Wrapper for torchaudio.load that uses soundfile directly instead of torchcodec"""
+    import soundfile as sf
+    import torch as t
+    
+    # Load audio using soundfile
+    data, samplerate = sf.read(str(filepath), dtype='float32')
+    
+    # Convert to torch tensor and ensure shape is (channels, samples)
+    waveform = t.from_numpy(data.T if data.ndim > 1 else data.reshape(1, -1))
+    
+    return waveform, samplerate
+
+torchaudio.load = _patched_torchaudio_load
+
+
+# Monkey-patch torchaudio.save to avoid torchcodec dependency
+# torchaudio 2.9.0+ defaults to torchcodec backend which requires additional installation
+# This patch uses soundfile directly which is already installed
+_original_torchaudio_save = torchaudio.save
+
+def _patched_torchaudio_save(filepath, src, sample_rate, *args, **kwargs):
+    """Wrapper for torchaudio.save that uses soundfile directly instead of torchcodec"""
+    import soundfile as sf
+    import numpy as np
+    
+    # Convert torch tensor to numpy array
+    # src is expected to be (channels, samples), soundfile expects (samples, channels)
+    audio_data = src.numpy().T if src.ndim > 1 else src.numpy().reshape(-1, 1)
+    
+    # Save audio using soundfile
+    sf.write(str(filepath), audio_data, sample_rate)
+
+torchaudio.save = _patched_torchaudio_save
+
+
+# Monkey-patch torch.load to use weights_only=False for compatibility with fastai models
+# PyTorch 2.6+ changed the default to weights_only=True for security, but fastai models
+# require weights_only=False to load functools.partial and other objects
+_original_torch_load = torch.load
+
+def _patched_torch_load(*args, **kwargs):
+    """Wrapper for torch.load that defaults to weights_only=False for fastai compatibility"""
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return _original_torch_load(*args, **kwargs)
+
+torch.load = _patched_torch_load
 
 
 def load_model(mPath, mName="stg2-rn18.pkl"):

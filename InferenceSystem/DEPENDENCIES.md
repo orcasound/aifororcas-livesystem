@@ -2,18 +2,18 @@
 
 ## Version Constraints Strategy
 
-The InferenceSystem uses Python 3.8 and runs on Ubuntu 18.04 in production (Docker). Because of this, we use **version ranges** rather than pinned versions for key dependencies to allow Dependabot to update within safe bounds while preventing updates to versions that don't exist for Python 3.8.
+The InferenceSystem uses Python 3.11+ and is no longer constrained by Python 3.6 compatibility. We use **version ranges** for key dependencies to allow updates within safe bounds while ensuring compatibility with Python 3.11.3 and later.
 
 ### Key Dependencies and Their Constraints
 
 | Package | Constraint | Reasoning |
 |---------|-----------|-----------|
-| `numba` | `>=0.51.0,<0.59.0` | Versions 0.59.0+ require Python 3.9+. Max version 0.58.1 is confirmed working. Minimum 0.51.0 required by librosa 0.10.x. |
-| `numpy` | `==1.19.5` | Pinned to 1.19.5 for Python 3.6 compatibility (Docker uses Ubuntu 18.04). numpy 1.20+ requires Python 3.7+. This is the only stable version that works across Python 3.6-3.8. |
-| `spacy` | `>=3.5.4,<3.7.0` | Versions 3.7.0+ require Python 3.7+, but Docker uses Python 3.6. Constrained to 3.6.x for compatibility. |
-| `librosa` | `>=0.8.0,<0.11.0` | Version 0.11.0+ requires numba 0.51.0+, which may have compatibility issues. Version 0.10.0 is confirmed working. |
-| `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with numpy 1.x and Python 3.6+. |
-| `torchaudio` | `>=0.6.0,<0.14.0` | Version range allows pip to select platform-specific versions. Version 0.6.0 works on Linux but Windows requires 0.8.0+. Upper bound prevents major API changes. |
+| `numba` | `>=0.57.0` | Versions 0.57.0+ are compatible with Python 3.11. No upper bound to allow updates. |
+| `numpy` | `>=1.21.0,<2.0` | numpy 1.21+ is compatible with Python 3.9+. Upper bound <2.0 required for compatibility with pandas <2.0. |
+| `spacy` | `>=3.5.4` | spacy 3.5.4+ supports Python 3.11. No upper bound to allow updates. |
+| `librosa` | `>=0.10.0` | Version 0.10.0+ is compatible with Python 3.11 and modern numpy/numba. |
+| `pandas` | `>=1.1.0,<2.0` | Constrained to maintain compatibility with existing code and numpy <2.0. |
+| `torchaudio` | `>=2.1.0` | Version 2.1.0+ is compatible with Python 3.11. |
 
 ## Dependabot Configuration
 
@@ -33,58 +33,52 @@ The `requirements.txt` uses `--extra-index-url https://download.pytorch.org/whl/
 ## Why These Constraints Matter
 
 Dependabot doesn't validate whether proposed versions:
-- Are available on PyPI for your platform (many packages skip Python 3.8 builds for newer versions)
+- Are available on PyPI for your platform
 - Are compatible with your other dependencies
 - Are installable in your CI environment (Python version mismatch)
 
-For example, Dependabot previously suggested:
-- `numba==0.60.0` - doesn't exist for Python 3.8 (only goes up to 0.58.1)
-- `spacy==3.8.7` - doesn't have wheels for Python 3.8 (latest is 3.8.2)
-- `numpy==1.26.4` - doesn't support Python 3.6 (Docker constraint) or Python 3.8
-
-**Note on numpy**: Due to Docker using Python 3.6, numpy must be pinned to 1.19.5 (the last version supporting Python 3.6 before numpy 1.20+ required Python 3.7+). While CI uses Python 3.8, we must satisfy the lowest common denominator.
-
-**Note on spacy**: Similarly, spacy is constrained to `<3.7.0` because spacy 3.7.0+ requires Python 3.7+, but Docker uses Python 3.6.
-
-By using version ranges with upper bounds (and pinned versions where necessary), we prevent these invalid updates while still allowing Dependabot to suggest updates within the safe range.
+By using version ranges with minimum requirements (and upper bounds where necessary), we ensure compatibility while allowing safe updates.
 
 ## Testing Dependency Updates
 
 When testing dependency updates locally or in CI:
-1. Ensure you're using Python 3.8 (not 3.9+)
+1. Ensure you're using Python 3.11 or later
 2. Test on both Ubuntu and Windows (as both are used in CI)
-3. Verify the package version exists on PyPI for Python 3.8:
+3. Verify the package version exists on PyPI for Python 3.11+:
    ```bash
-   pip index versions <package> --python-version 3.8
+   pip index versions <package> --python-version 3.11
    ```
 4. Check compatibility with other dependencies (especially librosa/numba/numpy)
 
 ## Verified Working Versions
 
-See `ModelTraining/requirements.lock.txt` for a full list of verified working versions that pass tests with Python 3.8+.
+Key versions confirmed working with Python 3.11+:
+- `numba>=0.57.0` (for Python 3.11+)
+- `numpy>=1.21.0,<2.0` (for Python 3.9+ compatibility; <2.0 constraint for pandas compatibility)
+- `spacy>=3.5.4` (for Python 3.11+ compatibility)
+- `librosa>=0.10.0` (for Python 3.11+)
+- `torchaudio>=2.1.0` (for Python 3.11+)
+- `pandas>=1.1.0,<2.0` (constrained to <2.0 for numpy 1.x compatibility)
 
-Key versions confirmed working:
-- `numba==0.58.1` (for Python 3.8+)
-- `numpy==1.19.5` (for Python 3.6-3.8 compatibility)
-- `spacy==3.6.1` (for Python 3.6 compatibility; 3.7.5 requires Python 3.7+)
-- `librosa==0.10.0` (for Python 3.8+)
+## Migration from Python 3.8
 
-**Note**: The InferenceSystem Docker build uses Ubuntu 18.04 with Python 3.6, which constrains:
-- numpy to 1.19.x (1.20+ requires Python 3.7+)
-- spacy to 3.6.x (3.7+ requires Python 3.7+)
+This version of the InferenceSystem has been upgraded from Python 3.8 to Python 3.11.3. Key changes:
+1. Removed Python 3.6 compatibility constraints
+2. Updated numpy from pinned 1.19.5 to `>=1.21.0,<2.0` (upper bound for pandas <2.0 compatibility)
+3. Removed spacy upper bound constraint (<3.7.0)
+4. Updated librosa from <0.11.0 to >=0.10.0
+5. Updated torchaudio from <0.14.0 to >=2.1.0
+6. Updated numba from <0.59.0 to >=0.57.0
+7. Added patch for fastai_audio Python 3.11+ compatibility (dataclass mutable default fix)
 
-The CI tests use Python 3.8 and can support newer versions, but we constrain to the lowest common denominator for compatibility.
+### fastai_audio Compatibility Patch
 
-## Future Migration Path
+The `fastai_audio` package uses a dataclass pattern that is incompatible with Python 3.11+ (mutable default values). A patch script is automatically applied during CI/CD testing to fix this issue. If running tests locally with Python 3.11+, run:
 
-When the InferenceSystem Docker is upgraded to Python 3.7 or later:
-1. Update the Docker base image from Ubuntu 18.04 to Ubuntu 20.04+ (which has Python 3.8+)
-2. Relax numpy constraint to `>=1.19.5,<1.25.0` to allow versions up to 1.24.4
-3. Consider updating other constraints as well
-4. Test thoroughly before deploying to production
+```bash
+# On Linux/Mac
+bash InferenceSystem/patch_fastai_audio.sh
 
-When upgrading to Python 3.9+:
-1. Complete the Python 3.7+ migration first
-2. Update CI workflows to use Python 3.9+
-3. Further relax version constraints to allow newer package versions
-4. Test thoroughly before deploying to production
+# On Windows
+InferenceSystem\patch_fastai_audio.bat
+```
