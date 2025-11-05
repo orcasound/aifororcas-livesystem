@@ -5,6 +5,7 @@ using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using ComposableAsync;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -23,12 +24,14 @@ namespace NotificationSystem
     {
         private readonly ILogger _logger;
         private readonly OrcasiteHelper _orcasiteHelper;
+        private readonly IConfiguration _configuration;
         const int SendRate = 14;
 
-        public SendSubscriberEmail(ILogger<SendSubscriberEmail> logger, OrcasiteHelper orcasiteHelper)
+        public SendSubscriberEmail(ILogger<SendSubscriberEmail> logger, OrcasiteHelper orcasiteHelper, IConfiguration configuration)
         {
             _logger = logger;
             _orcasiteHelper = orcasiteHelper;
+            _configuration = configuration;
         }
 
         [Function("SendSubscriberEmail")]
@@ -38,7 +41,7 @@ namespace NotificationSystem
             [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient)
         {
             // Initialize OrcasiteHelper to fetch feeds data
-            await _orcasiteHelper.InitializeAsync();
+            await _orcasiteHelper.InitializeAsync(_configuration);
             
             string queueConnection = Environment.GetEnvironmentVariable("OrcaNotificationStorageSetting");
             var queueClient = new QueueClient(queueConnection, "srkwfound");
