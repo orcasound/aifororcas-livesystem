@@ -56,24 +56,25 @@ namespace NotificationSystem
             }
 
             _logger.LogInformation("Creating email message");
-            var body = await CreateBody(queueClient);
+            var (body, messages) = await CreateBody(queueClient);
 
             var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
             _logger.LogInformation("Retrieving email list and sending notifications");
+            string emailSubject = EmailTemplate.GetSubscriberEmailSubject(messages);
             foreach (var emailEntity in await EmailHelpers.GetEmailEntitiesAsync<SubscriberEmailEntity>(tableClient, "Subscriber"))
             {
                 await timeConstraint;
                 var email = EmailHelpers.CreateEmail(
                     Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email,
-                    "Notification: Orca detected!",
+                    emailSubject,
                     body);
                 await aws.SendEmailAsync(email);
             }
         }
 
-        private async Task<string> CreateBody(QueueClient queueClient)
+        private async Task<(string body, List<JObject> messages)> CreateBody(QueueClient queueClient)
         {
             var bodyBuilder = new StringBuilder("<h1>Confirmed SRKW detections:</h1>\n<ul>");
             QueueMessage message;
@@ -91,7 +92,8 @@ namespace NotificationSystem
                 await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
             }
 
-            return EmailTemplate.GetSubscriberEmailBody(messagesJson, _orcasiteHelper);
+            string body = EmailTemplate.GetSubscriberEmailBody(messagesJson, _orcasiteHelper);
+            return (body, messagesJson);
         }
     }
 }
