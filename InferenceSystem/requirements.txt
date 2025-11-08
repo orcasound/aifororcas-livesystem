@@ -25,4 +25,4 @@ opencv-python
 boto3
 pytz
 opencensus-ext-azure
-git+https://github.com/dthaler/orca-hls-utils.git@master#egg=orca-hls-utils
+git+https://github.com/orcasound/orca-hls-utils.git@master#egg=orca-hls-utils
