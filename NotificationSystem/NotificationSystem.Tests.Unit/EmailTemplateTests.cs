@@ -225,5 +225,169 @@ namespace NotificationSystem.Tests.Unit
             Assert.DoesNotContain("north-san-juan-channel.jpg", emailBody);
             Assert.Contains("North San Juan Channel", emailBody);
         }
+
+        /// <summary>
+        /// Tests that GetSubscriberEmailSubject generates correct subject line with location.
+        /// </summary>
+        [Fact]
+        public void GetSubscriberEmailSubject_IncludesLocationInSubject()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                JObject.FromObject(new
+                {
+                    timestamp = DateTime.UtcNow,
+                    location = new
+                    {
+                        name = "Sunset Bay",
+                        latitude = 47.86497296593844,
+                        longitude = -122.33393605795372,
+                        id = "rpi_sunset_bay"
+                    },
+                    moderator = "Test Moderator",
+                    comments = "Test comments"
+                })
+            };
+
+            // Act
+            string location = EmailTemplate.GetLocation(messages);
+            string subject = EmailTemplate.GetSubscriberEmailSubject(location);
+
+            // Assert
+            Assert.Equal("Notification: Orca detected at location Sunset Bay", subject);
+        }
+
+        /// <summary>
+        /// Tests that GetSubscriberEmailSubject handles empty location with "Unknown".
+        /// </summary>
+        [Fact]
+        public void GetSubscriberEmailSubject_HandlesEmptyLocation()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                JObject.FromObject(new
+                {
+                    timestamp = DateTime.UtcNow,
+                    location = new
+                    {
+                        name = "",
+                        latitude = 47.86497296593844,
+                        longitude = -122.33393605795372,
+                        id = "rpi_sunset_bay"
+                    },
+                    moderator = "Test Moderator",
+                    comments = "Test comments"
+                })
+            };
+
+            // Act
+            string location = EmailTemplate.GetLocation(messages);
+            string subject = EmailTemplate.GetSubscriberEmailSubject(location);
+
+            // Assert
+            Assert.Equal("Notification: Orca detected at location Unknown", subject);
+        }
+
+        /// <summary>
+        /// Tests that GetLocation handles null location.
+        /// </summary>
+        [Fact]
+        public void GetLocation_HandlesNullLocation()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                JObject.FromObject(new
+                {
+                    timestamp = DateTime.UtcNow,
+                    moderator = "Test Moderator",
+                    comments = "Test comments"
+                })
+            };
+
+            // Act
+            string location = EmailTemplate.GetLocation(messages);
+
+            // Assert
+            Assert.Null(location);
+        }
+
+        /// <summary>
+        /// Tests that GetLocation handles empty message list.
+        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
+        /// </summary>
+        [Fact]
+        public void GetLocation_HandlesEmptyMessageList()
+        {
+            // Arrange
+            var messages = new List<JObject>();
+
+            // Act
+            string location = EmailTemplate.GetLocation(messages);
+
+            // Assert
+            Assert.Null(location);
+        }
+
+        /// <summary>
+        /// Tests that GetLocation handles null message list.
+        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
+        /// </summary>
+        [Fact]
+        public void GetLocation_HandlesNullMessageList()
+        {
+            // Act
+            string location = EmailTemplate.GetLocation(null);
+
+            // Assert
+            Assert.Null(location);
+        }
+
+        /// <summary>
+        /// Tests that GetLocation uses first location when multiple messages exist.
+        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
+        /// </summary>
+        [Fact]
+        public void GetLocation_UsesFirstLocationForMultipleMessages()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                JObject.FromObject(new
+                {
+                    timestamp = DateTime.UtcNow,
+                    location = new
+                    {
+                        name = "Sunset Bay",
+                        latitude = 47.86497296593844,
+                        longitude = -122.33393605795372,
+                        id = "rpi_sunset_bay"
+                    },
+                    moderator = "Test Moderator",
+                    comments = "Test comments"
+                }),
+                JObject.FromObject(new
+                {
+                    timestamp = DateTime.UtcNow,
+                    location = new
+                    {
+                        name = "Orcasound Lab",
+                        latitude = 48.123,
+                        longitude = -122.456,
+                        id = "rpi_orcasound_lab"
+                    },
+                    moderator = "Test Moderator 2",
+                    comments = "Test comments 2"
+                })
+            };
+
+            // Act
+            string location = EmailTemplate.GetLocation(messages);
+
+            // Assert
+            Assert.Equal("Sunset Bay", location);
+        }
     }
 }

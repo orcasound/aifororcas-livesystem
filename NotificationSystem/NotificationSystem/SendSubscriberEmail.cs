@@ -56,40 +56,46 @@ namespace NotificationSystem
             }
 
             _logger.LogInformation("Creating email message");
-            var body = await CreateBody(queueClient);
+            List<JObject> messages = await GetMessages(queueClient);
+            string body = CreateBody(messages);
 
             var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
             _logger.LogInformation("Retrieving email list and sending notifications");
+            string location = EmailTemplate.GetLocation(messages);
+            string emailSubject = EmailTemplate.GetSubscriberEmailSubject(location);
             foreach (var emailEntity in await EmailHelpers.GetEmailEntitiesAsync<SubscriberEmailEntity>(tableClient, "Subscriber"))
             {
                 await timeConstraint;
                 var email = EmailHelpers.CreateEmail(
                     Environment.GetEnvironmentVariable("SenderEmail"),
                     emailEntity.Email,
-                    "Notification: Orca detected!",
+                    emailSubject,
                     body);
                 await aws.SendEmailAsync(email);
             }
         }
 
-        private async Task<string> CreateBody(QueueClient queueClient)
+        private async Task<List<JObject>> GetMessages(QueueClient queueClient)
         {
-            var bodyBuilder = new StringBuilder("<h1>Confirmed SRKW detections:</h1>\n<ul>");
             QueueMessage message;
             List<JObject> messagesJson = new List<JObject>();
-
             while (true)
             {
                 var response = await queueClient.ReceiveMessageAsync();
                 message = response.Value;
                 if (message == null || string.IsNullOrEmpty(message.MessageText))
                     break;
-
                 var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
                 messagesJson.Add(JsonConvert.DeserializeObject<JObject>(decoded));
                 await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
             }
+            return messagesJson;
+        }
+
+        private string CreateBody(List<JObject> messagesJson)
+        {
+            var bodyBuilder = new StringBuilder("<h1>Confirmed SRKW detections:</h1>\n<ul>");
 
             return EmailTemplate.GetSubscriberEmailBody(messagesJson, _orcasiteHelper);
         }

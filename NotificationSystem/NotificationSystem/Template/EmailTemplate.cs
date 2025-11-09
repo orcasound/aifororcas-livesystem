@@ -19,6 +19,30 @@ namespace NotificationSystem.Template
             return $"<html><head><style>{GetCSS()}</style></head><body>{GetSubscriberEmailHtml(messages, orcasiteHelper)}</body></html>";
         }
 
+        public static string GetLocation(List<JObject> messages)
+        {
+            if (messages == null || messages.Count == 0)
+            {
+                return null;
+            }
+
+            // Extract location from first message
+            string location = null;
+            try
+            {
+                return messages[0]["location"]?["name"]?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static string GetSubscriberEmailSubject(string location)
+        {
+            return $"Notification: Orca detected at location {(string.IsNullOrEmpty(location) ? "Unknown" : location)}";
+        }
+
         private static string GetSubscriberEmailHtml(List<JObject> messages, OrcasiteHelper orcasiteHelper)
         {
             string timeString = GetPDTTimestring((DateTime?) messages[0]["timestamp"]);
