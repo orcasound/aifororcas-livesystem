@@ -251,7 +251,8 @@ namespace NotificationSystem.Tests.Unit
             };
 
             // Act
-            string subject = EmailTemplate.GetSubscriberEmailSubject(messages);
+            string location = EmailTemplate.GetLocation(messages);
+            string subject = EmailTemplate.GetSubscriberEmailSubject(location);
 
             // Assert
             Assert.Equal("Notification: Orca detected at location Sunset Bay", subject);
@@ -282,17 +283,18 @@ namespace NotificationSystem.Tests.Unit
             };
 
             // Act
-            string subject = EmailTemplate.GetSubscriberEmailSubject(messages);
+            string location = EmailTemplate.GetLocation(messages);
+            string subject = EmailTemplate.GetSubscriberEmailSubject(location);
 
             // Assert
             Assert.Equal("Notification: Orca detected at location Unknown", subject);
         }
 
         /// <summary>
-        /// Tests that GetSubscriberEmailSubject handles null location with "Unknown".
+        /// Tests that GetLocation handles null location.
         /// </summary>
         [Fact]
-        public void GetSubscriberEmailSubject_HandlesNullLocation()
+        public void GetLocation_HandlesNullLocation()
         {
             // Arrange
             var messages = new List<JObject>
@@ -306,46 +308,49 @@ namespace NotificationSystem.Tests.Unit
             };
 
             // Act
-            string subject = EmailTemplate.GetSubscriberEmailSubject(messages);
+            string location = EmailTemplate.GetLocation(messages);
 
             // Assert
-            Assert.Equal("Notification: Orca detected at location Unknown", subject);
+            Assert.Null(location);
         }
 
         /// <summary>
-        /// Tests that GetSubscriberEmailSubject handles empty message list.
+        /// Tests that GetLocation handles empty message list.
+        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
         /// </summary>
         [Fact]
-        public void GetSubscriberEmailSubject_HandlesEmptyMessageList()
+        public void GetLocation_HandlesEmptyMessageList()
         {
             // Arrange
             var messages = new List<JObject>();
 
             // Act
-            string subject = EmailTemplate.GetSubscriberEmailSubject(messages);
+            string location = EmailTemplate.GetLocation(messages);
 
             // Assert
-            Assert.Equal("Notification: Orca detected!", subject);
+            Assert.Null(location);
         }
 
         /// <summary>
-        /// Tests that GetSubscriberEmailSubject handles null message list.
+        /// Tests that GetLocation handles null message list.
+        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
         /// </summary>
         [Fact]
-        public void GetSubscriberEmailSubject_HandlesNullMessageList()
+        public void GetLocation_HandlesNullMessageList()
         {
             // Act
-            string subject = EmailTemplate.GetSubscriberEmailSubject(null);
+            string location = EmailTemplate.GetLocation(null);
 
             // Assert
-            Assert.Equal("Notification: Orca detected!", subject);
+            Assert.Null(location);
         }
 
         /// <summary>
-        /// Tests that GetSubscriberEmailSubject uses first location when multiple messages exist.
+        /// Tests that GetLocation uses first location when multiple messages exist.
+        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
         /// </summary>
         [Fact]
-        public void GetSubscriberEmailSubject_UsesFirstLocationForMultipleMessages()
+        public void GetLocation_UsesFirstLocationForMultipleMessages()
         {
             // Arrange
             var messages = new List<JObject>
@@ -379,10 +384,10 @@ namespace NotificationSystem.Tests.Unit
             };
 
             // Act
-            string subject = EmailTemplate.GetSubscriberEmailSubject(messages);
+            string location = EmailTemplate.GetLocation(messages);
 
             // Assert
-            Assert.Equal("Notification: Orca detected at location Sunset Bay", subject);
+            Assert.Equal("Sunset Bay", location);
         }
     }
 }
