@@ -570,7 +570,9 @@ namespace NotificationSystem.Models
 
                 // Fix the Unix time.  The originalDateTime is incorrect and
                 // was computed based on clips being 11 seconds long instead
-                // of 10 seconds long.  We can correct this once we know the
+                // of 10 seconds long.  It is also based on the audio stream
+                // starting as of the .ts folder date, instead of about 2 seconds
+                // afterwards.  We can correct these once we know the
                 // .ts folder date to start calculating the drift based on.
 
                 string locationIdString = TryGetLocationIdString(originalDetection);
@@ -601,7 +603,7 @@ namespace NotificationSystem.Models
 
                 long originalSecondsIntoFolder = originalUnixTimeSeconds - folderTimeSeconds;
                 long originalClipIndex = originalSecondsIntoFolder / 11;
-                long correctedSecondsIntoFolder = originalClipIndex * 10;
+                long correctedSecondsIntoFolder = originalClipIndex * 10 + 2;
                 long correctedUnixTimeSeconds = folderTimeSeconds + correctedSecondsIntoFolder;
                 DateTimeOffset correctedDateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(correctedUnixTimeSeconds);
                 string correctedTimestampString = correctedDateTimeOffset.ToUniversalTime()
