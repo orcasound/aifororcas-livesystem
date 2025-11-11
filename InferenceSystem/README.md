@@ -184,7 +184,7 @@ This can be completed in two ways.
 
 **Note:** With the new common container image approach, adding a new hydrophone is now much simpler and no longer requires building a separate Docker image.
 
-1. Add the new hydrophone configuration to the ConfigMap in [deploy/configmap.yaml](deploy/configmap.yaml). The key should be `{namespace}.yml` where namespace is in kebab-case (e.g., `new-hydrophone.yml`).
+1. Create a new ConfigMap file for the hydrophone in the deploy folder named `{namespace}-configmap.yaml` (e.g., `new-hydrophone-configmap.yaml`). Use an existing ConfigMap file as a template. The ConfigMap should be in the same namespace as the deployment and contain a single entry with the key `config.yml`.
 
 2. Update [src/globals.py](src/globals.py) to add variables for the new hydrophone location.
 
@@ -192,11 +192,11 @@ This can be completed in two ways.
 
 4. Follow the deployment steps in the "Deploying an updated docker build to Azure Kubernetes Service" section below to:
    - Create the namespace
-   - Update or create the ConfigMap with the new configuration
+   - Create the namespace-scoped ConfigMap with the hydrophone configuration
    - Create the secret
    - Apply the deployment
 
-**Important:** The container image is now common across all hydrophones. Configuration files are stored in a Kubernetes ConfigMap and mounted into the container at `/config/`. The container reads the namespace and loads the corresponding config file (e.g., namespace `bush-point` loads `/config/bush-point.yml`).
+**Important:** The container image is now common across all hydrophones. Configuration files are stored in a Kubernetes ConfigMap and mounted into the container at `/config/`. The container reads the namespace and loads the corresponding config file (e.g., namespace `bush-point` loads `/config/config.yml`).
 
 ## Building the docker container for production
 
@@ -352,49 +352,39 @@ Verify it is successful. You should see a list of VM names and no error message.
 kubectl get nodes
 ```
 
-3. Create or update the ConfigMap with hydrophone configurations. This ConfigMap is shared across all namespaces and contains configurations for all hydrophones.
+3. If deploying a new hydrophone, create the namespace first.
 
 ```bash
-# Create or update the ConfigMap (this applies to all namespaces)
-kubectl apply -f deploy/configmap.yaml
-```
-
-The ConfigMap should contain entries like:
-```yaml
-data:
-  bush-point.yml: |
-    model_type: "FastAI"
-    hls_hydrophone_id: "rpi_bush_point"
-    # ... other config parameters
-  orcasound-lab.yml: |
-    model_type: "FastAI"
-    hls_hydrophone_id: "rpi_orcasound_lab"
-    # ... other config parameters
-```
-
-See [deploy/configmap.yaml](deploy/configmap.yaml) for the complete example.
-
-4. If deploying a new hydrophone, create a new namespace and secret. Skip this step if not bringing up a new hydrophone.
-
-**Important:** The namespace name must match a config key in the ConfigMap. For example, namespace `bush-point` must have a corresponding `bush-point.yml` entry in the ConfigMap.
-
-```bash
-# replace "bush-point" with hydrophone identifier (must match a key in the ConfigMap)
+# replace "bush-point" with hydrophone identifier
 kubectl create namespace bush-point
+```
 
+4. Create or update the namespace-scoped ConfigMap for the hydrophone. Each namespace has its own ConfigMap.
+
+```bash
+# replace "bush-point" with hydrophone identifier
+kubectl apply -f deploy/bush-point-configmap.yaml
+```
+
+**Important:** The ConfigMap must be in the same namespace as the deployment. Each ConfigMap contains only the configuration for that specific hydrophone. See [deploy/bush-point-configmap.yaml](deploy/bush-point-configmap.yaml) for an example.
+
+5. If deploying a new hydrophone, create the secret in the namespace. Skip this step if the secret already exists.
+
+```bash
+# replace "bush-point" with hydrophone identifier
 kubectl create secret generic inference-system -n bush-point \
     --from-literal=AZURE_COSMOSDB_PRIMARY_KEY='<cosmos_primary_key>' \
     --from-literal=AZURE_STORAGE_CONNECTION_STRING='<storage_connection_string>`' \
     --from-literal=INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING='<appinsights_connection_string>'
 ```
 
-5. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one. The deployment file should reference the ConfigMap volume mount.
+6. Create or update deployment. Use file for hydrophone under [deploy](./deploy/) folder, or create and commit a new one.
 
 ```bash
 kubectl apply -f deploy/bush-point.yaml
 ```
 
-**Note:** All deployment files now reference the same container image and mount the ConfigMap at `/config/`. The container determines which hydrophone it's serving based on the namespace and loads the corresponding config file from the ConfigMap.
+**Note:** All deployment files now reference the same container image and mount the namespace-scoped ConfigMap at `/config/`. The container determines which hydrophone it's serving based on the namespace and loads the corresponding config file from the ConfigMap.
 
 6. To verify that the container is running, check logs:
 

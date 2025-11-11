@@ -121,8 +121,8 @@ def get_config_path():
 			with open(namespace_file, "r") as f:
 				namespace = f.read().strip()
 			
-			# Config files are mounted from ConfigMap at /config/{namespace}.yml
-			config_path = f"/config/{namespace}.yml"
+			# Config files are mounted from ConfigMap at /config/config.yml
+			config_path = f"/config/config.yml"
 			
 			if os.path.exists(config_path):
 				print(f"Detected Kubernetes namespace: {namespace}")
