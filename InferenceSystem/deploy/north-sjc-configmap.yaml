@@ -4,7 +4,7 @@ metadata:
   name: hydrophone-configs
   namespace: north-sjc
 data:
-  north-sjc.yml: |
+  config.yml: |
     model_type: "FastAI"
     model_local_threshold: 0.5
     model_global_threshold: 3

@@ -4,7 +4,7 @@ metadata:
   name: hydrophone-configs
   namespace: mast-center
 data:
-  mast-center.yml: |
+  config.yml: |
     model_type: "FastAI"
     model_local_threshold: 0.5
     model_global_threshold: 3

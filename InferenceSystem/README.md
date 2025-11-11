@@ -184,7 +184,7 @@ This can be completed in two ways.
 
 **Note:** With the new common container image approach, adding a new hydrophone is now much simpler and no longer requires building a separate Docker image.
 
-1. Create a new ConfigMap file for the hydrophone in the deploy folder named `{namespace}-configmap.yaml` (e.g., `new-hydrophone-configmap.yaml`). Use an existing ConfigMap file as a template. The ConfigMap should be in the same namespace as the deployment and contain a single entry with the key `{namespace}.yml`.
+1. Create a new ConfigMap file for the hydrophone in the deploy folder named `{namespace}-configmap.yaml` (e.g., `new-hydrophone-configmap.yaml`). Use an existing ConfigMap file as a template. The ConfigMap should be in the same namespace as the deployment and contain a single entry with the key `config.yml`.
 
 2. Update [src/globals.py](src/globals.py) to add variables for the new hydrophone location.
 
@@ -196,7 +196,7 @@ This can be completed in two ways.
    - Create the secret
    - Apply the deployment
 
-**Important:** The container image is now common across all hydrophones. Configuration files are stored in a Kubernetes ConfigMap and mounted into the container at `/config/`. The container reads the namespace and loads the corresponding config file (e.g., namespace `bush-point` loads `/config/bush-point.yml`).
+**Important:** The container image is now common across all hydrophones. Configuration files are stored in a Kubernetes ConfigMap and mounted into the container at `/config/`. The container reads the namespace and loads the corresponding config file (e.g., namespace `bush-point` loads `/config/config.yml`).
 
 ## Building the docker container for production
 
