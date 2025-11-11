@@ -76,10 +76,6 @@ jobs:
     - name: List Docker images
       run: docker images
 
-    - name: Set image name
-      run: |
-        echo "IMAGE_NAME=live-inference-system" >> $GITHUB_ENV
-
     - name: Get image creation date in MM-DD-YYYY
       run: |
         IMAGE_ID=$(docker images live-inference-system --format "{{.ID}}" | head -n 1)
