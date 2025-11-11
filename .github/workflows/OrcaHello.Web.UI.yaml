@@ -4,17 +4,9 @@ on:
   pull_request:
     branches:
     - main
-    paths:
-    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.UI/**
-    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
-    - .github/workflows/OrcaHello.Web.UI.yaml
   push:
     branches:
     - main
-    paths:
-    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.UI/**
-    - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
-    - .github/workflows/OrcaHello.Web.UI.yaml
   workflow_dispatch: # Allow manual workflow invocation from the Github Actions UI
 
 env:
@@ -32,8 +24,30 @@ permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      src: ${{ steps.filter.outputs.src }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    - name: Check for file changes
+      uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      id: filter
+      with:
+        filters: |
+          src:
+            - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.UI/**
+            - ModeratorFrontEnd/OrcaHello/OrcaHello.Web.Shared/**
+            - .github/workflows/OrcaHello.Web.UI.yaml
+
   build:
     runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.src == 'true' }}
     permissions:
       contents: read
     steps:
@@ -60,9 +74,10 @@ jobs:
         path: ./${{ env.WORKING_DIR }}/${{ env.PUBLISH_DIR }}
         key: ${{ github.sha }}-${{ env.AZURE_APP_NAME }}-${{ env.DOTNET_RUNTIME }}-artifacts
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.src == 'true'
     runs-on: ubuntu-latest
     needs:
+    - changes
     - build
     permissions:
       contents: read
