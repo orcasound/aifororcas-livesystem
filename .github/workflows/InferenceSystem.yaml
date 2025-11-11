@@ -91,13 +91,13 @@ jobs:
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
 
     - name: Test with FastAI DateRangeHLS config
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 2
 
   test-ubuntu:
     runs-on: ubuntu-latest
@@ -165,12 +165,12 @@ jobs:
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
 
     - name: Test with FastAI DateRangeHLS config
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 2
 
   test-docker:
     runs-on: ubuntu-latest
@@ -231,8 +231,8 @@ jobs:
           -v $PWD/config:/config \
           live-inference-system \
           python3 -u ./src/LiveInferenceOrchestrator.py \
-          --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml \
-          --max_iterations 1
+          --config /config/Test/FastAI_LiveHLS_OrcasoundLab.yml \
+          --max_iterations 2
 
     - name: Save docker container to tar file
       working-directory: InferenceSystem
