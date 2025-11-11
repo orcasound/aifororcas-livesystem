@@ -36,3 +36,11 @@ spec:
               secretKeyRef:
                 name: inference-system
                 key: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
+        volumeMounts:
+          - name: config-volume
+            mountPath: /config
+            readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: hydrophone-configs
