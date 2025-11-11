@@ -61,7 +61,7 @@ jobs:
     - name: Download model
       working-directory: InferenceSystem
       run: |
-        curl -o model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+        curl -f -o model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
 
     - name: Create environment variable file
       working-directory: InferenceSystem
