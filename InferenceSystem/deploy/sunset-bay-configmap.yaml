@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hydrophone-configs
+  namespace: sunset-bay
+data:
+  config.yml: |
+    model_type: "FastAI"
+    model_local_threshold: 0.5
+    model_global_threshold: 3
+    model_path: "./model"
+    model_name: "model.pkl"
+    hls_stream_type: "LiveHLS"
+    hls_polling_interval: 60
+    hls_hydrophone_id: "rpi_sunset_bay"
+    upload_to_azure: True
+    delete_local_wavs: True
