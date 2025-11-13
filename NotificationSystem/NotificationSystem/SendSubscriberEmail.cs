@@ -57,22 +57,25 @@ namespace NotificationSystem
 
             _logger.LogInformation("Creating email message");
             List<JObject> messages = await GetMessages(queueClient);
-            string body = CreateBody(messages);
 
             var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
             _logger.LogInformation("Retrieving email list and sending notifications");
-            string location = EmailTemplate.GetLocation(messages);
-            string emailSubject = EmailTemplate.GetSubscriberEmailSubject(location);
-            foreach (var emailEntity in await EmailHelpers.GetEmailEntitiesAsync<SubscriberEmailEntity>(tableClient, "Subscriber"))
+            foreach (var message in messages)
             {
-                await timeConstraint;
-                var email = EmailHelpers.CreateEmail(
-                    Environment.GetEnvironmentVariable("SenderEmail"),
-                    emailEntity.Email,
-                    emailSubject,
-                    body);
-                await aws.SendEmailAsync(email);
+                string location = EmailTemplate.GetLocation(message);
+                string emailSubject = EmailTemplate.GetSubscriberEmailSubject(location);
+                string body = CreateBody(message);
+                foreach (var emailEntity in await EmailHelpers.GetEmailEntitiesAsync<SubscriberEmailEntity>(tableClient, "Subscriber"))
+                {
+                    await timeConstraint;
+                    var email = EmailHelpers.CreateEmail(
+                        Environment.GetEnvironmentVariable("SenderEmail"),
+                        emailEntity.Email,
+                        emailSubject,
+                        body);
+                    await aws.SendEmailAsync(email);
+                }
             }
         }
 
@@ -93,11 +96,11 @@ namespace NotificationSystem
             return messagesJson;
         }
 
-        private string CreateBody(List<JObject> messagesJson)
+        private string CreateBody(JObject messageJson)
         {
             var bodyBuilder = new StringBuilder("<h1>Confirmed SRKW detections:</h1>\n<ul>");
 
-            return EmailTemplate.GetSubscriberEmailBody(messagesJson, _orcasiteHelper);
+            return EmailTemplate.GetSubscriberEmailBody(messageJson, _orcasiteHelper);
         }
     }
 }

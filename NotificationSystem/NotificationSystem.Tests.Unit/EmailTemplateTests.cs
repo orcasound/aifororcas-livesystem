@@ -27,22 +27,19 @@ namespace NotificationSystem.Tests.Unit
         public void GetSubscriberEmailBody_GeneratesCorrectMapUri_ForLocationName(string locationName, string expectedFileName)
         {
             // Arrange
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
+                timestamp = DateTime.UtcNow,
+                location = new
                 {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = locationName,
-                        latitude = 48.123,
-                        longitude = -122.456,
-                        id = "test_location"
-                    },
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                })
-            };
+                    name = locationName,
+                    latitude = 48.123,
+                    longitude = -122.456,
+                    id = "test_location"
+                },
+                moderator = "Test Moderator",
+                comments = "Test comments"
+            });
 
             // Mock OrcasiteHelper to simulate production behavior
             var mockOrcasiteHelper = new Mock<OrcasiteHelper>(
@@ -63,7 +60,7 @@ namespace NotificationSystem.Tests.Unit
             string expectedMapUrl = $"https://orcanotificationstorage.blob.core.windows.net/images/{expectedFileName}";
 
             // Act - with OrcasiteHelper as in production
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, mockOrcasiteHelper.Object);
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(message, mockOrcasiteHelper.Object);
 
             // Assert
             Assert.Contains(expectedMapUrl, emailBody);
@@ -76,22 +73,19 @@ namespace NotificationSystem.Tests.Unit
         public void GetSubscriberEmailBody_HandlesMultipleSpacesCorrectly()
         {
             // Arrange
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
+                timestamp = DateTime.UtcNow,
+                location = new
                 {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = "North San Juan Channel",
-                        latitude = 48.591294,
-                        longitude = -123.058779,
-                        id = "rpi_north_sjc"
-                    },
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                })
-            };
+                    name = "North San Juan Channel",
+                    latitude = 48.591294,
+                    longitude = -123.058779,
+                    id = "rpi_north_sjc"
+                },
+                moderator = "Test Moderator",
+                comments = "Test comments"
+            });
 
             // Mock OrcasiteHelper to return the correct slug
             var mockOrcasiteHelper = new Mock<OrcasiteHelper>(
@@ -102,7 +96,7 @@ namespace NotificationSystem.Tests.Unit
                 .Returns("north-sjc");
 
             // Act - with OrcasiteHelper as in production
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, mockOrcasiteHelper.Object);
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(message, mockOrcasiteHelper.Object);
 
             // Assert - the URI should use "north-sjc" from OrcasiteHelper
             Assert.Contains("north-sjc.jpg", emailBody);
@@ -118,25 +112,22 @@ namespace NotificationSystem.Tests.Unit
         public void GetSubscriberEmailBody_FallsBackToSimpleTransformation_WhenOrcasiteHelperNotProvided()
         {
             // Arrange
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
+                timestamp = DateTime.UtcNow,
+                location = new
                 {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = "Sunset Bay",
-                        latitude = 47.86497296593844,
-                        longitude = -122.33393605795372,
-                        id = "rpi_sunset_bay"
-                    },
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                })
-            };
+                    name = "Sunset Bay",
+                    latitude = 47.86497296593844,
+                    longitude = -122.33393605795372,
+                    id = "rpi_sunset_bay"
+                },
+                moderator = "Test Moderator",
+                comments = "Test comments"
+            });
 
             // Act - without OrcasiteHelper, it falls back to simple transformation
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, null);
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(message, null);
 
             // Assert - should use simple transformation
             Assert.Contains("sunset-bay.jpg", emailBody);
@@ -151,25 +142,22 @@ namespace NotificationSystem.Tests.Unit
         {
             // Arrange
             var testTimestamp = new DateTime(2025, 1, 15, 10, 30, 0, DateTimeKind.Utc);
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
+                timestamp = testTimestamp,
+                location = new
                 {
-                    timestamp = testTimestamp,
-                    location = new
-                    {
-                        name = "Sunset Bay",
-                        latitude = 47.86497296593844,
-                        longitude = -122.33393605795372,
-                        id = "rpi_sunset_bay"
-                    },
-                    moderator = "Jane Doe",
-                    comments = "Clear SRKW calls detected"
-                })
-            };
+                    name = "Sunset Bay",
+                    latitude = 47.86497296593844,
+                    longitude = -122.33393605795372,
+                    id = "rpi_sunset_bay"
+                },
+                moderator = "Jane Doe",
+                comments = "Clear SRKW calls detected"
+            });
 
             // Act - without OrcasiteHelper, it falls back to simple transformation
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, null);
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(message, null);
 
             // Assert
             Assert.Contains("Southern Resident Killer Whale Detected", emailBody);
@@ -188,22 +176,19 @@ namespace NotificationSystem.Tests.Unit
         public void GetSubscriberEmailBody_UsesOrcasiteHelperSlug_WhenProvided()
         {
             // Arrange
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
+                timestamp = DateTime.UtcNow,
+                location = new
                 {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = "North San Juan Channel",
-                        latitude = 48.591294,
-                        longitude = -123.058779,
-                        id = "rpi_north_sjc"
-                    },
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                })
-            };
+                    name = "North San Juan Channel",
+                    latitude = 48.591294,
+                    longitude = -123.058779,
+                    id = "rpi_north_sjc"
+                },
+                moderator = "Test Moderator",
+                comments = "Test comments"
+            });
 
             // Mock OrcasiteHelper that returns the actual slug
             var mockOrcasiteHelper = new Mock<OrcasiteHelper>(
@@ -218,7 +203,7 @@ namespace NotificationSystem.Tests.Unit
                 });
             
             // Act
-            string emailBody = EmailTemplate.GetSubscriberEmailBody(messages, mockOrcasiteHelper.Object);
+            string emailBody = EmailTemplate.GetSubscriberEmailBody(message, mockOrcasiteHelper.Object);
 
             // Assert - should use "north-sjc" from OrcasiteHelper, not "north-san-juan-channel"
             Assert.Contains("north-sjc.jpg", emailBody);
@@ -233,25 +218,22 @@ namespace NotificationSystem.Tests.Unit
         public void GetSubscriberEmailSubject_IncludesLocationInSubject()
         {
             // Arrange
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
+                timestamp = DateTime.UtcNow,
+                location = new
                 {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = "Sunset Bay",
-                        latitude = 47.86497296593844,
-                        longitude = -122.33393605795372,
-                        id = "rpi_sunset_bay"
-                    },
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                })
-            };
+                    name = "Sunset Bay",
+                    latitude = 47.86497296593844,
+                    longitude = -122.33393605795372,
+                    id = "rpi_sunset_bay"
+                },
+                moderator = "Test Moderator",
+                comments = "Test comments"
+            });
 
             // Act
-            string location = EmailTemplate.GetLocation(messages);
+            string location = EmailTemplate.GetLocation(message);
             string subject = EmailTemplate.GetSubscriberEmailSubject(location);
 
             // Assert
@@ -265,25 +247,22 @@ namespace NotificationSystem.Tests.Unit
         public void GetSubscriberEmailSubject_HandlesEmptyLocation()
         {
             // Arrange
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
+                timestamp = DateTime.UtcNow,
+                location = new
                 {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = "",
-                        latitude = 47.86497296593844,
-                        longitude = -122.33393605795372,
-                        id = "rpi_sunset_bay"
-                    },
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                })
-            };
+                    name = "",
+                    latitude = 47.86497296593844,
+                    longitude = -122.33393605795372,
+                    id = "rpi_sunset_bay"
+                },
+                moderator = "Test Moderator",
+                comments = "Test comments"
+            });
 
             // Act
-            string location = EmailTemplate.GetLocation(messages);
+            string location = EmailTemplate.GetLocation(message);
             string subject = EmailTemplate.GetSubscriberEmailSubject(location);
 
             // Assert
@@ -297,97 +276,18 @@ namespace NotificationSystem.Tests.Unit
         public void GetLocation_HandlesNullLocation()
         {
             // Arrange
-            var messages = new List<JObject>
+            var message = JObject.FromObject(new
             {
-                JObject.FromObject(new
-                {
-                    timestamp = DateTime.UtcNow,
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                })
-            };
+                timestamp = DateTime.UtcNow,
+                moderator = "Test Moderator",
+                comments = "Test comments"
+            });
 
             // Act
-            string location = EmailTemplate.GetLocation(messages);
+            string location = EmailTemplate.GetLocation(message);
 
             // Assert
             Assert.Null(location);
-        }
-
-        /// <summary>
-        /// Tests that GetLocation handles empty message list.
-        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
-        /// </summary>
-        [Fact]
-        public void GetLocation_HandlesEmptyMessageList()
-        {
-            // Arrange
-            var messages = new List<JObject>();
-
-            // Act
-            string location = EmailTemplate.GetLocation(messages);
-
-            // Assert
-            Assert.Null(location);
-        }
-
-        /// <summary>
-        /// Tests that GetLocation handles null message list.
-        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
-        /// </summary>
-        [Fact]
-        public void GetLocation_HandlesNullMessageList()
-        {
-            // Act
-            string location = EmailTemplate.GetLocation(null);
-
-            // Assert
-            Assert.Null(location);
-        }
-
-        /// <summary>
-        /// Tests that GetLocation uses first location when multiple messages exist.
-        /// TODO(issue #356): remove this test once the API is updated to use a singleton.
-        /// </summary>
-        [Fact]
-        public void GetLocation_UsesFirstLocationForMultipleMessages()
-        {
-            // Arrange
-            var messages = new List<JObject>
-            {
-                JObject.FromObject(new
-                {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = "Sunset Bay",
-                        latitude = 47.86497296593844,
-                        longitude = -122.33393605795372,
-                        id = "rpi_sunset_bay"
-                    },
-                    moderator = "Test Moderator",
-                    comments = "Test comments"
-                }),
-                JObject.FromObject(new
-                {
-                    timestamp = DateTime.UtcNow,
-                    location = new
-                    {
-                        name = "Orcasound Lab",
-                        latitude = 48.123,
-                        longitude = -122.456,
-                        id = "rpi_orcasound_lab"
-                    },
-                    moderator = "Test Moderator 2",
-                    comments = "Test comments 2"
-                })
-            };
-
-            // Act
-            string location = EmailTemplate.GetLocation(messages);
-
-            // Assert
-            Assert.Equal("Sunset Bay", location);
         }
     }
 }
