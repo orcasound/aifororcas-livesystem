@@ -232,7 +232,8 @@ jobs:
           live-inference-system \
           python3 -u ./src/LiveInferenceOrchestrator.py \
           --config /config/Test/FastAI_LiveHLS_OrcasoundLab.yml \
-          --max_iterations 2
+          --max_iterations 2 | tee output.log
+        test "$(grep -c "global_prediction" output.log)" -eq 2
 
     - name: Save docker container to tar file
       working-directory: InferenceSystem
