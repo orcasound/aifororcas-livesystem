@@ -14,23 +14,18 @@ namespace NotificationSystem.Template
             return $"<html><head><style>{GetCSS()}</style></head><body>{GetModeratorEmailHtml(timestamp, location)}</body></html>";
         }
 
-        public static string GetSubscriberEmailBody(List<JObject> messages, OrcasiteHelper orcasiteHelper = null)
+        public static string GetSubscriberEmailBody(JObject message, OrcasiteHelper orcasiteHelper = null)
         {
-            return $"<html><head><style>{GetCSS()}</style></head><body>{GetSubscriberEmailHtml(messages, orcasiteHelper)}</body></html>";
+            return $"<html><head><style>{GetCSS()}</style></head><body>{GetSubscriberEmailHtml(message, orcasiteHelper)}</body></html>";
         }
 
-        public static string GetLocation(List<JObject> messages)
+        public static string GetLocation(JObject message)
         {
-            if (messages == null || messages.Count == 0)
-            {
-                return null;
-            }
-
             // Extract location from first message
             string location = null;
             try
             {
-                return messages[0]["location"]?["name"]?.ToString();
+                return message["location"]?["name"]?.ToString();
             }
             catch
             {
@@ -43,9 +38,9 @@ namespace NotificationSystem.Template
             return $"Notification: Orca detected at location {(string.IsNullOrEmpty(location) ? "Unknown" : location)}";
         }
 
-        private static string GetSubscriberEmailHtml(List<JObject> messages, OrcasiteHelper orcasiteHelper)
+        private static string GetSubscriberEmailHtml(JObject message, OrcasiteHelper orcasiteHelper)
         {
-            string timeString = GetPDTTimestring((DateTime?) messages[0]["timestamp"]);
+            string timeString = GetPDTTimestring((DateTime?) message["timestamp"]);
 
             return $@"
                 <body>
@@ -66,7 +61,7 @@ namespace NotificationSystem.Template
                 <p>
                 <center>
                   <table style='width:70%;'>
-                  {GetDetectedSectionHtml(messages, orcasiteHelper)}
+                  {GetDetectedSectionHtml(message, orcasiteHelper)}
                   </table>
                 </center>
                 </p>
@@ -78,17 +73,14 @@ namespace NotificationSystem.Template
             ";
         }
 
-        private static string GetDetectedSectionHtml(List<JObject> messages, OrcasiteHelper orcasiteHelper)
+        private static string GetDetectedSectionHtml(JObject message, OrcasiteHelper orcasiteHelper)
         {
-            string rows = "";
-            foreach (JObject message in messages)
-            {
-                string timeString = GetPDTTimestring((DateTime?)message["timestamp"]);
+            string timeString = GetPDTTimestring((DateTime?)message["timestamp"]);
 
-                rows += $@"
+            return $@"
                   <tr>
                     <td>
-                      <img src='{GetMapUri((string) message["location"]["name"], orcasiteHelper)}'>
+                      <img src='{GetMapUri((string)message["location"]["name"], orcasiteHelper)}'>
                     </td>
                     <td>
                       <ul>
@@ -105,9 +97,6 @@ namespace NotificationSystem.Template
                     </td>
                   </tr>
                 ";
-            }
-
-            return rows;
         }
 
         private static string GetMapUri(string locationName, OrcasiteHelper orcasiteHelper)
