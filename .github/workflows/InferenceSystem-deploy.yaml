@@ -22,27 +22,12 @@ jobs:
       IMAGE_NAME: live-inference-system
       ACR_REGISTRY: orcaconservancycr.azurecr.io
     steps:
-    - name: Install GitHub CLI
-      run: sudo apt-get install gh
+    - uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+      with:
+        egress-policy: audit
 
-    - name: Get latest successful run ID
-      id: get_run
-      run: |
-        RUN_ID=$(gh run list \
-          --repo "${{ github.repository }}" \
-          --workflow "InferenceSystem" \
-          --branch main \
-          --status success \
-          --limit 1 \
-          --json databaseId \
-          --jq '.[0].databaseId')
-        echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Check if run ID was found
-      if: ${{ steps.get_run.outputs.run_id == '' }}
-      run: echo "No successful run found for InferenceSystem on main branch" && exit 1
+    - name: Checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: Check if ACR secrets are set
       run: |
@@ -53,29 +38,47 @@ jobs:
           echo "ACR credentials are set"
         fi
 
-    - name: Download Docker image artifact from latest run
-      uses: actions/download-artifact@v6
-      with:
-        name: live-inference-system-docker-image
-        path: ./image-artifact
-        run-id: ${{ steps.get_run.outputs.run_id }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Load Docker image
+    - name: Free up disk space
       run: |
-        gunzip -c ./image-artifact/live-inference-system.tar.gz | docker load
+        echo "Disk space before cleanup:"
+        df -h
+        # Remove unnecessary packages and cached files
+        sudo apt-get clean
+        sudo apt-get autoremove -y
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo rm -rf /usr/local/.ghcup
+        sudo rm -rf /usr/share/swift
+        # Clean up Docker
+        docker system prune -af
+        echo "Disk space after cleanup:"
+        df -h
+
+    - name: Download model
+      working-directory: InferenceSystem
+      run: |
+        curl -f -o model.zip https://trainedproductionmodels.blob.core.windows.net/dnnmodel/11-15-20.FastAI.R1-12.zip
+
+    - name: Create environment variable file
+      working-directory: InferenceSystem
+      run: |
+        touch .env
+
+    - name: Build docker container
+      working-directory: InferenceSystem
+      run: |
+        docker build . -t live-inference-system -f ./Dockerfile
 
     - name: List Docker images
       run: docker images
 
-    - name: Get image name
-      run: |
-        IMAGE_NAME=$(docker images --format "{{.Repository}}" | head -n 1)
-        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
-
     - name: Get image creation date in MM-DD-YYYY
       run: |
-        IMAGE_ID=$(docker images --format "{{.ID}}" | head -n 1)
+        IMAGE_ID=$(docker images live-inference-system --format "{{.ID}}" | head -n 1)
         CREATED=$(docker inspect --format='{{.Created}}' $IMAGE_ID)
         DATE_STRING=$(date -d "$CREATED" +"%m-%d-%Y")
         echo "DATE_STRING=$DATE_STRING" >> $GITHUB_ENV
