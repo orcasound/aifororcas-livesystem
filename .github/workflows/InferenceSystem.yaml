@@ -44,7 +44,7 @@ jobs:
     if: ${{ needs.changes.outputs.src == 'true' }}
     steps:
     - name: Check out
-      uses: actions/checkout@v5
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: Download model
       id: model-path
@@ -91,13 +91,13 @@ jobs:
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
 
     - name: Test with FastAI DateRangeHLS config
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 2
 
   test-ubuntu:
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
     if: ${{ needs.changes.outputs.src == 'true' }}
     steps:
     - name: Check out
-      uses: actions/checkout@v5
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: Download model
       id: model-path
@@ -165,12 +165,12 @@ jobs:
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 1
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
 
     - name: Test with FastAI DateRangeHLS config
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 1
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 2
 
   test-docker:
     runs-on: ubuntu-latest
@@ -222,6 +222,18 @@ jobs:
       working-directory: InferenceSystem
       run: |
         docker build . -t live-inference-system -f ./Dockerfile
+
+    - name: Test docker container
+      working-directory: InferenceSystem
+      run: |
+        docker run --rm \
+          --env-file .env \
+          -v $PWD/config:/config \
+          live-inference-system \
+          python3 -u ./src/LiveInferenceOrchestrator.py \
+          --config /config/Test/FastAI_LiveHLS_OrcasoundLab.yml \
+          --max_iterations 2 | tee output.log
+        test "$(grep -c "global_prediction" output.log)" -eq 2
 
     - name: Save docker container to tar file
       working-directory: InferenceSystem
