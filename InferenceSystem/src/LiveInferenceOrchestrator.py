@@ -192,8 +192,8 @@ if __name__ == "__main__":
 	else:
 		raise ValueError("hls_stream_type should be one of LiveHLS or DateRangeHLS")
 
-	# Adding a 10 second addition because there is logic in HLSStream that checks if now < current_clip_end_time
-	current_clip_end_time = datetime.utcnow() + timedelta(0,10)
+	# We want a clip that ends, say, 10 seconds ago to allow for time to upload it.
+	current_clip_end_time = datetime.utcnow() - timedelta(0,10)
 
 	max_iterations = args.max_iterations
 	iteration_count = 0
@@ -202,7 +202,6 @@ if __name__ == "__main__":
 			break
 		iteration_count += 1
 
-		#TODO (@prgogia) prepend hydrophone friendly name to clip and remove slashes
 		clip_path, start_timestamp, current_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
 
 		# if this clip was at the end of a bucket, clip_duration_in_seconds < 60, if so we skip it

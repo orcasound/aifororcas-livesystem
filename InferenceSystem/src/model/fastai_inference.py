@@ -124,7 +124,7 @@ class FastAIModel():
             os.makedirs(local_dir)
 
         # infer clip length
-        max_length = get_duration(filename=wav_file_path)
+        max_length = get_duration(path=wav_file_path)
         print(os.path.basename(wav_file_path))
         print("Length of Audio Clip:{0}".format(max_length))
         #max_length = 60

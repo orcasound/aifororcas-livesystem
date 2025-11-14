@@ -350,7 +350,7 @@ namespace NotificationSystem.Models
         /// </summary>
         /// <param name="json">JSON to parse</param>
         /// <param name="id">ID of the detection</param>
-        /// <param name="timestampString">Timestamp in the detection</param>
+        /// <param name="timestampString">Timestamp to report for the detection</param>
         /// <param name="feedId">Feed ID for the hydrophone node in the detection</param>
         /// <param name="commentsString">Comments in the detection</param>
         /// <returns>true on success, false on failure</returns>
@@ -551,6 +551,9 @@ namespace NotificationSystem.Models
 
             foreach (JsonElement originalDetection in originalInput)
             {
+                // Get the timestamp that OrcaHello listed in the detection.
+                // This is what was used to find the clips, but does not align
+                // with the start of a clip.
                 DateTime? originalDateTime = TryGetTimestamp(originalDetection);
                 if (originalDateTime == null)
                 {
@@ -601,6 +604,7 @@ namespace NotificationSystem.Models
                     continue;
                 }
 
+                // Compute the correct timestamp of the start of the 60 second clip.
                 long originalSecondsIntoFolder = originalUnixTimeSeconds - folderTimeSeconds;
                 long originalClipIndex = originalSecondsIntoFolder / 11;
                 long correctedSecondsIntoFolder = originalClipIndex * 10 + 2;
