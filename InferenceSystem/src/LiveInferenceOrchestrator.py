@@ -34,6 +34,7 @@ COSMOSDB_DATABASE_NAME = "predictions"
 COSMOSDB_CONTAINER_NAME = "metadata"
 
 # TODO: get this data from https://live.orcasound.net/api/json/feeds
+ANDREWS_BAY_LOCATION = {"id": "rpi_andrews_bay", "name": "Andrews Bay", "longitude":  -123.1666492, "latitude": 48.5500299}
 BUSH_POINT_LOCATION = {"id": "rpi_bush_point", "name": "Bush Point", "longitude":  -122.6040035, "latitude": 48.0336664}
 MAST_CENTER_LOCATION = {"id": "rpi_mast_center", "name": "Mast Center", "longitude":  -122.32512, "latitude": 47.34922}
 NORTH_SAN_JUAN_CHANNEL_LOCATION = {"id": "rpi_north_sjc", "name": "North San Juan Channel", "longitude":  -123.058779, "latitude": 48.591294}
@@ -42,7 +43,7 @@ POINT_ROBINSON_LOCATION = {"id": "rpi_point_robinson", "name": "Point Robinson",
 PORT_TOWNSEND_LOCATION = {"id": "rpi_port_townsend", "name": "Port Townsend", "longitude":  -122.760614, "latitude": 48.135743}
 SUNSET_BAY_LOCATION = {"id": "rpi_sunset_bay", "name": "Sunset Bay", "longitude":  -122.33393605795372, "latitude": 47.86497296593844}
 
-source_guid_to_location = {"rpi_bush_point": BUSH_POINT_LOCATION, "rpi_mast_center": MAST_CENTER_LOCATION, "rpi_north_sjc": NORTH_SAN_JUAN_CHANNEL_LOCATION, "rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_point_robinson": POINT_ROBINSON_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_sunset_bay": SUNSET_BAY_LOCATION}
+source_guid_to_location = {"rpi_andrews_bay": ANDREWS_BAY_LOCATION, "rpi_bush_point": BUSH_POINT_LOCATION, "rpi_mast_center": MAST_CENTER_LOCATION, "rpi_north_sjc": NORTH_SAN_JUAN_CHANNEL_LOCATION, "rpi_orcasound_lab" : ORCASOUND_LAB_LOCATION, "rpi_point_robinson": POINT_ROBINSON_LOCATION, "rpi_port_townsend" : PORT_TOWNSEND_LOCATION, "rpi_sunset_bay": SUNSET_BAY_LOCATION}
 
 def assemble_blob_uri(container_name, item_name):
 
@@ -96,14 +97,14 @@ def populate_metadata_json(
 
 def get_config_path():
 	"""
-	Determine the config file path based on Kubernetes namespace or command line argument.
+	Determine the config file path.
 	
 	Priority:
-	1. Command line --config argument (for backward compatibility and local testing)
-	2. Kubernetes namespace detection with ConfigMap (for production deployments)
+	1. Command line --config argument (for local testing)
+	2. Well-known path (for production deployments)
 	
 	Returns:
-		str: Path to the config file
+		tuple: (config_path, args) where config_path is the path to the config file
 	"""
 	# Check if --config argument is provided
 	parser = argparse.ArgumentParser()
@@ -112,31 +113,14 @@ def get_config_path():
 	args, _ = parser.parse_known_args()
 	
 	if args.config:
+		print(f"Using config from command line argument: {args.config}")
 		return args.config, args
 	
-	# Try to detect Kubernetes namespace
-	namespace_file = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
-	if os.path.exists(namespace_file):
-		try:
-			with open(namespace_file, "r") as f:
-				namespace = f.read().strip()
-			
-			# Config files are mounted from ConfigMap at /config/config.yml
-			config_path = f"/config/config.yml"
-			
-			if os.path.exists(config_path):
-				print(f"Detected Kubernetes namespace: {namespace}")
-				print(f"Using config from ConfigMap: {config_path}")
-				return config_path, args
-			else:
-				raise ValueError(f"Config file not found for namespace '{namespace}' at {config_path}. Ensure ConfigMap is properly mounted.")
-		except Exception as e:
-			print(f"Error reading namespace or config: {e}")
-			raise
+	# Config files are mounted from ConfigMap at /config/config.yml
+	config_path = f"/config/config.yml"
+	print(f"Using config from ConfigMap: {config_path}")
+	return config_path, args
 	
-	# If neither config argument nor namespace detection works, raise error
-	raise ValueError("No config file specified. Either provide --config argument or run in Kubernetes with namespace and ConfigMap mounted at /config.")
-
 if __name__ == "__main__":
 	# Get config path
 	config_path, args = get_config_path()
