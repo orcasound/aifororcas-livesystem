@@ -25,4 +25,4 @@ opencv-python
 boto3
 pytz
 opencensus-ext-azure
-orca-hls-utils>=0.0.3
+orca-hls-utils>=0.0.4
