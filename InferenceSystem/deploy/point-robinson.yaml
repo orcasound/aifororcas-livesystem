@@ -36,6 +36,10 @@ spec:
               secretKeyRef:
                 name: inference-system
                 key: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
+          - name: OMP_NUM_THREADS
+            value: "1"
+          - name: MKL_NUM_THREADS
+            value: "1"
         volumeMounts:
           - name: config-volume
             mountPath: /config
