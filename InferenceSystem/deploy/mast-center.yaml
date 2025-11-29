@@ -15,10 +15,7 @@ spec:
     spec:
       containers:
       - name: inference-system
-        # NOTE: This is the old hydrophone-specific image. When using the new common container image,
-        # update to a tag without the hydrophone location suffix (e.g., 11-15-20.FastAI.R1-12.v0)
-        # The container will automatically detect the namespace and load the config from ConfigMap.
-        image: orcaconservancycr.azurecr.io/live-inference-system:09-19-24.FastAI.R1-12.MastCenter.v0
+        image: orcaconservancycr.azurecr.io/live-inference-system:11-19-2025.FastAI.R1-12.v0
         resources:
           limits:
             cpu: 1
@@ -39,6 +36,10 @@ spec:
               secretKeyRef:
                 name: inference-system
                 key: INFERENCESYSTEM_APPINSIGHTS_CONNECTION_STRING
+          - name: OMP_NUM_THREADS
+            value: "1"
+          - name: MKL_NUM_THREADS
+            value: "1"
         volumeMounts:
           - name: config-volume
             mountPath: /config
