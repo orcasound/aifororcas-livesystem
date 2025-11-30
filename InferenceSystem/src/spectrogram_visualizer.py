@@ -29,7 +29,7 @@ def _create_spectrogram_figure(specshow_data, sr, output_path, x_axis='time', y_
     else:
         librosa.display.specshow(specshow_data, sr=sr, x_axis=x_axis, y_axis=y_axis, ax=ax)
     
-    fig.savefig(output_path, bbox_inches='tight', pad_inches=0)
+    fig.savefig(output_path, bbox_inches=None, pad_inches=0)
     
     # Close figure to release memory and prevent leaks
     plt.close(fig)
