@@ -4,7 +4,6 @@ import shutil
 import tempfile
 import torch
 from fastai.basic_train import load_learner
-from fastai.basic_data import DatasetType
 import pandas as pd
 from pydub import AudioSegment
 from librosa import get_duration
@@ -185,22 +184,18 @@ class FastAIModel():
             else:
                 self.model.model.cpu()
             
-            # Set the test databunch on the learner for batched inference
-            self.model.data = testdb
-            
-            # Batched inference using get_preds with no_grad and eval mode
-            # FastAI 1.x get_preds() uses the learner's data attribute
+            # Use per-item prediction to ensure correct path-prediction alignment
+            # (get_preds with DataLoader may have different ordering)
             self.model.model.eval()
+            predictions = []
             with torch.no_grad():
-                preds, _ = self.model.get_preds(ds_type=DatasetType.Train)
-                # Extract class 1 probabilities (orca call confidence)
-                predictions = preds[:, 1].tolist()
+                for item in testdb.x:
+                    predictions.append(self.model.predict(item)[2][1])
 
             # Explicitly clean up large fastai objects to encourage immediate memory release
             del test
             del testdb
             del tfms
-            del preds
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
