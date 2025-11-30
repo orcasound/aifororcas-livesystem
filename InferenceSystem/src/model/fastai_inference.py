@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import torch
 from fastai.basic_train import load_learner
+from fastai.basic_data import DatasetType
 import pandas as pd
 from pydub import AudioSegment
 from librosa import get_duration
@@ -191,7 +192,7 @@ class FastAIModel():
             # FastAI 1.x get_preds() uses the learner's data attribute
             self.model.model.eval()
             with torch.no_grad():
-                preds, _ = self.model.get_preds(ds_type=0)  # DatasetType.Train = 0
+                preds, _ = self.model.get_preds(ds_type=DatasetType.Train)
                 # Extract class 1 probabilities (orca call confidence)
                 predictions = preds[:, 1].tolist()
 
