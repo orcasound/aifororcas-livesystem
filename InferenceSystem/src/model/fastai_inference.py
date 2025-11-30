@@ -184,10 +184,14 @@ class FastAIModel():
             else:
                 self.model.model.cpu()
             
+            # Set the test databunch on the learner for batched inference
+            self.model.data = testdb
+            
             # Batched inference using get_preds with no_grad and eval mode
+            # FastAI 1.x get_preds() uses the learner's data attribute
             self.model.model.eval()
             with torch.no_grad():
-                preds, _ = self.model.get_preds(dl=testdb.train_dl)
+                preds, _ = self.model.get_preds(ds_type=0)  # DatasetType.Train = 0
                 # Extract class 1 probabilities (orca call confidence)
                 predictions = preds[:, 1].tolist()
 
