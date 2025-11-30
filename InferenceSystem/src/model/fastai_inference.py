@@ -1,3 +1,4 @@
+import gc
 import os
 import shutil
 import tempfile
@@ -104,10 +105,12 @@ def extract_segments(audioPath, sampleDict, destnPath, suffix):
 
 
 class FastAIModel():
-    def __init__(self, model_path, model_name="stg2-rn18.pkl", threshold=0.5, min_num_positive_calls_threshold=3):
+    def __init__(self, model_path, model_name="stg2-rn18.pkl", threshold=0.5, min_num_positive_calls_threshold=3, batch_size=32, use_gpu=False):
         self.model = load_model(model_path, model_name)
         self.threshold = threshold
         self.min_num_positive_calls_threshold = min_num_positive_calls_threshold
+        self.batch_size = batch_size
+        self.use_gpu = use_gpu
 
     def predict(self, wav_file_path):
         '''
@@ -123,62 +126,82 @@ class FastAIModel():
         else:
             os.makedirs(local_dir)
 
-        # Infer clip length
-        max_length = get_duration(path=wav_file_path)
-        print(os.path.basename(wav_file_path))
-        print("Length of Audio Clip:{0}".format(max_length))
-        #max_length = 60
-        # Generating 2 sec proposal with 1 sec hop length
-        twoSecList = []
-        for i in range(int(floor(max_length)-1)):
-            twoSecList.append([i, i+2])
+        try:
+            # Infer clip length
+            max_length = get_duration(path=wav_file_path)
+            print(os.path.basename(wav_file_path))
+            print("Length of Audio Clip:{0}".format(max_length))
+            #max_length = 60
+            # Generating 2 sec proposal with 1 sec hop length
+            twoSecList = []
+            for i in range(int(floor(max_length)-1)):
+                twoSecList.append([i, i+2])
 
-        # Creating a proposal dictionary
-        two_sec_dict = {}
-        two_sec_dict[Path(wav_file_path).name] = twoSecList
+            # Creating a proposal dictionary
+            two_sec_dict = {}
+            two_sec_dict[Path(wav_file_path).name] = twoSecList
 
-        # Creating 2 sec segments from the defined wavefile using proposals built above.
-        # "use_a_real_wavname.wav" will generate -> "use_a_real_wavname_1_3.wav", "use_a_real_wavname_2_4.wav" etc. files in fastai_dir folder
-        extract_segments(
-            str(Path(wav_file_path).parent),
-            two_sec_dict,
-            local_dir,
-            ""
-        )
+            # Creating 2 sec segments from the defined wavefile using proposals built above.
+            # "use_a_real_wavname.wav" will generate -> "use_a_real_wavname_1_3.wav", "use_a_real_wavname_2_4.wav" etc. files in fastai_dir folder
+            extract_segments(
+                str(Path(wav_file_path).parent),
+                two_sec_dict,
+                local_dir,
+                ""
+            )
         
-        # Definining Audio config needed to create on the fly mel spectograms
-        config = AudioConfig(standardize=False,
-                             sg_cfg=SpectrogramConfig(
-                                 f_min=0.0,  # Minimum frequency to Display
-                                 f_max=10000,  # Maximum Frequency to Display
-                                 hop_length=256,
-                                 n_fft=2560,  # Number of Samples for Fourier
-                                 n_mels=256,  # Mel bins
-                                 pad=0,
-                                 to_db_scale=True,  # Converting to DB scale
-                                 top_db=100,  # Top decibel sound
-                                 win_length=None,
-                                 n_mfcc=20)
-                             )
-        config.duration = 4000  # 4 sec padding or snip
-        config.resample_to = 20000  # Every sample at 20000 frequency
-        config.downmix=True
+            # Defining Audio config needed to create on the fly mel spectograms
+            config = AudioConfig(standardize=False,
+                                 sg_cfg=SpectrogramConfig(
+                                     f_min=0.0,  # Minimum frequency to Display
+                                     f_max=10000,  # Maximum Frequency to Display
+                                     hop_length=256,
+                                     n_fft=2560,  # Number of Samples for Fourier
+                                     n_mels=256,  # Mel bins
+                                     pad=0,
+                                     to_db_scale=True,  # Converting to DB scale
+                                     top_db=100,  # Top decibel sound
+                                     win_length=None,
+                                     n_mfcc=20)
+                                 )
+            config.duration = 4000  # 4 sec padding or snip
+            config.resample_to = 20000  # Every sample at 20000 frequency
+            config.downmix=True
 
-        # Creating an Audio DataLoader
-        test_data_folder = Path(local_dir)
-        tfms = None
-        test = AudioList.from_folder(
-            test_data_folder, config=config).split_none().label_empty()
-        testdb = test.transform(tfms).databunch(bs=32)
+            # Creating an Audio DataLoader
+            test_data_folder = Path(local_dir)
+            tfms = None
+            test = AudioList.from_folder(
+                test_data_folder, config=config).split_none().label_empty()
+            testdb = test.transform(tfms).databunch(bs=32)
 
-        # Scoring each 2 sec clip
-        predictions = []
-        pathList = list(pd.Series(test_data_folder.ls()).astype('str'))
-        for item in testdb.x:
-            predictions.append(self.model.predict(item)[2][1])
+            # Scoring using batched inference for better memory efficiency
+            pathList = list(pd.Series(test_data_folder.ls()).astype('str'))
+            
+            # Move model to appropriate device based on use_gpu flag
+            if self.use_gpu and torch.cuda.is_available():
+                self.model.model.cuda()
+            else:
+                self.model.model.cpu()
+            
+            # Batched inference using get_preds with no_grad and eval mode
+            self.model.model.eval()
+            with torch.no_grad():
+                preds, _ = self.model.get_preds(dl=testdb.train_dl)
+                # Extract class 1 probabilities (orca call confidence)
+                predictions = preds[:, 1].tolist()
 
-        # Clean folder
-        shutil.rmtree(local_dir)
+            # Explicitly clean up large fastai objects to encourage immediate memory release
+            del test
+            del testdb
+            del tfms
+            del preds
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        finally:
+            # Clean folder - always clean up even on exceptions
+            shutil.rmtree(local_dir, ignore_errors=True)
 
         # Aggregating predictions
 
