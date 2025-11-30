@@ -12,6 +12,29 @@ import cv2
 import json
 import math
 
+
+def _create_spectrogram_figure(specshow_data, sr, output_path, x_axis='time', y_axis='hz', fmax=None):
+    """
+    Helper function to create and save a spectrogram using explicit Figure/Axes objects.
+    Closes the figure after saving to prevent memory leaks.
+    """
+    # Use explicit figure with size 6.4x4.8 inches at 100 dpi = 640x480 pixels
+    fig = plt.figure(frameon=False, figsize=(6.4, 4.8), dpi=100)
+    ax = fig.add_subplot(111)
+    ax.axis('off')
+    ax.set_position([0., 0., 1., 1.])  # Remove borders
+    
+    if fmax is not None:
+        librosa.display.specshow(specshow_data, sr=sr, x_axis=x_axis, y_axis=y_axis, fmax=fmax, ax=ax)
+    else:
+        librosa.display.specshow(specshow_data, sr=sr, x_axis=x_axis, y_axis=y_axis, ax=ax)
+    
+    fig.savefig(output_path, bbox_inches=None, pad_inches=0)
+    
+    # Close figure to release memory and prevent leaks
+    plt.close(fig)
+
+
 def write_spectrogram(wav_file_path):
     """
 
@@ -39,22 +62,15 @@ def write_spectrogram(wav_file_path):
 
     X_first_half = librosa.stft(y_first_half)
     Xdb_first_half = librosa.amplitude_to_db(abs(X_first_half))
-    pylab.axis('off') # no axis
-    pylab.axes([0., 0., 1., 1.], frameon=False, xticks=[], yticks=[]) # Remove the white edge
-    librosa.display.specshow(Xdb_first_half, sr=sr, x_axis='time', y_axis='hz')
-    pylab.savefig(spec_first_half, bbox_inches=None, pad_inches=0)
-    plt.close("all")
+    _create_spectrogram_figure(Xdb_first_half, sr, spec_first_half, x_axis='time', y_axis='hz')
 
     X_second_half = librosa.stft(y_second_half)
     Xdb_second_half = librosa.amplitude_to_db(abs(X_second_half))
-    pylab.axis('off') # no axis
-    pylab.axes([0., 0., 1., 1.], frameon=False, xticks=[], yticks=[]) # Remove the white edge
-    librosa.display.specshow(Xdb_second_half, sr=sr, x_axis='time',y_axis='hz')
-    pylab.savefig(spec_second_half, bbox_inches=None, pad_inches=0)
-    plt.close("all")
+    _create_spectrogram_figure(Xdb_second_half, sr, spec_second_half, x_axis='time', y_axis='hz')
 
     # create canvas to create combined spectrogram
-    canvas = np.zeros((480, 640*2, 3))
+    # Use dtype=np.uint8 to match images read by cv2
+    canvas = np.zeros((480, 640*2, 3), dtype=np.uint8)
 
     # combine spectrograms
     spec1 = cv2.imread(spec_first_half)
@@ -78,15 +94,11 @@ def write_annotations_on_spectrogram(wav_file_path, wav_timestamp, data, spec_ou
     """
 
     y, sr = librosa.load(wav_file_path)
-    D = np.abs(librosa.stft(y))**2
     
     S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
     S_dB = librosa.power_to_db(S, ref=np.max)
 
-    pylab.axis('off') # no axis
-    pylab.axes([0., 0., 1., 1.], frameon=False, xticks=[], yticks=[]) # Remove the white edge
-    librosa.display.specshow(S_dB, x_axis='time',y_axis='mel', sr=sr, fmax=8000)
-    pylab.savefig(spec_output_path, bbox_inches=None, pad_inches=0)
+    _create_spectrogram_figure(S_dB, sr, spec_output_path, x_axis='time', y_axis='mel', fmax=8000)
 
     # read figure again yuck matplotlib
     image = cv2.imread(spec_output_path)
