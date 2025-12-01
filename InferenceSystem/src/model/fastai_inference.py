@@ -190,6 +190,7 @@ class FastAIModel():
             
             # Per-item prediction using fastai's predict() which handles
             # model.eval() and torch.no_grad() internally
+            # Note: FastAI's predict() also handles device placement for inputs internally
             predictions = []
             for item in testdb.x:
                 predictions.append(self.model.predict(item)[2][1])
