@@ -199,7 +199,7 @@ class FastAIModel():
             del test
             del testdb
             gc.collect()
-            if torch.cuda.is_available():
+            if self.use_gpu and torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
             # Aggregating predictions
