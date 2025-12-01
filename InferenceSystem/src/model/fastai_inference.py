@@ -160,7 +160,7 @@ class FastAIModel():
                 ""
             )
             
-            # Definining Audio config needed to create on the fly mel spectograms
+            # Defining Audio config needed to create on the fly mel spectrograms
             config = AudioConfig(standardize=False,
                                  sg_cfg=SpectrogramConfig(
                                      f_min=0.0,  # Minimum frequency to Display
