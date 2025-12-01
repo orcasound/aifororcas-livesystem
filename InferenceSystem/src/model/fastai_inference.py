@@ -110,6 +110,17 @@ def extract_segments(audioPath, sampleDict, destnPath, suffix):
 
 class FastAIModel():
     def __init__(self, model_path, model_name="stg2-rn18.pkl", threshold=0.5, min_num_positive_calls_threshold=3, batch_size=32, use_gpu=False):
+        """
+        Initialize the FastAIModel.
+
+        Args:
+            model_path (str or Path): Path to the directory containing the model file.
+            model_name (str, optional): Name of the model file to load. Defaults to "stg2-rn18.pkl".
+            threshold (float, optional): Probability threshold for positive detection. Defaults to 0.5.
+            min_num_positive_calls_threshold (int, optional): Minimum number of positive calls required to consider a detection valid. Defaults to 3.
+            batch_size (int, optional): Batch size for inference. Defaults to 32. Note: Currently not used for batched inference.
+            use_gpu (bool, optional): Whether to use GPU for inference if available. Defaults to False.
+        """
         self.model = load_model(model_path, model_name)
         self.threshold = threshold
         self.min_num_positive_calls_threshold = min_num_positive_calls_threshold
