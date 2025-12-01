@@ -111,6 +111,12 @@ class FastAIModel():
         self.min_num_positive_calls_threshold = min_num_positive_calls_threshold
         self.batch_size = batch_size
         self.use_gpu = use_gpu
+        
+        # Move model to appropriate device once during initialization
+        if self.use_gpu and torch.cuda.is_available():
+            self.model.model.cuda()
+        else:
+            self.model.model.cpu()
 
     def predict(self, wav_file_path):
         '''
@@ -175,17 +181,11 @@ class FastAIModel():
                 test_data_folder, config=config).split_none().label_empty()
             testdb = test.transform(tfms).databunch(bs=32)
 
-            # Scoring using batched inference for better memory efficiency
+            # Scoring each audio segment
             pathList = list(pd.Series(test_data_folder.ls()).astype('str'))
             
-            # Move model to appropriate device based on use_gpu flag
-            if self.use_gpu and torch.cuda.is_available():
-                self.model.model.cuda()
-            else:
-                self.model.model.cpu()
-            
-            # Use per-item prediction to ensure correct path-prediction alignment
-            # (get_preds with DataLoader may have different ordering)
+            # Per-item prediction loop with torch.no_grad() for memory efficiency
+            # Note: FastAI's predict() handles device placement for inputs internally
             self.model.model.eval()
             predictions = []
             with torch.no_grad():
@@ -195,7 +195,6 @@ class FastAIModel():
             # Explicitly clean up large fastai objects to encourage immediate memory release
             del test
             del testdb
-            del tfms
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
