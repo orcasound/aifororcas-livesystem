@@ -1,4 +1,5 @@
 import gc
+import logging
 import os
 import shutil
 import tempfile
@@ -11,6 +12,9 @@ from pathlib import Path
 from numpy import floor
 from audio.data import AudioConfig, SpectrogramConfig, AudioList
 import torchaudio
+
+# Configure logger for this module
+logger = logging.getLogger(__name__)
 
 
 # Monkey-patch torchaudio.load to avoid torchcodec dependency
@@ -184,13 +188,11 @@ class FastAIModel():
             # Scoring each audio segment
             pathList = list(pd.Series(test_data_folder.ls()).astype('str'))
             
-            # Per-item prediction loop with torch.no_grad() for memory efficiency
-            # Note: FastAI's predict() handles device placement for inputs internally
-            self.model.model.eval()
+            # Per-item prediction using fastai's predict() which handles
+            # model.eval() and torch.no_grad() internally
             predictions = []
-            with torch.no_grad():
-                for item in testdb.x:
-                    predictions.append(self.model.predict(item)[2][1])
+            for item in testdb.x:
+                predictions.append(self.model.predict(item)[2][1])
 
             # Explicitly clean up large fastai objects to encourage immediate memory release
             del test
@@ -251,5 +253,8 @@ class FastAIModel():
 
             return result_json
         finally:
-            # Clean folder - always clean up even on exceptions
-            shutil.rmtree(local_dir, ignore_errors=True)
+            # Clean temp folder - log any cleanup failures instead of silently ignoring
+            try:
+                shutil.rmtree(local_dir)
+            except Exception as e:
+                logger.warning(f"Failed to clean up temp directory {local_dir}: {e}")
