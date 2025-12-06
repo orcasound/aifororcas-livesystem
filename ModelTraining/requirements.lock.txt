@@ -28,7 +28,7 @@ fastai_audio @ git+https://github.com/fastaudio/fastai_audio@3730194a0ed14e14241
 fastjsonschema==2.20.0
 fastprogress==1.0.3
 fire==0.7.0
-fonttools==4.54.1
+fonttools==4.61.0
 future==1.0.0
 idna==3.10
 importlib_metadata==8.5.0
