@@ -89,7 +89,7 @@ class OrcaDetectionModel():
             result_json["local_confidences"].append(confidence)
             
             # Cleanup tensors every 10 windows to prevent accumulation
-            if i > 0 and i % 10 == 0:
+            if (i + 1) % 10 == 0:
                 del input_data, pred, posterior, mel_spec_window
                 gc.collect()
         
