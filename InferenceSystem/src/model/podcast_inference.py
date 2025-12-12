@@ -1,4 +1,5 @@
 import argparse
+import gc
 import glob
 import json
 import os
@@ -67,14 +68,17 @@ class OrcaDetectionModel():
             }
 
         # iterate through dataloader and add accumulate predictions
-        for i in tqdm(range(len(audio_file_windower))):
+        num_windows = len(audio_file_windower)
+        for i in tqdm(range(num_windows)):
             # get a mel spec for the window 
             audio_file_windower.get_mode = 'mel_spec'
             mel_spec_window, _ = audio_file_windower[i]
+            
             # run inference on window
-            input_data = torch.from_numpy(mel_spec_window).float().unsqueeze(0).unsqueeze(0)
-            pred, _ = self.model(input_data)
-            posterior = np.exp(pred.detach().cpu().numpy())
+            with torch.no_grad():  # Disable gradient computation to save memory
+                input_data = torch.from_numpy(mel_spec_window).float().unsqueeze(0).unsqueeze(0)
+                pred, _ = self.model(input_data)
+                posterior = np.exp(pred.detach().cpu().numpy())
 
             pred_id = 0
             if posterior[0,1] > self.threshold:
@@ -83,10 +87,19 @@ class OrcaDetectionModel():
 
             result_json["local_predictions"].append(pred_id)
             result_json["local_confidences"].append(confidence)
+            
+            # Cleanup tensors every 10 windows to prevent accumulation
+            if i % 10 == 0:
+                del input_data, pred, posterior, mel_spec_window
+                gc.collect()
+        
+        # Final cleanup before DataFrame creation
+        del audio_file_windower
+        gc.collect()
         
         submission = pd.DataFrame(dict(
             wav_filename=Path(wav_file_path).name,
-            start_time_s=[i*self.hop_s for i in range(len(audio_file_windower))],
+            start_time_s=[i*self.hop_s for i in range(num_windows)],
             duration_s=self.hop_s,
             confidence=result_json['local_confidences']
         ))
