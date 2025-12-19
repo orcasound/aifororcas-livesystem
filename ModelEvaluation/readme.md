@@ -54,7 +54,7 @@ If the optional `-threshold` argument, is provided, precision/recall/F1 scores a
 
 ## Results
 
-This the the current state-of-art for models on the repo :) 
+This is the current state-of-art for models on the repo :) 
 
 | dataset             |   [Baseline-AudioSet-VGGish_R1to7](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EWGJMz-YuRxNhn9US9h-3Y4B6HYJGQk8yjs_YNXpvtD4jg?e=GXKOX0) |   [FastAI-ResNet50_R1to7](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EYcGElFToGpHnFDI41iO5e8B2vu_GLTZP6aVhx3GII5sew?e=vd7FCl) |   [Baseline-AudioSet-VGGish_R1to12](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EcvUHjmVMmhPl6P9wTNi41oBx0NmhbgQ9hLbX08bbiiG2A?e=0vcoxu) |   [FastAI-ResNet50_R1to12](https://microsoft.sharepoint.com/:u:/t/OrcaCallAutomatedRecognitionSystemHackathon2019Project/EccXTDQB4FZMkZMFwsyueQQBIHLK4J_fBN5HxPeBClrg-w?e=VPMXTb) |
 |:--------------------|---------------------------------:|------------------------:|---------------------------------:|------------------------:|

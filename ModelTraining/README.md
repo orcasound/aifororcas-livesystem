@@ -25,7 +25,7 @@ uv pip install -r requirements.txt
 I'm also including a full list of installed packages and versions in `requirements.lock.txt`, which was generated using `pip freeze`.
 
 ## Model data 
-The base data used here is hosted on Current test set for evaluation is hosted on [Orca Sound website ](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
+The base data used here is hosted on Current test set for evaluation is hosted on the [Orcasound website](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#test-sets). The model was trained with the following dataset -
 
 - [WHOIS09222019_PodCastRound1](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#WHOIS_PodCastRound1) (~6hrs, open data source – Orca call around the planet, Good for generic models)
 - [OrcasoundLab07052019_PodCastRound2](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#OrcasoundLab07052019_PodCastRound2) (~1.2hrs, live hydrophone data - SRKW)
@@ -35,7 +35,7 @@ And testing in evaluation section of FastAI start script is done on this data -
 - [OrcasoundLab07052019_Test](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#OrcasoundLab07052019_Test) (~30min, very call-rich, good SNR conditions)
 - [OrcasoundLab09272017_Test](https://github.com/orcasound/orcadata/wiki/Pod.Cast-data-archive#OrcasoundLab07052019_Test) (~21min, more typical distribution, good SNR conditions)
 
-## Data Directory structure in this folder(not uploaded on Git) -
+## Data Directory structure in this folder (not uploaded on Git) -
 
 ```
 fastai/data
@@ -73,14 +73,14 @@ fastai/data
 - Extracting small audio segments for positive and negative label and store them in positive and negative folder for training  (Filtering any call with less than 1 second duration)
 - Also create 2 sec audio sample from testing data for formal ML evaluation
 
-### **Step2**: Transfer leaning a ResNet18 model with on the fly spectogram creation with frequency masking for data augmentation - [2_FastAI_StarterScript.ipynb]()
+### **Step 2**: Transfer leaning a ResNet18 model with on the fly spectogram creation with frequency masking for data augmentation - [2_FastAI_StarterScript.ipynb]()
 - Step 1: Create a Dataloader using FastAI library (Defining parameters to create a spectogram)
 - Step 2: Create a DataBunch by splitting training data in 80:20% for validation using training phase, also defining augmentation technique (Frequency transformation)
 - Step 3: Training a model using ResNet18 (pre-trained on ImageNet Data)
 - Step 4: Running evaluation on Test set
 - Step 5: Running scoring for official evaluation
 
-### **Step3**: Inference Testing[3_InferenceTesting.ipynb]()
+### **Step 3**: Inference Testing[3_InferenceTesting.ipynb]()
 Notebook showing how to use the inference.py to load the model and do predictions by defining a clip path.
 The inference.py returns a dictionary -
 - **local_predictions**: A list of predictions (1/0) for each second of wav file (list of integers)
