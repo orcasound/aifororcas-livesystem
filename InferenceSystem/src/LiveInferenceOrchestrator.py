@@ -202,7 +202,17 @@ if __name__ == "__main__":
 			break
 		iteration_count += 1
 
-		clip_path, start_timestamp, current_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
+		try:
+			clip_path, start_timestamp, current_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
+		except (IndexError, ValueError) as e:
+			# Handle case when no audio files exist for the specified time range
+			print(f"\nWarning: Unable to retrieve audio clip. This may occur when no audio files exist for the specified time range.")
+			print(f"Error details: {type(e).__name__}: {str(e)}")
+			print(f"Hydrophone: {hls_hydrophone_id}")
+			if hls_stream_type == "DateRangeHLS":
+				print(f"Time range: {hls_start_time_pst} to {hls_end_time_pst} PST")
+			print("Continuing to next iteration...\n")
+			continue
 
 		# if this clip was at the end of a bucket, clip_duration_in_seconds < 60, if so we skip it
 		if clip_path:

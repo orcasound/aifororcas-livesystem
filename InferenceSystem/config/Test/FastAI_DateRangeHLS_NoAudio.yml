@@ -6,7 +6,7 @@ model_name: "model.pkl"
 hls_stream_type: "DateRangeHLS"
 hls_polling_interval: 60
 hls_start_time_pst: "2020-09-01 15:13"
-hls_end_time_pst: "2020-09-01 15:14"
+hls_end_time_pst: "2020-09-01 16:45"
 hls_hydrophone_id: "rpi_andrews_bay"
 upload_to_azure: False
 delete_local_wavs: True
