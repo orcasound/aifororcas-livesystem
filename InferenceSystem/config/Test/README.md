@@ -21,9 +21,9 @@ These configs test inference on historical audio data from specific date/time ra
 #### Hydrophone Coverage Tests
 The following configs test inference across all hydrophones. These may produce either positive (1) or negative (0) predictions depending on whether orca calls were present at the specified time:
 
-- `FastAI_DateRangeHLS_AndrewsBay.yml` - rpi_andrews_bay at 2025-12-01 15:13-16:45 PST
-- `FastAI_DateRangeHLS_BushPoint.yml` - rpi_bush_point at 2020-09-01 15:13-16:45 PST
-- `FastAI_DateRangeHLS_MastCenter.yml` - rpi_mast_center at 2020-09-01 15:13-16:45 PST
+- `FastAI_DateRangeHLS_AndrewsBay.yml` - **Expected: global_prediction: 0** - rpi_andrews_bay at 2025-12-01 15:13-14:00 PST
+- `FastAI_DateRangeHLS_BushPoint.yml` - **Expected: global_prediction: 0** - rpi_bush_point at 2020-09-01 15:13-16:45 PST
+- `FastAI_DateRangeHLS_MastCenter.yml` - rpi_mast_center at 2023-08-05 12:32-14:00 PST
 - `FastAI_DateRangeHLS_NorthSJC.yml` - rpi_north_sjc at 2020-09-01 15:13-16:45 PST
 - `FastAI_DateRangeHLS_PointRobinson.yml` - rpi_point_robinson at 2020-09-01 15:13-16:45 PST
 - `FastAI_DateRangeHLS_PortTownsend.yml` - rpi_port_townsend at 2020-09-01 15:13-16:45 PST
@@ -34,6 +34,10 @@ These configs test system behavior in edge cases:
 
 - `FastAI_DateRangeHLS_NoAudio.yml` - Tests when no audio files exist for the specified time
   - Hydrophone: rpi_andrews_bay at 2020-09-01 15:13-16:45 PST
+  - Expected: System should handle gracefully without crashing with an informative warning message
+
+- `FastAI_DateRangeHLS_NoAudio2.yml` - Tests when no audio files exist for the specified time (second case)
+  - Hydrophone: rpi_mast_center at 2020-09-01 15:13-16:45 PST
   - Expected: System should handle gracefully without crashing with an informative warning message
 
 - `FastAI_DateRangeHLS_IncompleteMinute.yml` - Tests when audio stream doesn't last a full minute
@@ -47,4 +51,4 @@ The GitHub Actions workflow (`.github/workflows/InferenceSystem.yaml`) runs thes
 - Ubuntu (test-ubuntu job)
 - Docker (test-docker job)
 
-Only the `FastAI_DateRangeHLS_OrcasoundLab.yml` test explicitly verifies `global_prediction: 1` output to confirm inference is working correctly. Other tests verify the system runs without errors but may produce either positive or negative predictions.
+Only the `FastAI_DateRangeHLS_OrcasoundLab.yml` test explicitly verifies `global_prediction: 1` output to confirm inference is working correctly for positive detections. The `FastAI_DateRangeHLS_AndrewsBay.yml` and `FastAI_DateRangeHLS_BushPoint.yml` tests verify `global_prediction: 0` to confirm negative detection handling. Other tests verify the system runs without errors but may produce either positive or negative predictions.
