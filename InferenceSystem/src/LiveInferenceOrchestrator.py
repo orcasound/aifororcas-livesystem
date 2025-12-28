@@ -188,7 +188,16 @@ if __name__ == "__main__":
 		end_dt_aware = timezone('US/Pacific').localize(end_dt)
 		hls_end_time_unix = int(end_dt_aware.timestamp())
 
-		hls_stream = DateRangeHLSStream(hydrophone_stream_url, hls_polling_interval, hls_start_time_unix, hls_end_time_unix, local_dir, False)
+		try:
+			hls_stream = DateRangeHLSStream(hydrophone_stream_url, hls_polling_interval, hls_start_time_unix, hls_end_time_unix, local_dir, False)
+		except IndexError as e:
+			print("\nERROR: Failed to initialize DateRangeHLSStream.")
+			print("This usually means the S3 folder list is malformed or unsorted.")
+			print(f"Details: {e}")
+			print(f"Hydrophone: {hls_hydrophone_id}")
+			print(f"Start time (unix): {hls_start_time_unix}")
+			print(f"End time (unix)  : {hls_end_time_unix}")
+			sys.exit(0)
 	else:
 		raise ValueError("hls_stream_type should be one of LiveHLS or DateRangeHLS")
 
