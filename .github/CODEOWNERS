@@ -12,7 +12,5 @@
 
 /.github/ @dthaler @micya @scottveirs
 /InferenceSystem/ @micya @akashmjn @truashamu
-/ModelEvaluation/ @pastorep @akashmjn
-/ModelTraining/ @pastorep @bnestor
 /ModeratorFrontEnd/ @micowan @dthaler
 /NotificationSystem/ @skanderm @micya @scottveirs @dthaler

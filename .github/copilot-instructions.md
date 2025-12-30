@@ -10,8 +10,6 @@ This repository contains multiple interconnected components:
 
 - **ModeratorFrontEnd**: Web applications for moderator portal (both AIForOrcas and OrcaHello implementations)
 - **InferenceSystem**: Real-time AI inference engine for detecting whale calls
-- **ModelTraining**: Machine learning model training and data preparation
-- **ModelEvaluation**: Model benchmarking and evaluation tools
 - **NotificationSystem**: Email notification system for confirmed detections
 
 ## Technology Stack
@@ -128,12 +126,6 @@ public static class WebServiceProviders
 - Environment-specific configuration management
 
 ## AI/ML Specific Guidelines
-
-### Model Training
-- Use versioned datasets with proper train/validation/test splits
-- Document model performance metrics and evaluation criteria
-- Include data preprocessing and feature engineering steps
-- Version control trained models and track experiments
 
 ### Inference System
 - Maintain low latency for real-time processing
