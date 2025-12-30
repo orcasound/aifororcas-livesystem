@@ -119,6 +119,7 @@ jobs:
       shell: cmd
       run: |
         call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/Positive/FastAI_DateRangeHLS_SunsetBay.yml --max_iterations 1 > output.log 2>&1
+        type output.log
         findstr /C:"global_prediction: 1" output.log || (echo "Expected global_prediction: 1 not found" && exit /b 1)
 
     # Use negative test cases for other hydrophones where the model has never correctly predicted positive event.
@@ -253,6 +254,7 @@ jobs:
       working-directory: InferenceSystem
       run: |
         source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/Positive/FastAI_DateRangeHLS_SunsetBay.yml --max_iterations 1 > output.log 2>&1
+        cat output.log
         grep -q "global_prediction: 1" output.log || (echo "Expected global_prediction: 1 not found" && exit 1)
 
     - name: Negative test with AndrewsBay
