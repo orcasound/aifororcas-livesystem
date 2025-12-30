@@ -212,7 +212,7 @@ if __name__ == "__main__":
 		iteration_count += 1
 
 		try:
-			clip_path, start_timestamp, current_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
+			clip_path, start_timestamp, next_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
 		except (IndexError, ValueError) as e:
 			# Handle case when no audio files exist for the specified time range
 			print(f"\nWarning: Unable to retrieve audio clip. This may occur when no audio files exist for the specified time range.")
@@ -220,7 +220,11 @@ if __name__ == "__main__":
 			print(f"Hydrophone: {hls_hydrophone_id}")
 			if hls_stream_type == "DateRangeHLS":
 				print(f"Time range: {hls_start_time_pst} to {hls_end_time_pst} PST")
-			print("Continuing to next iteration...\n")
+			print(f"next_clip_end_time    {next_clip_end_time}")
+			print(f"current_clip_end_time {current_clip_end_time}")
+			if next_clip_end_time is not None:
+				current_clip_end_time = next_clip_end_time
+			current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
 			continue
 
 		# if this clip was at the end of a bucket, clip_duration_in_seconds < 60, if so we skip it
@@ -232,7 +236,6 @@ if __name__ == "__main__":
 			print("local_predictions: {}\n".format(prediction_results["local_predictions"]))
 			print("global_confidence: {}\n".format(prediction_results["global_confidence"]))
 			print("global_prediction: {}".format(prediction_results["global_prediction"]))
-
 
 			# only upload positive clip data
 			if prediction_results["global_prediction"] == 1:
@@ -285,4 +288,6 @@ if __name__ == "__main__":
 						json.dump(prediction_results, f)
 
 		# get next current_clip_end_time by adding 60 seconds to current_clip_end_time
+		if next_clip_end_time is not None:
+			current_clip_end_time = next_clip_end_time
 		current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
