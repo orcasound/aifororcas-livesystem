@@ -19,41 +19,41 @@ These configs test live streaming from hydrophones:
 ### DateRangeHLS Configs
 
 #### Positive Detection Tests (Positive/)
+These are known positive detection cases used to verify inference is working correctly.
 Tests expected to produce `global_prediction: 1`:
 
-- `FastAI_DateRangeHLS_OrcasoundLab.yml` - **Expected: global_prediction: 1**
+- `FastAI_DateRangeHLS_OrcasoundLab.yml`
   - Hydrophone: rpi_orcasound_lab
   - Time: 2020-09-01 15:13 to 16:45 PST
-  - This is a known positive detection case used to verify inference is working correctly
 
-- `FastAI_DateRangeHLS_BushPoint.yml` - **Expected: global_prediction: 1**
+- `FastAI_DateRangeHLS_AndrewsBay.yml`
+  - Hydrophone: rpi_andrews_bay
+  - Time: 2025-12-16 23:16 to 23:17 PST
+
+- `FastAI_DateRangeHLS_BushPoint.yml`
   - Hydrophone: rpi_bush_point
   - Time: 2024-11-02 09:52 to 09:53 PST
 
-- `FastAI_DateRangeHLS_PortTownsend.yml` - **Expected: global_prediction: 1**
+- `FastAI_DateRangeHLS_PortTownsend.yml`
   - Hydrophone: rpi_port_townsend
   - Time: 2025-12-26 14:08 to 14:09 PST
 
-- `FastAI_DateRangeHLS_SunsetBay.yml` - **Expected: global_prediction: 1**
+- `FastAI_DateRangeHLS_SunsetBay.yml`
   - Hydrophone: rpi_sunset_bay
   - Time: 2025-12-11 15:03 to 15:04 PST
 
 #### Negative Detection Tests (Negative/)
 Tests expected to produce `global_prediction: 0`:
 
-- `FastAI_DateRangeHLS_AndrewsBay.yml` - **Expected: global_prediction: 0**
-  - Hydrophone: rpi_andrews_bay
-  - Time: 2025-12-01 15:13 to 16:45 PST
-
-- `FastAI_DateRangeHLS_MastCenter.yml` - **Expected: global_prediction: 0**
+- `FastAI_DateRangeHLS_MastCenter.yml`
   - Hydrophone: rpi_mast_center
   - Time: 2023-08-05 12:32 to 14:00 PST
 
-- `FastAI_DateRangeHLS_NorthSJC.yml` - **Expected: global_prediction: 0**
+- `FastAI_DateRangeHLS_NorthSJC.yml`
   - Hydrophone: rpi_north_sjc
   - Time: 2025-12-01 15:13 to 16:45 PST
 
-- `FastAI_DateRangeHLS_PointRobinson.yml` - **Expected: global_prediction: 0**
+- `FastAI_DateRangeHLS_PointRobinson.yml`
   - Hydrophone: rpi_point_robinson
   - Time: 2025-11-01 15:13 to 16:45 PST
 
