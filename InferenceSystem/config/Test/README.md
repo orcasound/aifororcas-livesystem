@@ -34,6 +34,10 @@ Tests expected to produce `global_prediction: 1`:
   - Hydrophone: rpi_bush_point
   - Time: 2024-11-02 09:52 to 09:53 PST
 
+- `FastAI_DateRangeHLS_NorthSJC.yml`
+  - Hydrophone: rpi_north_sjc
+  - Time: 2025-12-29 21:58 to 21:59 PST
+
 - `FastAI_DateRangeHLS_PortTownsend.yml`
   - Hydrophone: rpi_port_townsend
   - Time: 2025-12-26 14:08 to 14:09 PST
@@ -48,10 +52,6 @@ Tests expected to produce `global_prediction: 0`:
 - `FastAI_DateRangeHLS_MastCenter.yml`
   - Hydrophone: rpi_mast_center
   - Time: 2023-08-05 12:32 to 14:00 PST
-
-- `FastAI_DateRangeHLS_NorthSJC.yml`
-  - Hydrophone: rpi_north_sjc
-  - Time: 2025-12-01 15:13 to 16:45 PST
 
 - `FastAI_DateRangeHLS_PointRobinson.yml`
   - Hydrophone: rpi_point_robinson
