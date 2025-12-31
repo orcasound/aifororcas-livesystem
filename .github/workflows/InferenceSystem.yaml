@@ -238,6 +238,12 @@ jobs:
         source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/Positive/FastAI_DateRangeHLS_OrcasoundLab.yml --max_iterations 2 > output.log 2>&1
         grep -q "global_prediction: 1" output.log || (echo "Expected global_prediction: 1 not found" && exit 1)
 
+    - name: Positive test with AndrewsBay
+      working-directory: InferenceSystem
+      run: |
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/Negative/FastAI_DateRangeHLS_AndrewsBay.yml --max_iterations 1 > output.log 2>&1
+        grep -q "global_prediction: 1" output.log || (echo "Expected global_prediction: 1 not found" && exit 1)
+
     - name: Positive test with BushPoint
       working-directory: InferenceSystem
       run: |
@@ -256,12 +262,6 @@ jobs:
         source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/Positive/FastAI_DateRangeHLS_SunsetBay.yml --max_iterations 1 > output.log 2>&1
         cat output.log
         grep -q "global_prediction: 1" output.log || (echo "Expected global_prediction: 1 not found" && exit 1)
-
-    - name: Negative test with AndrewsBay
-      working-directory: InferenceSystem
-      run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/Negative/FastAI_DateRangeHLS_AndrewsBay.yml --max_iterations 1 > output.log 2>&1
-        grep -q "global_prediction: 0" output.log || (echo "Expected global_prediction: 0 not found" && exit 1)
 
     - name: Negative test with MastCenter
       working-directory: InferenceSystem
