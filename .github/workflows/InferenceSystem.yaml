@@ -249,7 +249,7 @@ jobs:
     - name: Positive test with AndrewsBay
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/Negative/FastAI_DateRangeHLS_AndrewsBay.yml --max_iterations 1 > output.log 2>&1
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/Positive/FastAI_DateRangeHLS_AndrewsBay.yml --max_iterations 1 > output.log 2>&1
         cat output.log
         grep -q "global_prediction: 1" output.log || (echo "Expected global_prediction: 1 not found" && exit 1)
 
