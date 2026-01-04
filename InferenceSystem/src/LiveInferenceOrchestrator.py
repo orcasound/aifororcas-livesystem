@@ -188,7 +188,16 @@ if __name__ == "__main__":
 		end_dt_aware = timezone('US/Pacific').localize(end_dt)
 		hls_end_time_unix = int(end_dt_aware.timestamp())
 
-		hls_stream = DateRangeHLSStream(hydrophone_stream_url, hls_polling_interval, hls_start_time_unix, hls_end_time_unix, local_dir, False)
+		try:
+			hls_stream = DateRangeHLSStream(hydrophone_stream_url, hls_polling_interval, hls_start_time_unix, hls_end_time_unix, local_dir, False)
+		except IndexError as e:
+			print("\nERROR: Failed to initialize DateRangeHLSStream.")
+			print("This usually means the S3 folder list is malformed or unsorted.")
+			print(f"Details: {e}")
+			print(f"Hydrophone: {hls_hydrophone_id}")
+			print(f"Start time (unix): {hls_start_time_unix}")
+			print(f"End time (unix)  : {hls_end_time_unix}")
+			sys.exit(0)
 	else:
 		raise ValueError("hls_stream_type should be one of LiveHLS or DateRangeHLS")
 
@@ -202,7 +211,21 @@ if __name__ == "__main__":
 			break
 		iteration_count += 1
 
-		clip_path, start_timestamp, current_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
+		try:
+			clip_path, start_timestamp, next_clip_end_time = hls_stream.get_next_clip(current_clip_end_time)
+		except (IndexError, ValueError) as e:
+			# Handle case when no audio files exist for the specified time range
+			print(f"\nWarning: Unable to retrieve audio clip. This may occur when no audio files exist for the specified time range.")
+			print(f"Error details: {type(e).__name__}: {str(e)}")
+			print(f"Hydrophone: {hls_hydrophone_id}")
+			if hls_stream_type == "DateRangeHLS":
+				print(f"Time range: {hls_start_time_pst} to {hls_end_time_pst} PST")
+			print(f"next_clip_end_time    {next_clip_end_time}")
+			print(f"current_clip_end_time {current_clip_end_time}")
+			if next_clip_end_time is not None:
+				current_clip_end_time = next_clip_end_time
+			current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
+			continue
 
 		# if this clip was at the end of a bucket, clip_duration_in_seconds < 60, if so we skip it
 		if clip_path:
@@ -213,7 +236,6 @@ if __name__ == "__main__":
 			print("local_predictions: {}\n".format(prediction_results["local_predictions"]))
 			print("global_confidence: {}\n".format(prediction_results["global_confidence"]))
 			print("global_prediction: {}".format(prediction_results["global_prediction"]))
-
 
 			# only upload positive clip data
 			if prediction_results["global_prediction"] == 1:
@@ -266,4 +288,6 @@ if __name__ == "__main__":
 						json.dump(prediction_results, f)
 
 		# get next current_clip_end_time by adding 60 seconds to current_clip_end_time
+		if next_clip_end_time is not None:
+			current_clip_end_time = next_clip_end_time
 		current_clip_end_time = current_clip_end_time + timedelta(0, hls_polling_interval)
