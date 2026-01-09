@@ -20,6 +20,20 @@ public partial class CandidateFilterComponent
 
 	private async Task ApplyFilter()
 	{
+		// The HydrophoneId (e.g., rpi_orcasound_lab) is constant whereas the Location
+		// value can and has changed over time (e.g., Haro Strait vs Orcasound Lab).
+		// The UI lets the user choose among labels that are Location values, but
+		// we want to actually query by HydrophoneId.
+		if (FilterOptions.Location != "all")
+		{
+			int index = Array.IndexOf(AppSettings.Locations, FilterOptions.Location);
+			if (index >= 0 && index < AppSettings.HydrophoneIds.Length)
+			{
+				FilterOptions.Location = "all";
+				FilterOptions.HydrophoneId = AppSettings.HydrophoneIds[index];
+			}
+		}
+
 		await ApplyFilterCallback.InvokeAsync(FilterOptions);
 	}
 }

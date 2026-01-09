@@ -50,6 +50,12 @@ namespace AIForOrcas.DTO.API
 		public string Location { get; set; } = "all";
 
 		/// <summary>
+		/// Hydrophone ID (rpi_orcasound_lab, etc., or all).
+		/// </summary>
+		/// <example>all</example>
+		public string HydrophoneId { get; set; } = "all";
+
+		/// <summary>
 		/// Number of records per page to retrieve.
 		/// </summary>
 		/// <example>5</example>
