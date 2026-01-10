@@ -33,6 +33,10 @@ public partial class CandidateFilterComponent
 				FilterOptions.HydrophoneId = AppSettings.HydrophoneIds[index];
 			}
 		}
+		else
+		{
+			FilterOptions.HydrophoneId = "all";
+		}
 
 		await ApplyFilterCallback.InvokeAsync(FilterOptions);
 	}
