@@ -506,7 +506,7 @@ namespace NotificationSystem.Models
                 RegionEndpoint = RegionEndpoint.USWest2
             };
 
-            var client = new AmazonS3Client(new Amazon.Runtime.AnonymousAWSCredentials(), config);
+            using var client = new AmazonS3Client(new Amazon.Runtime.AnonymousAWSCredentials(), config);
             var allFolders = new List<string>();
             string continuationToken = null;
 
