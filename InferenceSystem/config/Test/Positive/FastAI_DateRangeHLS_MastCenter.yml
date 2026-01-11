@@ -5,8 +5,8 @@ model_path: "./model"
 model_name: "model.pkl"
 hls_stream_type: "DateRangeHLS"
 hls_polling_interval: 60
-hls_start_time_pst: "2023-08-05 12:32"
-hls_end_time_pst: "2023-08-05 14:00"
+hls_start_time_pst: "2025-12-22 10:37"
+hls_end_time_pst: "2025-12-22 10:38"
 hls_hydrophone_id: "rpi_mast_center"
 upload_to_azure: False
 delete_local_wavs: True
