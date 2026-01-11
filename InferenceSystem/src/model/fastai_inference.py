@@ -88,7 +88,7 @@ def export_wave_file(audio, begin, end, dest):
 
 def extract_segments(audioPath, sampleDict, destnPath, suffix):
     '''
-    Function to exctact segments given a audio path folder and proposal segments
+    Function to extract segments given an audio path folder and proposal segments
     '''
     # Listing the local audio files
     local_audio_files = str(audioPath) + '/'
@@ -114,7 +114,7 @@ class FastAIModel():
         Function which generates local predictions using wavefile
         '''
 
-        # Creates local directory to save 2 second clops
+        # Creates local directory to save 2 second clips
         # local_dir = "./fastai_dir/"
         local_dir = tempfile.mkdtemp()+"/"
         if os.path.exists(local_dir):
@@ -123,7 +123,7 @@ class FastAIModel():
         else:
             os.makedirs(local_dir)
 
-        # infer clip length
+        # Infer clip length
         max_length = get_duration(path=wav_file_path)
         print(os.path.basename(wav_file_path))
         print("Length of Audio Clip:{0}".format(max_length))
@@ -155,8 +155,8 @@ class FastAIModel():
                                  n_fft=2560,  # Number of Samples for Fourier
                                  n_mels=256,  # Mel bins
                                  pad=0,
-                                 to_db_scale=True,  # Converting to DB sclae
-                                 top_db=100,  # Top decible sound
+                                 to_db_scale=True,  # Converting to DB scale
+                                 top_db=100,  # Top decibel sound
                                  win_length=None,
                                  n_mfcc=20)
                              )
@@ -164,7 +164,7 @@ class FastAIModel():
         config.resample_to = 20000  # Every sample at 20000 frequency
         config.downmix=True
 
-        # Creating a Audio DataLoader
+        # Creating an Audio DataLoader
         test_data_folder = Path(local_dir)
         tfms = None
         test = AudioList.from_folder(
@@ -177,7 +177,7 @@ class FastAIModel():
         for item in testdb.x:
             predictions.append(self.model.predict(item)[2][1])
 
-        # clean folder
+        # Clean folder
         shutil.rmtree(local_dir)
 
         # Aggregating predictions
@@ -207,7 +207,7 @@ class FastAIModel():
         # Updating first row
         submission.loc[0, 'confidence'] = prediction.confidence[0]
 
-        # Adding lastrow
+        # Adding last row
         lastLine = pd.DataFrame({
             'wav_filename': Path(wav_file_path).name,
             'start_time_s': [submission.start_time_s.max()+1],
@@ -217,7 +217,7 @@ class FastAIModel():
         submission = submission.append(lastLine, ignore_index=True)
         submission = submission[['wav_filename', 'start_time_s', 'duration_s', 'confidence']]
 
-        # initialize output JSON
+        # Initialize output JSON
         result_json = {}
         result_json = dict(
             submission=submission,
