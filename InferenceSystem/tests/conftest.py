@@ -55,7 +55,7 @@ TEST_DATA_DIR = Path(__file__).parent.parent / "claude-scratch" / "test_data"
 REFERENCE_DIR = Path(__file__).parent / "reference_outputs"
 
 # V1 config file
-V1_CONFIG_PATH = Path(__file__).parent.parent / "config" / "v1" / "inference_config.yaml"
+V1_CONFIG_PATH = Path(__file__).parent / "test_config.yaml"
 
 
 @pytest.fixture

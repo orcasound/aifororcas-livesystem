@@ -8,6 +8,7 @@ These tests are modular:
 
 import tempfile
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 import matplotlib
 import numpy as np
@@ -34,6 +35,68 @@ def plot_spectrogram(spec_tensor, output_path, title=None, sr=20000, hop_length=
     fig.colorbar(img, ax=ax, format="%.0f", label="dB")
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
+
+
+# =============================================================================
+# Window Splitting Helpers (will be moved to inference class later)
+# =============================================================================
+
+
+def split_audio_into_windows(
+    audio_file_path: str, inference_config: Dict, output_dir: str, max_segments: int = None
+) -> List[Tuple[int, str]]:
+    """
+    Split audio file into overlapping windows for inference.
+
+    This function will eventually be part of the inference class.
+
+    Args:
+        audio_file_path: Path to input audio file
+        inference_config: Dict with keys:
+            - window_s: float - window duration in seconds (e.g., 2.0)
+            - window_hop_s: float - hop between windows in seconds (e.g., 1.0)
+        output_dir: Directory to save window segments
+        max_segments: Optional limit on number of segments (for testing)
+
+    Returns:
+        List of (window_idx, segment_path) tuples
+    """
+    from librosa import get_duration
+    from pydub import AudioSegment
+
+    window_s = inference_config["window_s"]
+    window_hop_s = inference_config["window_hop_s"]
+
+    # Get audio duration
+    max_length = get_duration(path=audio_file_path)
+    wav_name = Path(audio_file_path).stem
+
+    # Load audio
+    audio = AudioSegment.from_wav(audio_file_path)
+
+    # Calculate number of windows
+    num_windows = int(np.floor(max_length / window_hop_s))
+    if max_segments is not None:
+        num_windows = min(max_segments, num_windows)
+
+    # Create windows
+    segments = []
+    for i in range(num_windows):
+        start_s = int(i * window_hop_s)
+        end_s = start_s + int(window_s)
+
+        # Stop if window extends beyond audio
+        if end_s > max_length:
+            break
+
+        # Export segment
+        segment_path = f"{output_dir}/{wav_name}_{start_s}_{end_s}.wav"
+        segment = audio[start_s * 1000 : end_s * 1000]
+        segment.export(segment_path, format="wav")
+
+        segments.append((i, segment_path))
+
+    return segments
 
 
 class TestAudioPreprocessingUnit:
@@ -132,34 +195,26 @@ class TestAudioPreprocessingParity:
 
         random.seed(42)  # Fix random seed for reproducible padding
 
-        from librosa import get_duration
         from model_v1.legacy_fastai_frontend import prepare_audio, prepare_audio_stage_b
-        from pydub import AudioSegment
 
-        # Get duration and create 2-second segments
-        max_length = get_duration(path=sample_1min_wav)
         wav_name = Path(sample_1min_wav).stem
 
         # Create temp directory for segments
         with tempfile.TemporaryDirectory() as tmpdir:
-            audio = AudioSegment.from_wav(sample_1min_wav)
+            # Split audio into windows using inference config
+            segments = split_audio_into_windows(
+                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=5
+            )
 
-            # Extract first few 2-second segments for testing
-            segments_to_test = min(5, int(np.floor(max_length) - 1))
             references = {}
-
-            for i in range(segments_to_test):
-                segment_path = f"{tmpdir}/{wav_name}_{i}_{i+2}.wav"
-                segment = audio[i * 1000 : (i + 2) * 1000]
-                segment.export(segment_path, format="wav")
-
+            for window_idx, segment_path in segments:
                 # Stage B: Pure mel spectrogram (no padding)
                 stage_b_spec = prepare_audio_stage_b(segment_path, v1_config)
 
                 # Stage C: Full pipeline with standardization
                 stage_c_spec = prepare_audio(segment_path, v1_config)
 
-                references[f"segment_{i}"] = {
+                references[f"segment_{window_idx}"] = {
                     "stage_b": stage_b_spec,
                     "stage_c": stage_c_spec,
                 }
@@ -197,9 +252,7 @@ class TestAudioPreprocessingParity:
         Tests mel spectrogram generation from raw 2-second clips WITHOUT padding.
         This isolates the core mel computation (downmix -> resample -> mel spec).
         """
-        from librosa import get_duration
         from model_v1.audio_frontend import featurize_waveform, load_audio
-        from pydub import AudioSegment
 
         wav_name = Path(sample_1min_wav).stem
         reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
@@ -221,25 +274,20 @@ class TestAudioPreprocessingParity:
             )
 
         # Create same segments as fastai test
-        max_length = get_duration(path=sample_1min_wav)
-
         with tempfile.TemporaryDirectory() as tmpdir:
-            audio = AudioSegment.from_wav(sample_1min_wav)
+            # Split audio into windows using inference config
+            segments = split_audio_into_windows(
+                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=5
+            )
 
-            segments_to_test = min(5, int(np.floor(max_length) - 1))
             mismatches = []
-
-            for i in range(segments_to_test):
-                segment_path = f"{tmpdir}/{wav_name}_{i}_{i+2}.wav"
-                segment = audio[i * 1000 : (i + 2) * 1000]
-                segment.export(segment_path, format="wav")
-
+            for window_idx, segment_path in segments:
                 # Process with model_v1 - Stage B only (no standardization)
                 waveform, sr = load_audio(segment_path, v1_config["audio"])
                 model_v1_spec, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
                 # Get reference Stage B
-                ref_key = f"segment_{i}"
+                ref_key = f"segment_{window_idx}"
                 if ref_key not in references:
                     continue
 
@@ -263,7 +311,7 @@ class TestAudioPreprocessingParity:
                     max_diff = (model_v1_overlap - fastai_overlap).abs().max().item()
                     mean_diff = (model_v1_overlap - fastai_overlap).abs().mean().item()
                     mismatches.append(
-                        f"Segment {i}: Stage B mismatch - "
+                        f"Segment {window_idx}: Stage B mismatch - "
                         f"model_v1={model_v1_spec.shape}, fastai={fastai_spec.shape}, "
                         f"compared {n_frames} frames, max_diff={max_diff:.4f}, mean_diff={mean_diff:.4f}"
                     )
@@ -281,9 +329,7 @@ class TestAudioPreprocessingParity:
 
         This test is marked xfail to document the known discrepancy.
         """
-        from librosa import get_duration
         from model_v1.audio_frontend import prepare_audio
-        from pydub import AudioSegment
 
         wav_name = Path(sample_1min_wav).stem
         reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
@@ -305,24 +351,19 @@ class TestAudioPreprocessingParity:
             get_ref = lambda r: r  # Old format
 
         # Create same segments as fastai test
-        max_length = get_duration(path=sample_1min_wav)
-
         with tempfile.TemporaryDirectory() as tmpdir:
-            audio = AudioSegment.from_wav(sample_1min_wav)
+            # Split audio into windows using inference config
+            segments = split_audio_into_windows(
+                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=5
+            )
 
-            segments_to_test = min(5, int(np.floor(max_length) - 1))
             mismatches = []
-
-            for i in range(segments_to_test):
-                segment_path = f"{tmpdir}/{wav_name}_{i}_{i+2}.wav"
-                segment = audio[i * 1000 : (i + 2) * 1000]
-                segment.export(segment_path, format="wav")
-
+            for window_idx, segment_path in segments:
                 # Process with model_v1 - full pipeline
                 model_v1_spec = prepare_audio(segment_path, v1_config)
 
                 # Get reference
-                ref_key = f"segment_{i}"
+                ref_key = f"segment_{window_idx}"
                 if ref_key not in references:
                     continue
 
@@ -331,7 +372,7 @@ class TestAudioPreprocessingParity:
                 # Compare shapes
                 if model_v1_spec.shape != fastai_spec.shape:
                     mismatches.append(
-                        f"Segment {i}: shape mismatch - "
+                        f"Segment {window_idx}: shape mismatch - "
                         f"model_v1={model_v1_spec.shape}, fastai={fastai_spec.shape}"
                     )
                     continue
@@ -344,7 +385,9 @@ class TestAudioPreprocessingParity:
                     rtol=numerical_tolerance["rtol"],
                 ):
                     max_diff = (model_v1_spec - fastai_spec).abs().max().item()
-                    mismatches.append(f"Segment {i}: value mismatch - max_diff={max_diff:.6e}")
+                    mismatches.append(
+                        f"Segment {window_idx}: value mismatch - max_diff={max_diff:.6e}"
+                    )
 
             assert len(mismatches) == 0, f"Stage C parity failures:\n" + "\n".join(mismatches)
 
@@ -358,23 +401,16 @@ class TestAudioPreprocessingParity:
         if not fastai_available:
             pytest.skip("fastai_audio not available")
 
-        from librosa import get_duration
         from model_v1.audio_frontend import prepare_audio
         from model_v1.legacy_fastai_frontend import prepare_audio as fastai_prepare_audio
-        from pydub import AudioSegment
-
-        wav_name = Path(sample_1min_wav).stem
-        max_length = get_duration(path=sample_1min_wav)
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            audio = AudioSegment.from_wav(sample_1min_wav)
+            # Split audio into windows using inference config
+            segments = split_audio_into_windows(
+                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=3
+            )
 
-            # Test first 3 segments
-            for i in range(min(3, int(np.floor(max_length) - 1))):
-                segment_path = f"{tmpdir}/{wav_name}_{i}_{i+2}.wav"
-                segment = audio[i * 1000 : (i + 2) * 1000]
-                segment.export(segment_path, format="wav")
-
+            for window_idx, segment_path in segments:
                 # model_v1 processing
                 model_v1_spec = prepare_audio(segment_path, v1_config)
 
@@ -382,11 +418,13 @@ class TestAudioPreprocessingParity:
                 fastai_spec = fastai_prepare_audio(segment_path, v1_config)
 
                 # Compare
-                assert model_v1_spec.shape == fastai_spec.shape, f"Segment {i}: shape mismatch"
+                assert (
+                    model_v1_spec.shape == fastai_spec.shape
+                ), f"Segment {window_idx}: shape mismatch"
 
                 assert torch.allclose(
                     model_v1_spec,
                     fastai_spec,
                     atol=numerical_tolerance["atol"],
                     rtol=numerical_tolerance["rtol"],
-                ), f"Segment {i}: value mismatch, max_diff={(model_v1_spec - fastai_spec).abs().max().item():.6e}"
+                ), f"Segment {window_idx}: value mismatch, max_diff={(model_v1_spec - fastai_spec).abs().max().item():.6e}"
