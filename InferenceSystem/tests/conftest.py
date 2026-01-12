@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 import torch
 import torchaudio
+import yaml
 
 # Add src to path for imports
 SRC_DIR = Path(__file__).parent.parent / "src"
@@ -22,22 +23,28 @@ sys.path.insert(0, str(SRC_DIR))
 
 _original_torchaudio_load = torchaudio.load
 
+
 def _patched_torchaudio_load(filepath, *args, **kwargs):
     """Wrapper for torchaudio.load that uses soundfile directly"""
     import soundfile as sf
-    data, samplerate = sf.read(str(filepath), dtype='float32')
+
+    data, samplerate = sf.read(str(filepath), dtype="float32")
     waveform = torch.from_numpy(data.T if data.ndim > 1 else data.reshape(1, -1))
     return waveform, samplerate
+
 
 torchaudio.load = _patched_torchaudio_load
 
 _original_torchaudio_save = torchaudio.save
 
+
 def _patched_torchaudio_save(filepath, src, sample_rate, *args, **kwargs):
     """Wrapper for torchaudio.save that uses soundfile directly"""
     import soundfile as sf
+
     audio_data = src.numpy().T if src.ndim > 1 else src.numpy().reshape(-1, 1)
     sf.write(str(filepath), audio_data, sample_rate)
+
 
 torchaudio.save = _patched_torchaudio_save
 
@@ -46,6 +53,9 @@ TEST_DATA_DIR = Path(__file__).parent.parent / "claude-scratch" / "test_data"
 
 # Reference outputs directory (for parity testing)
 REFERENCE_DIR = Path(__file__).parent / "reference_outputs"
+
+# V1 config file
+V1_CONFIG_PATH = Path(__file__).parent.parent / "config" / "v1" / "inference_config.yaml"
 
 
 @pytest.fixture
@@ -103,19 +113,22 @@ def fastai_available():
     try:
         from audio.data import AudioConfig, AudioList, SpectrogramConfig
         from fastai.basic_train import load_learner
+
         return True
     except ImportError:
         return False
 
 
+@pytest.fixture
+def v1_config():
+    """Load v1 inference config from YAML"""
+    assert V1_CONFIG_PATH.exists(), f"V1 config not found: {V1_CONFIG_PATH}"
+    with open(V1_CONFIG_PATH) as f:
+        return yaml.safe_load(f)
+
+
 def pytest_configure(config):
     """Pytest configuration hook"""
-    config.addinivalue_line(
-        "markers", "parity: marks tests that compare fastai vs model_v1"
-    )
-    config.addinivalue_line(
-        "markers", "slow: marks tests that take a long time"
-    )
-    config.addinivalue_line(
-        "markers", "requires_fastai: marks tests that need fastai environment"
-    )
+    config.addinivalue_line("markers", "parity: marks tests that compare fastai vs model_v1")
+    config.addinivalue_line("markers", "slow: marks tests that take a long time")
+    config.addinivalue_line("markers", "requires_fastai: marks tests that need fastai environment")

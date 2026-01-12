@@ -1,0 +1,28 @@
+## V1 inference configuration (used by model_v1 audio + inference)
+# Values mirror claude-scratch/instructions/model_port_hf.md
+# Safe defaults preserve fastai parity; adjust thresholds/windowing as needed.
+
+audio:
+  downmix_mono: true
+  resample_rate: 20000        # Hz
+
+spectrogram:
+  sample_rate: 16000          # torchaudio default (fastai quirk)
+  n_fft: 2560
+  hop_length: 256
+  mel_n_filters: 256
+  mel_f_min: 0.0
+  mel_f_max: 10000.0
+  mel_f_pad: 0
+  convert_to_db: true
+  top_db: 100
+
+inference:
+  window_s: 2.0               # segment length
+  window_hop_s: 1.0           # hop between segments
+  local_conf_threshold: 0.5
+  global_pred_threshold: 3
+
+model:
+  name: "orcahello-srkw-detect-v1"
+  input_pad_s: 4.0            # audio padded/trimmed to this duration
