@@ -1,6 +1,14 @@
 inference-venv
 model-v1-venv
 .env
+
 true_srkw/
 model/
 model.zip
+
+claude-scratch/test_data/
+claude-scratch/tmp/
+
+tests/reference_outputs/
+*.wav
+*.png
