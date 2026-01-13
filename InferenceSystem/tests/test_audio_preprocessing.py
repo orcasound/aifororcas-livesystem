@@ -6,79 +6,13 @@ These tests are modular:
 - Can compare model_v1 outputs against saved references (in model-v1-venv)
 """
 
-import tempfile
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import numpy as np
 import pytest
 import torch
+from model_v1.audio_frontend import audio_segment_generator
 from tests.utils import diff_specs, plot_spec_comparison
-
-
-
-# =============================================================================
-# Window Splitting Helpers (will be moved to inference class later)
-# =============================================================================
-
-
-def split_audio_into_windows(
-    audio_file_path: str, inference_config: Dict, output_dir: str, 
-    max_segments: int = None, segments_start_s: int = None
-) -> List[Tuple[int, str]]:
-    """
-    Split audio file into overlapping windows for inference.
-
-    This function will eventually be part of the inference class.
-
-    Args:
-        audio_file_path: Path to input audio file
-        inference_config: Dict with keys:
-            - window_s: float - window duration in seconds (e.g., 2.0)
-            - window_hop_s: float - hop between windows in seconds (e.g., 1.0)
-        output_dir: Directory to save window segments
-        max_segments: Optional limit on number of segments (for testing)
-
-    Returns:
-        List of (window_idx, segment_path) tuples
-    """
-    from librosa import get_duration
-    from pydub import AudioSegment
-
-    window_s = inference_config["window_s"]
-    window_hop_s = inference_config["window_hop_s"]
-
-    # Get audio duration
-    max_length = get_duration(path=audio_file_path)
-    wav_name = Path(audio_file_path).stem
-
-    # Load audio
-    audio = AudioSegment.from_wav(audio_file_path)
-
-    # Calculate number of windows
-    num_windows = int(np.floor(max_length / window_hop_s))
-    if max_segments is not None:
-        num_windows = min(max_segments, num_windows)
-
-    # Create windows
-    segments = []
-    segments_start_s = segments_start_s or 0
-    for i in range(num_windows):
-        start_s = int(i * window_hop_s) + segments_start_s
-        end_s = start_s + int(window_s)
-
-        # Stop if window extends beyond audio
-        if end_s > max_length + segments_start_s:
-            break
-
-        # Export segment
-        segment_path = f"{output_dir}/{wav_name}_{start_s}_{end_s}.wav"
-        segment = audio[start_s * 1000 : end_s * 1000]
-        segment.export(segment_path, format="wav")
-
-        segments.append((i, segment_path))
-
-    return segments
 
 
 class TestAudioPreprocessingUnit:
@@ -180,49 +114,51 @@ class TestAudioPreprocessingParity:
         from model_v1.legacy_fastai_frontend import prepare_audio, prepare_audio_stage_b
 
         wav_name = Path(sample_1min_wav).stem
-        with tempfile.TemporaryDirectory() as tmpdir:
-            segments = split_audio_into_windows(
-                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=max_segments,
-                segments_start_s=segments_start_s
+        segments = audio_segment_generator(
+            sample_1min_wav,
+            segment_duration_s=v1_config["inference"]["window_s"],
+            segment_hop_s=v1_config["inference"]["window_hop_s"],
+            max_segments=max_segments,
+            start_time_s=segments_start_s or 0.0,
+        )
+        references = {}
+        for window_idx, segment_path in enumerate(segments):
+            # Stage B: Pure mel spectrogram (no padding)
+            stage_b_spec = prepare_audio_stage_b(segment_path, v1_config)
+
+            # Stage C: Full pipeline with standardization
+            stage_c_spec = prepare_audio(segment_path, v1_config)
+
+            references[f"segment_{window_idx}"] = {
+                "stage_b": stage_b_spec,
+                "stage_c": stage_c_spec,
+            }
+
+        # Save reference spectrograms
+        reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
+        torch.save(references, reference_file)
+        print(f"Saved reference outputs to {reference_file}")
+
+        # Print shape info for debugging
+        for seg_name, specs in references.items():
+            print(
+                f"  {seg_name}: stage_b={specs['stage_b'].shape}, stage_c={specs['stage_c'].shape}"
             )
-            references = {}
-            for window_idx, segment_path in segments:
-                # Stage B: Pure mel spectrogram (no padding)
-                stage_b_spec = prepare_audio_stage_b(segment_path, v1_config)
 
-                # Stage C: Full pipeline with standardization
-                stage_c_spec = prepare_audio(segment_path, v1_config)
+        # Save spectrogram comparison images (stage_b vs stage_c for each segment)
+        images_dir = reference_dir / f"{wav_name}_spectrograms"
+        images_dir.mkdir(exist_ok=True)
 
-                references[f"segment_{window_idx}"] = {
-                    "stage_b": stage_b_spec,
-                    "stage_c": stage_c_spec,
-                }
+        for seg_name, specs in references.items():
+            img_path = images_dir / f"{seg_name}_comparison.png"
+            plot_spec_comparison(
+                specs["stage_b"],
+                specs["stage_c"],
+                img_path,
+                f"{wav_name} {seg_name}",
+            )
 
-            # Save reference spectrograms
-            reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
-            torch.save(references, reference_file)
-            print(f"Saved reference outputs to {reference_file}")
-
-            # Print shape info for debugging
-            for seg_name, specs in references.items():
-                print(
-                    f"  {seg_name}: stage_b={specs['stage_b'].shape}, stage_c={specs['stage_c'].shape}"
-                )
-
-            # Save spectrogram comparison images (stage_b vs stage_c for each segment)
-            images_dir = reference_dir / f"{wav_name}_spectrograms"
-            images_dir.mkdir(exist_ok=True)
-
-            for seg_name, specs in references.items():
-                img_path = images_dir / f"{seg_name}_comparison.png"
-                plot_spec_comparison(
-                    specs["stage_b"],
-                    specs["stage_c"],
-                    img_path,
-                    f"{wav_name} {seg_name}",
-                )
-
-            print(f"Saved spectrogram images to {images_dir}")
+        print(f"Saved spectrogram images to {images_dir}")
 
     def test_stage_b_parity(self, sample_1min_wav, reference_dir, v1_config, max_segments, segments_start_s):
         """
@@ -253,33 +189,35 @@ class TestAudioPreprocessingParity:
             )
 
         # Create same segments as fastai test
-        with tempfile.TemporaryDirectory() as tmpdir:
-            segments = split_audio_into_windows(
-                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=max_segments,
-                segments_start_s=segments_start_s
-            )
+        segments = audio_segment_generator(
+            sample_1min_wav,
+            segment_duration_s=v1_config["inference"]["window_s"],
+            segment_hop_s=v1_config["inference"]["window_hop_s"],
+            max_segments=max_segments,
+            start_time_s=segments_start_s or 0.0,
+        )
 
-            mismatches = []
-            for window_idx, segment_path in segments:
-                # Process with model_v1 - Stage B only (no standardization)
-                waveform, sr = load_audio(segment_path, v1_config["audio"])
-                model_v1_spec, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
+        mismatches = []
+        for window_idx, segment_path in enumerate(segments):
+            # Process with model_v1 - Stage B only (no standardization)
+            waveform, sr = load_audio(segment_path, v1_config["audio"])
+            model_v1_spec, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
-                # Get reference Stage B
-                ref_key = f"segment_{window_idx}"
-                if ref_key not in references:
-                    continue
+            # Get reference Stage B
+            ref_key = f"segment_{window_idx}"
+            if ref_key not in references:
+                continue
 
-                fastai_spec = references[ref_key]["stage_b"]
+            fastai_spec = references[ref_key]["stage_b"]
 
-                # Compare using SpecDiff (handles overlapping frames automatically)
-                diff = diff_specs(model_v1_spec, fastai_spec)
-                try:
-                    diff.assert_close(name=ref_key)
-                except AssertionError as e:
-                    mismatches.append(str(e))
+            # Compare using SpecDiff (handles overlapping frames automatically)
+            diff = diff_specs(model_v1_spec, fastai_spec)
+            try:
+                diff.assert_close(name=ref_key)
+            except AssertionError as e:
+                mismatches.append(str(e))
 
-            assert len(mismatches) == 0, "Stage B parity failures:\n" + "\n".join(mismatches)
+        assert len(mismatches) == 0, "Stage B parity failures:\n" + "\n".join(mismatches)
 
     def test_stage_c_parity(self, sample_1min_wav, reference_dir, v1_config, debug_dir, max_segments, segments_start_s):
         """
@@ -313,43 +251,45 @@ class TestAudioPreprocessingParity:
         references = torch.load(reference_file, weights_only=False)
 
         # Create same segments as fastai test
-        with tempfile.TemporaryDirectory() as tmpdir:
-            segments = split_audio_into_windows(
-                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=max_segments,
-                segments_start_s=segments_start_s
-            )
+        segments = audio_segment_generator(
+            sample_1min_wav,
+            segment_duration_s=v1_config["inference"]["window_s"],
+            segment_hop_s=v1_config["inference"]["window_hop_s"],
+            max_segments=max_segments,
+            start_time_s=segments_start_s or 0.0,
+        )
 
-            mismatches = []
+        mismatches = []
 
-            for window_idx, segment_path in segments:
-                # Process with model_v1 - full pipeline
-                model_v1_spec = prepare_audio(segment_path, v1_config)
+        for window_idx, segment_path in enumerate(segments):
+            # Process with model_v1 - full pipeline
+            model_v1_spec = prepare_audio(segment_path, v1_config)
 
-                # Get reference
-                ref_key = f"segment_{window_idx}"
-                if ref_key not in references:
-                    continue
+            # Get reference
+            ref_key = f"segment_{window_idx}"
+            if ref_key not in references:
+                continue
 
-                fastai_spec = references[ref_key]["stage_c"]
+            fastai_spec = references[ref_key]["stage_c"]
 
-                # Compare using SpecDiff
-                diff = diff_specs(model_v1_spec, fastai_spec)
-                
-                # Save debug output for this segment (only if --save-debug flag is set)
-                if stage_c_debug_dir is not None:
-                    seg_dir = stage_c_debug_dir / ref_key
-                    diff.save_debug(seg_dir, ref_key)
-
-                # Check tolerance and collect failures
-                try:
-                    diff.assert_close(name=ref_key)
-                except AssertionError as e:
-                    mismatches.append(str(e))
-
+            # Compare using SpecDiff
+            diff = diff_specs(model_v1_spec, fastai_spec)
+            
+            # Save debug output for this segment (only if --save-debug flag is set)
             if stage_c_debug_dir is not None:
-                print(f"\nDebug output saved to: {stage_c_debug_dir}")
+                seg_dir = stage_c_debug_dir / ref_key
+                diff.save_debug(seg_dir, ref_key)
 
-            assert len(mismatches) == 0, "Stage C parity failures:\n" + "\n".join(mismatches)
+            # Check tolerance and collect failures
+            try:
+                diff.assert_close(name=ref_key)
+            except AssertionError as e:
+                mismatches.append(str(e))
+
+        if stage_c_debug_dir is not None:
+            print(f"\nDebug output saved to: {stage_c_debug_dir}")
+
+        assert len(mismatches) == 0, "Stage C parity failures:\n" + "\n".join(mismatches)
 
     @pytest.mark.requires_fastai
     def test_audio_parity_direct(
@@ -366,25 +306,27 @@ class TestAudioPreprocessingParity:
             prepare_audio as fastai_prepare_audio,
         )
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            segments = split_audio_into_windows(
-                sample_1min_wav, v1_config["inference"], tmpdir, max_segments=max_segments,
-                segments_start_s=segments_start_s
-            )
+        segments = audio_segment_generator(
+            sample_1min_wav,
+            segment_duration_s=v1_config["inference"]["window_s"],
+            segment_hop_s=v1_config["inference"]["window_hop_s"],
+            max_segments=max_segments,
+            start_time_s=segments_start_s or 0.0,
+        )
 
-            mismatches = []
-            for window_idx, segment_path in segments:
-                # model_v1 processing
-                model_v1_spec = prepare_audio(segment_path, v1_config)
+        mismatches = []
+        for window_idx, segment_path in enumerate(segments):
+            # model_v1 processing
+            model_v1_spec = prepare_audio(segment_path, v1_config)
 
-                # fastai_audio processing
-                fastai_spec = fastai_prepare_audio(segment_path, v1_config)
+            # fastai_audio processing
+            fastai_spec = fastai_prepare_audio(segment_path, v1_config)
 
-                # Compare using SpecDiff
-                diff = diff_specs(model_v1_spec, fastai_spec)
-                try:
-                    diff.assert_close(name=f"segment_{window_idx}")
-                except AssertionError as e:
-                    mismatches.append(str(e))
+            # Compare using SpecDiff
+            diff = diff_specs(model_v1_spec, fastai_spec)
+            try:
+                diff.assert_close(name=f"segment_{window_idx}")
+            except AssertionError as e:
+                mismatches.append(str(e))
 
-            assert len(mismatches) == 0, "Direct parity failures:\n" + "\n".join(mismatches)
+        assert len(mismatches) == 0, "Direct parity failures:\n" + "\n".join(mismatches)

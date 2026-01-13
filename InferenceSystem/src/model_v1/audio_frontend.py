@@ -9,6 +9,7 @@ Interfaces:
 - featurize_waveform(waveform, sample_rate, spectrogram_config) -> (features, times, freqs)
 - standardize(spectrogram, model_config, spectrogram_config) -> spectrogram
 - prepare_audio(file_path, config) -> spectrogram
+- audio_segment_generator(audio_file_path, segment_duration_s, segment_hop_s, ...) -> Generator
 
 CRITICAL: The original fastai_audio uses sample_rate=16000 (torchaudio default)
 for MelSpectrogram even though audio is resampled to 20kHz. This is replicated
@@ -16,12 +17,16 @@ here for exact parity with the trained model.
 """
 
 import math
+import tempfile
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Generator, Optional, Tuple
 
 import numpy as np
 import soundfile as sf
 import torch
+from librosa import get_duration
+from pydub import AudioSegment
 from scipy.signal import resample_poly
 from torchaudio.transforms import AmplitudeToDB, MelSpectrogram
 
@@ -281,3 +286,84 @@ def prepare_audio(file_path: str, config: Dict) -> torch.Tensor:
     features = standardize(features, model_config_with_sr, spectrogram_config)
 
     return features
+
+
+@contextmanager
+def _temp_segment_dir(output_dir: Optional[str] = None):
+    """Context manager for temporary segment directory."""
+    if output_dir is not None:
+        # Use provided directory
+        yield output_dir
+    else:
+        # Create and cleanup temporary directory
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield tmpdir
+
+
+def audio_segment_generator(
+    audio_file_path: str,
+    segment_duration_s: float,
+    segment_hop_s: float,
+    output_dir: Optional[str] = None,
+    max_segments: Optional[int] = None,
+    start_time_s: float = 0.0,
+) -> Generator[str, None, None]:
+    """
+    Generate overlapping audio segments from an audio file.
+
+    Yields generator of segments as they are created to handle large audio files. 
+    Automatically creates and cleans up a temporary directory unless output_dir is explicitly provided.
+
+    Args:
+        audio_file_path: Path to input audio file
+        segment_duration_s: Duration of each segment in seconds (e.g., 2.0)
+        segment_hop_s: Hop/stride between segment starts in seconds (e.g., 1.0)
+        output_dir: Optional directory to save segments. If None, creates temporary
+                    directory that is cleaned up after generation completes.
+        max_segments: Optional limit on number of segments (useful for testing)
+        start_time_s: Start time offset in seconds (default: 0.0)
+
+    Yields:
+        Path to each generated audio segment file
+
+    Example:
+        >>> # Temporary directory (auto-cleanup)
+        >>> for segment_path in audio_segment_generator("audio.wav", 2.0, 1.0):
+        ...     mel_spec = prepare_audio(segment_path, config)
+        ...     # Process immediately, files cleaned up after loop
+        
+        >>> # Persistent directory
+        >>> for segment_path in audio_segment_generator(
+        ...     "audio.wav", 2.0, 1.0, output_dir="/data/segments"
+        ... ):
+        ...     # Segment files remain after loop completes
+        ...     pass
+    """
+    with _temp_segment_dir(output_dir) as segment_dir:
+        # Get audio duration
+        audio_duration = get_duration(path=audio_file_path)
+        wav_name = Path(audio_file_path).stem
+
+        # Load audio
+        audio = AudioSegment.from_wav(audio_file_path)
+
+        # Calculate number of segments
+        num_segments = int(np.floor((audio_duration - start_time_s) / segment_hop_s))
+        if max_segments is not None:
+            num_segments = min(max_segments, num_segments)
+
+        # Generate segments
+        for i in range(num_segments):
+            start_s = int(i * segment_hop_s + start_time_s)
+            end_s = start_s + int(segment_duration_s)
+
+            # Stop if segment extends beyond audio
+            if end_s > audio_duration:
+                break
+
+            # Export segment
+            segment_path = f"{segment_dir}/{wav_name}_{start_s}_{end_s}.wav"
+            segment = audio[start_s * 1000 : end_s * 1000]
+            segment.export(segment_path, format="wav")
+
+            yield segment_path
