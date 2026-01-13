@@ -81,21 +81,21 @@ def sample_1min_wav(test_data_dir):
     assert len(wav_files) > 0, "No WAV files found in test_data directory"
     return str(wav_files[0])
 
+@pytest.fixture
+def max_segments():
+    """Return maximum number of segments to test from the 1-minute WAV file"""
+    return 3
+
+@pytest.fixture
+def segments_start_s():
+    """Return start time in seconds for segments"""
+    return 32
 
 @pytest.fixture
 def all_test_wavs(test_data_dir):
     """Return paths to all test WAV files"""
     wav_files = list(test_data_dir.glob("*.wav"))
     return [str(f) for f in wav_files]
-
-
-@pytest.fixture
-def numerical_tolerance():
-    """Return numerical tolerance settings for comparisons"""
-    return {
-        "atol": 1e-5,  # Absolute tolerance
-        "rtol": 1e-5,  # Relative tolerance
-    }
 
 
 @pytest.fixture
@@ -127,8 +127,34 @@ def v1_config():
         return yaml.safe_load(f)
 
 
+def pytest_addoption(parser):
+    """Add custom command-line options"""
+    parser.addoption(
+        "--save-debug",
+        action="store_true",
+        default=False,
+        help="Save debug output (spectrograms, stats) to tests/tmp/",
+    )
+
+
 def pytest_configure(config):
     """Pytest configuration hook"""
     config.addinivalue_line("markers", "parity: marks tests that compare fastai vs model_v1")
     config.addinivalue_line("markers", "slow: marks tests that take a long time")
     config.addinivalue_line("markers", "requires_fastai: marks tests that need fastai environment")
+
+
+@pytest.fixture
+def debug_dir(request):
+    """
+    Return debug output directory if --save-debug flag is set, otherwise None.
+    
+    Usage:
+        pytest --save-debug  # enables debug output to tests/tmp/
+        pytest               # no debug output
+    """
+    if request.config.getoption("--save-debug"):
+        debug_dir = Path(__file__).parent / "tmp"
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        return debug_dir
+    return None
