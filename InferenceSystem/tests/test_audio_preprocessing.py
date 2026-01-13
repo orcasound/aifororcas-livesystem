@@ -37,13 +37,113 @@ def plot_spectrogram(spec_tensor, output_path, title=None, sr=20000, hop_length=
     plt.close(fig)
 
 
+def plot_stage_c_comparison(model_v1_spec, fastai_spec, output_path, segment_name):
+    """
+    Create side-by-side spectrogram comparison with difference heatmap.
+    
+    Args:
+        model_v1_spec: model_v1 spectrogram tensor (1, n_mels, n_frames)
+        fastai_spec: fastai reference spectrogram tensor (1, n_mels, n_frames)
+        output_path: Path to save the comparison image
+        segment_name: Name for the title
+    """
+    model_v1 = model_v1_spec[0].numpy() if model_v1_spec.ndim == 3 else model_v1_spec.numpy()
+    fastai = fastai_spec[0].numpy() if fastai_spec.ndim == 3 else fastai_spec.numpy()
+    diff = model_v1 - fastai
+    
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    
+    # Common colormap limits for spectrograms
+    vmin = min(model_v1.min(), fastai.min())
+    vmax = max(model_v1.max(), fastai.max())
+    
+    # model_v1 spectrogram
+    im0 = axes[0].imshow(model_v1, aspect="auto", origin="lower", cmap="viridis", vmin=vmin, vmax=vmax)
+    axes[0].set_title(f"model_v1 - {segment_name}")
+    axes[0].set_xlabel("Frame")
+    axes[0].set_ylabel("Mel bin")
+    fig.colorbar(im0, ax=axes[0], format="%.0f", label="dB")
+    
+    # fastai spectrogram
+    im1 = axes[1].imshow(fastai, aspect="auto", origin="lower", cmap="viridis", vmin=vmin, vmax=vmax)
+    axes[1].set_title(f"fastai - {segment_name}")
+    axes[1].set_xlabel("Frame")
+    axes[1].set_ylabel("Mel bin")
+    fig.colorbar(im1, ax=axes[1], format="%.0f", label="dB")
+    
+    # Difference heatmap
+    diff_abs_max = max(abs(diff.min()), abs(diff.max()), 0.001)  # Avoid zero range
+    im2 = axes[2].imshow(diff, aspect="auto", origin="lower", cmap="RdBu_r", 
+                         vmin=-diff_abs_max, vmax=diff_abs_max)
+    axes[2].set_title(f"Difference (model_v1 - fastai)\nmax={diff.max():.4f}, min={diff.min():.4f}")
+    axes[2].set_xlabel("Frame")
+    axes[2].set_ylabel("Mel bin")
+    fig.colorbar(im2, ax=axes[2], format="%.3f", label="dB diff")
+    
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
+def save_debug_summary(debug_dir, all_stats):
+    """
+    Save detailed markdown report with statistics.
+    
+    Args:
+        debug_dir: Path to debug output directory
+        all_stats: List of dicts with per-segment statistics
+    """
+    report_path = debug_dir / "summary_report.md"
+    
+    with open(report_path, "w") as f:
+        f.write("# Stage C Debug Report\n\n")
+        f.write(f"Generated: {Path(debug_dir).name}\n\n")
+        
+        # Overall summary
+        f.write("## Overall Summary\n\n")
+        if all_stats:
+            max_diffs = [s["max_diff"] for s in all_stats]
+            mean_diffs = [s["mean_diff"] for s in all_stats]
+            f.write(f"- **Total segments**: {len(all_stats)}\n")
+            f.write(f"- **Max diff across all segments**: {max(max_diffs):.6f} dB\n")
+            f.write(f"- **Mean diff across all segments**: {np.mean(mean_diffs):.6f} dB\n\n")
+        
+        # Per-segment breakdown
+        f.write("## Per-Segment Breakdown\n\n")
+        for stats in all_stats:
+            f.write(f"### Segment {stats['segment_idx']}\n\n")
+            f.write(f"- Shape: {stats['shape']}\n")
+            f.write(f"- Max diff: {stats['max_diff']:.6f} dB\n")
+            f.write(f"- Mean diff: {stats['mean_diff']:.6f} dB\n")
+            f.write(f"- Median diff: {stats['median_diff']:.6f} dB\n")
+            f.write(f"- Overlap region (frames 0-156) max: {stats['overlap_max']:.6f} dB\n")
+            f.write(f"- Padded region (frames 157+) max: {stats['padded_max']:.6f} dB\n\n")
+            
+            # Mel bin analysis - find bins with largest differences
+            per_mel = stats.get("per_mel_bin_max", [])
+            if per_mel:
+                top_bins = sorted(enumerate(per_mel), key=lambda x: x[1], reverse=True)[:5]
+                f.write("**Top 5 mel bins with largest differences:**\n\n")
+                for bin_idx, max_val in top_bins:
+                    f.write(f"- Mel bin {bin_idx}: max diff = {max_val:.6f} dB\n")
+                f.write("\n")
+        
+        # Analysis notes
+        f.write("## Analysis Notes\n\n")
+        f.write("If differences are concentrated in:\n")
+        f.write("- **Mel bin 0**: This is the lowest frequency bin, often contains DC/noise\n")
+        f.write("- **Padded region**: fastai pads with 0.0 dB (full power), which is incorrect\n")
+        f.write("- **Both overlap and padded**: Indicates a more fundamental difference\n")
+
+
 # =============================================================================
 # Window Splitting Helpers (will be moved to inference class later)
 # =============================================================================
 
 
 def split_audio_into_windows(
-    audio_file_path: str, inference_config: Dict, output_dir: str, max_segments: int = None
+    audio_file_path: str, inference_config: Dict, output_dir: str, 
+    max_segments: int = None, segments_start_s: int = None
 ) -> List[Tuple[int, str]]:
     """
     Split audio file into overlapping windows for inference.
@@ -81,12 +181,13 @@ def split_audio_into_windows(
 
     # Create windows
     segments = []
+    segments_start_s = segments_start_s or 0
     for i in range(num_windows):
-        start_s = int(i * window_hop_s)
+        start_s = int(i * window_hop_s) + segments_start_s
         end_s = start_s + int(window_s)
 
         # Stop if window extends beyond audio
-        if end_s > max_length:
+        if end_s > max_length + segments_start_s:
             break
 
         # Export segment
@@ -318,7 +419,7 @@ class TestAudioPreprocessingParity:
 
             assert len(mismatches) == 0, f"Stage B parity failures:\n" + "\n".join(mismatches)
 
-    @pytest.mark.xfail(reason="Known issue: fastai_audio pads dB spectrograms with 0.0 dB")
+    @pytest.mark.xfail(reason="Known issue: investigating mel bin 0 differences")
     def test_stage_c_parity(self, sample_1min_wav, reference_dir, numerical_tolerance, v1_config):
         """
         STAGE C PARITY: Compare full pipeline including standardization.
@@ -327,8 +428,11 @@ class TestAudioPreprocessingParity:
         - fastai pads dB-scale spectrograms with 0.0 dB (represents full power, not silence)
         - model_v1 may crop instead of pad depending on frame count
 
-        This test is marked xfail to document the known discrepancy.
+        This test generates debug output to tests/tmp/stage_c_debug/
+        for detailed analysis of differences.
         """
+        import json
+
         from model_v1.audio_frontend import prepare_audio
 
         wav_name = Path(sample_1min_wav).stem
@@ -339,6 +443,10 @@ class TestAudioPreprocessingParity:
                 f"Reference file not found: {reference_file}. "
                 "Run test_generate_reference_outputs first."
             )
+
+        # Set up debug output directory
+        debug_dir = Path(__file__).parent / "tmp" / "stage_c_debug"
+        debug_dir.mkdir(parents=True, exist_ok=True)
 
         # Load references
         references = torch.load(reference_file, weights_only=False)
@@ -358,6 +466,8 @@ class TestAudioPreprocessingParity:
             )
 
             mismatches = []
+            all_stats = []
+
             for window_idx, segment_path in segments:
                 # Process with model_v1 - full pipeline
                 model_v1_spec = prepare_audio(segment_path, v1_config)
@@ -368,6 +478,40 @@ class TestAudioPreprocessingParity:
                     continue
 
                 fastai_spec = get_ref(references[ref_key])
+
+                # Compute detailed statistics
+                diff = (model_v1_spec - fastai_spec).abs()
+                n_frames = model_v1_spec.shape[2]
+                overlap_frames = min(157, n_frames)  # Stage B typically has 157 frames for 2s audio
+                
+                stats = {
+                    "segment_idx": window_idx,
+                    "shape": list(model_v1_spec.shape),
+                    "max_diff": diff.max().item(),
+                    "mean_diff": diff.mean().item(),
+                    "median_diff": diff.median().item(),
+                    "overlap_max": diff[:, :, :overlap_frames].max().item(),
+                    "padded_max": diff[:, :, overlap_frames:].max().item() if n_frames > overlap_frames else 0.0,
+                    "per_mel_bin_max": [diff[0, i, :].max().item() for i in range(256)],
+                }
+                all_stats.append(stats)
+
+                # Create segment debug directory
+                seg_dir = debug_dir / f"segment_{window_idx}"
+                seg_dir.mkdir(exist_ok=True)
+
+                # Save comparison image
+                plot_stage_c_comparison(
+                    model_v1_spec, fastai_spec, seg_dir / "comparison.png", f"segment_{window_idx}"
+                )
+
+                # Save tensors for offline analysis
+                torch.save(model_v1_spec, seg_dir / "model_v1.pt")
+                torch.save(diff, seg_dir / "diff.pt")
+
+                # Save stats as JSON
+                with open(seg_dir / "stats.json", "w") as f:
+                    json.dump(stats, f, indent=2)
 
                 # Compare shapes
                 if model_v1_spec.shape != fastai_spec.shape:
@@ -388,6 +532,10 @@ class TestAudioPreprocessingParity:
                     mismatches.append(
                         f"Segment {window_idx}: value mismatch - max_diff={max_diff:.6e}"
                     )
+
+            # Generate summary report
+            save_debug_summary(debug_dir, all_stats)
+            print(f"\nDebug output saved to: {debug_dir}")
 
             assert len(mismatches) == 0, f"Stage C parity failures:\n" + "\n".join(mismatches)
 
