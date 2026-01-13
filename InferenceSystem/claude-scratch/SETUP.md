@@ -5,23 +5,33 @@ This directory contains modified configuration files that work around compatibil
 ## Quick Start with uv (Recommended)
 
 ```bash
-# 1. Extract model (if not done)
+# Navigate to InferenceSystem directory
 cd InferenceSystem
+
+# 1. Extract model (if not done)
 unzip -o model/model.zip -d model/
 mv model/model/model.pkl model/
 rmdir model/model
 
-# 2. Create environment
+# 2. Remove old environment (if exists)
+rm -rf inference-venv
+
+# 3. Create fresh environment with Python 3.11
 uv venv inference-venv --python 3.11
 source inference-venv/bin/activate
 
-# 3. Install fastai without dependencies (avoids pynvx ARM64 issue)
+# 4. Install fastai 1.0.61 without dependencies (avoids pynvx ARM64 issue)
 uv pip install --no-deps fastai==1.0.61
 
-# 4. Install remaining dependencies
+# 5. Install remaining dependencies
+# Note: This will install fastai-audio which pulls in fastai 2.x,
+# but we'll reinstall fastai 1.0.61 in the next step
 uv pip install -r claude-scratch/requirements.txt
 
-# 5. Apply fastai_audio patch for Python 3.11
+# 6. Reinstall fastai 1.0.61 (needed after fastai-audio overwrites it)
+uv pip install --no-deps fastai==1.0.61
+
+# 7. Apply fastai_audio patch for Python 3.11
 python3 << 'EOF'
 import sys
 import os
@@ -47,7 +57,7 @@ with open(audio_data_file, 'w') as f:
 print(f"Patched: {audio_data_file}")
 EOF
 
-# 6. Test
+# 8. Test the environment
 python claude-scratch/test_local_wav.py
 ```
 
@@ -73,8 +83,10 @@ docker run --rm \
 
 ### requirements.txt
 - **Removed**: Explicit `pynvx` dependency (causes ARM64 issues)
+- **Removed**: `fastai==1.0.61` from requirements.txt (must be installed separately with `--no-deps`)
+- **Added**: FastAI dependencies manually (beautifulsoup4, bottleneck, fastprogress, nvidia-ml-py3, packaging, Pillow, pyyaml, scipy)
 - **Added**: `soundfile` for audio I/O
-- **Clarified**: Install fastai 1.0.61 without deps, then install other packages
+- **Workflow**: Install fastai 1.0.61 with `--no-deps` → Install requirements.txt → Reinstall fastai 1.0.61 (because fastai-audio overwrites it)
 
 ### Dockerfile
 - **Updated**: Python 3.11 compatibility patch applied inline
@@ -91,7 +103,15 @@ docker run --rm \
 
 ## Validation
 
-Both setups were tested on macOS ARM64 with Python 3.11.5 and produced:
+Environment setup verified on macOS ARM64 with Python 3.11.5:
 
-- **CI Test**: `global_prediction: 1`, confidence 66.28%
-- **Local WAV Test**: `global_prediction: 1`, confidence 63.91%
+- **Environment**: Successfully created with uv
+- **FastAI version**: 1.0.61 (verified after installation)
+- **Python 3.11 patch**: Applied successfully to fastai_audio
+- **Test result**: `test_local_wav.py` runs successfully
+  - Processed 59 segments from test WAV file
+  - Detected 2 positive segments (below threshold of 3)
+  - `global_prediction: 0`, `global_confidence: 58.750`
+  - All dependencies working correctly
+
+The environment is ready for inference tasks.

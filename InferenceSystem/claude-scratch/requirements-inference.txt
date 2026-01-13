@@ -1,0 +1,63 @@
+# Modified requirements.txt for Python 3.11 compatibility
+# Addresses macOS ARM64 pynvx issue and fastai version conflicts
+
+# Core ML dependencies
+--extra-index-url https://download.pytorch.org/whl/torch_stable.html
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+
+# FastAI - install v1 separately with --no-deps to avoid pynvx conflict
+# pynvx has no ARM64 wheels and is not needed for inference
+# Note: fastai 1.0.61 must be installed with: uv pip install --no-deps fastai==1.0.61
+# Then install the rest of this requirements file
+
+# FastAI dependencies (manually specified, excluding pynvx)
+beautifulsoup4
+bottleneck
+fastprogress>=0.1.18
+nvidia-ml-py3
+packaging
+Pillow
+pyyaml
+scipy
+
+# Audio processing
+librosa>=0.10.0
+pydub==0.24.1
+soundfile
+git+https://github.com/fastaudio/fastai_audio@0.1
+
+# Data processing
+pandas>=1.1.0,<2.0
+numpy>=1.21.0,<2.0
+numba>=0.57.0
+
+# Visualization
+matplotlib
+opencv-python
+
+# NLP (for fastai dependencies)
+spacy>=3.5.4
+
+# Cloud/Storage
+awscli
+boto3
+azure-cosmos
+azure-cosmosdb-table
+azure-storage-blob
+orca-hls-utils>=0.0.4
+
+# Media processing
+ffmpeg-python
+m3u8
+
+# Monitoring
+opencensus-ext-azure
+
+# Utilities
+requests
+bs4
+tqdm
+ipython
+pytz
