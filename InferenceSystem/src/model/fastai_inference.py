@@ -1,3 +1,5 @@
+import gc
+import logging
 import os
 import shutil
 import tempfile
@@ -10,6 +12,9 @@ from pathlib import Path
 from numpy import floor
 from audio.data import AudioConfig, SpectrogramConfig, AudioList
 import torchaudio
+
+# Configure logger for this module
+logger = logging.getLogger(__name__)
 
 
 # Monkey-patch torchaudio.load to avoid torchcodec dependency
@@ -104,10 +109,18 @@ def extract_segments(audioPath, sampleDict, destnPath, suffix):
 
 
 class FastAIModel():
-    def __init__(self, model_path, model_name="stg2-rn18.pkl", threshold=0.5, min_num_positive_calls_threshold=3):
+    def __init__(self, model_path, model_name="stg2-rn18.pkl", threshold=0.5, min_num_positive_calls_threshold=3, batch_size=32, use_gpu=False):
         self.model = load_model(model_path, model_name)
         self.threshold = threshold
         self.min_num_positive_calls_threshold = min_num_positive_calls_threshold
+        self.batch_size = batch_size
+        self.use_gpu = use_gpu
+        
+        # Move model to appropriate device once during initialization
+        if self.use_gpu and torch.cuda.is_available():
+            self.model.model.cuda()
+        else:
+            self.model.model.cpu()
 
     def predict(self, wav_file_path):
         '''
@@ -123,111 +136,126 @@ class FastAIModel():
         else:
             os.makedirs(local_dir)
 
-        # Infer clip length
-        max_length = get_duration(path=wav_file_path)
-        print(os.path.basename(wav_file_path))
-        print("Length of Audio Clip:{0}".format(max_length))
-        #max_length = 60
-        # Generating 2 sec proposal with 1 sec hop length
-        twoSecList = []
-        for i in range(int(floor(max_length)-1)):
-            twoSecList.append([i, i+2])
+        try:
+            # Infer clip length
+            max_length = get_duration(path=wav_file_path)
+            print(os.path.basename(wav_file_path))
+            print("Length of Audio Clip:{0}".format(max_length))
+            #max_length = 60
+            # Generating 2 sec proposal with 1 sec hop length
+            twoSecList = []
+            for i in range(int(floor(max_length)-1)):
+                twoSecList.append([i, i+2])
 
-        # Creating a proposal dictionary
-        two_sec_dict = {}
-        two_sec_dict[Path(wav_file_path).name] = twoSecList
+            # Creating a proposal dictionary
+            two_sec_dict = {}
+            two_sec_dict[Path(wav_file_path).name] = twoSecList
 
-        # Creating 2 sec segments from the defined wavefile using proposals built above.
-        # "use_a_real_wavname.wav" will generate -> "use_a_real_wavname_1_3.wav", "use_a_real_wavname_2_4.wav" etc. files in fastai_dir folder
-        extract_segments(
-            str(Path(wav_file_path).parent),
-            two_sec_dict,
-            local_dir,
-            ""
-        )
+            # Creating 2 sec segments from the defined wavefile using proposals built above.
+            # "use_a_real_wavname.wav" will generate -> "use_a_real_wavname_1_3.wav", "use_a_real_wavname_2_4.wav" etc. files in fastai_dir folder
+            extract_segments(
+                str(Path(wav_file_path).parent),
+                two_sec_dict,
+                local_dir,
+                ""
+            )
         
-        # Definining Audio config needed to create on the fly mel spectograms
-        config = AudioConfig(standardize=False,
-                             sg_cfg=SpectrogramConfig(
-                                 f_min=0.0,  # Minimum frequency to Display
-                                 f_max=10000,  # Maximum Frequency to Display
-                                 hop_length=256,
-                                 n_fft=2560,  # Number of Samples for Fourier
-                                 n_mels=256,  # Mel bins
-                                 pad=0,
-                                 to_db_scale=True,  # Converting to DB scale
-                                 top_db=100,  # Top decibel sound
-                                 win_length=None,
-                                 n_mfcc=20)
-                             )
-        config.duration = 4000  # 4 sec padding or snip
-        config.resample_to = 20000  # Every sample at 20000 frequency
-        config.downmix=True
+            # Defining Audio config needed to create on the fly mel spectograms
+            config = AudioConfig(standardize=False,
+                                 sg_cfg=SpectrogramConfig(
+                                     f_min=0.0,  # Minimum frequency to Display
+                                     f_max=10000,  # Maximum Frequency to Display
+                                     hop_length=256,
+                                     n_fft=2560,  # Number of Samples for Fourier
+                                     n_mels=256,  # Mel bins
+                                     pad=0,
+                                     to_db_scale=True,  # Converting to DB scale
+                                     top_db=100,  # Top decibel sound
+                                     win_length=None,
+                                     n_mfcc=20)
+                                 )
+            config.duration = 4000  # 4 sec padding or snip
+            config.resample_to = 20000  # Every sample at 20000 frequency
+            config.downmix=True
 
-        # Creating an Audio DataLoader
-        test_data_folder = Path(local_dir)
-        tfms = None
-        test = AudioList.from_folder(
-            test_data_folder, config=config).split_none().label_empty()
-        testdb = test.transform(tfms).databunch(bs=32)
+            # Creating an Audio DataLoader
+            test_data_folder = Path(local_dir)
+            tfms = None
+            test = AudioList.from_folder(
+                test_data_folder, config=config).split_none().label_empty()
+            testdb = test.transform(tfms).databunch(bs=32)
 
-        # Scoring each 2 sec clip
-        predictions = []
-        pathList = list(pd.Series(test_data_folder.ls()).astype('str'))
-        for item in testdb.x:
-            predictions.append(self.model.predict(item)[2][1])
+            # Scoring each audio segment
+            pathList = list(pd.Series(test_data_folder.ls()).astype('str'))
+            
+            # Per-item prediction using fastai's predict() which handles
+            # model.eval() and torch.no_grad() internally
+            # Note: FastAI's predict() also handles device placement for inputs internally
+            predictions = []
+            for item in testdb.x:
+                predictions.append(self.model.predict(item)[2][1])
 
-        # Clean folder
-        shutil.rmtree(local_dir)
+            # Explicitly clean up large fastai objects to encourage immediate memory release
+            del test
+            del testdb
+            gc.collect()
+            if self.use_gpu and torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
-        # Aggregating predictions
+            # Aggregating predictions
 
-        # Creating a DataFrame
-        prediction = pd.DataFrame({'FilePath': pathList, 'confidence': predictions})
+            # Creating a DataFrame
+            prediction = pd.DataFrame({'FilePath': pathList, 'confidence': predictions})
 
-        # Converting prediction to float
-        prediction['confidence'] = prediction.confidence.astype(float)
+            # Converting prediction to float
+            prediction['confidence'] = prediction.confidence.astype(float)
 
-        # Extracting Starting time from file name
-        prediction['start_time_s'] = prediction.FilePath.apply(lambda x: int(x.split('_')[-2]))
+            # Extracting Starting time from file name
+            prediction['start_time_s'] = prediction.FilePath.apply(lambda x: int(x.split('_')[-2]))
 
-        # Sorting the file based on start_time_s
-        prediction = prediction.sort_values(
-            ['start_time_s']).reset_index(drop=True)
+            # Sorting the file based on start_time_s
+            prediction = prediction.sort_values(
+                ['start_time_s']).reset_index(drop=True)
 
-        # Rolling Window (to average at per second level)
-        submission = pd.DataFrame(
-                {
-                    'wav_filename': Path(wav_file_path).name,
-                    'duration_s': 1.0,
-                    'confidence': list(prediction.rolling(2)['confidence'].mean().values)
-                }
-            ).reset_index().rename(columns={'index': 'start_time_s'})
+            # Rolling Window (to average at per second level)
+            submission = pd.DataFrame(
+                    {
+                        'wav_filename': Path(wav_file_path).name,
+                        'duration_s': 1.0,
+                        'confidence': list(prediction.rolling(2)['confidence'].mean().values)
+                    }
+                ).reset_index().rename(columns={'index': 'start_time_s'})
 
-        # Updating first row
-        submission.loc[0, 'confidence'] = prediction.confidence[0]
+            # Updating first row
+            submission.loc[0, 'confidence'] = prediction.confidence[0]
 
-        # Adding last row
-        lastLine = pd.DataFrame({
-            'wav_filename': Path(wav_file_path).name,
-            'start_time_s': [submission.start_time_s.max()+1],
-            'duration_s': 1.0,
-            'confidence': [prediction.confidence[prediction.shape[0]-1]]
-            })
-        submission = submission.append(lastLine, ignore_index=True)
-        submission = submission[['wav_filename', 'start_time_s', 'duration_s', 'confidence']]
+            # Adding last row
+            lastLine = pd.DataFrame({
+                'wav_filename': Path(wav_file_path).name,
+                'start_time_s': [submission.start_time_s.max()+1],
+                'duration_s': 1.0,
+                'confidence': [prediction.confidence[prediction.shape[0]-1]]
+                })
+            submission = pd.concat([submission, lastLine], ignore_index=True)
+            submission = submission[['wav_filename', 'start_time_s', 'duration_s', 'confidence']]
 
-        # Initialize output JSON
-        result_json = {}
-        result_json = dict(
-            submission=submission,
-            local_predictions=list((submission['confidence'] > self.threshold).astype(int)),
-            local_confidences=list(submission['confidence'])
-        )
+            # Initialize output JSON
+            result_json = {}
+            result_json = dict(
+                submission=submission,
+                local_predictions=list((submission['confidence'] > self.threshold).astype(int)),
+                local_confidences=list(submission['confidence'])
+            )
 
-        result_json['global_prediction'] = int(sum(result_json["local_predictions"]) >= self.min_num_positive_calls_threshold)
-        result_json['global_confidence'] = submission.loc[(submission['confidence'] > self.threshold), 'confidence'].mean()*100
-        if pd.isnull(result_json["global_confidence"]):
-            result_json["global_confidence"] = 0
+            result_json['global_prediction'] = int(sum(result_json["local_predictions"]) >= self.min_num_positive_calls_threshold)
+            result_json['global_confidence'] = submission.loc[(submission['confidence'] > self.threshold), 'confidence'].mean()*100
+            if pd.isnull(result_json["global_confidence"]):
+                result_json["global_confidence"] = 0
 
-        return result_json
+            return result_json
+        finally:
+            # Clean temp folder - log any cleanup failures instead of silently ignoring
+            try:
+                shutil.rmtree(local_dir)
+            except Exception as e:
+                logger.warning(f"Failed to clean up temp directory {local_dir}: {e}")
