@@ -25,3 +25,5 @@ inference:
 model:
   name: "orcahello-srkw-detect-v1"
   input_pad_s: 4.0            # audio padded/trimmed to this duration
+  num_classes: 2              # binary classification
+  call_class_index: 1         # class index for positive (call detected)
