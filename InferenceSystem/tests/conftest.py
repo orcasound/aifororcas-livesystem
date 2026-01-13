@@ -148,7 +148,7 @@ def pytest_configure(config):
 def debug_dir(request):
     """
     Return debug output directory if --save-debug flag is set, otherwise None.
-    
+
     Usage:
         pytest --save-debug  # enables debug output to tests/tmp/
         pytest               # no debug output
@@ -158,3 +158,9 @@ def debug_dir(request):
         debug_dir.mkdir(parents=True, exist_ok=True)
         return debug_dir
     return None
+
+
+@pytest.fixture
+def numerical_tolerance():
+    """Return numerical tolerance for parity tests"""
+    return {"atol": 1e-5, "rtol": 1e-5}
