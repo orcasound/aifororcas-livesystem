@@ -10,6 +10,73 @@ from torch import Tensor
 from .audio_frontend import audio_segment_generator, prepare_audio
 
 
+def _from_dict(cls, d: Dict):
+    """Helper to create dataclass from dict, ignoring unknown keys."""
+    import dataclasses
+    field_names = {f.name for f in dataclasses.fields(cls)}
+    return cls(**{k: v for k, v in d.items() if k in field_names})
+
+
+@dataclass
+class AudioConfig:
+    downmix_mono: bool = True
+    resample_rate: int = 20000
+
+
+@dataclass
+class SpectrogramConfig:
+    sample_rate: int = 16000
+    n_fft: int = 2560
+    hop_length: int = 256
+    mel_n_filters: int = 256
+    mel_f_min: float = 0.0
+    mel_f_max: float = 10000.0
+    mel_f_pad: int = 0
+    convert_to_db: bool = True
+    top_db: int = 100
+
+
+@dataclass
+class InferenceConfig:
+    window_s: float = 2.0
+    window_hop_s: float = 1.0
+    local_conf_threshold: float = 0.5
+    global_pred_threshold: int = 3
+
+
+@dataclass
+class ModelConfig:
+    name: str = "orcahello-srkw-detect-v1"
+    input_pad_s: float = 4.0
+    num_classes: int = 2
+    call_class_index: int = 1
+
+
+@dataclass
+class DetectorInferenceConfig:
+    """Full config for detector inference, validated from YAML dict."""
+    audio: AudioConfig = None
+    spectrogram: SpectrogramConfig = None
+    inference: InferenceConfig = None
+    model: ModelConfig = None
+
+    def __post_init__(self):
+        self.audio = self.audio or AudioConfig()
+        self.spectrogram = self.spectrogram or SpectrogramConfig()
+        self.inference = self.inference or InferenceConfig()
+        self.model = self.model or ModelConfig()
+
+    @classmethod
+    def from_dict(cls, d: Dict) -> "DetectorInferenceConfig":
+        """Create config from nested YAML dict."""
+        return cls(
+            audio=_from_dict(AudioConfig, d.get("audio", {})),
+            spectrogram=_from_dict(SpectrogramConfig, d.get("spectrogram", {})),
+            inference=_from_dict(InferenceConfig, d.get("inference", {})),
+            model=_from_dict(ModelConfig, d.get("model", {})),
+        )
+
+
 @dataclass
 class SegmentPrediction:
     start_time_s: float
@@ -64,24 +131,13 @@ class OrcaHelloSRKWDetector(nn.Module):
     - Custom head: AdaptiveConcatPool2d -> Linear(4096, 512) -> Linear(512, 2)
     """
 
-    def __init__(self, config: Optional[Dict] = None, num_classes: Optional[int] = None):
+    def __init__(self, config: Dict):
         super().__init__()
 
-        # Load config values (prioritize explicit args over config dict, then defaults)
-        # Extract from config if provided
-        if config is not None:
-            model_config = config.get('model', {})
-            config_num_classes = model_config.get('num_classes', 2)
-            config_call_class_index = model_config.get('call_class_index', 1)
-        else:
-            config_num_classes = 2
-            config_call_class_index = 1
-
-        # Explicit args override config, config overrides defaults
-        self.num_classes = num_classes if num_classes is not None else config_num_classes
-        # FastAI trained model has classes ['negative', 'positive']
-        # So class index 1 is the "positive" (call detected) class
-        self.call_class_index = config_call_class_index
+        # Validate and parse config, store for use in detect_srkw_from_file
+        self.config = DetectorInferenceConfig.from_dict(config)
+        self.num_classes = self.config.model.num_classes
+        self.call_class_index = self.config.model.call_class_index
 
         self.model = resnet50()
         # Modify first conv layer for single-channel input
@@ -152,17 +208,20 @@ class OrcaHelloSRKWDetector(nn.Module):
 
         Args:
             wav_file_path: Path to the WAV file
-            config: Configuration dict with audio, spectrogram, and inference parameters
+            config: Configuration dict - values override self.config defaults
 
         Returns:
             DetectionResult with local predictions, confidences, and global prediction
         """
-        # Extract config params
-        inference_config = config.get('inference', {})
-        local_conf_threshold = inference_config.get('local_conf_threshold', 0.5)
-        global_pred_threshold = inference_config.get('global_pred_threshold', 3)
-        segment_duration_s = inference_config.get('window_s', 2.0)
-        segment_hop_s = inference_config.get('window_hop_s', 1.0)
+        # Parse overrides and merge with stored config defaults
+        overrides = DetectorInferenceConfig.from_dict(config)
+        inf = overrides.inference
+        
+        # Use override values (they fall back to defaults if not in config dict)
+        local_conf_threshold = inf.local_conf_threshold
+        global_pred_threshold = inf.global_pred_threshold
+        segment_duration_s = inf.window_s
+        segment_hop_s = inf.window_hop_s
 
         # Generate segments and process into spectrograms
         spectrograms = []
@@ -178,7 +237,7 @@ class OrcaHelloSRKWDetector(nn.Module):
             parts = filename.split('_')
             start_s = int(parts[-2])
 
-            # Convert segment to spectrogram
+            # Convert segment to spectrogram (pass raw dict for audio_frontend compatibility)
             mel_spec = prepare_audio(segment_path, config)
             spectrograms.append(mel_spec)
             segment_info.append({
@@ -239,19 +298,19 @@ class OrcaHelloSRKWDetector(nn.Module):
         )
 
     @classmethod
-    def from_checkpoint(cls, checkpoint_path: str, config: Optional[Dict] = None, device: str = "cpu") -> "OrcaHelloSRKWDetector":
+    def from_checkpoint(cls, checkpoint_path: str, config: Dict, device: str = "cpu") -> "OrcaHelloSRKWDetector":
         """
         Load model from PyTorch checkpoint.
 
         Args:
             checkpoint_path: Path to .pt checkpoint file
-            config: Optional config dict with model parameters
+            config: Config dict (validated via DetectorInferenceConfig)
             device: Device to load model onto ("cpu" or "cuda")
 
         Returns:
             OrcaHelloSRKWDetector with loaded weights in eval mode
         """
-        model = cls(config=config)
+        model = cls(config)
         state_dict = torch.load(checkpoint_path, map_location=device, weights_only=True)
         model.load_state_dict(state_dict)
         model.eval()

@@ -41,7 +41,7 @@ def main():
 
     # Run model_v1 inference
     print("[2/2] Running model_v1 inference...")
-    model_v1 = OrcaHelloSRKWDetector.from_checkpoint(model_v1_path, config=config)
+    model_v1 = OrcaHelloSRKWDetector.from_checkpoint(model_v1_path, config)
     v1_result = model_v1.detect_srkw_from_file(wav_path, config)
 
     print("\n" + "=" * 80)

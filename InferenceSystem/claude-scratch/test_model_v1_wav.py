@@ -30,7 +30,7 @@ def main():
     print("-" * 60)
 
     # Load model
-    model = OrcaHelloSRKWDetector.from_checkpoint(model_path, config=config)
+    model = OrcaHelloSRKWDetector.from_checkpoint(model_path, config)
 
     # Run inference
     result = model.detect_srkw_from_file(wav_path, config)
