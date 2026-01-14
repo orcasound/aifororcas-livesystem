@@ -163,6 +163,7 @@ class FastAIModel():
         config.duration = 4000  # 4 sec padding or snip
         config.resample_to = 20000  # Every sample at 20000 frequency
         config.downmix=True
+        config.pad_mode = "zeros-after"  # Make deterministic: zeros at end only
 
         # Creating an Audio DataLoader
         test_data_folder = Path(local_dir)
