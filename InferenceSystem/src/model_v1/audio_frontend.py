@@ -307,11 +307,12 @@ def audio_segment_generator(
     output_dir: Optional[str] = None,
     max_segments: Optional[int] = None,
     start_time_s: float = 0.0,
+    strict_segments: bool = True,
 ) -> Generator[str, None, None]:
     """
     Generate overlapping audio segments from an audio file.
 
-    Yields generator of segments as they are created to handle large audio files. 
+    Yields generator of segments as they are created to handle large audio files.
     Automatically creates and cleans up a temporary directory unless output_dir is explicitly provided.
 
     Args:
@@ -322,6 +323,9 @@ def audio_segment_generator(
                     directory that is cleaned up after generation completes.
         max_segments: Optional limit on number of segments (useful for testing)
         start_time_s: Start time offset in seconds (default: 0.0)
+        strict_segments: If True (default), only generate segments that fit completely
+                        within audio duration. If False, allow final partial segment
+                        that may extend beyond audio duration (matches fastai behavior).
 
     Yields:
         Path to each generated audio segment file
@@ -331,12 +335,19 @@ def audio_segment_generator(
         >>> for segment_path in audio_segment_generator("audio.wav", 2.0, 1.0):
         ...     mel_spec = prepare_audio(segment_path, config)
         ...     # Process immediately, files cleaned up after loop
-        
+
         >>> # Persistent directory
         >>> for segment_path in audio_segment_generator(
         ...     "audio.wav", 2.0, 1.0, output_dir="/data/segments"
         ... ):
         ...     # Segment files remain after loop completes
+        ...     pass
+
+        >>> # Allow partial segments (fastai compatibility)
+        >>> for segment_path in audio_segment_generator(
+        ...     "audio.wav", 2.0, 1.0, strict_segments=False
+        ... ):
+        ...     # May include a final partial segment < 2.0s
         ...     pass
     """
     with _temp_segment_dir(output_dir) as segment_dir:
@@ -357,11 +368,12 @@ def audio_segment_generator(
             start_s = int(i * segment_hop_s + start_time_s)
             end_s = start_s + int(segment_duration_s)
 
-            # Stop if segment extends beyond audio
-            if end_s > audio_duration:
+            # In strict mode, stop if segment extends beyond audio
+            # In non-strict mode, allow partial segments (pydub handles gracefully)
+            if strict_segments and end_s > audio_duration:
                 break
 
-            # Export segment
+            # Export segment (pydub will return partial segment if end_s > audio duration)
             segment_path = f"{segment_dir}/{wav_name}_{start_s}_{end_s}.wav"
             segment = audio[start_s * 1000 : end_s * 1000]
             segment.export(segment_path, format="wav")

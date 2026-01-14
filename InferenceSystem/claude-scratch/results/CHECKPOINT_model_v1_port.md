@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-13
 **Branch**: `akash/inference-v1-nofastai`
-**Status**: Task 4.5 Complete - Ready for HuggingFace upload
+**Status**: Tasks 0-4.5 Complete - Ready for HuggingFace Upload
 
 ---
 
@@ -16,26 +16,48 @@
 | 2.5 | Audio interface cleanup | COMPLETE |
 | 3 | Weight extraction | COMPLETE |
 | 4 | Full-file inference | COMPLETE |
-| 4.5 | **Investigate/fix differences** | **IN PROGRESS** |
+| 4.5 | Investigate/fix differences | COMPLETE |
 | 5 | HuggingFace upload | NOT STARTED |
 | 6 | CI integration | NOT STARTED |
 
 ---
 
-## Current Focus: Investigating Differences (Task 4.5)
+## Current Focus: Task 4.5 Complete - Segment Count Investigation
 
-After Task 4 completion, some cleanup was done and now investigating/fixing the differences between model_v1 and fastai before proceeding to HuggingFace upload.
+After Task 4 completion, investigated and resolved the segment count difference between model_v1 and fastai.
 
-### Known Differences from FastAI
-1. **Rolling window smoothing**: FastAI applies rolling window smoothing to confidences; model_v1 uses raw per-segment confidences
-2. **Segment count**: FastAI generates 59 segments, model_v1 generates 58 (final segment handling)
-3. **Confidence values**: Mean diff ~6.3% due to smoothing differences
-4. **Segment predictions**: 5 mismatches out of 58 (91.4% agreement)
+### Resolution: `strict_segments` Parameter
 
-### Investigation Goals
-- Determine root cause of segment count difference
-- Decide whether to replicate fastai's rolling window smoothing
-- Ensure global predictions match for production use cases
+Added configurable `strict_segments` boolean parameter to control whether partial final segments are allowed:
+
+- **`strict_segments=True` (default)**: Only generate complete segments (58 segments)
+  - Recommended for production use
+  - All segments have consistent 2.0s duration
+
+- **`strict_segments=False`**: Allow partial final segment (59 segments)
+  - Matches FastAI behavior
+  - Useful for parity testing
+
+**Root Cause**: FastAI allows the final segment to extend beyond audio duration (58s-60s on 59.989s audio), while model_v1 originally enforced strict segment boundaries.
+
+### Comparison Results (After FastAI Bugfix - 2026-01-13)
+
+**Strict Mode (default)** - 58 segments:
+- Global prediction: ✓ MATCH
+- Global confidence: 68.7 vs 69.8 (diff: 1.1%)
+- Segment agreement: **94.8%** (55/58 match, 3 mismatches)
+- Mean confidence diff: 5.3%
+
+**Non-Strict Mode** - 59 segments:
+- Segment count: ✓ MATCH (59 vs 59)
+- Global prediction: ✓ MATCH
+- Global confidence: 68.7 vs 70.6 (diff: 1.8%)
+- Segment agreement: **93.2%** (55/59 match, 4 mismatches)
+- Mean confidence diff: 6.5%
+
+**Key Achievement**: Excellent parity with FastAI - global predictions match, >93% segment agreement
+
+**Detailed Analysis**: See `results/segment_count_investigation.md`
 
 ---
 
@@ -176,9 +198,10 @@ Latest commits:
 
 ## Related Documentation
 
-- **Master Plan**: `plans/model_port_hf.plan.md`
-- **Task 3 Details**: `plans/task3_weight_extraction.plan.md`
+- **Master Plan**: `plans/master-model_port_hf.plan.md`
+- **Task 3 Details**: `plans/task-3-weight_extraction.plan.md`
 - **Task 4 Results**: `results/task4_full_file_inference.md`
+- **Task 4.5 Results**: `results/segment_count_investigation.md`
 - **Comparison Output**: `results/inference_comparison.txt`
 
 ---

@@ -21,6 +21,7 @@ inference:
   window_hop_s: 1.0           # hop between segments
   local_conf_threshold: 0.5
   global_pred_threshold: 3
+  strict_segments: true       # if false, allow partial final segment (fastai compat)
 
 model:
   name: "orcahello-srkw-detector-v1"

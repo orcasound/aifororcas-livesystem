@@ -2,7 +2,7 @@
 
 **Last Updated**: 2026-01-13
 **Branch**: `akash/inference-v1-nofastai`
-**Status**: Tasks 0-4 Complete, Investigating differences (Task 4.5)
+**Status**: Tasks 0-4.5 Complete, Ready for HuggingFace Upload (Task 5)
 
 ## Overview
 
@@ -22,7 +22,7 @@ Port the OrcaHello SRKW detection model from fastai to pure PyTorch, removing th
 | 2.5 | Audio Interface Cleanup | COMPLETE | `audio_interface_cleanup.plan.md` |
 | 3 | Weight Extraction | COMPLETE | `task3_weight_extraction.plan.md` |
 | 4 | Full-File Inference | COMPLETE | - |
-| 4.5 | Investigate/Fix Differences | **IN PROGRESS** | - |
+| 4.5 | Investigate/Fix Differences | **COMPLETE** | `segment_count_investigation.md` |
 | 5 | HuggingFace Upload | NOT STARTED | (create when starting) |
 | 6 | CI Integration | NOT STARTED | (create when starting) |
 
@@ -112,22 +112,36 @@ Port the OrcaHello SRKW detection model from fastai to pure PyTorch, removing th
 
 ---
 
-## Task 4.5: Investigate/Fix Differences (IN PROGRESS)
+## Task 4.5: Investigate/Fix Differences (COMPLETE)
 
 **Goal**: Investigate and resolve differences between model_v1 and fastai full-file inference before HuggingFace upload.
 
-**Known Differences**:
-1. Rolling window smoothing: FastAI applies smoothing; model_v1 uses raw confidences
-2. Segment count: FastAI generates 59 segments, model_v1 generates 58
-3. Confidence values: Mean diff ~6.3% due to smoothing
-4. Segment predictions: 5 mismatches out of 58 (91.4% agreement)
+**Outcome**: Successfully resolved segment count difference by adding `strict_segments` parameter.
 
-**Investigation Goals**:
-- Determine root cause of segment count difference
-- Decide whether to replicate fastai's rolling window smoothing
-- Ensure global predictions match for production use cases
+**Key Changes**:
+- Added `strict_segments` boolean to `InferenceConfig` (default: `True`)
+- Modified `audio_segment_generator()` to support partial final segments
+- `strict_segments=False` matches FastAI's 59 segments
+- `strict_segments=True` (default) generates only complete segments (58)
 
-**Checkpoint**: `results/CHECKPOINT_model_v1_port.md`
+**Parity Results** (After FastAI bugfix - 2026-01-13):
+
+Strict Mode (default, 58 segments):
+- Global prediction: ✓ MATCH
+- Segment agreement: **94.8%** (3 mismatches)
+- Mean confidence diff: 5.3%
+
+Non-Strict Mode (59 segments):
+- Segment count: ✓ MATCH (59 vs 59)
+- Global prediction: ✓ MATCH
+- Segment agreement: **93.2%** (4 mismatches)
+- Mean confidence diff: 6.5%
+
+**Decision**: Keep `strict_segments=True` as default for production (consistent segment durations). Use `strict_segments=False` for FastAI parity testing.
+
+**Key Achievement**: Excellent parity - global predictions match, >93% segment agreement
+
+**Detailed Results**: `results/segment_count_investigation.md`
 
 ---
 

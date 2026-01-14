@@ -42,6 +42,7 @@ class InferenceConfig:
     window_hop_s: float = 1.0
     local_conf_threshold: float = 0.5
     global_pred_threshold: int = 3
+    strict_segments: bool = True  # If False, allow partial final segment (fastai compat)
 
 
 @dataclass
@@ -217,12 +218,13 @@ class OrcaHelloSRKWDetectorV1(nn.Module):
         # Parse overrides and merge with stored config defaults
         overrides = DetectorInferenceConfig.from_dict(config)
         inf = overrides.inference
-        
+
         # Use override values (they fall back to defaults if not in config dict)
         local_conf_threshold = inf.local_conf_threshold
         global_pred_threshold = inf.global_pred_threshold
         segment_duration_s = inf.window_s
         segment_hop_s = inf.window_hop_s
+        strict_segments = inf.strict_segments
 
         # Generate segments and process into spectrograms
         spectrograms = []
@@ -231,7 +233,8 @@ class OrcaHelloSRKWDetectorV1(nn.Module):
         for segment_path in audio_segment_generator(
             wav_file_path,
             segment_duration_s=segment_duration_s,
-            segment_hop_s=segment_hop_s
+            segment_hop_s=segment_hop_s,
+            strict_segments=strict_segments
         ):
             # Extract start time from filename: "basename_start_end.wav"
             filename = Path(segment_path).stem
