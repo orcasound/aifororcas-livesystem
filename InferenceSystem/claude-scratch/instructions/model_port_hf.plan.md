@@ -240,7 +240,7 @@ This affects mel filterbank calculation. Must replicate this for exact parity.
 ## Task 4: Update HuggingFace Model Repo
 
 ### Goal
-Upload converted model to https://huggingface.co/orcasound/orcahello-srkw-detect-v1
+Upload converted model to https://huggingface.co/orcasound/orcahello-srkw-detector-v1
 
 ### Implementation Steps
 
@@ -260,12 +260,12 @@ Upload converted model to https://huggingface.co/orcasound/orcahello-srkw-detect
 3. **Upload to HuggingFace**
    ```bash
    huggingface-cli login
-   huggingface-cli upload orcasound/orcahello-srkw-detect-v1 ./model_files
+   huggingface-cli upload orcasound/orcahello-srkw-detector-v1 ./model_files
    ```
 
 ### HuggingFace Model Structure
 ```
-orcasound/orcahello-srkw-detect-v1/
+orcasound/orcahello-srkw-detector-v1/
 ├── README.md                   # Model card
 ├── pytorch_model.bin           # Model weights
 ├── config.json                 # Model config
@@ -318,7 +318,7 @@ Based on user clarification:
 
 1. **Numerical tolerance**: 1e-5 tolerance for floating point comparisons
 2. **Integration**: model_v1 will be standalone for testing, NOT integrated into LiveInferenceOrchestrator
-3. **HuggingFace version**: Upload to existing empty v1 repo (`orcasound/orcahello-srkw-detect-v1`)
+3. **HuggingFace version**: Upload to existing empty v1 repo (`orcasound/orcahello-srkw-detector-v1`)
 
 ---
 

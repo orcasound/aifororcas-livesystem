@@ -46,7 +46,7 @@ class InferenceConfig:
 
 @dataclass
 class ModelConfig:
-    name: str = "orcahello-srkw-detect-v1"
+    name: str = "orcahello-srkw-detector-v1"
     input_pad_s: float = 4.0
     num_classes: int = 2
     call_class_index: int = 1
