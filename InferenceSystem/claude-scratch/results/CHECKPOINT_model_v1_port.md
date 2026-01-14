@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-13
 **Branch**: `akash/inference-v1-nofastai`
-**Status**: Tasks 0-4.5 Complete - Ready for HuggingFace Upload
+**Status**: Tasks 0-5 Complete - Ready for Upload to HuggingFace Hub
 
 ---
 
@@ -17,14 +17,14 @@
 | 3 | Weight extraction | COMPLETE |
 | 4 | Full-file inference | COMPLETE |
 | 4.5 | Investigate/fix differences | COMPLETE |
-| 5 | HuggingFace upload | NOT STARTED |
+| 5 | HuggingFace Hub integration | COMPLETE |
 | 6 | CI integration | NOT STARTED |
 
 ---
 
-## Current Focus: Task 4.5 Complete - Segment Count Investigation
+## Current Focus: Task 5 Complete - HuggingFace Hub Integration
 
-After Task 4 completion, investigated and resolved the segment count difference between model_v1 and fastai.
+Successfully integrated PyTorchModelHubMixin into OrcaHelloSRKWDetectorV1. Model can now be uploaded to and loaded from HuggingFace Hub.
 
 ### Resolution: `strict_segments` Parameter
 
@@ -180,6 +180,13 @@ python -m pytest tests/test_model_inference.py::TestPredictCallParity::test_gene
 - Global predictions match fastai on test data
 - Created comparison scripts for validation
 
+### Task 5: HuggingFace Hub Integration
+- Integrated `PyTorchModelHubMixin` into `OrcaHelloSRKWDetectorV1`
+- Created `scripts/upload_to_hub.py` for uploading to HF Hub
+- Added 7 tests in `tests/test_huggingface_integration.py` (6 passing)
+- Backward compatibility maintained with `from_checkpoint()`
+- Ready for upload to `orcasound/orcahello-srkw-detector-v1`
+
 ---
 
 ## Git Status
@@ -202,6 +209,8 @@ Latest commits:
 - **Task 3 Details**: `plans/task-3-weight_extraction.plan.md`
 - **Task 4 Results**: `results/task4_full_file_inference.md`
 - **Task 4.5 Results**: `results/segment_count_investigation.md`
+- **Task 5 Plan**: `plans/task-5-huggingface_upload.plan.md`
+- **Task 5 Results**: `results/task5_huggingface_integration.md`
 - **Comparison Output**: `results/inference_comparison.txt`
 
 ---

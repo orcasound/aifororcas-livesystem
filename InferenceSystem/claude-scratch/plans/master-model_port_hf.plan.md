@@ -2,7 +2,7 @@
 
 **Last Updated**: 2026-01-13
 **Branch**: `akash/inference-v1-nofastai`
-**Status**: Tasks 0-4.5 Complete, Ready for HuggingFace Upload (Task 5)
+**Status**: Tasks 0-5 Complete, Ready for Upload to HuggingFace Hub
 
 ## Overview
 
@@ -22,8 +22,8 @@ Port the OrcaHello SRKW detection model from fastai to pure PyTorch, removing th
 | 2.5 | Audio Interface Cleanup | COMPLETE | `audio_interface_cleanup.plan.md` |
 | 3 | Weight Extraction | COMPLETE | `task3_weight_extraction.plan.md` |
 | 4 | Full-File Inference | COMPLETE | - |
-| 4.5 | Investigate/Fix Differences | **COMPLETE** | `segment_count_investigation.md` |
-| 5 | HuggingFace Upload | NOT STARTED | (create when starting) |
+| 4.5 | Investigate/Fix Differences | COMPLETE | `segment_count_investigation.md` |
+| 5 | HuggingFace Hub Integration | **COMPLETE** | `task-5-huggingface_upload.plan.md` |
 | 6 | CI Integration | NOT STARTED | (create when starting) |
 
 ---
@@ -145,21 +145,23 @@ Non-Strict Mode (59 segments):
 
 ---
 
-## Task 5: HuggingFace Upload (NOT STARTED)
+## Task 5: HuggingFace Hub Integration (COMPLETE)
 
-**Goal**: Package and upload model to `orcasound/orcahello-srkw-detector-v1` on HuggingFace Hub.
+**Goal**: Package model for HuggingFace Hub upload to `orcasound/orcahello-srkw-detector-v1`.
 
-**Planned Deliverables**:
-- `pytorch_model.bin` or `model.safetensors` - Model weights
-- `config.json` - Model architecture and parameters
-- `preprocessor_config.json` - Audio preprocessing parameters
-- `README.md` - Model card with usage examples
+**Deliverables**:
+- `src/model_v1/inference.py` - Added `PyTorchModelHubMixin` inheritance
+- `scripts/upload_to_hub.py` - Upload script with CLI
+- `tests/test_huggingface_integration.py` - 7 tests (6 passing)
+- `claude-scratch/requirements-model-v1.txt` - Added `huggingface-hub`, `safetensors`
 
-**Key Considerations**:
-- Follow HuggingFace audio model conventions
-- Include preprocessing config for reproducibility
-- Document the sample_rate quirk (16kHz filterbank on 20kHz audio)
-- Add license (RAIL)
+**Key Features**:
+- `model.save_pretrained()` - Save to local directory
+- `model.push_to_hub()` - Upload to HuggingFace Hub
+- `OrcaHelloSRKWDetectorV1.from_pretrained()` - Load from Hub
+- Backward compatibility with `from_checkpoint()` preserved
+
+**Detailed Results**: `results/task5_huggingface_integration.md`
 
 ---
 

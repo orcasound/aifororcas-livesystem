@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from torchvision.models import resnet50
 from typing import Dict, Optional, Tuple, List
 from pathlib import Path
 from torch import Tensor
+from huggingface_hub import PyTorchModelHubMixin
 
 from .audio_frontend import audio_segment_generator, prepare_audio
 
@@ -78,7 +79,6 @@ class DetectorInferenceConfig:
             model=_from_dict(ModelConfig, d.get("model", {})),
         )
 
-
 @dataclass
 class SegmentPrediction:
     start_time_s: float
@@ -98,9 +98,9 @@ class DetectionResult:
     """
     local_predictions: List[int]
     local_confidences: List[float]
+    segment_predictions: List[SegmentPrediction]
     global_prediction: int
     global_confidence: float
-    segment_predictions: List[SegmentPrediction]
     wav_file_path: str
 
 
@@ -122,7 +122,13 @@ class AdaptiveConcatPool2d(nn.Module):
         return torch.cat([self.max_pool(x), self.avg_pool(x)], dim=1)
 
 
-class OrcaHelloSRKWDetectorV1(nn.Module):
+class OrcaHelloSRKWDetectorV1(
+    nn.Module,
+    PyTorchModelHubMixin,
+    library_name="orcahello",
+    repo_url="https://github.com/orcasound/aifororcas-livesystem",
+    tags=["audio-classification", "bioacoustics", "orca-detection", "srkw"],
+):
     """
     Wrapper of ResNet50 model for binary detection of individual orca calls
     from featurized audio segments (mel spectrograms).
@@ -198,7 +204,7 @@ class OrcaHelloSRKWDetectorV1(nn.Module):
             logits = self.forward(x)
             return F.softmax(logits, dim=1)[:, self.call_class_index].squeeze()
     
-    def detect_srkw_from_file(self, wav_file_path: str, config: Dict) -> DetectionResult:
+    def detect_srkw_from_file(self, wav_file_path: str, config: Optional[Dict] = None) -> DetectionResult:
         """
         Detect SRKW calls from a WAV file.
 
@@ -210,13 +216,17 @@ class OrcaHelloSRKWDetectorV1(nn.Module):
 
         Args:
             wav_file_path: Path to the WAV file
-            config: Configuration dict - values override self.config defaults
+            config: Optional configuration dict - values override self.config defaults.
+                    If None, uses self.config from model initialization.
 
         Returns:
             DetectionResult with local predictions, confidences, and global prediction
         """
         # Parse overrides and merge with stored config defaults
-        overrides = DetectorInferenceConfig.from_dict(config)
+        if config is not None:
+            overrides = DetectorInferenceConfig.from_dict(config)
+        else:
+            overrides = self.config
         inf = overrides.inference
 
         # Use override values (they fall back to defaults if not in config dict)
@@ -242,7 +252,7 @@ class OrcaHelloSRKWDetectorV1(nn.Module):
             start_s = int(parts[-2])
 
             # Convert segment to spectrogram (pass raw dict for audio_frontend compatibility)
-            mel_spec = prepare_audio(segment_path, config)
+            mel_spec = prepare_audio(segment_path, asdict(overrides))
             spectrograms.append(mel_spec)
             segment_info.append({
                 'start_time_s': float(start_s),
