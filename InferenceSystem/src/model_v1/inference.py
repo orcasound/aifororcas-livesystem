@@ -50,6 +50,7 @@ class ModelConfig:
     input_pad_s: float = 4.0
     num_classes: int = 2
     call_class_index: int = 1
+    max_batch_size: int = 32  # Max segments to process at once in detect_srkw_from_file
 
 
 @dataclass
@@ -256,14 +257,21 @@ class OrcaHelloSRKWDetectorV1(nn.Module):
                 wav_file_path=wav_file_path
             )
 
-        # Stack spectrograms into batch: (num_segments, 1, n_mels, time_frames)
-        spectrograms_batch = torch.stack(spectrograms)
+        # Process spectrograms in batches to control memory usage
+        max_batch_size = overrides.model.max_batch_size
+        all_confidences = []
+        
+        for batch_start in range(0, len(spectrograms), max_batch_size):
+            batch_end = min(batch_start + max_batch_size, len(spectrograms))
+            batch = torch.stack(spectrograms[batch_start:batch_end])
+            batch_confidences = self.predict_call(batch)
+            all_confidences.append(batch_confidences.cpu())
 
-        # Run inference on all segments
-        confidences = self.predict_call(spectrograms_batch)
+        # Concatenate all batch results
+        confidences = torch.cat(all_confidences)
 
         # Convert to lists for output
-        local_confidences = confidences.cpu().numpy().tolist()
+        local_confidences = confidences.numpy().tolist()
         local_predictions = [1 if conf > local_conf_threshold else 0 for conf in local_confidences]
 
         # Calculate global prediction
