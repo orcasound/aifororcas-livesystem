@@ -1,0 +1,244 @@
+---
+license: other
+license_name: orcahello-rail
+license_link: https://github.com/orcasound/aifororcas-livesystem/blob/main/InferenceSystem/model/LICENSE
+library_name: orcahello
+tags:
+- audio-classification
+- bioacoustics
+- orca-detection
+- srkw
+- marine-conservation
+pipeline_tag: audio-classification
+---
+
+# OrcaHello SRKW Detector V1
+
+Southern Resident Killer Whale (SRKW) call detection model using ResNet50 on mel spectrograms.
+
+![Close-up of SRKW fin reflected as waves](./orca-fin-waves.jpg)
+
+## Model Description
+
+This model detects the presence of Southern Resident Killer Whale (SRKW) calls in audio recordings from hydrophone networks. It was trained on labeled audio data from the Orcasound hydrophone network in Puget Sound, Washington.
+
+**Architecture**: ResNet50 with custom classification head
+**Input**: Mel spectrogram (1 channel, 256 mel bins, 312 time frames)
+**Output**: Binary classification (orca call present / not present)
+**Framework**: PyTorch (ported from FastAI)
+
+### Model Details
+
+- **Developed by**: Akash Mahajan, Prakruti Gogia, Aayush Agrawal
+- **Model type**: Audio classification (binary)
+- **License**: OrcaHello RAIL (Responsible AI License) - See LICENSE file
+- **Finetuned from**: ResNet50 ImageNet pretrained weights
+- **Date trained**: November 2020, ported from FastAI in January 2026
+
+### Model Sources
+
+- **Repository**: https://github.com/orcasound/aifororcas-livesystem
+- **Documentation**: https://github.com/orcasound/aifororcas-livesystem/tree/main/InferenceSystem
+
+## Uses
+
+### Direct Use
+
+This model is designed for real-time detection of Southern Resident Killer Whale calls in hydrophone audio streams to:
+- Alert researchers and the public when orcas are detected
+- Support conservation efforts for the endangered SRKW population
+- Enable rapid response for vessel traffic management
+
+### Downstream Use
+
+The model can be integrated into:
+- Live audio streaming pipelines
+- Offline audio analysis workflows
+- Marine mammal monitoring systems
+
+### Out-of-Scope Use
+
+This model should **NOT** be used for:
+- Detecting other whale species without retraining
+- Fine-grained call type classification (only detects presence/absence)
+- Audio recorded at significantly different sample rates without preprocessing
+- Activities that violate the RAIL license restrictions (see License section)
+
+## Bias, Risks, and Limitations
+
+- **Training data bias**: Model trained primarily on Orcasound Lab hydrophone data from Puget Sound
+- **Environmental specificity**: Performance may vary with different acoustic environments
+- **False positives**: Background noise, boats, and other marine mammals may trigger false detections
+- **Time sensitivity**: Model was trained to process fixed-length 4-second segments, shorter segments padded with zeros
+
+### Recommendations
+
+- Use as part of a two-stage detection system with expert review (moderator validation)
+- Calibrate confidence thresholds based on your specific deployment environment
+- Implement temporal aggregation (multiple positive detections) for robust alerts
+- Consider ensemble with fine-grained classification/captioning/analysis models for efficient processing of audio archives
+
+## Usage
+
+After following setup within repository: [Orcasound/aifororcas-livesystem/InferenceSystem/](https://github.com/orcasound/aifororcas-livesystem/tree/main/InferenceSystem):
+
+### Detection in audio file
+
+Internally handles audio pre-processing into segments and batched inference.
+
+```python
+from model_v1.inference import OrcaHelloSRKWDetectorV1
+
+# Load model from HuggingFace Hub
+model = OrcaHelloSRKWDetectorV1.from_pretrained("orcasound/orcahello-srkw-detector-v1")
+
+# Detect SRKW calls in audio file
+result = model.detect_srkw_from_file("audio.wav", config)
+
+print(f"Orca detected: {result.global_prediction}")
+print(f"Confidence: {result.global_confidence:.1f}%")
+```
+
+### Call predictions in segments
+
+Manually managing per-segment call predictions.
+
+```python
+from src.model_v1.inference import OrcaHelloSRKWDetectorV1, DetectorInferenceConfig
+from src.model_v1.audio_frontend import audio_segment_generator, prepare_audio
+from dataclasses import asdict
+
+config = asdict(DetectorInferenceConfig())
+
+for segment in audio_segment_generator(WAV_FILE, segment_duration_s=3.0, segment_hop_s=1.5):
+    X = prepare_audio(segment, config).unsqueeze(0)
+    model.predict_call(X)  # => scalar tensor(0.67)
+    break
+```
+
+### Configuration
+
+The model requires a configuration dict specifying audio preprocessing parameters:
+
+```python
+config = {
+    "audio": {
+        "downmix_mono": True,
+        "resample_rate": 20000
+    },
+    "spectrogram": {
+        "sample_rate": 16000,
+        "n_fft": 2560,
+        "hop_length": 256,
+        "mel_n_filters": 256,
+        "mel_f_min": 0.0,
+        "mel_f_max": 10000.0
+    },
+    "inference": {
+        "window_s": 2.0,
+        "window_hop_s": 1.0,
+        "local_conf_threshold": 0.5,
+        "global_pred_threshold": 3
+    }
+}
+```
+
+Refer to repository above for complete setup and configuration details.
+
+## Training Details
+
+### Training Data
+
+- **Source**: Orcasound hydrophone network (Puget Sound, WA)
+- **Positive examples**: Confirmed SRKW call recordings
+- **Negative examples**: Background ocean noise, boats, other sounds
+- **Preprocessing**: Audio → Mel spectrogram (20kHz audio, 256 mel filterbank)
+
+### Training Procedure
+
+Transfer learning approach:
+1. Started with ResNet50 pretrained on ImageNet
+2. Modified first conv layer for single-channel (grayscale) input
+3. Replaced classification head with custom pooling + dense layers
+4. Fine-tuned on mel spectrograms using FastAI
+
+**Note**: This is a port of the original FastAI model to pure PyTorch for easier usage and deployment.
+
+#### Training Hyperparameters
+
+- **Architecture**: ResNet50 (3,4,6,3 Bottleneck blocks)
+- **Pooling**: AdaptiveConcatPool2d (concatenates max + average)
+- **Head**: BN(4096) → Dropout(0.25) → Linear(512) → ReLU → BN(512) → Dropout(0.5) → Linear(2)
+- **Data loading**: SpecAugment-style augmentation with frequency masking, annotated calls padded/cropped to fixed 4.0s windows (312 time frames)
+- **Loss**: Cross-entropy
+- **Framework**: FastAI (original training)
+
+## Evaluation
+
+### Testing Data & Metrics
+
+TODO: WIP
+
+## Environmental Impact
+
+This model supports conservation of the critically endangered Southern Resident Killer Whale population (currently ~75 individuals as of Jan 2026). As a component of OrcaHello’s live monitoring pipeline, it helps:
+- Filter 24hr hydrophone audio down to likely SRKW-call candidates for review
+- Enable **human-in-the-loop** confirmation by experts before sending alerts/notifications
+- Support downstream mitigation actions (e.g., coordinated vessel slow-downs and pausing pile-driving) during confirmed whale presence
+- Engage citizen scientists in conservation via notifications on the Orcasound live listening web-app
+
+Learn more: https://ai4orcas.net/orcahello/
+
+## Technical Specifications
+
+### Model Architecture
+
+```
+Single-channel input → (256 x 312) frequency x time mel spectrogram
+  ↓
+ResNet50 backbone (3,4,6,3 Bottleneck blocks) → (8 x 10 x 2048) feature map
+  ↓
+AdaptiveConcatPool2d [max, avg] → 4096 features
+  ↓
+BatchNorm1d(4096) → Dropout(0.25) → Linear(512) → ReLU
+  ↓
+BatchNorm1d(512) → Dropout(0.5) → Linear(2)
+  ↓
+Softmax → [P(negative), P(positive)]
+```
+
+### Compute Infrastructure
+
+- **Training**: GPU-accelerated (original FastAI training)
+- **Inference**: CPU-compatible (deployed on Azure Kubernetes Service)
+
+## Citation
+
+**BibTeX:**
+
+```bibtex
+@software{orcahello_srkw_detector_v1,
+  author = {Akash Mahajan and Prakruti Gogia and Aayush Agrawal},
+  title = {OrcaHello SRKW Detector V1},
+  year = {2020},
+  url = {https://huggingface.co/orcasound/orcahello-srkw-detector-v1},
+  license = {OrcaHello-RAIL}
+}
+```
+
+## License
+
+This model is released under the **OrcaHello RAIL (Responsible AI License)**, which includes specific restrictions to promote conservation of endangered Southern Resident Killer Whales.
+
+**Key restrictions**:
+- Prohibits use in violation of Marine Mammal Protection Act
+- Prohibits support for captive whale industry
+- Requires adherence to "Be Whale Wise" guidelines
+
+See the [LICENSE](https://github.com/orcasound/aifororcas-livesystem/blob/main/InferenceSystem/model/LICENSE) file for complete terms.
+
+## Contact
+
+- **Project**: https://www.orcasound.net/
+- **Repository**: https://github.com/orcasound/aifororcas-livesystem
+- **Issues**: https://github.com/orcasound/aifororcas-livesystem/issues

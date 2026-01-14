@@ -142,16 +142,16 @@ class OrcaHelloSRKWDetectorV1(
     def __init__(self, config: Dict):
         super().__init__()
 
-        # Validate and parse config, store for use in detect_srkw_from_file
+        # `config` needs to Dict not DetectorInferenceConfig for serialization with PyTorchModelHubMixin
         self.config = DetectorInferenceConfig.from_dict(config)
+
         self.num_classes = self.config.model.num_classes
         self.call_class_index = self.config.model.call_class_index
-
         self.model = resnet50()
+
         # Modify first conv layer for single-channel input
         # Original: Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.model.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=7, stride=2, padding=3, bias=False)
-
         # Replace avgpool and fc with fastai-style head
         # FastAI head structure:
         # [0] AdaptiveConcatPool2d - outputs 2048*2 = 4096 features

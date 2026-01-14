@@ -2,9 +2,9 @@ inference-venv
 model-v1-venv
 .env
 
-true_srkw/
-model/
-model.zip
+*.pt
+*.pkl
+*.zip
 
 claude-scratch/tmp/
 
