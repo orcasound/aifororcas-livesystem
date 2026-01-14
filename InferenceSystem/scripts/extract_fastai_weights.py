@@ -4,7 +4,7 @@ Extract weights from fastai learner to PyTorch checkpoint.
 
 This script runs in the inference-venv environment (which has fastai).
 It extracts the ResNet50 weights from model.pkl and saves them in a format
-that loads directly into OrcaHelloSRKWDetector.
+that loads directly into OrcaHelloSRKWDetectorV1.
 
 Usage:
     cd InferenceSystem
@@ -69,7 +69,7 @@ def inspect_fastai_model(learner_path: Path, learner_name: str = "model.pkl"):
 
 def convert_fastai_to_pytorch(fastai_state_dict: dict) -> dict:
     """
-    Convert fastai state_dict keys to match OrcaHelloSRKWDetector.
+    Convert fastai state_dict keys to match OrcaHelloSRKWDetectorV1.
 
     FastAI model structure:
     - Sequential[0] = backbone (Conv2d, BatchNorm, ReLU, MaxPool, layer1-4)
@@ -96,7 +96,7 @@ def convert_fastai_to_pytorch(fastai_state_dict: dict) -> dict:
     - 1.7 -> Dropout (no params)
     - 1.8 -> Linear(512, 2)       -> model.fc.7.*
 
-    OrcaHelloSRKWDetector has:
+    OrcaHelloSRKWDetectorV1 has:
     - model.conv1, model.bn1, model.layer1-4 (backbone)
     - model.fc = Sequential[Flatten, BN(4096), Dropout, Linear, ReLU, BN(512), Dropout, Linear]
     """
@@ -113,7 +113,7 @@ def convert_fastai_to_pytorch(fastai_state_dict: dict) -> dict:
     }
 
     # Mapping for head layers
-    # FastAI indices -> OrcaHelloSRKWDetector fc Sequential indices
+    # FastAI indices -> OrcaHelloSRKWDetectorV1 fc Sequential indices
     # fastai 1.2.* (BN 4096) -> model.fc.1.*
     # fastai 1.4.* (Linear 4096->512) -> model.fc.3.*
     # fastai 1.6.* (BN 512) -> model.fc.5.*
@@ -193,13 +193,13 @@ def extract_weights(
     for key in sorted(pytorch_state_dict.keys()):
         print(f"  {key}: {pytorch_state_dict[key].shape}")
 
-    # Verify the conversion by loading into OrcaHelloSRKWDetector
+    # Verify the conversion by loading into OrcaHelloSRKWDetectorV1
     print("\n=== Verifying Load ===")
     # Import using direct path since we're in scripts/
     sys.path.insert(0, str(ROOT_DIR / "src"))
-    from model_v1.inference import OrcaHelloSRKWDetector
+    from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-    test_model = OrcaHelloSRKWDetector()
+    test_model = OrcaHelloSRKWDetectorV1()
     expected_keys = set(test_model.state_dict().keys())
     converted_keys = set(pytorch_state_dict.keys())
 

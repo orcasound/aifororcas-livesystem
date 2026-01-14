@@ -120,7 +120,7 @@ class AdaptiveConcatPool2d(nn.Module):
         return torch.cat([self.max_pool(x), self.avg_pool(x)], dim=1)
 
 
-class OrcaHelloSRKWDetector(nn.Module):
+class OrcaHelloSRKWDetectorV1(nn.Module):
     """
     Wrapper of ResNet50 model for binary detection of individual orca calls
     from featurized audio segments (mel spectrograms).
@@ -298,7 +298,7 @@ class OrcaHelloSRKWDetector(nn.Module):
         )
 
     @classmethod
-    def from_checkpoint(cls, checkpoint_path: str, config: Dict, device: str = "cpu") -> "OrcaHelloSRKWDetector":
+    def from_checkpoint(cls, checkpoint_path: str, config: Dict, device: str = "cpu") -> "OrcaHelloSRKWDetectorV1":
         """
         Load model from PyTorch checkpoint.
 
@@ -308,7 +308,7 @@ class OrcaHelloSRKWDetector(nn.Module):
             device: Device to load model onto ("cpu" or "cuda")
 
         Returns:
-            OrcaHelloSRKWDetector with loaded weights in eval mode
+            OrcaHelloSRKWDetectorV1 with loaded weights in eval mode
         """
         model = cls(config)
         state_dict = torch.load(checkpoint_path, map_location=device, weights_only=True)

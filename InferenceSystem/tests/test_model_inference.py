@@ -1,5 +1,5 @@
 """
-Model Inference Tests - Verify OrcaHelloSRKWDetector matches fastai
+Model Inference Tests - Verify OrcaHelloSRKWDetectorV1 matches fastai
 
 Test structure:
 - TestOrcaHelloSRKWDetectorUnit: Unit tests for model class
@@ -17,13 +17,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 
 class TestOrcaHelloSRKWDetectorUnit:
-    """Unit tests for OrcaHelloSRKWDetector model class"""
+    """Unit tests for OrcaHelloSRKWDetectorV1 model class"""
 
     def test_model_creation(self, v1_config):
         """Test model instantiation"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-        model = OrcaHelloSRKWDetector(v1_config)
+        model = OrcaHelloSRKWDetectorV1(v1_config)
         assert model is not None
         assert model.num_classes == 2
         # FastAI classes are ['negative', 'positive'], so class 1 is "positive"
@@ -31,17 +31,17 @@ class TestOrcaHelloSRKWDetectorUnit:
 
     def test_model_creation_defaults(self):
         """Test model with empty config uses defaults"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-        model = OrcaHelloSRKWDetector({})
+        model = OrcaHelloSRKWDetectorV1({})
         assert model.num_classes == 2
         assert model.call_class_index == 1
 
     def test_forward_pass_shape(self, v1_config):
         """Test forward() returns (batch, num_classes) logits"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-        model = OrcaHelloSRKWDetector(v1_config)
+        model = OrcaHelloSRKWDetectorV1(v1_config)
         model.eval()
 
         # Standard input shape: (batch, 1, n_mels=256, time_frames=313)
@@ -54,9 +54,9 @@ class TestOrcaHelloSRKWDetectorUnit:
 
     def test_forward_pass_batch(self, v1_config):
         """Test forward() with batch > 1"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-        model = OrcaHelloSRKWDetector(v1_config)
+        model = OrcaHelloSRKWDetectorV1(v1_config)
         model.eval()
 
         x = torch.randn(4, 1, 256, 313)
@@ -68,9 +68,9 @@ class TestOrcaHelloSRKWDetectorUnit:
 
     def test_predict_call_shape(self, v1_config):
         """Test predict_call() returns (batch,) probabilities"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-        model = OrcaHelloSRKWDetector(v1_config)
+        model = OrcaHelloSRKWDetectorV1(v1_config)
         model.eval()
 
         x = torch.randn(1, 1, 256, 313)
@@ -81,9 +81,9 @@ class TestOrcaHelloSRKWDetectorUnit:
 
     def test_predict_call_batch(self, v1_config):
         """Test predict_call() with batch > 1"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-        model = OrcaHelloSRKWDetector(v1_config)
+        model = OrcaHelloSRKWDetectorV1(v1_config)
         model.eval()
 
         x = torch.randn(4, 1, 256, 313)
@@ -93,9 +93,9 @@ class TestOrcaHelloSRKWDetectorUnit:
 
     def test_predict_call_range(self, v1_config):
         """Test predict_call() returns values in [0, 1]"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-        model = OrcaHelloSRKWDetector(v1_config)
+        model = OrcaHelloSRKWDetectorV1(v1_config)
         model.eval()
 
         # Run multiple random inputs
@@ -108,20 +108,20 @@ class TestOrcaHelloSRKWDetectorUnit:
 
     def test_from_checkpoint_missing_file(self, v1_config):
         """Test from_checkpoint() raises error for missing file"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
         with pytest.raises(FileNotFoundError):
-            OrcaHelloSRKWDetector.from_checkpoint("/nonexistent/path/model.pt", v1_config)
+            OrcaHelloSRKWDetectorV1.from_checkpoint("/nonexistent/path/model.pt", v1_config)
 
     def test_from_checkpoint(self, model_dir, v1_config):
         """Test loading from checkpoint file"""
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
         model_path = model_dir / "model_v1.pt"
         if not model_path.exists():
             pytest.skip(f"Checkpoint not found: {model_path}. Run extraction script first.")
 
-        model = OrcaHelloSRKWDetector.from_checkpoint(str(model_path), v1_config)
+        model = OrcaHelloSRKWDetectorV1.from_checkpoint(str(model_path), v1_config)
 
         assert model is not None
         # Verify model is in eval mode
@@ -215,13 +215,13 @@ class TestPredictCallParity:
         if not model_path.exists():
             pytest.skip(f"Checkpoint not found: {model_path}. Run extraction script first.")
 
-        from model_v1.inference import OrcaHelloSRKWDetector
+        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
         # Load references
         references = torch.load(reference_file, weights_only=False)
 
         # Load model_v1
-        model = OrcaHelloSRKWDetector.from_checkpoint(str(model_path), v1_config)
+        model = OrcaHelloSRKWDetectorV1.from_checkpoint(str(model_path), v1_config)
 
         mismatches = []
 

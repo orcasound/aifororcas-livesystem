@@ -7,7 +7,7 @@ import yaml
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from model_v1.inference import OrcaHelloSRKWDetector
+from model_v1.inference import OrcaHelloSRKWDetectorV1
 from model.fastai_inference import FastAIModel
 
 DEFAULT_WAV_PATH = os.path.join(os.path.dirname(__file__), "test_data", "rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav")
@@ -41,7 +41,7 @@ def main():
 
     # Run model_v1 inference
     print("[2/2] Running model_v1 inference...")
-    model_v1 = OrcaHelloSRKWDetector.from_checkpoint(model_v1_path, config)
+    model_v1 = OrcaHelloSRKWDetectorV1.from_checkpoint(model_v1_path, config)
     v1_result = model_v1.detect_srkw_from_file(wav_path, config)
 
     print("\n" + "=" * 80)
