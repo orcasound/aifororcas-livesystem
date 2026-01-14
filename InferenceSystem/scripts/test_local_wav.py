@@ -8,11 +8,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from model.fastai_inference import FastAIModel
 
-DEFAULT_WAV_PATH = os.path.join(os.path.dirname(__file__), "test_data", "rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav")
+TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_data')
+DEFAULT_WAV_PATH = os.path.join(TEST_DATA_DIR, "rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav")
 
 
 def main():
-    # Default to the test WAV file in test_data
+    # Default to the test WAV file in tests/test_data
     wav_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_WAV_PATH
 
     # Model path relative to InferenceSystem directory

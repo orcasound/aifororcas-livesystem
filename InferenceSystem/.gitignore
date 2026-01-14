@@ -6,9 +6,9 @@ true_srkw/
 model/
 model.zip
 
-claude-scratch/test_data/
 claude-scratch/tmp/
 
+tests/test_data/
 tests/reference_outputs/
 *.wav
 *.png

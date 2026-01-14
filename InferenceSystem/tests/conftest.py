@@ -49,7 +49,7 @@ def _patched_torchaudio_save(filepath, src, sample_rate, *args, **kwargs):
 torchaudio.save = _patched_torchaudio_save
 
 # Test data directory
-TEST_DATA_DIR = Path(__file__).parent.parent / "claude-scratch" / "test_data"
+TEST_DATA_DIR = Path(__file__).parent.parent / "tests" / "test_data"
 
 # Reference outputs directory (for parity testing)
 REFERENCE_DIR = Path(__file__).parent / "reference_outputs"
