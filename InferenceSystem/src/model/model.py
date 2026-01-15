@@ -2,16 +2,19 @@
 ResNet_slim: 8 layers ResCNN with temporal pooling.
 
 """
+import contextlib
 import glob
+import logging
+import os
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import contextlib, logging, os
-from . import params
-
 from torch.autograd import Variable
 from torch.utils.data import Dataset
+
+from . import params
 
 # deal with a known bug in sklearn that pollutes stdout: https://stackoverflow.com/questions/52596204/the-imp-module-is-deprecated
 with contextlib.redirect_stderr(None):
