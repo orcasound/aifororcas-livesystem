@@ -13,9 +13,14 @@ public partial class CandidateFilterComponent
 
 	private List<string> AllLocations = new List<string>();
 
+	// Local UI-only tracking of selected location.
+	private string SelectedLocation { get; set; } = "all";
+
 	protected override void OnInitialized()
 	{
-		AllLocations = AppSettings.Locations.ToList();
+		AllLocations = HydrophoneLocations.Locations.ToList();
+		// Don't initialize from FilterOptions.Location - keep it independent.
+		SelectedLocation = "all";
 	}
 
 	private async Task ApplyFilter()
@@ -24,13 +29,21 @@ public partial class CandidateFilterComponent
 		// value can and has changed over time (e.g., Haro Strait vs Orcasound Lab).
 		// The UI lets the user choose among labels that are Location values, but
 		// we want to actually query by HydrophoneId.
-		if (FilterOptions.Location != "all")
+
+		// Always set location to "all" so backend doesn't filter by location name.
+		FilterOptions.Location = "all";
+
+		if (SelectedLocation != "all")
 		{
-			int index = Array.IndexOf(AppSettings.Locations, FilterOptions.Location);
-			if (index >= 0 && index < AppSettings.HydrophoneIds.Length)
+			var hydrophoneId = HydrophoneLocations.GetIdByLocation(SelectedLocation);
+			if (hydrophoneId != null)
 			{
-				FilterOptions.Location = "all";
-				FilterOptions.HydrophoneId = AppSettings.HydrophoneIds[index];
+				FilterOptions.HydrophoneId = hydrophoneId;
+			}
+			else
+			{
+				// Location not found in map, default to "all".
+				FilterOptions.HydrophoneId = "all";
 			}
 		}
 		else

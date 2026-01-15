@@ -4,7 +4,5 @@ public class AppSettings
 {
     public const string Section = "AppSettings";
     public string APIUrl { get; set; }
-    public string[] Locations { get; set; }
-    public string[] HydrophoneIds { get; set; }
     public AzureAd AzureAd { get; set; }
 }
