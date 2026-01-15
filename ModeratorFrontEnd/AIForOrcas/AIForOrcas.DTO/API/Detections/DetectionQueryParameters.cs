@@ -26,7 +26,7 @@ namespace AIForOrcas.DTO.API
 		public string SortOrder { get; set; } = "desc";
 
 		/// <summary>
-		/// Timeframe for the record set (last 30m, 3h, 6h, 24h, 1w, 30d, range, all).
+		/// Timeframe for the record set (last 30m, 3h, 6h, 24h, 1w, 1m, range, all).
 		/// </summary>
 		/// <example>all</example>
 		public string Timeframe { get; set; } = "all";
