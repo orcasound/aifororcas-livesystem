@@ -128,6 +128,7 @@ class OrcaHelloSRKWDetectorV1(
     library_name="orcahello",
     repo_url="https://github.com/orcasound/aifororcas-livesystem",
     tags=["audio-classification", "bioacoustics", "orca-detection", "srkw"],
+    license="other",
 ):
     """
     Wrapper of ResNet50 model for binary detection of individual orca calls

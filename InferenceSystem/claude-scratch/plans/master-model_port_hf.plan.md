@@ -150,8 +150,10 @@ Non-Strict Mode (59 segments):
 **Goal**: Package model for HuggingFace Hub upload to `orcasound/orcahello-srkw-detector-v1`.
 
 **Deliverables**:
-- `src/model_v1/inference.py` - Added `PyTorchModelHubMixin` inheritance
-- `scripts/upload_to_hub.py` - Upload script with CLI
+- `src/model_v1/inference.py` - Added `PyTorchModelHubMixin` inheritance with RAIL license metadata
+- `model/MODEL_CARD.md` - Comprehensive model card with YAML frontmatter, conservation focus
+- `model/LICENSE` - OrcaHello RAIL license with use restrictions for whale conservation
+- `scripts/upload_to_hub.py` - Upload script with support for custom README/LICENSE
 - `tests/test_huggingface_integration.py` - 7 tests (6 passing)
 - `claude-scratch/requirements-model-v1.txt` - Added `huggingface-hub`, `safetensors`
 
@@ -159,7 +161,10 @@ Non-Strict Mode (59 segments):
 - `model.save_pretrained()` - Save to local directory
 - `model.push_to_hub()` - Upload to HuggingFace Hub
 - `OrcaHelloSRKWDetectorV1.from_pretrained()` - Load from Hub
+- Custom model card and RAIL license automatically uploaded
 - Backward compatibility with `from_checkpoint()` preserved
+
+**License**: Uses OrcaHello RAIL (Responsible AI License) with restrictions to promote SRKW conservation, prohibiting illegal whale watching and captive whale industry support.
 
 **Detailed Results**: `results/task5_huggingface_integration.md`
 

@@ -86,6 +86,8 @@ Softmax → [P(negative), P(positive)]
 |------|-------------|
 | `model/model.pkl` | Original fastai learner (98MB) |
 | `model/model_v1.pt` | Converted PyTorch checkpoint (98MB) |
+| `model/MODEL_CARD.md` | HuggingFace model card with metadata |
+| `model/LICENSE` | OrcaHello RAIL license (Responsible AI License) |
 
 ### Source Code
 | File | Description |
@@ -102,6 +104,7 @@ Softmax → [P(negative), P(positive)]
 | `scripts/test_local_wav_model_v1.py` | Test model_v1 on WAV files |
 | `scripts/compare_inference.py` | Compare fastai vs model_v1 |
 | `scripts/test_local_wav.py` | Original fastai test script |
+| `scripts/upload_to_hub.py` | Upload model to HuggingFace Hub with custom README/LICENSE |
 
 ---
 
@@ -181,8 +184,10 @@ python -m pytest tests/test_model_inference.py::TestPredictCallParity::test_gene
 - Created comparison scripts for validation
 
 ### Task 5: HuggingFace Hub Integration
-- Integrated `PyTorchModelHubMixin` into `OrcaHelloSRKWDetectorV1`
-- Created `scripts/upload_to_hub.py` for uploading to HF Hub
+- Integrated `PyTorchModelHubMixin` into `OrcaHelloSRKWDetectorV1` with RAIL license metadata
+- Created comprehensive model card (`model/MODEL_CARD.md`) with conservation focus
+- Added OrcaHello RAIL license (`model/LICENSE`) with use restrictions
+- Created `scripts/upload_to_hub.py` with support for custom README and LICENSE
 - Added 7 tests in `tests/test_huggingface_integration.py` (6 passing)
 - Backward compatibility maintained with `from_checkpoint()`
 - Ready for upload to `orcasound/orcahello-srkw-detector-v1`

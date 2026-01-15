@@ -6,14 +6,20 @@ from pathlib import Path
 import sys
 import yaml
 import os
+import shutil
+import tempfile
 
 SCRIPT_DIR = Path(__file__).parent
 ROOT_DIR = SCRIPT_DIR.parent
 sys.path.insert(0, str(ROOT_DIR / "src"))
 
 from model_v1.inference import OrcaHelloSRKWDetectorV1
+from huggingface_hub import HfApi, upload_file
 
 DEFAULT_REPO_ID = "orcasound/orcahello-srkw-detector-v1"
+DEFAULT_MODEL_CARD = ROOT_DIR / "model/MODEL_CARD.md"
+DEFAULT_LICENSE = ROOT_DIR / "model/LICENSE"
+DEFAULT_HERO_IMAGE = ROOT_DIR / "model/img-orca_fin_waveform.jpg"
 
 def main():
     # Check for HF_TOKEN environment variable
@@ -26,11 +32,12 @@ def main():
         print()
     
     parser = argparse.ArgumentParser(description="Upload OrcaHelloSRKWDetectorV1 to HuggingFace Hub")
+    parser.add_argument("-m", "--commit-message", required=True, help="Commit message for upload")
     parser.add_argument("--repo-id", default=DEFAULT_REPO_ID, help=f"HuggingFace repo ID (default: {DEFAULT_REPO_ID})")
     parser.add_argument("--checkpoint", type=Path, default=ROOT_DIR / "model/model_v1.pt", help="Path to model checkpoint")
     parser.add_argument("--config", type=Path, default=ROOT_DIR / "tests/test_config.yaml", help="Path to config YAML")
-    parser.add_argument("--commit-message", default="Upload OrcaHelloSRKWDetectorV1", help="Commit message for upload")
-    parser.add_argument("--private", action="store_true", help="Make repo private")
+    parser.add_argument("--model-card", type=Path, default=DEFAULT_MODEL_CARD, help="Path to model card (README.md)")
+    parser.add_argument("--license-file", type=Path, default=DEFAULT_LICENSE, help="Path to LICENSE file")
     args = parser.parse_args()
 
     # Validate paths
@@ -51,19 +58,55 @@ def main():
     print(f"Loading model from {args.checkpoint}")
     model = OrcaHelloSRKWDetectorV1.from_checkpoint(str(args.checkpoint), config)
 
-    # Upload to hub
-    print(f"Uploading to {args.repo_id}...")
-    print(f"Commit message: {args.commit_message}")
-    model.push_to_hub(
-        args.repo_id,
-        commit_message=args.commit_message,
-        private=args.private,
-        token=hf_token
-    )
+    # Create temporary directory for upload
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+
+        # Save model to temp directory
+        print(f"Preparing model files...")
+        model.save_pretrained(tmpdir)
+
+        # Copy custom README if provided
+        if args.model_card and args.model_card.exists():
+            print(f"Adding custom model card from {args.model_card}")
+            shutil.copy(args.model_card, tmpdir / "README.md")
+        else:
+            print("⚠️  No model card found, using default from PyTorchModelHubMixin")
+
+        # Copy LICENSE file if provided
+        if args.license_file and args.license_file.exists():
+            print(f"Adding LICENSE file from {args.license_file}")
+            shutil.copy(args.license_file, tmpdir / "LICENSE")
+        else:
+            print("⚠️  No LICENSE file found")
+        
+        # Copy hero image
+        shutil.copy(DEFAULT_HERO_IMAGE, tmpdir / "img-orca_fin_waveform.jpg")
+
+        # Upload everything to hub
+        print(f"\nUploading to {args.repo_id}...")
+        print(f"Commit message: {args.commit_message}")
+
+        api = HfApi()
+        api.upload_folder(
+            folder_path=tmpdir,
+            repo_id=args.repo_id,
+            repo_type="model",
+            commit_message=args.commit_message,
+            token=hf_token,
+            create_pr=False,
+        )
 
     print(f"\n✓ Successfully uploaded to: https://huggingface.co/{args.repo_id}")
+    print(f"\nFiles uploaded:")
+    print(f"  - config.json (model configuration)")
+    print(f"  - model.safetensors (model weights)")
+    if args.model_card and args.model_card.exists():
+        print(f"  - README.md (model card)")
+    if args.license_file and args.license_file.exists():
+        print(f"  - LICENSE (RAIL license)")
     print(f"\nTo load the model:")
-    print(f"  from model_v1.inference import OrcaHelloSRKWDetectorV1")
+    print(f"  from src.model_v1.inference import OrcaHelloSRKWDetectorV1")
     print(f"  model = OrcaHelloSRKWDetectorV1.from_pretrained('{args.repo_id}')")
 
 if __name__ == "__main__":
