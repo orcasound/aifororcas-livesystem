@@ -1,13 +1,20 @@
-import pandas as pd
-import multiprocessing
-import os, sys
 import argparse
+import multiprocessing
+import os
+import pdb
+import sys
 from glob import glob
+from pathlib import Path
+
+import pandas as pd
+from tqdm import tqdm
+
+SRC_DIR = Path(__file__).parent.parent / "src"
+print(f"Adding {SRC_DIR} to sys.path")
+sys.path.append(str(SRC_DIR))
+
 from model.fastai_inference import FastAIModel
 from model.podcast_inference import OrcaDetectionModel
-from pathlib import Path
-from tqdm import tqdm
-import pdb
 
 
 class ForkedPdb(pdb.Pdb):

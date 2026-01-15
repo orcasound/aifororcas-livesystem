@@ -10,6 +10,3 @@ S3_STREAM_URLS = {
     "port_townsend": "https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_port_townsend",
     "sunset_bay": "https://s3-us-west-2.amazonaws.com/audio-orcasound-net/rpi_sunset_bay",
 }
-
-# Limits time window (end - start) of negative samples to be downloaded for retraining
-MAX_NEGATIVE_SAMPLE_RETRAIN_DATETIME_DELTA = datetime.timedelta(minutes=30)

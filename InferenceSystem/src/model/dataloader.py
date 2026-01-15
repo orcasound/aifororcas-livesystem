@@ -1,14 +1,17 @@
-import librosa
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import os
-from tqdm import tqdm
-from scipy.io import wavfile
-from pathlib import Path
 from math import ceil
+from pathlib import Path
+
+import librosa
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from scipy.io import wavfile
 from torch.utils.data import Dataset
+from tqdm import tqdm
+
 from . import params
+
 
 def s_to_samples(duration,sr):
     return int(duration*sr)
