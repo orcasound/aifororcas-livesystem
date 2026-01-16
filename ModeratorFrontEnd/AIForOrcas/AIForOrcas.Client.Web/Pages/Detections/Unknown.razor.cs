@@ -17,7 +17,7 @@ public partial class Unknown : IDisposable
 		new PaginationOptionsDTO() { RecordsPerPage = 5, Page = 1 };
 
 	private CandidateFilterOptionsDTO filterOptions =
-		new CandidateFilterOptionsDTO() { SortBy = "timestamp", SortOrder = "desc", Timeframe = "24h", Location = "all" };
+		new CandidateFilterOptionsDTO() { SortBy = "timestamp", SortOrder = "desc", Timeframe = "24h", Location = "all", HydrophoneId = "all" };
 
 	private PaginationResultsDTO pagination = new PaginationResultsDTO();
 
