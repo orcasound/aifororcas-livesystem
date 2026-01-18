@@ -1,6 +1,8 @@
 import argparse
 import datetime
-import globals
+
+# Limits time window (end - start) of negative samples to be downloaded for retraining
+MAX_NEGATIVE_SAMPLE_RETRAIN_DATETIME_DELTA = datetime.timedelta(minutes=30)
 
 
 def main():
