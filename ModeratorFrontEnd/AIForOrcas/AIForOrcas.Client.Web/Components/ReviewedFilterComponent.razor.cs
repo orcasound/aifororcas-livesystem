@@ -15,7 +15,7 @@ public partial class ReviewedFilterComponent
 
 	protected override void OnInitialized()
 	{
-		AllLocations = AppSettings.Locations.ToList();
+		AllLocations = HydrophoneLocations.Locations.ToList();
 	}
 
 	private async Task ApplyFilter()

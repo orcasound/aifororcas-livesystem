@@ -67,9 +67,17 @@ public static class MetadataFilters
 
 		public static void ApplyLocationFilter(ref IQueryable<Metadata> queryable, string location)
 		{
-			if(!string.IsNullOrWhiteSpace(location))
+			if (!string.IsNullOrWhiteSpace(location))
 			{
 				queryable = queryable.Where(x => x.location.name == location);
+			}
+		}
+
+		public static void ApplyHydrophoneIdFilter(ref IQueryable<Metadata> queryable, string hydrophoneId)
+		{
+			if (!string.IsNullOrWhiteSpace(hydrophoneId))
+			{
+				queryable = queryable.Where(x => x.source_guid == hydrophoneId);
 			}
 		}
 

@@ -68,9 +68,15 @@ public class DetectionsController : ControllerBase
 			MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe, queryParameters.DateFrom,queryParameters.DateTo);
 
 			// apply location filter
-			if(queryParameters.Location.ToLower() != "all")
+			if (queryParameters.Location.ToLower() != "all")
 			{
 				MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+			}
+
+			// apply hydrophoneId filter
+			if (queryParameters.HydrophoneId.ToLower() != "all")
+			{
+				MetadataFilters.ApplyHydrophoneIdFilter(ref queryable, queryParameters.HydrophoneId);
 			}
 
 			// If no detections found
@@ -206,11 +212,17 @@ public class DetectionsController : ControllerBase
 			// apply reviewed status
 			MetadataFilters.ApplyReviewedFilter(ref queryable, false);
 
-                // apply location filter
-                if (queryParameters.Location.ToLower() != "all")
-                {
-                    MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
-                }
+			// apply location filter
+			if (queryParameters.Location.ToLower() != "all")
+			{
+				MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+			}
+
+			// apply hydrophoneId filter
+			if (queryParameters.HydrophoneId.ToLower() != "all")
+			{
+				MetadataFilters.ApplyHydrophoneIdFilter(ref queryable, queryParameters.HydrophoneId);
+			}
 
 			// apply timeframe filter
 			MetadataFilters.ApplyTimeframeFilter(ref queryable, queryParameters.Timeframe, queryParameters.DateFrom, queryParameters.DateTo);
@@ -322,6 +334,12 @@ public class DetectionsController : ControllerBase
 				MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
 			}
 
+			// apply hydrophoneId filter
+			if (queryParameters.HydrophoneId.ToLower() != "all")
+			{
+				MetadataFilters.ApplyHydrophoneIdFilter(ref queryable, queryParameters.HydrophoneId);
+			}
+
 			// If no detections found
 			if (queryable == null || queryable.Count() == 0)
 			{
@@ -423,6 +441,12 @@ public class DetectionsController : ControllerBase
 				MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
 			}
 
+			// apply hydrophoneId filter
+			if (queryParameters.HydrophoneId.ToLower() != "all")
+			{
+				MetadataFilters.ApplyHydrophoneIdFilter(ref queryable, queryParameters.HydrophoneId);
+			}
+
 			// If no detections found
 			if (queryable == null || queryable.Count() == 0)
 			{
@@ -522,6 +546,12 @@ public class DetectionsController : ControllerBase
 			if (queryParameters.Location.ToLower() != "all")
 			{
 				MetadataFilters.ApplyLocationFilter(ref queryable, queryParameters.Location);
+			}
+
+			// apply hydrophoneId filter
+			if (queryParameters.HydrophoneId.ToLower() != "all")
+			{
+				MetadataFilters.ApplyHydrophoneIdFilter(ref queryable, queryParameters.HydrophoneId);
 			}
 
 			// If no detections found
