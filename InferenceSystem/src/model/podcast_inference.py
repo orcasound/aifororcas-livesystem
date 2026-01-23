@@ -1,20 +1,24 @@
-import os, sys, json, glob
+import argparse
+import glob
+import json
+import os
+import pdb
+import sys
 import gc
-import torch
-import numpy as np
-import model.params as params
-import argparse, pdb
 
-from model.model import get_model_or_checkpoint
-from scipy.io import wavfile
 from collections import defaultdict
-from model.dataloader import AudioFileWindower 
-from pathlib import Path
-from tqdm import tqdm
-
 from datetime import datetime
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
+import torch
+
+import model.params as params
+from model.dataloader import AudioFileWindower
+from model.model import get_model_or_checkpoint
+from scipy.io import wavfile
+from tqdm import tqdm
 
 """
 Input: wav file 
