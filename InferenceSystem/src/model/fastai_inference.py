@@ -184,7 +184,7 @@ class FastAIModel():
             tfms = None
             test = AudioList.from_folder(
                 test_data_folder, config=config).split_none().label_empty()
-            testdb = test.transform(tfms).databunch(bs=32)
+            testdb = test.transform(tfms).databunch(bs=self.batch_size)
 
             # Scoring each audio segment
             pathList = list(pd.Series(test_data_folder.ls()).astype('str'))
