@@ -115,9 +115,9 @@ Refer to repository above for complete setup and configuration details.
 ### Model Architecture
 
 ```
-Single-channel input → (256 x 312) frequency x time mel spectrogram
+Single-channel input → (1, 256, 312) channel x frequency x time mel spectrogram
   ↓
-ResNet50 backbone (3,4,6,3 Bottleneck blocks) → (8 x 10 x 2048) feature map
+ResNet50 backbone (3,4,6,3 Bottleneck blocks) → (2048, 8, 10) feature map
   ↓
 AdaptiveConcatPool2d [max, avg] → 4096 features
   ↓
