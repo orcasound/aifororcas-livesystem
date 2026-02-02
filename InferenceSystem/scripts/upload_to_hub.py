@@ -13,13 +13,14 @@ SCRIPT_DIR = Path(__file__).parent
 ROOT_DIR = SCRIPT_DIR.parent
 sys.path.insert(0, str(ROOT_DIR / "src"))
 
-from model_v1.inference import OrcaHelloSRKWDetectorV1
+from model_v1 import OrcaHelloSRKWDetectorV1
 from huggingface_hub import HfApi, upload_file
 
 DEFAULT_REPO_ID = "orcasound/orcahello-srkw-detector-v1"
 DEFAULT_MODEL_CARD = ROOT_DIR / "model/MODEL_CARD.md"
 DEFAULT_LICENSE = ROOT_DIR / "model/LICENSE"
 DEFAULT_HERO_IMAGE = ROOT_DIR / "model/img-orca_fin_waveform.jpg"
+DEFAULT_CONFIG = ROOT_DIR / "model/config.yaml"
 
 def main():
     # Check for HF_TOKEN environment variable
@@ -35,7 +36,7 @@ def main():
     parser.add_argument("-m", "--commit-message", required=True, help="Commit message for upload")
     parser.add_argument("--repo-id", default=DEFAULT_REPO_ID, help=f"HuggingFace repo ID (default: {DEFAULT_REPO_ID})")
     parser.add_argument("--checkpoint", type=Path, default=ROOT_DIR / "model/model_v1.pt", help="Path to model checkpoint")
-    parser.add_argument("--config", type=Path, default=ROOT_DIR / "tests/test_config.yaml", help="Path to config YAML")
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG, help="Path to config YAML")
     parser.add_argument("--model-card", type=Path, default=DEFAULT_MODEL_CARD, help="Path to model card (README.md)")
     parser.add_argument("--license-file", type=Path, default=DEFAULT_LICENSE, help="Path to LICENSE file")
     args = parser.parse_args()
@@ -52,11 +53,11 @@ def main():
     # Load config
     print(f"Loading config from {args.config}")
     with open(args.config) as f:
-        config = yaml.safe_load(f)
+        config_dict = yaml.safe_load(f)
 
     # Load model
     print(f"Loading model from {args.checkpoint}")
-    model = OrcaHelloSRKWDetectorV1.from_checkpoint(str(args.checkpoint), config)
+    model = OrcaHelloSRKWDetectorV1.from_checkpoint(str(args.checkpoint), config_dict)
 
     # Create temporary directory for upload
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -80,7 +81,8 @@ def main():
         else:
             print("⚠️  No LICENSE file found")
         
-        # Copy hero image
+        # Copy config and hero image
+        shutil.copy(args.config, tmpdir / "config.yaml")
         shutil.copy(DEFAULT_HERO_IMAGE, tmpdir / "img-orca_fin_waveform.jpg")
 
         # Upload everything to hub
@@ -99,7 +101,8 @@ def main():
 
     print(f"\n✓ Successfully uploaded to: https://huggingface.co/{args.repo_id}")
     print(f"\nFiles uploaded:")
-    print(f"  - config.json (model configuration)")
+    print(f"  - config.yaml (model configuration)")
+    print(f"  - config.json (model configuration: HF serialized)")
     print(f"  - model.safetensors (model weights)")
     if args.model_card and args.model_card.exists():
         print(f"  - README.md (model card)")

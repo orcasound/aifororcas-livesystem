@@ -42,7 +42,7 @@ This model detects the presence of Southern Resident Killer Whale (SRKW) calls i
 
 ## Usage
 
-Follow setup and use code within repository: [Orcasound/aifororcas-livesystem/InferenceSystem/](https://github.com/orcasound/aifororcas-livesystem/tree/main/InferenceSystem):
+Use code within repository: [Orcasound/aifororcas-livesystem/InferenceSystem/](https://github.com/orcasound/aifororcas-livesystem/tree/main/InferenceSystem) after following setup.
 
 ### Quick Start: Detection in audio file
 
@@ -81,7 +81,7 @@ for mel_spec, start_s, duration_s in preprocessor.process_segments("audio.wav"):
 
 ### Configuration
 
-Configuration can be loaded from YAML or created programmatically:
+Configuration can be loaded from YAML to modify inference behavior:
 
 **YAML format** (`config.yaml`):
 ```yaml
@@ -98,10 +98,12 @@ spectrogram:
   mel_f_max: 10000.0
 
 inference:
-  window_s: 2.0
-  window_hop_s: 1.0
+  window_s: 2.0               # segment length
+  window_hop_s: 1.0           # hop between segments
+  max_batch_size: 8           # max segments to process at once in detect_srkw_from_file
   local_conf_threshold: 0.5
   global_pred_threshold: 3
+  strict_segments: true       # if false, allow partial final segment
 ```
 
 
