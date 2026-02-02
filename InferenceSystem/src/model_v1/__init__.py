@@ -5,10 +5,22 @@ This module provides a fastai-free implementation of the OrcaHello SRKW detectio
 It uses pure PyTorch and torchaudio for audio processing and model inference.
 
 Usage:
-    from model_v1.inference import OrcaDetectionModel
+    from model_v1 import OrcaHelloSRKWDetectorV1
 
-    model = OrcaDetectionModel(model_path="./model", threshold=0.5)
-    result = model.predict("path/to/audio.wav")
+    model = OrcaHelloSRKWDetectorV1.from_pretrained("orcasound/orcahello-srkw-detector-v1")
+    result = model.detect_srkw_from_file("path/to/audio.wav")
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
+
+from .inference import OrcaHelloSRKWDetectorV1
+from .types import (
+    DetectorInferenceConfig,
+    DetectionResult,
+)
+
+__all__ = [
+    "OrcaHelloSRKWDetectorV1",
+    "DetectorInferenceConfig",
+    "DetectionResult",
+]

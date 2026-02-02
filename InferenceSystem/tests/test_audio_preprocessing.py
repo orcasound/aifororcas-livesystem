@@ -122,7 +122,7 @@ class TestAudioPreprocessingParity:
             start_time_s=segments_start_s or 0.0,
         )
         references = {}
-        for window_idx, segment_path in enumerate(segments):
+        for window_idx, (segment_path, _, _) in enumerate(segments):
             # Stage B: Pure mel spectrogram (no padding)
             stage_b_spec = prepare_audio_stage_b(segment_path, v1_config)
 
@@ -198,7 +198,7 @@ class TestAudioPreprocessingParity:
         )
 
         mismatches = []
-        for window_idx, segment_path in enumerate(segments):
+        for window_idx, (segment_path, _, _) in enumerate(segments):
             # Process with model_v1 - Stage B only (no standardization)
             waveform, sr = load_audio(segment_path, v1_config["audio"])
             model_v1_spec, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
@@ -261,7 +261,7 @@ class TestAudioPreprocessingParity:
 
         mismatches = []
 
-        for window_idx, segment_path in enumerate(segments):
+        for window_idx, (segment_path, _, _) in enumerate(segments):
             # Process with model_v1 - full pipeline
             model_v1_spec = prepare_audio(segment_path, v1_config)
 
@@ -315,7 +315,7 @@ class TestAudioPreprocessingParity:
         )
 
         mismatches = []
-        for window_idx, segment_path in enumerate(segments):
+        for window_idx, (segment_path, _, _) in enumerate(segments):
             # model_v1 processing
             model_v1_spec = prepare_audio(segment_path, v1_config)
 

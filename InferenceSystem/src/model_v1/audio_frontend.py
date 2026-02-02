@@ -30,6 +30,8 @@ from pydub import AudioSegment
 from scipy.signal import resample_poly
 from torchaudio.transforms import AmplitudeToDB, MelSpectrogram
 
+from .types import DetectorInferenceConfig
+
 
 # =============================================================================
 # Private Helper Functions
@@ -308,7 +310,7 @@ def audio_segment_generator(
     max_segments: Optional[int] = None,
     start_time_s: float = 0.0,
     strict_segments: bool = True,
-) -> Generator[str, None, None]:
+) -> Generator[Tuple[str, float, float], None, None]:
     """
     Generate overlapping audio segments from an audio file.
 
@@ -328,27 +330,15 @@ def audio_segment_generator(
                         that may extend beyond audio duration (matches fastai behavior).
 
     Yields:
-        Path to each generated audio segment file
+        Tuple of (segment_path, start_s, end_s):
+            - segment_path: Path to the generated audio segment file
+            - start_s: Start time of the segment in seconds (float)
+            - end_s: End time of the segment in seconds (float)
 
     Example:
-        >>> # Temporary directory (auto-cleanup)
-        >>> for segment_path in audio_segment_generator("audio.wav", 2.0, 1.0):
+        >>> for segment_path, start_s, end_s in audio_segment_generator("audio.wav", 2.0, 1.0):
         ...     mel_spec = prepare_audio(segment_path, config)
-        ...     # Process immediately, files cleaned up after loop
-
-        >>> # Persistent directory
-        >>> for segment_path in audio_segment_generator(
-        ...     "audio.wav", 2.0, 1.0, output_dir="/data/segments"
-        ... ):
-        ...     # Segment files remain after loop completes
-        ...     pass
-
-        >>> # Allow partial segments (fastai compatibility)
-        >>> for segment_path in audio_segment_generator(
-        ...     "audio.wav", 2.0, 1.0, strict_segments=False
-        ... ):
-        ...     # May include a final partial segment < 2.0s
-        ...     pass
+        ...     print(f"Segment {start_s:.1f}-{end_s:.1f}s")
     """
     with _temp_segment_dir(output_dir) as segment_dir:
         # Get audio duration
@@ -365,17 +355,69 @@ def audio_segment_generator(
 
         # Generate segments
         for i in range(num_segments):
-            start_s = int(i * segment_hop_s + start_time_s)
-            end_s = start_s + int(segment_duration_s)
+            start_s = i * segment_hop_s + start_time_s
+            end_s = start_s + segment_duration_s
 
             # In strict mode, stop if segment extends beyond audio
             # In non-strict mode, allow partial segments (pydub handles gracefully)
             if strict_segments and end_s > audio_duration:
                 break
 
-            # Export segment (pydub will return partial segment if end_s > audio duration)
-            segment_path = f"{segment_dir}/{wav_name}_{start_s}_{end_s}.wav"
-            segment = audio[start_s * 1000 : end_s * 1000]
+            # Export segment (pydub needs milliseconds as integers)
+            start_ms = int(start_s * 1000)
+            end_ms = int(end_s * 1000)
+            segment_path = f"{segment_dir}/{wav_name}_{start_ms:06d}_{end_ms:06d}.wav"
+            segment = audio[start_ms:end_ms]
             segment.export(segment_path, format="wav")
 
-            yield segment_path
+            yield segment_path, start_s, end_s
+
+
+class AudioPreprocessor:
+    """
+    Config-driven wrapper around audio_segment_generator + prepare_audio.
+
+    Args:
+        config: DetectorInferenceConfig or dict with audio/spectrogram/model/inference sections
+    """
+
+    def __init__(self, config):
+        if isinstance(config, DetectorInferenceConfig):
+            self.config = config
+        elif isinstance(config, dict):
+            self.config = DetectorInferenceConfig.from_dict(config)
+        else:
+            raise TypeError(
+                f"config must be DetectorInferenceConfig or dict, got {type(config)}"
+            )
+
+    def process_segments(
+        self,
+        audio_file_path: str,
+    ) -> Generator[Tuple[torch.Tensor, float, float], None, None]:
+        """
+        Generate preprocessed mel spectrogram segments from an audio file.
+
+        Wraps audio_segment_generator() + prepare_audio() into a single
+        generator that yields ready-to-infer tensors.
+
+        Args:
+            audio_file_path: Path to input audio file
+
+        Yields:
+            Tuple of (mel_spectrogram, start_time_s, duration_s):
+                - mel_spectrogram: tensor of shape (1, n_mels, target_frames)
+                - start_time_s: start time of this segment in seconds
+                - duration_s: duration of this segment in seconds
+        """
+        inf = self.config.inference
+        config_dict = self.config.as_dict()
+
+        for segment_path, start_s, end_s in audio_segment_generator(
+            audio_file_path,
+            segment_duration_s=inf.window_s,
+            segment_hop_s=inf.window_hop_s,
+            strict_segments=inf.strict_segments,
+        ):
+            mel_spec = prepare_audio(segment_path, config_dict)
+            yield mel_spec, start_s, inf.window_s

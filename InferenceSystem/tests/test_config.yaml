@@ -16,16 +16,16 @@ spectrogram:
   convert_to_db: true
   top_db: 100
 
-inference:
-  window_s: 2.0               # segment length
-  window_hop_s: 1.0           # hop between segments
-  local_conf_threshold: 0.5
-  global_pred_threshold: 3
-  strict_segments: true       # if false, allow partial final segment (fastai compat)
-
 model:
   name: "orcahello-srkw-detector-v1"
   input_pad_s: 4.0            # audio padded/trimmed to this duration
   num_classes: 2              # binary classification
   call_class_index: 1         # class index for positive (call detected)
+
+inference:
+  window_s: 2.0               # segment length
+  window_hop_s: 1.0           # hop between segments
   max_batch_size: 8           # max segments to process at once in detect_srkw_from_file
+  local_conf_threshold: 0.5
+  global_pred_threshold: 3
+  strict_segments: true       # if false, allow partial final segment (fastai compat)

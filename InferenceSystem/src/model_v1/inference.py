@@ -1,107 +1,17 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from dataclasses import dataclass, asdict
 from torchvision.models import resnet50
-from typing import Dict, Optional, Tuple, List
-from pathlib import Path
+from typing import Dict, Optional, Union, List
 from torch import Tensor
 from huggingface_hub import PyTorchModelHubMixin
 
-from .audio_frontend import audio_segment_generator, prepare_audio
-
-
-def _from_dict(cls, d: Dict):
-    """Helper to create dataclass from dict, ignoring unknown keys."""
-    import dataclasses
-    field_names = {f.name for f in dataclasses.fields(cls)}
-    return cls(**{k: v for k, v in d.items() if k in field_names})
-
-
-@dataclass
-class AudioConfig:
-    downmix_mono: bool = True
-    resample_rate: int = 20000
-
-
-@dataclass
-class SpectrogramConfig:
-    sample_rate: int = 16000
-    n_fft: int = 2560
-    hop_length: int = 256
-    mel_n_filters: int = 256
-    mel_f_min: float = 0.0
-    mel_f_max: float = 10000.0
-    mel_f_pad: int = 0
-    convert_to_db: bool = True
-    top_db: int = 100
-
-
-@dataclass
-class InferenceConfig:
-    window_s: float = 2.0
-    window_hop_s: float = 1.0
-    local_conf_threshold: float = 0.5
-    global_pred_threshold: int = 3
-    strict_segments: bool = True  # If False, allow partial final segment (fastai compat)
-
-
-@dataclass
-class ModelConfig:
-    name: str = "orcahello-srkw-detector-v1"
-    input_pad_s: float = 4.0
-    num_classes: int = 2
-    call_class_index: int = 1
-    max_batch_size: int = 32  # Max segments to process at once in detect_srkw_from_file
-
-
-@dataclass
-class DetectorInferenceConfig:
-    """Full config for detector inference, validated from YAML dict."""
-    audio: AudioConfig = None
-    spectrogram: SpectrogramConfig = None
-    inference: InferenceConfig = None
-    model: ModelConfig = None
-
-    def __post_init__(self):
-        self.audio = self.audio or AudioConfig()
-        self.spectrogram = self.spectrogram or SpectrogramConfig()
-        self.inference = self.inference or InferenceConfig()
-        self.model = self.model or ModelConfig()
-
-    @classmethod
-    def from_dict(cls, d: Dict) -> "DetectorInferenceConfig":
-        """Create config from nested YAML dict."""
-        return cls(
-            audio=_from_dict(AudioConfig, d.get("audio", {})),
-            spectrogram=_from_dict(SpectrogramConfig, d.get("spectrogram", {})),
-            inference=_from_dict(InferenceConfig, d.get("inference", {})),
-            model=_from_dict(ModelConfig, d.get("model", {})),
-        )
-
-@dataclass
-class SegmentPrediction:
-    start_time_s: float
-    duration_s: float
-    confidence: float
-
-@dataclass
-class DetectionResult:
-    """
-    Detection result matching the fastai inference output format.
-    
-    Attributes:
-        local_predictions: List of binary predictions (0/1) for each time segment
-        local_confidences: List of confidence scores for each time segment
-        global_prediction: Binary prediction (0/1) indicating if orca calls were detected
-        global_confidence: Mean confidence score across positive detections (0-100)
-    """
-    local_predictions: List[int]
-    local_confidences: List[float]
-    segment_predictions: List[SegmentPrediction]
-    global_prediction: int
-    global_confidence: float
-    wav_file_path: str
+from .audio_frontend import AudioPreprocessor
+from .types import (
+    DetectorInferenceConfig,
+    SegmentPrediction,
+    DetectionResult,
+)
 
 
 
@@ -205,7 +115,11 @@ class OrcaHelloSRKWDetectorV1(
             logits = self.forward(x)
             return F.softmax(logits, dim=1)[:, self.call_class_index].squeeze()
     
-    def detect_srkw_from_file(self, wav_file_path: str, config: Optional[Dict] = None) -> DetectionResult:
+    def detect_srkw_from_file(
+        self,
+        wav_file_path: str,
+        config: Optional[Union[Dict, DetectorInferenceConfig]] = None
+    ) -> DetectionResult:
         """
         Detect SRKW calls from a WAV file.
 
@@ -217,47 +131,39 @@ class OrcaHelloSRKWDetectorV1(
 
         Args:
             wav_file_path: Path to the WAV file
-            config: Optional configuration dict - values override self.config defaults.
+            config: Optional configuration - values override self.config defaults.
+                    Can be a dict or DetectorInferenceConfig object.
                     If None, uses self.config from model initialization.
 
         Returns:
             DetectionResult with local predictions, confidences, and global prediction
         """
         # Parse overrides and merge with stored config defaults
-        if config is not None:
-            overrides = DetectorInferenceConfig.from_dict(config)
-        else:
+        if config is None:
             overrides = self.config
+        elif isinstance(config, DetectorInferenceConfig):
+            overrides = config
+        else:
+            # Dict -- backward compatible path
+            overrides = DetectorInferenceConfig.from_dict(config)
+
         inf = overrides.inference
 
         # Use override values (they fall back to defaults if not in config dict)
         local_conf_threshold = inf.local_conf_threshold
         global_pred_threshold = inf.global_pred_threshold
-        segment_duration_s = inf.window_s
-        segment_hop_s = inf.window_hop_s
-        strict_segments = inf.strict_segments
+        max_batch_size = inf.max_batch_size
 
-        # Generate segments and process into spectrograms
+        # Generate segments and process into spectrograms using AudioPreprocessor
+        preprocessor = AudioPreprocessor(overrides)
         spectrograms = []
         segment_info = []  # Track start times and durations
 
-        for segment_path in audio_segment_generator(
-            wav_file_path,
-            segment_duration_s=segment_duration_s,
-            segment_hop_s=segment_hop_s,
-            strict_segments=strict_segments
-        ):
-            # Extract start time from filename: "basename_start_end.wav"
-            filename = Path(segment_path).stem
-            parts = filename.split('_')
-            start_s = int(parts[-2])
-
-            # Convert segment to spectrogram (pass raw dict for audio_frontend compatibility)
-            mel_spec = prepare_audio(segment_path, asdict(overrides))
+        for mel_spec, start_s, duration_s in preprocessor.process_segments(wav_file_path):
             spectrograms.append(mel_spec)
             segment_info.append({
-                'start_time_s': float(start_s),
-                'duration_s': segment_duration_s
+                'start_time_s': start_s,
+                'duration_s': duration_s
             })
 
         if len(spectrograms) == 0:
@@ -272,7 +178,6 @@ class OrcaHelloSRKWDetectorV1(
             )
 
         # Process spectrograms in batches to control memory usage
-        max_batch_size = overrides.model.max_batch_size
         all_confidences = []
 
         # Get model device
