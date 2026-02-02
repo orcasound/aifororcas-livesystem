@@ -274,10 +274,15 @@ class OrcaHelloSRKWDetectorV1(
         # Process spectrograms in batches to control memory usage
         max_batch_size = overrides.model.max_batch_size
         all_confidences = []
-        
+
+        # Get model device
+        model_device = next(self.parameters()).device
+
         for batch_start in range(0, len(spectrograms), max_batch_size):
             batch_end = min(batch_start + max_batch_size, len(spectrograms))
             batch = torch.stack(spectrograms[batch_start:batch_end])
+            # Move batch to model's device
+            batch = batch.to(model_device)
             batch_confidences = self.predict_call(batch)
             all_confidences.append(batch_confidences.cpu())
 
