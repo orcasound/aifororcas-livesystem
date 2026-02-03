@@ -8,6 +8,8 @@ source model-v1-venv/bin/activate
 uv pip install -r requirements-model-v1.txt
 ```
 
+Then follow usage instructions in the [model card](model/MODEL_CARD.md).
+
 # Working with the InferenceSystem
 
 The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py).
