@@ -1,3 +1,13 @@
+# Using the OrcaHello SRKW Detector V1 model 
+
+If you are here from [HuggingFace](https://huggingface.co/orcasound/orcahello-srkw-detector-v1), setup a python venv as below:
+
+```
+uv venv model-v1-venv --python 3.11
+source model-v1-venv/bin/activate
+uv pip install -r requirements-model-v1.txt
+```
+
 # Working with the InferenceSystem
 
 The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py).

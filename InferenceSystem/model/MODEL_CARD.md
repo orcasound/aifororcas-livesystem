@@ -35,14 +35,14 @@ This model detects the presence of Southern Resident Killer Whale (SRKW) calls i
 - **License**: OrcaHello RAIL (Responsible AI License) - See LICENSE file
 - **Finetuned from**: ResNet50 ImageNet pretrained weights
 - **Date trained**: November 2020
-- **Code**: [Orcasound/aifororcas-livesystem/InferenceSystem](https://github.com/orcasound/aifororcas-livesystem/tree/main/InferenceSystem)
+- **Code**: [Orcasound/aifororcas-livesystem/InferenceSystem](https://github.com/orcasound/aifororcas-livesystem/tree/main/InferenceSystem); use branch [akash/inference-v1-nofastai](https://github.com/orcasound/aifororcas-livesystem/tree/akash/inference-v1-nofastai/InferenceSystem) for now.
 
 **Note**: This is a port of the original FastAI model to pure PyTorch for easier usage and deployment.
 
 
 ## Usage
 
-Use code within repository: [Orcasound/aifororcas-livesystem/InferenceSystem/](https://github.com/orcasound/aifororcas-livesystem/tree/main/InferenceSystem) after following setup.
+Follow setup instructions in the code linked above. Then use module `src` as follows below:
 
 ### Quick Start: Detection in audio file
 
@@ -156,15 +156,19 @@ TODO: WIP
 
 **BibTeX:**
 
+Example below:
 ```bibtex
-@software{orcahello_srkw_detector_v1,
-  author = {Akash Mahajan and Prakruti Gogia and Aayush Agrawal},
-  title = {OrcaHello SRKW Detector V1},
-  year = {2020},
-  url = {https://huggingface.co/orcasound/orcahello-srkw-detector-v1},
-  license = {OrcaHello-RAIL}
+@misc{akash_mahajan_2026,
+	author       = { Akash Mahajan and Prakruti Gogia and Aayush Agrawal },
+	title        = { orcahello-srkw-detector-v1 (Revision 6ccff28) },
+  year         = { 2020 },
+	url          = { https://huggingface.co/orcasound/orcahello-srkw-detector-v1 },
+	doi          = { 10.57967/hf/7703 },
+	publisher    = { Hugging Face },
 }
 ```
+
+Grab the latest DOI with revision from the model card [here](https://huggingface.co/orcasound/orcahello-srkw-detector-v1?doi=true).
 
 
 ## License
