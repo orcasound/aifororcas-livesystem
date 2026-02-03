@@ -8,6 +8,7 @@ import os
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import cv2
+import gc
 
 import json
 import math
@@ -85,6 +86,13 @@ def write_spectrogram(wav_file_path):
 
     cv2.imwrite(spec_output_path, canvas)
 
+    # Explicitly clean up large arrays to reduce memory usage
+    del canvas, spec1, spec2, y, y_first_half, y_second_half
+    del X_first_half, Xdb_first_half, X_second_half, Xdb_second_half
+    
+    # Force garbage collection after each spectrogram
+    gc.collect()
+
     return spec_output_path
 
 
@@ -119,3 +127,9 @@ def write_annotations_on_spectrogram(wav_file_path, wav_timestamp, data, spec_ou
             
     image = cv2.putText(image, str(wav_timestamp), (0, 20), font, 0.5, (255, 255, 255), 2, cv2.LINE_AA, False)
     cv2.imwrite(spec_output_path, image)
+    
+    # Clean up large objects to reduce memory usage
+    del y, S, S_dB, image
+    
+    # Force garbage collection
+    gc.collect()
