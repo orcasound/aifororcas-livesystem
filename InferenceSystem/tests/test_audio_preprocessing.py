@@ -20,9 +20,9 @@ class TestAudioPreprocessingUnit:
 
     def test_load_audio(self, sample_1min_wav, v1_config):
         """Test that audio loads correctly with config"""
-        from model_v1.audio_frontend import load_audio
+        from model_v1.audio_frontend import load_processed_waveform
 
-        waveform, sr = load_audio(sample_1min_wav, v1_config["audio"])
+        waveform, sr = load_processed_waveform(sample_1min_wav, v1_config["audio"])
 
         assert isinstance(waveform, torch.Tensor)
         assert waveform.ndim == 2  # (channels, samples)
@@ -31,9 +31,9 @@ class TestAudioPreprocessingUnit:
 
     def test_featurize_waveform(self, sample_1min_wav, v1_config):
         """Test mel spectrogram feature extraction"""
-        from model_v1.audio_frontend import featurize_waveform, load_audio
+        from model_v1.audio_frontend import featurize_waveform, load_processed_waveform
 
-        waveform, sr = load_audio(sample_1min_wav, v1_config["audio"])
+        waveform, sr = load_processed_waveform(sample_1min_wav, v1_config["audio"])
         features, times, freqs = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
         # Check feature shape
@@ -50,9 +50,9 @@ class TestAudioPreprocessingUnit:
 
     def test_standardize(self, sample_1min_wav, v1_config):
         """Test spectrogram standardization (pad/crop)"""
-        from model_v1.audio_frontend import featurize_waveform, load_audio, standardize
+        from model_v1.audio_frontend import featurize_waveform, load_processed_waveform, standardize
 
-        waveform, sr = load_audio(sample_1min_wav, v1_config["audio"])
+        waveform, sr = load_processed_waveform(sample_1min_wav, v1_config["audio"])
         features, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
         # Add resample_rate to model_config
@@ -167,7 +167,7 @@ class TestAudioPreprocessingParity:
         Tests mel spectrogram generation from raw 2-second clips WITHOUT padding.
         This isolates the core mel computation (downmix -> resample -> mel spec).
         """
-        from model_v1.audio_frontend import featurize_waveform, load_audio
+        from model_v1.audio_frontend import featurize_waveform, load_processed_waveform
 
         wav_name = Path(sample_1min_wav).stem
         reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
@@ -200,7 +200,7 @@ class TestAudioPreprocessingParity:
         mismatches = []
         for window_idx, (segment_path, _, _) in enumerate(segments):
             # Process with model_v1 - Stage B only (no standardization)
-            waveform, sr = load_audio(segment_path, v1_config["audio"])
+            waveform, sr = load_processed_waveform(segment_path, v1_config["audio"])
             model_v1_spec, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
             # Get reference Stage B

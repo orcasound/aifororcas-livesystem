@@ -5,7 +5,7 @@ This module provides audio loading and mel spectrogram generation that matches
 the fastai_audio implementation exactly for inference parity.
 
 Interfaces:
-- load_audio(file_path, audio_config) -> (waveform, sample_rate)
+- load_processed_waveform(file_path, audio_config) -> (waveform, sample_rate)
 - featurize_waveform(waveform, sample_rate, spectrogram_config) -> (features, times, freqs)
 - standardize(spectrogram, model_config, spectrogram_config) -> spectrogram
 - prepare_audio(file_path, config) -> spectrogram
@@ -16,6 +16,7 @@ for MelSpectrogram even though audio is resampled to 20kHz. This is replicated
 here for exact parity with the trained model.
 """
 
+import dataclasses
 import math
 import tempfile
 from contextlib import contextmanager
@@ -117,9 +118,9 @@ def _compute_mel_spectrogram(
 # =============================================================================
 
 
-def load_audio(file_path: str, audio_config: Dict) -> Tuple[torch.Tensor, int]:
+def load_processed_waveform(file_path: str, audio_config: Dict) -> Tuple[torch.Tensor, int]:
     """
-    Load audio file with preprocessing (downmix, resample).
+    Load audio file and apply waveform-level preprocessing (downmix, resample).
 
     Args:
         file_path: Path to audio file
@@ -256,9 +257,46 @@ def standardize(
     return spectrogram
 
 
+def prepare_waveform(waveform: torch.Tensor, sample_rate: int, config: Dict) -> torch.Tensor:
+    """
+    Featurize and standardize a pre-loaded waveform tensor into a mel spectrogram.
+
+    Used by AudioPreprocessor.process_segments() which handles file loading separately.
+    Does NOT call load_processed_waveform — assumes the caller has already performed
+    downmix and resampling.
+
+    NOTE: prepare_audio() (below) is kept for backward compatibility and pytest use.
+    It is the file-path-based equivalent of load_processed_waveform + prepare_waveform.
+
+    Args:
+        waveform: Pre-processed audio tensor of shape (1, samples)
+        sample_rate: Sample rate of the waveform (should already be the target rate)
+        config: Full config dict with sections:
+            - audio: {resample_rate} (used only for standardize frame calculation)
+            - spectrogram: {sample_rate, n_fft, hop_length, mel_n_filters,
+                           mel_f_min, mel_f_max, mel_f_pad, convert_to_db, top_db}
+            - model: {input_pad_s}
+
+    Returns:
+        Mel spectrogram tensor ready for model inference, shape (1, n_mels, target_frames)
+    """
+    audio_config = config["audio"]
+    spectrogram_config = config["spectrogram"]
+    model_config = config["model"]
+
+    model_config_with_sr = {**model_config, "resample_rate": audio_config["resample_rate"]}
+
+    features, _, _ = featurize_waveform(waveform, sample_rate, spectrogram_config)
+    features = standardize(features, model_config_with_sr, spectrogram_config)
+    return features
+
+
 def prepare_audio(file_path: str, config: Dict) -> torch.Tensor:
     """
-    Complete audio preprocessing pipeline.
+    Complete audio preprocessing pipeline (file path → mel spectrogram).
+
+    NOTE: Kept for backward compatibility and use in pytest / standalone scripts.
+    AudioPreprocessor.process_segments() uses prepare_waveform() instead.
 
     Args:
         file_path: Path to audio file
@@ -271,23 +309,8 @@ def prepare_audio(file_path: str, config: Dict) -> torch.Tensor:
     Returns:
         Mel spectrogram tensor ready for model inference, shape (1, n_mels, target_frames)
     """
-    audio_config = config["audio"]
-    spectrogram_config = config["spectrogram"]
-    model_config = config["model"]
-
-    # Add resample_rate to model_config for standardize()
-    model_config_with_sr = {**model_config, "resample_rate": audio_config["resample_rate"]}
-
-    # Load and preprocess audio
-    waveform, sample_rate = load_audio(file_path, audio_config)
-
-    # Extract mel spectrogram features
-    features, times, freqs = featurize_waveform(waveform, sample_rate, spectrogram_config)
-
-    # Standardize to fixed frame count
-    features = standardize(features, model_config_with_sr, spectrogram_config)
-
-    return features
+    waveform, sample_rate = load_processed_waveform(file_path, config["audio"])
+    return prepare_waveform(waveform, sample_rate, config)
 
 
 @contextmanager
@@ -310,6 +333,7 @@ def audio_segment_generator(
     max_segments: Optional[int] = None,
     start_time_s: float = 0.0,
     strict_segments: bool = True,
+    process_waveform_config: Optional[Dict] = None,
 ) -> Generator[Tuple[str, float, float], None, None]:
     """
     Generate overlapping audio segments from an audio file.
@@ -328,6 +352,12 @@ def audio_segment_generator(
         strict_segments: If True (default), only generate segments that fit completely
                         within audio duration. If False, allow final partial segment
                         that may extend beyond audio duration (matches fastai behavior).
+        process_waveform_config: Optional dict with keys `downmix_mono` and `resample_rate`.
+                      When provided, the full audio is preprocessed (downmixed + resampled)
+                      once before segmenting. Exported segment WAVs are already at the
+                      target sample rate. Name makes clear at call sites whether waveform
+                      preprocessing has already been applied. When None (default), the
+                      original file is segmented as-is (backward compatible).
 
     Yields:
         Tuple of (segment_path, start_s, end_s):
@@ -341,12 +371,23 @@ def audio_segment_generator(
         ...     print(f"Segment {start_s:.1f}-{end_s:.1f}s")
     """
     with _temp_segment_dir(output_dir) as segment_dir:
-        # Get audio duration
-        audio_duration = get_duration(path=audio_file_path)
         wav_name = Path(audio_file_path).stem
 
+        if process_waveform_config is not None:
+            # Preprocess the full audio (downmix + resample) once, then segment.
+            # Write a temporary resampled WAV so pydub can slice it at the target SR.
+            waveform, target_sr = load_processed_waveform(audio_file_path, process_waveform_config)
+            resampled_wav_path = f"{segment_dir}/_resampled_{wav_name}.wav"
+            sf.write(resampled_wav_path, waveform.squeeze(0).numpy(), target_sr)
+            source_path = resampled_wav_path
+        else:
+            source_path = audio_file_path
+
+        # Get audio duration from (possibly resampled) source
+        audio_duration = get_duration(path=source_path)
+
         # Load audio (from_file handles WAV, FLAC, OGG, etc. via ffmpeg)
-        audio = AudioSegment.from_file(audio_file_path)
+        audio = AudioSegment.from_file(source_path)
 
         # Calculate number of segments.
         # strict: only complete hops fit; non-strict: ceil so a file shorter than one
@@ -418,12 +459,18 @@ class AudioPreprocessor:
         """
         inf = self.config.inference
         config_dict = self.config.as_dict()
+        waveform_config = dataclasses.asdict(self.config.audio)
 
         for segment_path, start_s, end_s in audio_segment_generator(
             audio_file_path,
             segment_duration_s=inf.window_s,
             segment_hop_s=inf.window_hop_s,
             strict_segments=inf.strict_segments,
+            process_waveform_config=waveform_config,
         ):
-            mel_spec = prepare_audio(segment_path, config_dict)
+            # Segments are already at the target sample rate (preprocessed in the generator).
+            # Load directly with soundfile — no further resampling needed.
+            data, sample_rate = sf.read(segment_path, dtype="float32")
+            waveform = torch.from_numpy(data.reshape(1, -1))
+            mel_spec = prepare_waveform(waveform, sample_rate, config_dict)
             yield mel_spec, start_s, inf.window_s
