@@ -345,8 +345,8 @@ def audio_segment_generator(
         audio_duration = get_duration(path=audio_file_path)
         wav_name = Path(audio_file_path).stem
 
-        # Load audio
-        audio = AudioSegment.from_wav(audio_file_path)
+        # Load audio (from_file handles WAV, FLAC, OGG, etc. via ffmpeg)
+        audio = AudioSegment.from_file(audio_file_path)
 
         # Calculate number of segments
         num_segments = int(np.floor((audio_duration - start_time_s) / segment_hop_s))

@@ -19,6 +19,7 @@
 | 4.5 | Investigate/fix differences | COMPLETE |
 | 5 | HuggingFace Hub integration | COMPLETE |
 | 6 | CI integration | NOT STARTED |
+| 8 | FLAC audio frontend support | IN PROGRESS |
 
 ---
 

@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-"""Test model_v1 inference on a local WAV file and compare with fastai."""
+"""Run model_v1 inference on a local audio file (WAV, FLAC, or any ffmpeg-supported format).
+
+Usage:
+    python scripts/run_inference.py                          # uses default WAV test file
+    python scripts/run_inference.py path/to/audio.wav
+    python scripts/run_inference.py path/to/audio.flac
+"""
 import os
 import sys
 import yaml
@@ -10,16 +16,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from model_v1.inference import OrcaHelloSRKWDetectorV1
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_data')
-DEFAULT_WAV_PATH = os.path.join(TEST_DATA_DIR, "rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav")
+DEFAULT_AUDIO_PATH = os.path.join(TEST_DATA_DIR, "rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav")
 
 
 def main():
-    # Default to the test WAV file in tests/test_data
-    wav_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_WAV_PATH
+    # Accept any audio file path as argument; fall back to default WAV test file
+    audio_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_AUDIO_PATH
 
     # Model and config paths relative to InferenceSystem directory
     model_path = os.path.join(os.path.dirname(__file__), '..', 'model', 'model_v1.pt')
-    config_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_config.yaml')
+    config_path = os.path.join(os.path.dirname(__file__), '..', 'model', 'config.yaml')
 
     # Load config
     with open(config_path, 'r') as f:
@@ -27,14 +33,14 @@ def main():
 
     print(f"Loading model from: {model_path}")
     print(f"Using config from: {config_path}")
-    print(f"Testing WAV file: {wav_path}")
+    print(f"Testing audio file: {audio_path}")
     print("-" * 60)
 
     # Load model
     model = OrcaHelloSRKWDetectorV1.from_checkpoint(model_path, config)
 
     # Run inference
-    result = model.detect_srkw_from_file(wav_path, config)
+    result = model.detect_srkw_from_file(audio_path, config)
 
     # Print local predictions and confidences in aligned table format
     print("\nLocal Predictions (per 2-second segment):")
@@ -55,10 +61,7 @@ def main():
     if positive_segments:
         print(f"Detected in segments: {positive_segments}")
 
-    # global_confidence (float)
     print(f"\nglobal_confidence: {result.global_confidence:.3f}")
-
-    # global_prediction (int)
     print(f"global_prediction: {result.global_prediction}")
 
     if result.global_prediction == 1:
