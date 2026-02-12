@@ -127,6 +127,7 @@ def load_processed_waveform(file_path: str, audio_config: Dict) -> Tuple[torch.T
         audio_config: Dict with keys:
             - downmix_mono: bool - whether to downmix to mono
             - resample_rate: int - target sample rate (e.g., 20000)
+            - normalize: bool - peak-normalize waveform so max(|x|) = 1.0 (default: False)
 
     Returns:
         Tuple of (waveform tensor [1, samples], sample_rate)
@@ -148,6 +149,12 @@ def load_processed_waveform(file_path: str, audio_config: Dict) -> Tuple[torch.T
     # Resample to target rate
     target_sr = audio_config["resample_rate"]
     waveform = _resample_audio(waveform, orig_sr, target_sr)
+
+    # Peak-normalize: scale so max(|x|) = 1.0 (matches librosa.util.normalize default)
+    if audio_config.get("normalize", False):
+        peak = waveform.abs().max()
+        if peak > 0:
+            waveform = waveform / peak
 
     return waveform, target_sr
 
@@ -375,11 +382,11 @@ def audio_segment_generator(
 
         if process_waveform_config is not None:
             # Preprocess the full audio (downmix + resample) once, then segment.
-            # Write a temporary resampled WAV so pydub can slice it at the target SR.
+            # Write a temporary processed WAV so pydub can slice it at the target SR.
             waveform, target_sr = load_processed_waveform(audio_file_path, process_waveform_config)
-            resampled_wav_path = f"{segment_dir}/_resampled_{wav_name}.wav"
-            sf.write(resampled_wav_path, waveform.squeeze(0).numpy(), target_sr)
-            source_path = resampled_wav_path
+            processed_wav_path = f"{segment_dir}/_processed_{wav_name}.wav"
+            sf.write(processed_wav_path, waveform.squeeze(0).numpy(), target_sr)
+            source_path = processed_wav_path
         else:
             source_path = audio_file_path
 

@@ -2,7 +2,7 @@
 
 **Date**: 2026-02-11
 **Branch**: `akash/inference-v1-nofastai`
-**Status**: Tasks 0-5, 8, 9 Complete
+**Status**: Tasks 0-5, 8-10 Complete
 
 ---
 
@@ -21,12 +21,13 @@
 | 6 | CI integration | NOT STARTED |
 | 8 | FLAC audio frontend support | COMPLETE |
 | 9 | Audio frontend refactor | COMPLETE |
+| 10 | Waveform normalization | COMPLETE |
 
 ---
 
-## Current Focus: Task 5 Complete - HuggingFace Hub Integration
+## Current Focus: Tasks 8-10 Complete - Audio Frontend Improvements
 
-Successfully integrated PyTorchModelHubMixin into OrcaHelloSRKWDetectorV1. Model can now be uploaded to and loaded from HuggingFace Hub.
+Extended audio frontend with FLAC support (Task 8), refactored preprocessing into `audio_segment_generator` with `prepare_waveform` for the processor path (Task 9), and added configurable peak normalization to `AudioConfig` (Task 10).
 
 ### Resolution: `strict_segments` Parameter
 

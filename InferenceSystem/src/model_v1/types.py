@@ -19,6 +19,7 @@ def _from_dict(cls, d: Dict):
 class AudioConfig:
     downmix_mono: bool = True
     resample_rate: int = 20000
+    normalize: bool = False
 
 @dataclass
 class SpectrogramConfig:
