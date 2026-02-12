@@ -348,8 +348,14 @@ def audio_segment_generator(
         # Load audio (from_file handles WAV, FLAC, OGG, etc. via ffmpeg)
         audio = AudioSegment.from_file(audio_file_path)
 
-        # Calculate number of segments
-        num_segments = int(np.floor((audio_duration - start_time_s) / segment_hop_s))
+        # Calculate number of segments.
+        # strict: only complete hops fit; non-strict: ceil so a file shorter than one
+        # hop still yields one segment (pydub slices gracefully beyond file end).
+        effective_duration = audio_duration - start_time_s
+        if strict_segments:
+            num_segments = int(np.floor(effective_duration / segment_hop_s))
+        else:
+            num_segments = int(np.ceil(effective_duration / segment_hop_s))
         if max_segments is not None:
             num_segments = min(max_segments, num_segments)
 
