@@ -56,10 +56,12 @@ def main():
     # Summary statistics
     num_positive = sum(result.local_predictions)
     positive_segments = [i+1 for i, pred in enumerate(result.local_predictions) if pred == 1]
+    positive_segment_times = [result.segment_predictions[i].start_time_s for i in positive_segments]
 
     print(f"\nSummary: {num_positive}/{len(result.local_predictions)} segments predicted positive")
     if positive_segments:
         print(f"Detected in segments: {positive_segments}")
+        print(f"Detected in times: {positive_segment_times}")
 
     print(f"\nglobal_confidence: {result.global_confidence:.3f}")
     print(f"global_prediction: {result.global_prediction}")

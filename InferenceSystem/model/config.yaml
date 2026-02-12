@@ -4,6 +4,7 @@
 audio:
   downmix_mono: true
   resample_rate: 20000        # Hz
+  normalize: true             # peak-normalize waveform to max(|x|)=1.0
 
 spectrogram:
   sample_rate: 16000          # torchaudio default (fastai quirk)
@@ -23,8 +24,8 @@ model:
   call_class_index: 1         # class index for positive (call detected)
 
 inference:
-  window_s: 2.0               # segment length
-  window_hop_s: 1.0           # hop between segments
+  window_s: 3.0               # segment length
+  window_hop_s: 2.0           # hop between segments
   max_batch_size: 8           # max segments to process at once in detect_srkw_from_file
   local_conf_threshold: 0.5
   global_pred_threshold: 3
