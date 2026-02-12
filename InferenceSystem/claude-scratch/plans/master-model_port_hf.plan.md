@@ -2,7 +2,7 @@
 
 **Last Updated**: 2026-02-11
 **Branch**: `akash/inference-v1-nofastai`
-**Status**: Tasks 0-5 Complete; Task 8 (FLAC support) IN PROGRESS
+**Status**: Tasks 0-5, 8 Complete
 
 ## Overview
 
@@ -25,7 +25,7 @@ Port the OrcaHello SRKW detection model from fastai to pure PyTorch, removing th
 | 4.5 | Investigate/Fix Differences | COMPLETE | `segment_count_investigation.md` |
 | 5 | HuggingFace Hub Integration | **COMPLETE** | `task-5-huggingface_upload.plan.md` |
 | 6 | CI Integration | NOT STARTED | (create when starting) |
-| 8 | FLAC Audio Frontend Support | IN PROGRESS | `task-8-flac_audio_support.plan.md` |
+| 8 | FLAC Audio Frontend Support | COMPLETE | `task-8-flac_audio_support.plan.md` |
 
 ---
 
