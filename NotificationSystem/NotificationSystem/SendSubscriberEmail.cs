@@ -35,14 +35,13 @@ namespace NotificationSystem
         }
 
         [Function("SendSubscriberEmail")]
-        // TODO: change timer to once per hour (0 0 * * * *)
         public async Task Run(
-            [TimerTrigger("0 */1 * * * *")] string timerInfo,
+            [TimerTrigger("0 */30 * * * *")] string timerInfo,
             [TableInput("EmailList", Connection = "OrcaNotificationStorageSetting")] TableClient tableClient)
         {
             // Initialize OrcasiteHelper to fetch feeds data
             await _orcasiteHelper.InitializeAsync(_configuration);
-            
+
             string queueConnection = Environment.GetEnvironmentVariable("OrcaNotificationStorageSetting");
             var queueClient = new QueueClient(queueConnection, "srkwfound");
 
@@ -55,27 +54,31 @@ namespace NotificationSystem
                 return;
             }
 
-            _logger.LogInformation("Creating email message");
+            _logger.LogInformation("Retrieving queued detections");
             List<JObject> messages = await GetMessages(queueClient);
+
+            if (messages.Count == 0)
+            {
+                _logger.LogInformation("No messages retrieved from queue");
+                return;
+            }
+
+            _logger.LogInformation($"Batching {messages.Count} detection(s) into a single email");
+            string emailSubject = EmailTemplate.GetBatchSubscriberEmailSubject(messages);
+            string body = EmailTemplate.GetBatchSubscriberEmailBody(messages, _orcasiteHelper);
 
             var timeConstraint = TimeLimiter.GetFromMaxCountByInterval(SendRate, TimeSpan.FromSeconds(1));
             var aws = new AmazonSimpleEmailServiceClient(RegionEndpoint.USWest2);
             _logger.LogInformation("Retrieving email list and sending notifications");
-            foreach (var message in messages)
+            foreach (var emailEntity in await EmailHelpers.GetEmailEntitiesAsync<SubscriberEmailEntity>(tableClient, "Subscriber"))
             {
-                string location = EmailTemplate.GetLocation(message);
-                string emailSubject = EmailTemplate.GetSubscriberEmailSubject(location);
-                string body = CreateBody(message);
-                foreach (var emailEntity in await EmailHelpers.GetEmailEntitiesAsync<SubscriberEmailEntity>(tableClient, "Subscriber"))
-                {
-                    await timeConstraint;
-                    var email = EmailHelpers.CreateEmail(
-                        Environment.GetEnvironmentVariable("SenderEmail"),
-                        emailEntity.Email,
-                        emailSubject,
-                        body);
-                    await aws.SendEmailAsync(email);
-                }
+                await timeConstraint;
+                var email = EmailHelpers.CreateEmail(
+                    Environment.GetEnvironmentVariable("SenderEmail"),
+                    emailEntity.Email,
+                    emailSubject,
+                    body);
+                await aws.SendEmailAsync(email);
             }
         }
 
@@ -96,11 +99,5 @@ namespace NotificationSystem
             return messagesJson;
         }
 
-        private string CreateBody(JObject messageJson)
-        {
-            var bodyBuilder = new StringBuilder("<h1>Confirmed SRKW detections:</h1>\n<ul>");
-
-            return EmailTemplate.GetSubscriberEmailBody(messageJson, _orcasiteHelper);
-        }
     }
 }

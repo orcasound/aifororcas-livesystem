@@ -2,6 +2,7 @@
 using NotificationSystem.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace NotificationSystem.Template
@@ -36,6 +37,78 @@ namespace NotificationSystem.Template
         public static string GetSubscriberEmailSubject(string location)
         {
             return $"Notification: Orca detected at location {(string.IsNullOrEmpty(location) ? "Unknown" : location)}";
+        }
+
+        public static string GetBatchSubscriberEmailSubject(List<JObject> messages)
+        {
+            var locations = messages
+                .Select(m => GetLocation(m))
+                .Where(l => !string.IsNullOrEmpty(l))
+                .Distinct()
+                .ToList();
+
+            if (messages.Count == 1)
+            {
+                string location = locations.FirstOrDefault() ?? "Unknown";
+                return $"Notification: Orca detected at location {location}";
+            }
+
+            string locationSummary = locations.Count switch
+            {
+                0 => "Unknown",
+                1 => locations[0],
+                _ => string.Join(", ", locations)
+            };
+
+            return $"Notification: {messages.Count} orca detections at {locationSummary}";
+        }
+
+        public static string GetBatchSubscriberEmailBody(List<JObject> messages, OrcasiteHelper orcasiteHelper = null)
+        {
+            return $"<html><head><style>{GetCSS()}</style></head><body>{GetBatchSubscriberEmailHtml(messages, orcasiteHelper)}</body></html>";
+        }
+
+        private static string GetBatchSubscriberEmailHtml(List<JObject> messages, OrcasiteHelper orcasiteHelper)
+        {
+            var detectionsHtml = new StringBuilder();
+            foreach (var message in messages)
+            {
+                detectionsHtml.Append(GetDetectedSectionHtml(message, orcasiteHelper));
+            }
+
+            string countText = messages.Count == 1
+                ? "a Southern Resident Killer Whale detection was confirmed"
+                : $"{messages.Count} Southern Resident Killer Whale detections were confirmed";
+
+            return $@"
+                <body>
+                <div class='card'>
+                <h1>
+                Southern Resident Killer Whale Detected
+                </h1>
+                <p>
+                Dear subscriber, {countText} in the last 30 minutes.
+                </p>
+                <p>
+                Please be mindful of their presence when travelling in the areas below.
+                </p>
+                <hr/>
+                <h2>
+                Detections
+                </h2>
+                <p>
+                <center>
+                  <table style='width:70%;'>
+                  {detectionsHtml}
+                  </table>
+                </center>
+                </p>
+                </div>
+                <footer>
+                  In partnership with Microsoft AI 4 Earth, Orcasound and Orca Conservancy.
+                </footer>
+                </body>
+            ";
         }
 
         private static string GetSubscriberEmailHtml(JObject message, OrcasiteHelper orcasiteHelper)
