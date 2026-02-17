@@ -289,5 +289,135 @@ namespace NotificationSystem.Tests.Unit
             // Assert
             Assert.Null(location);
         }
+
+        [Fact]
+        public void GetBatchSubscriberEmailSubject_SingleMessage_MatchesSingleFormat()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                CreateTestMessage("Sunset Bay")
+            };
+
+            // Act
+            string subject = EmailTemplate.GetBatchSubscriberEmailSubject(messages);
+
+            // Assert
+            Assert.Equal("Notification: Orca detected at location Sunset Bay", subject);
+        }
+
+        [Fact]
+        public void GetBatchSubscriberEmailSubject_MultipleMessages_SingleLocation()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                CreateTestMessage("Sunset Bay"),
+                CreateTestMessage("Sunset Bay")
+            };
+
+            // Act
+            string subject = EmailTemplate.GetBatchSubscriberEmailSubject(messages);
+
+            // Assert
+            Assert.Equal("Notification: 2 orca detections at Sunset Bay", subject);
+        }
+
+        [Fact]
+        public void GetBatchSubscriberEmailSubject_MultipleMessages_MultipleLocations()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                CreateTestMessage("Sunset Bay"),
+                CreateTestMessage("Bush Point"),
+                CreateTestMessage("Sunset Bay")
+            };
+
+            // Act
+            string subject = EmailTemplate.GetBatchSubscriberEmailSubject(messages);
+
+            // Assert
+            Assert.Equal("Notification: 3 orca detections at Sunset Bay, Bush Point", subject);
+        }
+
+        [Fact]
+        public void GetBatchSubscriberEmailBody_SingleMessage_ContainsDetectionDetails()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                CreateTestMessage("Sunset Bay", "Jane Doe", "Clear calls")
+            };
+
+            // Act
+            string body = EmailTemplate.GetBatchSubscriberEmailBody(messages, null);
+
+            // Assert
+            Assert.Contains("Southern Resident Killer Whale Detected", body);
+            Assert.Contains("a Southern Resident Killer Whale detection was confirmed", body);
+            Assert.Contains("Sunset Bay", body);
+            Assert.Contains("Jane Doe", body);
+            Assert.Contains("Clear calls", body);
+        }
+
+        [Fact]
+        public void GetBatchSubscriberEmailBody_MultipleMessages_ContainsAllDetections()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                CreateTestMessage("Sunset Bay", "Jane Doe", "First detection"),
+                CreateTestMessage("Bush Point", "John Smith", "Second detection")
+            };
+
+            // Act
+            string body = EmailTemplate.GetBatchSubscriberEmailBody(messages, null);
+
+            // Assert
+            Assert.Contains("2 Southern Resident Killer Whale detections were confirmed", body);
+            Assert.Contains("Sunset Bay", body);
+            Assert.Contains("Bush Point", body);
+            Assert.Contains("Jane Doe", body);
+            Assert.Contains("John Smith", body);
+            Assert.Contains("First detection", body);
+            Assert.Contains("Second detection", body);
+            Assert.Contains("sunset-bay.jpg", body);
+            Assert.Contains("bush-point.jpg", body);
+        }
+
+        [Fact]
+        public void GetBatchSubscriberEmailBody_MultipleMessages_ContainsIntervalText()
+        {
+            // Arrange
+            var messages = new List<JObject>
+            {
+                CreateTestMessage("Sunset Bay"),
+                CreateTestMessage("Bush Point")
+            };
+
+            // Act
+            string body = EmailTemplate.GetBatchSubscriberEmailBody(messages, null);
+
+            // Assert
+            Assert.Contains("in the last 30 minutes", body);
+        }
+
+        private static JObject CreateTestMessage(string locationName, string moderator = "Test Moderator", string comments = "Test comments")
+        {
+            return JObject.FromObject(new
+            {
+                timestamp = DateTime.UtcNow,
+                location = new
+                {
+                    name = locationName,
+                    latitude = 47.865,
+                    longitude = -122.334,
+                    id = "test_location"
+                },
+                moderator,
+                comments
+            });
+        }
     }
 }
