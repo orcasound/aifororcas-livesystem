@@ -13,6 +13,7 @@ import yaml
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
+from torch.backends.mps import is_available as is_torch_mps_available
 from model_v1.inference import OrcaHelloSRKWDetectorV1
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_data')
@@ -38,6 +39,9 @@ def main():
 
     # Load model
     model = OrcaHelloSRKWDetectorV1.from_checkpoint(model_path, config)
+    if is_torch_mps_available():
+        print("Using MPS backend for inference")
+        model = model.to("mps")
 
     # Run inference
     result = model.detect_srkw_from_file(audio_path, config)
