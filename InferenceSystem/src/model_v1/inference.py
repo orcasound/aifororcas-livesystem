@@ -17,6 +17,28 @@ from .types import (
 )
 
 
+def _resolve_device(device_str: str) -> torch.device:
+    """Resolve 'auto' to the best available device, or pass through explicit device strings."""
+    if device_str == "auto":
+        if torch.backends.mps.is_available():
+            return torch.device("mps")
+        elif torch.cuda.is_available():
+            return torch.device("cuda")
+        else:
+            return torch.device("cpu")
+    return torch.device(device_str)
+
+
+def _resolve_dtype(precision_str: str, device: torch.device) -> torch.dtype:
+    """Resolve precision string to torch.dtype.
+    'auto' uses float16 on cuda/mps and float32 on cpu."""
+    if precision_str == "auto":
+        return torch.float16 if device.type in ("cuda", "mps") else torch.float32
+    if precision_str == "float16":
+        return torch.float16
+    return torch.float32
+
+
 
 class AdaptiveConcatPool2d(nn.Module):
     """
@@ -61,6 +83,8 @@ class OrcaHelloSRKWDetectorV1(
 
         self.num_classes = self.config.model.num_classes
         self.call_class_index = self.config.model.call_class_index
+        self._device = _resolve_device(self.config.model.device)
+        self._dtype = _resolve_dtype(self.config.model.precision, self._device)
         self.model = resnet50()
 
         # Modify first conv layer for single-channel input
@@ -189,16 +213,17 @@ class OrcaHelloSRKWDetectorV1(
         # Process spectrograms in batches to control memory usage
         all_confidences = []
 
-        # Get model device
+        # Get model device and dtype for input casting
         model_device = next(self.parameters()).device
+        model_dtype = next(self.parameters()).dtype
 
         for batch_start in range(0, len(spectrograms), max_batch_size):
             batch_end = min(batch_start + max_batch_size, len(spectrograms))
             batch = torch.stack(spectrograms[batch_start:batch_end])
-            # Move batch to model's device
-            batch = batch.to(model_device)
+            # Move batch to model's device and cast to model dtype (e.g. fp16)
+            batch = batch.to(device=model_device, dtype=model_dtype)
             batch_confidences = self.predict_call(batch)
-            all_confidences.append(batch_confidences.cpu())
+            all_confidences.append(batch_confidences.cpu().float())
 
         # Concatenate all batch results
         confidences = torch.cat(all_confidences)
@@ -248,21 +273,24 @@ class OrcaHelloSRKWDetectorV1(
         )
 
     @classmethod
-    def from_checkpoint(cls, checkpoint_path: str, config: Dict, device: str = "cpu") -> "OrcaHelloSRKWDetectorV1":
+    def from_checkpoint(cls, checkpoint_path: str, config: Dict) -> "OrcaHelloSRKWDetectorV1":
         """
         Load model from PyTorch checkpoint.
+
+        Device and precision are taken from config.model.device and config.model.dtype.
+        Defaults: device="auto" (mps > cuda > cpu), dtype="fp16".
 
         Args:
             checkpoint_path: Path to .pt checkpoint file
             config: Config dict (validated via DetectorInferenceConfig)
-            device: Device to load model onto ("cpu" or "cuda")
 
         Returns:
-            OrcaHelloSRKWDetectorV1 with loaded weights in eval mode
+            OrcaHelloSRKWDetectorV1 with loaded weights in eval mode on configured device/dtype
         """
         model = cls(config)
-        state_dict = torch.load(checkpoint_path, map_location=device, weights_only=True)
+        state_dict = torch.load(checkpoint_path, map_location=model._device, weights_only=True)
         model.load_state_dict(state_dict)
+        model.to(device=model._device, dtype=model._dtype)
         model.eval()
         return model
 

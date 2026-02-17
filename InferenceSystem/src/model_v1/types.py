@@ -39,6 +39,8 @@ class ModelConfig:
     input_pad_s: float = 4.0
     num_classes: int = 2
     call_class_index: int = 1
+    device: str = "auto"   # "auto" selects mps > cuda > cpu; or explicit "cpu"/"cuda"/"mps"
+    precision: str = "auto"    # "auto" (float16 on cuda/mps, float32 on cpu), "float16", or "float32"
 
 
 @dataclass
