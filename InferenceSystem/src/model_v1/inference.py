@@ -1,3 +1,5 @@
+import time
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,6 +13,7 @@ from .types import (
     DetectorInferenceConfig,
     SegmentPrediction,
     DetectionResult,
+    DetectionMetadata,
 )
 
 
@@ -155,6 +158,7 @@ class OrcaHelloSRKWDetectorV1(
         max_batch_size = inf.max_batch_size
 
         # Generate segments and process into spectrograms using AudioPreprocessor
+        start_time = time.perf_counter()
         preprocessor = AudioPreprocessor(overrides)
         spectrograms = []
         segment_info = []  # Track start times and durations
@@ -168,13 +172,18 @@ class OrcaHelloSRKWDetectorV1(
 
         if len(spectrograms) == 0:
             # No segments generated - return empty result
+            processing_time = time.perf_counter() - start_time
             return DetectionResult(
                 local_predictions=[],
                 local_confidences=[],
                 global_prediction=0,
                 global_confidence=0.0,
                 segment_predictions=[],
-                wav_file_path=wav_file_path
+                metadata=DetectionMetadata(
+                    wav_file_path=wav_file_path,
+                    file_duration_s=0.0,
+                    processing_time_s=processing_time
+                )
             )
 
         # Process spectrograms in batches to control memory usage
@@ -220,13 +229,22 @@ class OrcaHelloSRKWDetectorV1(
                 )
             )
 
+        # Calculate file duration from last segment end time
+        last_seg = segment_info[-1]
+        file_duration_s = last_seg['start_time_s'] + last_seg['duration_s']
+        processing_time_s = time.perf_counter() - start_time
+
         return DetectionResult(
             local_predictions=local_predictions,
             local_confidences=local_confidences,
             global_prediction=global_prediction,
             global_confidence=global_confidence,
             segment_predictions=segment_preds,
-            wav_file_path=wav_file_path
+            metadata=DetectionMetadata(
+                wav_file_path=wav_file_path,
+                file_duration_s=file_duration_s,
+                processing_time_s=processing_time_s
+            )
         )
 
     @classmethod

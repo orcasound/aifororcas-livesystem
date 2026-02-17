@@ -96,6 +96,21 @@ class SegmentPrediction:
 
 
 @dataclass
+class DetectionMetadata:
+    """Metadata for a detection result including source file info and performance metrics."""
+    wav_file_path: str
+    file_duration_s: float
+    processing_time_s: float
+
+    @property
+    def realtime_factor(self) -> float:
+        """Ratio of file duration to processing time. >1 means faster than realtime."""
+        if self.processing_time_s > 0:
+            return self.file_duration_s / self.processing_time_s
+        return float('inf')
+
+
+@dataclass
 class DetectionResult:
     """
     Detection result matching the fastai inference output format.
@@ -105,10 +120,11 @@ class DetectionResult:
         local_confidences: List of confidence scores for each time segment
         global_prediction: Binary prediction (0/1) indicating if orca calls were detected
         global_confidence: Mean confidence score across positive detections (0-100)
+        metadata: Source file info and performance metrics
     """
     local_predictions: List[int]
     local_confidences: List[float]
     segment_predictions: List[SegmentPrediction]
     global_prediction: int
     global_confidence: float
-    wav_file_path: str
+    metadata: DetectionMetadata

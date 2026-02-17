@@ -5,9 +5,14 @@ Usage:
     python scripts/run_inference.py                          # uses default WAV test file
     python scripts/run_inference.py path/to/audio.wav
     python scripts/run_inference.py path/to/audio.flac
+    python scripts/run_inference.py path/to/audio.wav --output results.json
 """
+import argparse
+import json
 import os
 import sys
+from dataclasses import asdict
+
 import yaml
 
 # Add src directory to path
@@ -21,8 +26,13 @@ DEFAULT_AUDIO_PATH = os.path.join(TEST_DATA_DIR, "rpi_sunset_bay_2025_09_18_01_1
 
 
 def main():
-    # Accept any audio file path as argument; fall back to default WAV test file
-    audio_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_AUDIO_PATH
+    parser = argparse.ArgumentParser(description="Run model_v1 inference on audio files")
+    parser.add_argument("audio_path", nargs="?", default=DEFAULT_AUDIO_PATH,
+                        help="Path to audio file (WAV, FLAC, or ffmpeg-supported format)")
+    parser.add_argument("--output", "-o", help="Output JSON file path for serialized results")
+    args = parser.parse_args()
+
+    audio_path = args.audio_path
 
     # Model and config paths relative to InferenceSystem directory
     model_path = os.path.join(os.path.dirname(__file__), '..', 'model', 'model_v1.pt')
@@ -69,6 +79,22 @@ def main():
 
     print(f"\nglobal_confidence: {result.global_confidence:.3f}")
     print(f"global_prediction: {result.global_prediction}")
+
+    # Print performance info
+    meta = result.metadata
+    print(f"\n--- Performance ---")
+    print(f"File duration:    {meta.file_duration_s:.2f}s")
+    print(f"Processing time:  {meta.processing_time_s:.2f}s")
+    print(f"Realtime factor:  {meta.realtime_factor:.2f}x")
+
+    # Serialize to JSON if requested
+    if args.output:
+        result_dict = asdict(result)
+        # Add computed realtime_factor to metadata
+        result_dict['metadata']['realtime_factor'] = meta.realtime_factor
+        with open(args.output, 'w') as f:
+            json.dump(result_dict, f, indent=2)
+        print(f"\nResults saved to: {args.output}")
 
     if result.global_prediction == 1:
         print("\n*** ORCA DETECTED! ***")
