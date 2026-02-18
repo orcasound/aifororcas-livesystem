@@ -1,5 +1,56 @@
 # Working with the InferenceSystem
 
+## model_v1: PyTorch Audio Frontend
+
+`src/model_v1/` contains a FastAI-free PyTorch reimplementation of the audio preprocessing pipeline.
+
+### Setup
+
+```bash
+cd InferenceSystem
+python -m venv model-v1-venv
+source model-v1-venv/bin/activate  # or .\model-v1-venv\Scripts\activate.bat on Windows
+pip install -r requirements-model-v1.txt
+```
+
+### Run audio processing (segment + spectrogram generation)
+
+```bash
+# Segment a WAV file into 60s chunks and save mel spectrogram images
+python scripts/run_audio_processing.py /path/to/audio.wav
+
+# Use a shorter segment duration (e.g. 30s)
+python scripts/run_audio_processing.py /path/to/audio.wav --segment-duration 30
+
+# Specify output directory
+python scripts/run_audio_processing.py /path/to/audio.flac --output-dir /tmp/segments
+```
+
+Output is written to `claude-scratch/tmp/<stem>_segments/` by default (WAV segments + `spectrograms/` subfolder).
+
+### Run tests
+
+```bash
+cd InferenceSystem
+source model-v1-venv/bin/activate
+
+# Run all audio preprocessing tests (unit + parity)
+python -m pytest tests/test_audio_preprocessing.py -v
+
+# Run only unit tests (no reference files needed)
+python -m pytest tests/test_audio_preprocessing.py::TestAudioPreprocessingUnit -v
+```
+
+The parity tests (`test_stage_b_parity`, `test_stage_c_parity`) compare model_v1 output against pre-generated fastai references. These run automatically — no fastai installation required.
+
+To regenerate reference files (requires fastai environment):
+```bash
+source inference-venv/bin/activate
+python -m pytest tests/test_audio_preprocessing.py::TestAudioPreprocessingParity::test_generate_reference_outputs -v
+```
+
+---
+
 The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py).
 
 This document describes the following steps

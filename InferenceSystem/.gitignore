@@ -1,5 +1,20 @@
 inference-venv
+model-v1-venv
 .env
-true_srkw/
-model/
-model.zip
+
+*.pt
+*.pkl
+*.zip
+
+claude-scratch/tmp/
+
+# Test data and reference outputs are excluded by default (large binaries).
+# Specific files needed for pytest are explicitly tracked below.
+tests/test_data/*
+tests/reference_outputs/*
+*.wav
+*.png
+
+# Pytest fixtures: one WAV + one audio reference .pt (required for parity tests)
+!tests/test_data/rpi_bush_point_2020_11_25_15_51_20_PST--49025085-df4b-48a8-85d9-7b72c4d99ccf.wav
+!tests/reference_outputs/rpi_bush_point_2020_11_25_15_51_20_PST--49025085-df4b-48a8-85d9-7b72c4d99ccf_audio_reference.pt

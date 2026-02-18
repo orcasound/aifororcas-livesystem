@@ -1,0 +1,32 @@
+## V1 inference configuration (used by model_v1 audio + inference)
+# Safe defaults preserve fastai parity; adjust thresholds/windowing as needed.
+
+audio:
+  downmix_mono: true
+  resample_rate: 20000        # Hz
+  normalize: false            # peak-normalize waveform to max(|x|)=1.0
+
+spectrogram:
+  sample_rate: 16000          # torchaudio default (fastai quirk)
+  n_fft: 2560
+  hop_length: 256
+  mel_n_filters: 256
+  mel_f_min: 0.0
+  mel_f_max: 10000.0
+  mel_f_pad: 0
+  convert_to_db: true
+  top_db: 100
+
+model:
+  name: "orcahello-srkw-detector-v1"
+  input_pad_s: 4.0            # audio padded/trimmed to this duration
+  num_classes: 2              # binary classification
+  call_class_index: 1         # class index for positive (call detected)
+
+inference:
+  window_s: 2.0               # segment length
+  window_hop_s: 1.0           # hop between segments
+  max_batch_size: 8           # max segments to process at once in detect_srkw_from_file
+  local_conf_threshold: 0.5
+  global_pred_threshold: 3
+  strict_segments: true       # if false, allow partial final segment (fastai compat)
