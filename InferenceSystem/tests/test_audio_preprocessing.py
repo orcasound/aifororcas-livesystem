@@ -119,8 +119,8 @@ class TestAudioPreprocessingParity:
 
         random.seed(42)  # Fix random seed for reproducible padding
 
-        from model_v1.legacy_fastai_frontend import prepare_audio as fastai_prepare_audio
-        from model_v1.legacy_fastai_frontend import prepare_audio_mel_raw
+        from legacy.fastai_frontend import prepare_audio as fastai_prepare_audio
+        from legacy.fastai_frontend import prepare_audio_mel_raw
 
         wav_name = Path(sample_1min_wav).stem
         references = {}
