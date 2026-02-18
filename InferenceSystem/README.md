@@ -51,7 +51,7 @@ python -m pytest tests/test_audio_preprocessing.py -v
 python -m pytest tests/test_audio_preprocessing.py::TestAudioPreprocessingUnit -v
 ```
 
-The parity tests (`test_stage_b_parity`, `test_stage_c_parity`) compare model_v1 output against pre-generated fastai references. These run automatically — no fastai installation required.
+The parity tests (`test_mel_raw_parity`, `test_mel_standardized_parity`) compare model_v1 output against pre-generated fastai references. These run automatically — no fastai installation required.
 
 To regenerate reference files (requires fastai environment):
 ```bash

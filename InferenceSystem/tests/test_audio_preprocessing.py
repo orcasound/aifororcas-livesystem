@@ -107,8 +107,8 @@ class TestAudioPreprocessingParity:
         """
         Generate reference outputs from fastai_audio for later comparison.
 
-        Run this with fastai environment to create reference files.
-        Saves BOTH Stage B (before standardization) and Stage C (after) outputs.
+        Run this in the fastai environment to create reference files.
+        Saves mel_raw (pure mel, no padding) and mel_standardized (full pipeline) outputs.
         """
         if not fastai_available:
             pytest.skip(
@@ -120,22 +120,22 @@ class TestAudioPreprocessingParity:
         random.seed(42)  # Fix random seed for reproducible padding
 
         from model_v1.legacy_fastai_frontend import prepare_audio as fastai_prepare_audio
-        from model_v1.legacy_fastai_frontend import prepare_audio_stage_b
+        from model_v1.legacy_fastai_frontend import prepare_audio_mel_raw
 
         wav_name = Path(sample_1min_wav).stem
         references = {}
         for window_idx, (segment_path, _, _) in enumerate(
             _make_segments(sample_1min_wav, v1_config, max_segments, segments_start_s)
         ):
-            # Stage B: Pure mel spectrogram (no padding)
-            stage_b_spec = prepare_audio_stage_b(segment_path, v1_config)
+            # mel_raw: Pure mel spectrogram (no padding/standardization)
+            mel_raw_spec = prepare_audio_mel_raw(segment_path, v1_config)
 
-            # Stage C: Full pipeline with standardization
-            stage_c_spec = fastai_prepare_audio(segment_path, v1_config)
+            # mel_standardized: Full pipeline with standardization
+            mel_standardized_spec = fastai_prepare_audio(segment_path, v1_config)
 
             references[f"segment_{window_idx}"] = {
-                "stage_b": stage_b_spec,
-                "stage_c": stage_c_spec,
+                "mel_raw": mel_raw_spec,
+                "mel_standardized": mel_standardized_spec,
             }
 
         # Save reference spectrograms
@@ -146,34 +146,34 @@ class TestAudioPreprocessingParity:
         # Print shape info for debugging
         for seg_name, specs in references.items():
             print(
-                f"  {seg_name}: stage_b={specs['stage_b'].shape}, stage_c={specs['stage_c'].shape}"
+                f"  {seg_name}: mel_raw={specs['mel_raw'].shape}, mel_standardized={specs['mel_standardized'].shape}"
             )
 
-        # Save spectrogram comparison images (stage_b vs stage_c for each segment)
+        # Save spectrogram comparison images (mel_raw vs mel_standardized for each segment)
         images_dir = reference_dir / f"{wav_name}_spectrograms"
         images_dir.mkdir(exist_ok=True)
 
         for seg_name, specs in references.items():
             img_path = images_dir / f"{seg_name}_comparison.png"
             plot_spec_comparison(
-                specs["stage_b"],
-                specs["stage_c"],
+                specs["mel_raw"],
+                specs["mel_standardized"],
                 img_path,
                 f"{wav_name} {seg_name}",
             )
 
         print(f"Saved spectrogram images to {images_dir}")
 
-    def test_stage_b_parity(self, sample_1min_wav, audio_references, v1_config, max_segments, segments_start_s):
+    def test_mel_raw_parity(self, sample_1min_wav, audio_references, v1_config, max_segments, segments_start_s):
         """
-        STAGE B PARITY: Test pure mel spectrogram computation from raw audio clips.
+        MEL RAW PARITY: Test pure mel spectrogram computation from raw audio clips.
 
-        Tests mel spectrogram generation from raw 2-second clips WITHOUT padding.
+        Tests mel spectrogram generation from raw 2-second clips WITHOUT padding/standardization.
         This isolates the core mel computation (downmix -> resample -> mel spec).
         """
-        # Check if references have stage_b (new format)
+        # Check if references have mel_raw key
         first_ref = list(audio_references.values())[0]
-        if not isinstance(first_ref, dict) or "stage_b" not in first_ref:
+        if not isinstance(first_ref, dict) or "mel_raw" not in first_ref:
             pytest.skip(
                 "Reference file is in old format. Regenerate with test_generate_reference_outputs."
             )
@@ -182,16 +182,15 @@ class TestAudioPreprocessingParity:
         for window_idx, (segment_path, _, _) in enumerate(
             _make_segments(sample_1min_wav, v1_config, max_segments, segments_start_s)
         ):
-            # Process with model_v1 - Stage B only (no standardization)
+            # Process with model_v1 - raw mel only (no standardization)
             waveform, sr = load_processed_waveform(segment_path, v1_config["audio"])
             model_v1_spec, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
-            # Get reference Stage B
             ref_key = f"segment_{window_idx}"
             if ref_key not in audio_references:
                 continue
 
-            fastai_spec = audio_references[ref_key]["stage_b"]
+            fastai_spec = audio_references[ref_key]["mel_raw"]
 
             # Compare using SpecDiff (handles overlapping frames automatically)
             diff = diff_specs(model_v1_spec, fastai_spec)
@@ -200,46 +199,45 @@ class TestAudioPreprocessingParity:
             except AssertionError as e:
                 mismatches.append(str(e))
 
-        assert len(mismatches) == 0, "Stage B parity failures:\n" + "\n".join(mismatches)
+        assert len(mismatches) == 0, "mel_raw parity failures:\n" + "\n".join(mismatches)
 
-    def test_stage_c_parity(self, sample_1min_wav, audio_references, v1_config, debug_dir, max_segments, segments_start_s):
+    def test_mel_standardized_parity(self, sample_1min_wav, audio_references, v1_config, debug_dir, max_segments, segments_start_s):
         """
-        STAGE C PARITY: Compare full pipeline including standardization.
+        MEL STANDARDIZED PARITY: Compare full pipeline including standardization.
 
         KNOWN TO FAIL due to fastai_audio padding bug:
         - fastai pads dB-scale spectrograms with 0.0 dB (represents full power, not silence)
         - model_v1 may crop instead of pad depending on frame count
 
-        Run with --save-debug to generate debug output to tests/tmp/stage_c_debug/
+        Run with --save-debug to generate debug output to tests/tmp/mel_standardized_debug/
         for detailed analysis of differences.
         """
         # Set up debug output directory if enabled
-        stage_c_debug_dir = None
+        debug_output_dir = None
         if debug_dir is not None:
-            stage_c_debug_dir = debug_dir / "stage_c_debug"
-            stage_c_debug_dir.mkdir(parents=True, exist_ok=True)
+            debug_output_dir = debug_dir / "mel_standardized_debug"
+            debug_output_dir.mkdir(parents=True, exist_ok=True)
 
         mismatches = []
 
         for window_idx, (segment_path, _, _) in enumerate(
             _make_segments(sample_1min_wav, v1_config, max_segments, segments_start_s)
         ):
-            # Process with model_v1 - full pipeline
+            # Process with model_v1 - full pipeline including standardization
             model_v1_spec = prepare_audio(segment_path, v1_config)
 
-            # Get reference
             ref_key = f"segment_{window_idx}"
             if ref_key not in audio_references:
                 continue
 
-            fastai_spec = audio_references[ref_key]["stage_c"]
+            fastai_spec = audio_references[ref_key]["mel_standardized"]
 
             # Compare using SpecDiff
             diff = diff_specs(model_v1_spec, fastai_spec)
 
             # Save debug output for this segment (only if --save-debug flag is set)
-            if stage_c_debug_dir is not None:
-                seg_dir = stage_c_debug_dir / ref_key
+            if debug_output_dir is not None:
+                seg_dir = debug_output_dir / ref_key
                 diff.save_debug(seg_dir, ref_key)
 
             # Check tolerance and collect failures
@@ -248,7 +246,7 @@ class TestAudioPreprocessingParity:
             except AssertionError as e:
                 mismatches.append(str(e))
 
-        if stage_c_debug_dir is not None:
-            print(f"\nDebug output saved to: {stage_c_debug_dir}")
+        if debug_output_dir is not None:
+            print(f"\nDebug output saved to: {debug_output_dir}")
 
-        assert len(mismatches) == 0, "Stage C parity failures:\n" + "\n".join(mismatches)
+        assert len(mismatches) == 0, "mel_standardized parity failures:\n" + "\n".join(mismatches)

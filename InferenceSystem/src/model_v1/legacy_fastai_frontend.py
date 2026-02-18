@@ -92,12 +92,12 @@ def prepare_audio(file_path: str, config: Dict) -> torch.Tensor:
     return spectrogram
 
 
-def prepare_audio_stage_b(file_path: str, config: Dict) -> torch.Tensor:
+def prepare_audio_mel_raw(file_path: str, config: Dict) -> torch.Tensor:
     """
-    Process audio file to Stage B (mel spectrogram before standardization).
+    Process audio file to raw mel spectrogram (before standardization).
 
     This generates a pure mel spectrogram from the audio without padding/cropping.
-    Used for Stage B parity testing.
+    Used for mel_raw parity testing.
 
     Args:
         file_path: Path to audio file (typically a 2-second segment)
@@ -127,7 +127,7 @@ def prepare_audio_stage_b(file_path: str, config: Dict) -> torch.Tensor:
     if sr != target_sr:
         sig = tfm_resample(sig, sr, target_sr)
 
-    # Create mel spectrogram (Stage B - pure mel computation)
+    # Create raw mel spectrogram (pure mel computation, no standardization)
     # CRITICAL: Don't pass sample_rate - uses default 16000 (fastai quirk)
     mel_transform = MelSpectrogram(
         n_fft=spectrogram_config["n_fft"],
