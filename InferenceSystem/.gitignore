@@ -16,5 +16,5 @@ tests/reference_outputs/*
 *.png
 
 # Pytest fixtures: one WAV + one audio reference .pt (required for parity tests)
-!tests/test_data/rpi_bush_point_2020_11_25_15_51_20_PST--49025085-df4b-48a8-85d9-7b72c4d99ccf.wav
-!tests/reference_outputs/rpi_bush_point_2020_11_25_15_51_20_PST--49025085-df4b-48a8-85d9-7b72c4d99ccf_audio_reference.pt
+!tests/test_data/rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav
+!tests/reference_outputs/rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9_audio_reference.pt

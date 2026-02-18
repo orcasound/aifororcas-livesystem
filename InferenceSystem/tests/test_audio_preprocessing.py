@@ -203,11 +203,7 @@ class TestAudioPreprocessingParity:
 
     def test_mel_standardized_parity(self, sample_1min_wav, audio_references, v1_config, debug_dir, max_segments, segments_start_s):
         """
-        MEL STANDARDIZED PARITY: Compare full pipeline including standardization.
-
-        KNOWN TO FAIL due to fastai_audio padding bug:
-        - fastai pads dB-scale spectrograms with 0.0 dB (represents full power, not silence)
-        - model_v1 may crop instead of pad depending on frame count
+        MEL STANDARDIZED PARITY: Compare full fastai_audio pipeline including input standardization (padding/cropping).
 
         Run with --save-debug to generate debug output to tests/tmp/mel_standardized_debug/
         for detailed analysis of differences.

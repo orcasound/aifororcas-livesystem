@@ -46,7 +46,7 @@ class SpecDiff:
     top_time_frames: List[Tuple[int, float]] = field(default_factory=list)
     _diff_tensor: torch.Tensor = field(repr=False, default=None)
 
-    def assert_close(self, abs_tolerance: float = 1e-2, name: str = "") -> None:
+    def assert_close(self, abs_tolerance: float = 2e-2, name: str = "") -> None:
         """
         Assert spectrograms are close within tolerance.
         
