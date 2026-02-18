@@ -1,16 +1,26 @@
-# Working with the InferenceSystem
+# Using the OrcaHello SRKWDetector model
 
-## model_v1: PyTorch Audio Frontend
+## model_v1: Audio Frontend
 
-`src/model_v1/` contains a FastAI-free PyTorch reimplementation of the audio preprocessing pipeline.
+`src/model_v1/` contains a [WIP] FastAI-free reimplementation of the audio preprocessing pipeline.
+All preprocessing operations (resampling, freq featurization, segmentation/padding) are combined into a single `AudioPreprocessor` class.
+
+```python
+AudioPreprocessor(config=DetectorInferenceConfig).process_segments(audio_file_path) -> Generator[Tuple[torch.Tensor, float, float], None, None]
+    - torch.Tensor: mel spectrogram of shape (1, n_mels, target_frames)
+    - float: start time of this segment in seconds
+    - float: duration of this segment in seconds
+```
+
+pytests included test sample-wise parity with outputs generated from legacy code using FastAI audio (incl hard to reproduce bugs/quirks).
 
 ### Setup
 
 ```bash
 cd InferenceSystem
-python -m venv model-v1-venv
+uv venv model-v1-venv
 source model-v1-venv/bin/activate  # or .\model-v1-venv\Scripts\activate.bat on Windows
-pip install -r requirements-model-v1.txt
+uv pip install -r requirements-model-v1.txt
 ```
 
 ### Run audio processing (segment + spectrogram generation)
@@ -48,6 +58,8 @@ To regenerate reference files (requires fastai environment):
 source inference-venv/bin/activate
 python -m pytest tests/test_audio_preprocessing.py::TestAudioPreprocessingParity::test_generate_reference_outputs -v
 ```
+
+# Working with the InferenceSystem
 
 ---
 

@@ -7,8 +7,8 @@ audio:
   normalize: false            # peak-normalize waveform to max(|x|)=1.0
 
 spectrogram:
-  sample_rate: 16000          # torchaudio default (fastai quirk)
-  n_fft: 2560
+  sample_rate: 16000          # reproducing fastai bug/quirk due to torchaudio defaults
+  n_fft: 2560                 # causing mel filters to incorrectly span 20kHz range leaving zero bins
   hop_length: 256
   mel_n_filters: 256
   mel_f_min: 0.0
