@@ -8,11 +8,27 @@ These tests are modular:
 
 from pathlib import Path
 
-import numpy as np
 import pytest
 import torch
-from model_v1.audio_frontend import audio_segment_generator
+from model_v1.audio_frontend import (
+    audio_segment_generator,
+    featurize_waveform,
+    load_processed_waveform,
+    prepare_audio,
+    standardize,
+)
 from tests.utils import diff_specs, plot_spec_comparison
+
+
+def _make_segments(sample_1min_wav, v1_config, max_segments, segments_start_s):
+    """Create the standard audio segment generator for parity tests."""
+    return audio_segment_generator(
+        sample_1min_wav,
+        segment_duration_s=v1_config["inference"]["window_s"],
+        segment_hop_s=v1_config["inference"]["window_hop_s"],
+        max_segments=max_segments,
+        start_time_s=segments_start_s or 0.0,
+    )
 
 
 class TestAudioPreprocessingUnit:
@@ -20,8 +36,6 @@ class TestAudioPreprocessingUnit:
 
     def test_load_audio(self, sample_1min_wav, v1_config):
         """Test that audio loads correctly with config"""
-        from model_v1.audio_frontend import load_processed_waveform
-
         waveform, sr = load_processed_waveform(sample_1min_wav, v1_config["audio"])
 
         assert isinstance(waveform, torch.Tensor)
@@ -31,8 +45,6 @@ class TestAudioPreprocessingUnit:
 
     def test_featurize_waveform(self, sample_1min_wav, v1_config):
         """Test mel spectrogram feature extraction"""
-        from model_v1.audio_frontend import featurize_waveform, load_processed_waveform
-
         waveform, sr = load_processed_waveform(sample_1min_wav, v1_config["audio"])
         features, times, freqs = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
@@ -50,8 +62,6 @@ class TestAudioPreprocessingUnit:
 
     def test_standardize(self, sample_1min_wav, v1_config):
         """Test spectrogram standardization (pad/crop)"""
-        from model_v1.audio_frontend import featurize_waveform, load_processed_waveform, standardize
-
         waveform, sr = load_processed_waveform(sample_1min_wav, v1_config["audio"])
         features, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
@@ -69,8 +79,6 @@ class TestAudioPreprocessingUnit:
 
     def test_prepare_audio_full_pipeline(self, sample_1min_wav, v1_config):
         """Test complete audio preparation pipeline"""
-        from model_v1.audio_frontend import prepare_audio
-
         mel_spec = prepare_audio(sample_1min_wav, v1_config)
 
         assert isinstance(mel_spec, torch.Tensor)
@@ -111,23 +119,19 @@ class TestAudioPreprocessingParity:
 
         random.seed(42)  # Fix random seed for reproducible padding
 
-        from model_v1.legacy_fastai_frontend import prepare_audio, prepare_audio_stage_b
+        from model_v1.legacy_fastai_frontend import prepare_audio as fastai_prepare_audio
+        from model_v1.legacy_fastai_frontend import prepare_audio_stage_b
 
         wav_name = Path(sample_1min_wav).stem
-        segments = audio_segment_generator(
-            sample_1min_wav,
-            segment_duration_s=v1_config["inference"]["window_s"],
-            segment_hop_s=v1_config["inference"]["window_hop_s"],
-            max_segments=max_segments,
-            start_time_s=segments_start_s or 0.0,
-        )
         references = {}
-        for window_idx, (segment_path, _, _) in enumerate(segments):
+        for window_idx, (segment_path, _, _) in enumerate(
+            _make_segments(sample_1min_wav, v1_config, max_segments, segments_start_s)
+        ):
             # Stage B: Pure mel spectrogram (no padding)
             stage_b_spec = prepare_audio_stage_b(segment_path, v1_config)
 
             # Stage C: Full pipeline with standardization
-            stage_c_spec = prepare_audio(segment_path, v1_config)
+            stage_c_spec = fastai_prepare_audio(segment_path, v1_config)
 
             references[f"segment_{window_idx}"] = {
                 "stage_b": stage_b_spec,
@@ -160,55 +164,34 @@ class TestAudioPreprocessingParity:
 
         print(f"Saved spectrogram images to {images_dir}")
 
-    def test_stage_b_parity(self, sample_1min_wav, reference_dir, v1_config, max_segments, segments_start_s):
+    def test_stage_b_parity(self, sample_1min_wav, audio_references, v1_config, max_segments, segments_start_s):
         """
         STAGE B PARITY: Test pure mel spectrogram computation from raw audio clips.
 
         Tests mel spectrogram generation from raw 2-second clips WITHOUT padding.
         This isolates the core mel computation (downmix -> resample -> mel spec).
         """
-        from model_v1.audio_frontend import featurize_waveform, load_processed_waveform
-
-        wav_name = Path(sample_1min_wav).stem
-        reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
-
-        if not reference_file.exists():
-            pytest.skip(
-                f"Reference file not found: {reference_file}. "
-                "Run test_generate_reference_outputs first."
-            )
-
-        # Load references
-        references = torch.load(reference_file, weights_only=False)
-
         # Check if references have stage_b (new format)
-        first_ref = list(references.values())[0]
+        first_ref = list(audio_references.values())[0]
         if not isinstance(first_ref, dict) or "stage_b" not in first_ref:
             pytest.skip(
                 "Reference file is in old format. Regenerate with test_generate_reference_outputs."
             )
 
-        # Create same segments as fastai test
-        segments = audio_segment_generator(
-            sample_1min_wav,
-            segment_duration_s=v1_config["inference"]["window_s"],
-            segment_hop_s=v1_config["inference"]["window_hop_s"],
-            max_segments=max_segments,
-            start_time_s=segments_start_s or 0.0,
-        )
-
         mismatches = []
-        for window_idx, (segment_path, _, _) in enumerate(segments):
+        for window_idx, (segment_path, _, _) in enumerate(
+            _make_segments(sample_1min_wav, v1_config, max_segments, segments_start_s)
+        ):
             # Process with model_v1 - Stage B only (no standardization)
             waveform, sr = load_processed_waveform(segment_path, v1_config["audio"])
             model_v1_spec, _, _ = featurize_waveform(waveform, sr, v1_config["spectrogram"])
 
             # Get reference Stage B
             ref_key = f"segment_{window_idx}"
-            if ref_key not in references:
+            if ref_key not in audio_references:
                 continue
 
-            fastai_spec = references[ref_key]["stage_b"]
+            fastai_spec = audio_references[ref_key]["stage_b"]
 
             # Compare using SpecDiff (handles overlapping frames automatically)
             diff = diff_specs(model_v1_spec, fastai_spec)
@@ -219,7 +202,7 @@ class TestAudioPreprocessingParity:
 
         assert len(mismatches) == 0, "Stage B parity failures:\n" + "\n".join(mismatches)
 
-    def test_stage_c_parity(self, sample_1min_wav, reference_dir, v1_config, debug_dir, max_segments, segments_start_s):
+    def test_stage_c_parity(self, sample_1min_wav, audio_references, v1_config, debug_dir, max_segments, segments_start_s):
         """
         STAGE C PARITY: Compare full pipeline including standardization.
 
@@ -230,51 +213,30 @@ class TestAudioPreprocessingParity:
         Run with --save-debug to generate debug output to tests/tmp/stage_c_debug/
         for detailed analysis of differences.
         """
-        from model_v1.audio_frontend import prepare_audio
-
-        wav_name = Path(sample_1min_wav).stem
-        reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
-
-        if not reference_file.exists():
-            pytest.skip(
-                f"Reference file not found: {reference_file}. "
-                "Run test_generate_reference_outputs first."
-            )
-
         # Set up debug output directory if enabled
         stage_c_debug_dir = None
         if debug_dir is not None:
             stage_c_debug_dir = debug_dir / "stage_c_debug"
             stage_c_debug_dir.mkdir(parents=True, exist_ok=True)
 
-        # Load references
-        references = torch.load(reference_file, weights_only=False)
-
-        # Create same segments as fastai test
-        segments = audio_segment_generator(
-            sample_1min_wav,
-            segment_duration_s=v1_config["inference"]["window_s"],
-            segment_hop_s=v1_config["inference"]["window_hop_s"],
-            max_segments=max_segments,
-            start_time_s=segments_start_s or 0.0,
-        )
-
         mismatches = []
 
-        for window_idx, (segment_path, _, _) in enumerate(segments):
+        for window_idx, (segment_path, _, _) in enumerate(
+            _make_segments(sample_1min_wav, v1_config, max_segments, segments_start_s)
+        ):
             # Process with model_v1 - full pipeline
             model_v1_spec = prepare_audio(segment_path, v1_config)
 
             # Get reference
             ref_key = f"segment_{window_idx}"
-            if ref_key not in references:
+            if ref_key not in audio_references:
                 continue
 
-            fastai_spec = references[ref_key]["stage_c"]
+            fastai_spec = audio_references[ref_key]["stage_c"]
 
             # Compare using SpecDiff
             diff = diff_specs(model_v1_spec, fastai_spec)
-            
+
             # Save debug output for this segment (only if --save-debug flag is set)
             if stage_c_debug_dir is not None:
                 seg_dir = stage_c_debug_dir / ref_key
@@ -290,43 +252,3 @@ class TestAudioPreprocessingParity:
             print(f"\nDebug output saved to: {stage_c_debug_dir}")
 
         assert len(mismatches) == 0, "Stage C parity failures:\n" + "\n".join(mismatches)
-
-    @pytest.mark.requires_fastai
-    def test_audio_parity_direct(
-        self, sample_1min_wav, fastai_available, v1_config, max_segments, segments_start_s
-    ):
-        """
-        Direct comparison between model_v1 and fastai_audio (requires both available).
-        """
-        if not fastai_available:
-            pytest.skip("fastai_audio not available")
-
-        from model_v1.audio_frontend import prepare_audio
-        from model_v1.legacy_fastai_frontend import (
-            prepare_audio as fastai_prepare_audio,
-        )
-
-        segments = audio_segment_generator(
-            sample_1min_wav,
-            segment_duration_s=v1_config["inference"]["window_s"],
-            segment_hop_s=v1_config["inference"]["window_hop_s"],
-            max_segments=max_segments,
-            start_time_s=segments_start_s or 0.0,
-        )
-
-        mismatches = []
-        for window_idx, (segment_path, _, _) in enumerate(segments):
-            # model_v1 processing
-            model_v1_spec = prepare_audio(segment_path, v1_config)
-
-            # fastai_audio processing
-            fastai_spec = fastai_prepare_audio(segment_path, v1_config)
-
-            # Compare using SpecDiff
-            diff = diff_specs(model_v1_spec, fastai_spec)
-            try:
-                diff.assert_close(name=f"segment_{window_idx}")
-            except AssertionError as e:
-                mismatches.append(str(e))
-
-        assert len(mismatches) == 0, "Direct parity failures:\n" + "\n".join(mismatches)

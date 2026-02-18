@@ -5,8 +5,8 @@ Pytest Configuration and Shared Fixtures for InferenceSystem tests
 import sys
 from pathlib import Path
 
-import numpy as np
 import pytest
+import soundfile as sf
 import torch
 import torchaudio
 import yaml
@@ -26,8 +26,6 @@ _original_torchaudio_load = torchaudio.load
 
 def _patched_torchaudio_load(filepath, *args, **kwargs):
     """Wrapper for torchaudio.load that uses soundfile directly"""
-    import soundfile as sf
-
     data, samplerate = sf.read(str(filepath), dtype="float32")
     waveform = torch.from_numpy(data.T if data.ndim > 1 else data.reshape(1, -1))
     return waveform, samplerate
@@ -40,8 +38,6 @@ _original_torchaudio_save = torchaudio.save
 
 def _patched_torchaudio_save(filepath, src, sample_rate, *args, **kwargs):
     """Wrapper for torchaudio.save that uses soundfile directly"""
-    import soundfile as sf
-
     audio_data = src.numpy().T if src.ndim > 1 else src.numpy().reshape(-1, 1)
     sf.write(str(filepath), audio_data, sample_rate)
 
@@ -94,25 +90,11 @@ def max_segments():
     """Return maximum number of segments to test from the 1-minute WAV file"""
     return 3
 
+
 @pytest.fixture
 def segments_start_s():
     """Return start time in seconds for segments"""
     return 32
-
-@pytest.fixture
-def all_test_wavs(test_data_dir):
-    """Return paths to all test WAV files"""
-    wav_files = list(test_data_dir.glob("*.wav"))
-    return [str(f) for f in wav_files]
-
-
-@pytest.fixture
-def model_dir():
-    """Return path to model directory"""
-    model_path = Path(__file__).parent.parent / "model"
-    if model_path.exists():
-        return model_path
-    pytest.skip("Model directory not found")
 
 
 @pytest.fixture
@@ -135,6 +117,19 @@ def v1_config():
         return yaml.safe_load(f)
 
 
+@pytest.fixture
+def audio_references(reference_dir, sample_1min_wav):
+    """Load pre-generated fastai reference outputs, skip if missing."""
+    wav_name = Path(sample_1min_wav).stem
+    reference_file = reference_dir / f"{wav_name}_audio_reference.pt"
+    if not reference_file.exists():
+        pytest.skip(
+            f"Reference file not found: {reference_file}. "
+            "Run test_generate_reference_outputs first."
+        )
+    return torch.load(reference_file, weights_only=False)
+
+
 def pytest_addoption(parser):
     """Add custom command-line options"""
     parser.addoption(
@@ -149,7 +144,6 @@ def pytest_configure(config):
     """Pytest configuration hook"""
     config.addinivalue_line("markers", "parity: marks tests that compare fastai vs model_v1")
     config.addinivalue_line("markers", "slow: marks tests that take a long time")
-    config.addinivalue_line("markers", "requires_fastai: marks tests that need fastai environment")
 
 
 @pytest.fixture
@@ -166,9 +160,3 @@ def debug_dir(request):
         debug_dir.mkdir(parents=True, exist_ok=True)
         return debug_dir
     return None
-
-
-@pytest.fixture
-def numerical_tolerance():
-    """Return numerical tolerance for parity tests"""
-    return {"atol": 1e-5, "rtol": 1e-5}
