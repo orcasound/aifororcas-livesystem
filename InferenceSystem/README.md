@@ -12,7 +12,7 @@ AudioPreprocessor(config=DetectorInferenceConfig).process_segments(audio_file_pa
     - float: duration of this segment in seconds
 ```
 
-pytests included test sample-wise parity with outputs generated from legacy code using FastAI audio (incl hard to reproduce bugs/quirks).
+pytests included test sample-wise parity with outputs generated from legacy code using FastAI audio (including hard to reproduce bugs/quirks).
 
 ### Setup
 
@@ -29,7 +29,7 @@ uv pip install -r requirements-model-v1.txt
 # Segment a WAV file into 60s chunks and save mel spectrogram images
 python scripts/run_audio_processing.py /path/to/audio.wav
 
-# Use a shorter segment duration (e.g. 30s)
+# Use a shorter segment duration (e.g., 30s)
 python scripts/run_audio_processing.py /path/to/audio.wav --segment-duration 30
 
 # Specify output directory

@@ -19,16 +19,16 @@ Usage:
     source model-v1-venv/bin/activate
 
     # Default WAV test file, 60s segments
-    python scripts/test_audio_segments.py
+    python scripts/run_audio_processing.py
 
     # FLAC file
-    python scripts/test_audio_segments.py /path/to/audio.flac
+    python scripts/run_audio_processing.py /path/to/audio.flac
 
     # WAV with custom segment duration
-    python scripts/test_audio_segments.py /path/to/audio.wav --segment-duration 30
+    python scripts/run_audio_processing.py /path/to/audio.wav --segment-duration 30
 
     # Custom output directory
-    python scripts/test_audio_segments.py /path/to/audio.flac --output-dir /tmp/my_segments
+    python scripts/run_audio_processing.py /path/to/audio.flac --output-dir /tmp/my_segments
 """
 import argparse
 import copy
