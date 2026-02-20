@@ -1,0 +1,132 @@
+"""
+Type definitions for model_v1 inference pipeline.
+
+Contains all dataclasses used by the detector and audio frontend.
+"""
+
+import dataclasses
+from dataclasses import asdict, dataclass
+from typing import Dict, List
+
+
+def _from_dict(cls, d: Dict):
+    """Helper to create dataclass from dict, ignoring unknown keys."""
+    field_names = {f.name for f in dataclasses.fields(cls)}
+    return cls(**{k: v for k, v in d.items() if k in field_names})
+
+
+@dataclass
+class AudioConfig:
+    downmix_mono: bool = True
+    resample_rate: int = 20000
+    normalize: bool = False
+
+@dataclass
+class SpectrogramConfig:
+    sample_rate: int = 16000
+    n_fft: int = 2560
+    hop_length: int = 256
+    mel_n_filters: int = 256
+    mel_f_min: float = 0.0
+    mel_f_max: float = 10000.0
+    mel_f_pad: int = 0
+    convert_to_db: bool = True
+    top_db: int = 100
+
+@dataclass
+class ModelConfig:
+    name: str = "orcahello-srkw-detector-v1"
+    input_pad_s: float = 4.0
+    num_classes: int = 2
+    call_class_index: int = 1
+    device: str = "auto"   # "auto" selects mps > cuda > cpu; or explicit "cpu"/"cuda"/"mps"
+    precision: str = "auto"    # "auto" (float16 on cuda/mps, float32 on cpu), "float16", or "float32"
+
+
+@dataclass
+class InferenceConfig:
+    window_s: float = 2.0
+    window_hop_s: float = 1.0
+    max_batch_size: int = 8
+    local_conf_threshold: float = 0.5
+    global_pred_threshold: int = 3
+    strict_segments: bool = True
+
+
+@dataclass
+class DetectorInferenceConfig:
+    """Full config for detector inference, validated from YAML dict."""
+    audio: AudioConfig = None
+    spectrogram: SpectrogramConfig = None
+    model: ModelConfig = None
+    inference: InferenceConfig = None
+
+    def __post_init__(self):
+        self.audio = self.audio or AudioConfig()
+        self.spectrogram = self.spectrogram or SpectrogramConfig()
+        self.model = self.model or ModelConfig()
+        self.inference = self.inference or InferenceConfig()
+
+    @classmethod
+    def from_dict(cls, d: Dict) -> "DetectorInferenceConfig":
+        """Create config from nested YAML dict."""
+        return cls(
+            audio=_from_dict(AudioConfig, d.get("audio", {})),
+            spectrogram=_from_dict(SpectrogramConfig, d.get("spectrogram", {})),
+            model=_from_dict(ModelConfig, d.get("model", {})),
+            inference=_from_dict(InferenceConfig, d.get("inference", {})),
+        )
+
+    @classmethod
+    def from_yaml(cls, yaml_path: str) -> "DetectorInferenceConfig":
+        """Load config from a YAML file."""
+        import yaml
+        with open(yaml_path) as f:
+            d = yaml.safe_load(f)
+        return cls.from_dict(d)
+
+    def as_dict(self) -> Dict:
+        """Convert to nested dict (suitable for prepare_audio, JSON serialization, etc.)."""
+        return asdict(self)
+
+
+@dataclass
+class SegmentPrediction:
+    start_time_s: float
+    duration_s: float
+    confidence: float
+
+
+@dataclass
+class DetectionMetadata:
+    """Metadata for a detection result including source file info and performance metrics."""
+    wav_file_path: str
+    file_duration_s: float
+    processing_time_s: float
+
+    @property
+    def realtime_factor(self) -> float:
+        """Ratio of file duration to processing time. >1 means faster than realtime."""
+        if self.processing_time_s > 0:
+            return self.file_duration_s / self.processing_time_s
+        return float('inf')
+
+
+@dataclass
+class DetectionResult:
+    """
+    Detection result matching the fastai inference output format.
+
+    Attributes:
+        local_predictions: List of binary predictions (0/1) for each time segment
+        local_confidences: List of confidence scores for each time segment
+        global_prediction: Binary prediction (0/1) indicating if orca calls were detected
+        global_confidence: Mean confidence score across positive detections (0-100)
+        metadata: Source file info and performance metrics
+    """
+    local_predictions: List[int]
+    local_confidences: List[float]
+    segment_predictions: List[SegmentPrediction]
+    global_prediction: int
+    global_confidence: float
+    metadata: DetectionMetadata

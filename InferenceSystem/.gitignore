@@ -1,5 +1,20 @@
 inference-venv
+model-v1-venv
 .env
-true_srkw/
-model/
-model.zip
+
+*.pt
+*.pkl
+*.zip
+
+model/*
+
+# Test data and reference outputs are excluded by default (large binaries).
+# Specific files needed for pytest are explicitly tracked below.
+tests/test_data/*
+tests/reference_outputs/*
+*.wav
+*.png
+
+# Pytest fixtures: one WAV + one audio reference .pt (required for parity tests)
+!tests/test_data/rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav
+!tests/reference_outputs/rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9_audio_reference.pt
