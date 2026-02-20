@@ -1,3 +1,66 @@
+# Using the OrcaHello SRKWDetector model
+
+## model_v1: Audio Frontend
+
+`src/model_v1/` contains a [WIP] FastAI-free reimplementation of the audio preprocessing pipeline.
+All preprocessing operations (resampling, freq featurization, segmentation/padding) are combined into a single `AudioPreprocessor` class.
+
+```python
+AudioPreprocessor(config=DetectorInferenceConfig).process_segments(audio_file_path) -> Generator[Tuple[torch.Tensor, float, float], None, None]
+    - torch.Tensor: mel spectrogram of shape (1, n_mels, target_frames)
+    - float: start time of this segment in seconds
+    - float: duration of this segment in seconds
+```
+
+pytests included test sample-wise parity with outputs generated from legacy code using FastAI audio (including hard to reproduce bugs/quirks).
+
+### Setup
+
+```bash
+cd InferenceSystem
+uv venv model-v1-venv
+source model-v1-venv/bin/activate  # or .\model-v1-venv\Scripts\activate.bat on Windows
+uv pip install -r requirements-model-v1.txt
+```
+
+### Run audio processing (segment + spectrogram generation)
+
+```bash
+# Segment a WAV file into 60s chunks and save mel spectrogram images
+python scripts/run_audio_processing.py /path/to/audio.wav
+
+# Use a shorter segment duration (e.g., 30s)
+python scripts/run_audio_processing.py /path/to/audio.wav --segment-duration 30
+
+# Specify output directory
+python scripts/run_audio_processing.py /path/to/audio.flac --output-dir /tmp/segments
+```
+
+Output is written to `tmp/<stem>_segments/` by default (WAV segments + `spectrograms/` subfolder).
+
+### Run tests
+
+```bash
+cd InferenceSystem
+source model-v1-venv/bin/activate
+
+# Run all audio preprocessing tests (unit + parity)
+python -m pytest tests/test_audio_preprocessing.py -v
+
+# Run only unit tests (no reference files needed)
+python -m pytest tests/test_audio_preprocessing.py::TestAudioPreprocessingUnit -v
+```
+
+The parity tests (`test_mel_raw_parity`, `test_mel_standardized_parity`) compare model_v1 output against pre-generated fastai references. These run automatically — no fastai installation required.
+
+To regenerate reference files (requires fastai environment):
+```bash
+source inference-venv/bin/activate
+python -m pytest tests/test_audio_preprocessing.py::TestAudioPreprocessingParity::test_generate_reference_outputs -v
+```
+
+---
+
 # Working with the InferenceSystem
 
 The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py).
