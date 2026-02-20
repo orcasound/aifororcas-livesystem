@@ -50,12 +50,12 @@ from model_v1.audio_frontend import audio_segment_generator, prepare_waveform
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.join(SCRIPT_DIR, '..')
-CONFIG_PATH = os.path.join(REPO_DIR, 'model', 'config.yaml')
+CONFIG_PATH = os.path.join(REPO_DIR, 'tests', 'test_config.yaml')
 DEFAULT_AUDIO_PATH = os.path.join(
     REPO_DIR, 'tests', 'test_data',
     'rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9.wav'
 )
-DEFAULT_OUTPUT_BASE = os.path.join(REPO_DIR, 'claude-scratch', 'tmp')
+DEFAULT_OUTPUT_BASE = os.path.join(REPO_DIR, 'tmp')
 
 
 def save_spectrogram(mel_spec, start_s, end_s, img_path, config):

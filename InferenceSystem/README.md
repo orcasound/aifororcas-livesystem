@@ -36,7 +36,7 @@ python scripts/run_audio_processing.py /path/to/audio.wav --segment-duration 30
 python scripts/run_audio_processing.py /path/to/audio.flac --output-dir /tmp/segments
 ```
 
-Output is written to `claude-scratch/tmp/<stem>_segments/` by default (WAV segments + `spectrograms/` subfolder).
+Output is written to `tmp/<stem>_segments/` by default (WAV segments + `spectrograms/` subfolder).
 
 ### Run tests
 
@@ -59,9 +59,9 @@ source inference-venv/bin/activate
 python -m pytest tests/test_audio_preprocessing.py::TestAudioPreprocessingParity::test_generate_reference_outputs -v
 ```
 
-# Working with the InferenceSystem
-
 ---
+
+# Working with the InferenceSystem
 
 The InferenceSystem is an umbrella term for all the code used to stream audio from Orcasound's S3 buckets, perform inference on audio segments using the deep learning model and upload positive detections to Azure. The entrypoint for the InferenceSystem is [src/LiveInferenceOrchestrator.py](src/LiveInferenceOrchestrator.py).
 
