@@ -141,9 +141,8 @@ def load_processed_waveform(file_path: str, audio_config: Dict) -> Tuple[torch.T
         waveform = torch.from_numpy(data.reshape(1, -1))
     else:
         waveform = torch.from_numpy(data.T)
-
-    # Downmix to mono if requested
-    if audio_config.get("downmix_mono", True):
+        if not audio_config.get("downmix_mono", True):
+            raise NotImplementedError("Waveform has more than one channel, but downmix_mono is False. Multiple channels not supported.")
         waveform = _downmix_to_mono(waveform)
 
     # Resample to target rate
@@ -475,9 +474,9 @@ class AudioPreprocessor:
             strict_segments=inf.strict_segments,
             process_waveform_config=waveform_config,
         ):
-            # Segments are already at the target sample rate (preprocessed in the generator).
-            # Load directly with soundfile — no further resampling needed.
             data, sample_rate = sf.read(segment_path, dtype="float32")
+            assert sample_rate == waveform_config["resample_rate"], "Unexpected behavior: Preprocessed audio segment not at the target sample rate."
+            assert data.ndim == 1, "Unexpected behavior: Preprocessed audio segment has more than one channel."
             waveform = torch.from_numpy(data.reshape(1, -1))
             mel_spec = prepare_waveform(waveform, sample_rate, config_dict)
             yield mel_spec, start_s, inf.window_s

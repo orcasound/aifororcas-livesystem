@@ -6,7 +6,7 @@ model-v1-venv
 *.pkl
 *.zip
 
-claude-scratch/tmp/
+model/*
 
 # Test data and reference outputs are excluded by default (large binaries).
 # Specific files needed for pytest are explicitly tracked below.
