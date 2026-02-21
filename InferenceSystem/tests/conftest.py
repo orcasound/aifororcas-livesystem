@@ -10,6 +10,7 @@ import soundfile as sf
 import torch
 import torchaudio
 import yaml
+import json
 
 # Add src to path for imports
 SRC_DIR = Path(__file__).parent.parent / "src"
@@ -130,6 +131,34 @@ def audio_references(reference_dir, sample_1min_wav):
     return torch.load(reference_file, weights_only=False)
 
 
+@pytest.fixture
+def segment_prediction_references(reference_dir, sample_1min_wav):
+    """Load pre-generated fastai segment prediction references, skip if missing."""
+    wav_name = Path(sample_1min_wav).stem
+    reference_file = reference_dir / f"{wav_name}_segment_preds_reference.json"
+    if not reference_file.exists():
+        pytest.skip(
+            f"Reference file not found: {reference_file}. "
+            "Run test_generate_segment_predictions_reference first."
+        )
+    with open(reference_file) as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def file_prediction_references(reference_dir, sample_1min_wav):
+    """Load pre-generated fastai file prediction references (JSON), skip if missing."""
+    wav_name = Path(sample_1min_wav).stem
+    reference_file = reference_dir / f"{wav_name}_file_preds_reference.json"
+    if not reference_file.exists():
+        pytest.skip(
+            f"Reference file not found: {reference_file}. "
+            "Run test_generate_file_predictions_reference first."
+        )
+    with open(reference_file) as f:
+        return json.load(f)
+
+
 def pytest_addoption(parser):
     """Add custom command-line options"""
     parser.addoption(
@@ -160,3 +189,26 @@ def debug_dir(request):
         debug_dir.mkdir(parents=True, exist_ok=True)
         return debug_dir
     return None
+
+
+@pytest.fixture
+def model_dir():
+    """Return path to model directory"""
+    model_dir = Path(__file__).parent.parent / "model"
+    return model_dir
+
+
+@pytest.fixture
+def numerical_tolerance():
+    """Return numerical tolerance for inference parity tests"""
+    return {"atol": 1e-3, "rtol": 1e-3}
+
+
+@pytest.fixture
+def model_v1(v1_config):
+    """Create OrcaHelloSRKWDetectorV1 model instance with default config"""
+    from model_v1.inference import OrcaHelloSRKWDetectorV1
+
+    model = OrcaHelloSRKWDetectorV1.from_pretrained("orcasound/orcahello-srkw-detector-v1", config=v1_config)
+    model.eval()
+    return model

@@ -4,11 +4,11 @@
 audio:
   downmix_mono: true
   resample_rate: 20000        # Hz
-  normalize: false            # peak-normalize waveform to max(|x|)=1.0
+  normalize: true             # peak-normalize waveform to max(|x|)=1.0
 
 spectrogram:
-  sample_rate: 16000          # reproducing fastai bug/quirk due to torchaudio defaults
-  n_fft: 2560                 # causing mel filters to incorrectly span 20kHz range leaving zero bins
+  sample_rate: 16000          # torchaudio default (fastai quirk)
+  n_fft: 2560
   hop_length: 256
   mel_n_filters: 256
   mel_f_min: 0.0
@@ -22,17 +22,17 @@ model:
   input_pad_s: 4.0            # audio padded/trimmed to this duration
   num_classes: 2              # binary classification
   call_class_index: 1         # class index for positive (call detected)
-  device: "cpu"               # "auto" selects mps > cuda > cpu; or explicit "cpu"/"cuda"/"mps"
-  precision: "float32"        # "auto" (float16 on cuda/mps, float32 on cpu), "float16", or "float32"
+  device: "auto"              # "auto" selects mps > cuda > cpu; or explicit "cpu"/"cuda"/"mps"
+  precision: "auto"           # "auto" (float16 on cuda/mps, float32 on cpu), "float16", or "float32"
 
 inference:
-  window_s: 2.0               # segment length
-  window_hop_s: 1.0           # hop between segments
+  window_s: 3.0               # segment length
+  window_hop_s: 2.0           # hop between segments
   max_batch_size: 8           # max segments to process at once in detect_srkw_from_file
   strict_segments: true       # if false, allow partial final segment (true for fastai parity)
 
 global_prediction:
-  aggregation_strategy: "mean_thresholded"  # "mean_thresholded" or "mean_top_k"
+  aggregation_strategy: "mean_top_k"  # "mean_thresholded" or "mean_top_k"
   mean_top_k: 3               # top segments to average for global_confidence (mean_top_k)
   pred_local_threshold: 0.5   # for local binary predictions, and selecting segments to average for global_confidence (mean_thresholded)
   pred_global_threshold: 0.6  # applied to global_confidence for binary global_prediction

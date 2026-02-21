@@ -1,0 +1,12 @@
+{
+  "segment_predictions": {
+    "segment_0": 0.13018274307250977,
+    "segment_1": 0.5985817313194275,
+    "segment_2": 0.7865649461746216
+  },
+  "source_wav": "rpi_sunset_bay_2025_09_18_01_12_06_PDT--f6b3fcd7-2036-433a-8a18-76a6b3b4f0c9",
+  "classes": [
+    "negative",
+    "positive"
+  ]
+}
