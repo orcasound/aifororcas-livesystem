@@ -91,7 +91,11 @@ jobs:
       working-directory: InferenceSystem
       shell: cmd
       run: |
-        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
+        call .\inference-venv\Scripts\activate.bat && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2 > output.log 2>&1
+        type output.log
+        findstr /C:"m3u8 file does not exist" output.log
+        if not errorlevel 1 goto :eof
+        powershell -Command "$n = (Select-String -Path 'output.log' -Pattern 'global_prediction').Count; if ($n -ne 2) { Write-Host 'Expected 2 global_prediction lines, got' $n; exit 1 } else { exit 0 }"
 
     - name: Positive test with OrcasoundLab
       working-directory: InferenceSystem
@@ -237,7 +241,9 @@ jobs:
     - name: Test with FastAI LiveHLS config
       working-directory: InferenceSystem
       run: |
-        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2
+        source ./inference-venv/bin/activate && python src/LiveInferenceOrchestrator.py --config ./config/Test/FastAI_LiveHLS_OrcasoundLab.yml --max_iterations 2 > output.log 2>&1
+        cat output.log
+        grep -q "m3u8 file does not exist" output.log || test "$(grep -c "global_prediction" output.log)" -eq 2
 
     - name: Positive test with OrcasoundLab
       working-directory: InferenceSystem
@@ -367,4 +373,4 @@ jobs:
           python3 -u ./src/LiveInferenceOrchestrator.py \
           --config /config/Test/FastAI_LiveHLS_OrcasoundLab.yml \
           --max_iterations 2 | tee output.log
-        test "$(grep -c "global_prediction" output.log)" -eq 2
+        grep -q "m3u8 file does not exist" output.log || test "$(grep -c "global_prediction" output.log)" -eq 2
