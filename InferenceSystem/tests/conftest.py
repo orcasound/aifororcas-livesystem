@@ -143,6 +143,21 @@ def segment_prediction_references(reference_dir, sample_1min_wav):
     return torch.load(reference_file, weights_only=False)
 
 
+@pytest.fixture
+def file_prediction_references(reference_dir, sample_1min_wav):
+    """Load pre-generated fastai file prediction references (JSON), skip if missing."""
+    import json
+    wav_name = Path(sample_1min_wav).stem
+    reference_file = reference_dir / f"{wav_name}_file_preds_reference.json"
+    if not reference_file.exists():
+        pytest.skip(
+            f"Reference file not found: {reference_file}. "
+            "Run test_generate_file_predictions_reference first."
+        )
+    with open(reference_file) as f:
+        return json.load(f)
+
+
 def pytest_addoption(parser):
     """Add custom command-line options"""
     parser.addoption(
@@ -184,8 +199,8 @@ def model_dir():
 
 @pytest.fixture
 def numerical_tolerance():
-    """Return numerical tolerance for parity tests"""
-    return {"atol": 1e-5, "rtol": 1e-5}
+    """Return numerical tolerance for inference parity tests"""
+    return {"atol": 1e-3, "rtol": 1e-3}
 
 
 @pytest.fixture

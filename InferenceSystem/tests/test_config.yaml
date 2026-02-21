@@ -29,6 +29,10 @@ inference:
   window_s: 2.0               # segment length
   window_hop_s: 1.0           # hop between segments
   max_batch_size: 8           # max segments to process at once in detect_srkw_from_file
-  local_conf_threshold: 0.5
-  global_pred_threshold: 3
-  strict_segments: true       # if false, allow partial final segment (fastai compat)
+  strict_segments: true       # if false, allow partial final segment (true for fastai parity)
+
+global_prediction:
+  aggregation_strategy: "mean_thresholded"  # "mean_thresholded" or "mean_top_k"
+  mean_top_k: 3               # top segments to average for global_confidence (mean_top_k)
+  pred_local_threshold: 0.5   # for local binary predictions, and selecting segments to average for global_confidence (mean_thresholded)
+  pred_global_threshold: 0.6  # applied to global_confidence for binary global_prediction

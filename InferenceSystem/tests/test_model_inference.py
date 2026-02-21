@@ -191,47 +191,68 @@ class TestReferenceGeneration:
         """
         Generate fastai reference predictions for full-file inference.
 
-        The reference file contains:
-        - local_predictions: list of binary predictions per segment
-        - local_confidences: list of confidence scores per segment
-        - global_prediction: binary prediction for the file
-        - global_confidence: aggregated confidence score
-        - source_wav: name of WAV file
+        Saves as JSON-serialized DetectionResult for easy comparison.
         """
         if not fastai_available:
             pytest.skip("fastai not available - run in inference-venv to generate references")
 
         # Late import for fastai-specific test
+        import json
+        from dataclasses import asdict
         from model.fastai_inference import FastAIModel
+        from model_v1.types import DetectionResult, DetectionMetadata, SegmentPrediction
 
-        # Run fastai inference on the WAV file
+        # Run fastai inference on the WAV file (no smoothing for parity testing)
         model = FastAIModel(
             model_path=str(model_dir),
             model_name="model.pkl",
             threshold=0.5,
-            min_num_positive_calls_threshold=3
+            min_num_positive_calls_threshold=3,
+            smooth_predictions=False
         )
 
         result = model.predict(sample_1min_wav)
 
         wav_name = Path(sample_1min_wav).stem
 
-        references = {
-            "local_predictions": result["local_predictions"],
-            "local_confidences": result["local_confidences"],
-            "global_prediction": result["global_prediction"],
-            "global_confidence": result["global_confidence"],
-            "source_wav": wav_name,
-        }
+        # Build segment predictions from submission DataFrame
+        segment_predictions = []
+        submission = result["submission"]
+        for _, row in submission.iterrows():
+            segment_predictions.append(
+                SegmentPrediction(
+                    start_time_s=float(row["start_time_s"]),
+                    duration_s=float(row["duration_s"]),
+                    confidence=float(row["confidence"])
+                )
+            )
+
+        # Create DetectionResult with dummy metadata
+        detection_result = DetectionResult(
+            local_predictions=result["local_predictions"],
+            local_confidences=result["local_confidences"],
+            segment_predictions=segment_predictions,
+            global_prediction=result["global_prediction"],
+            global_confidence=result["global_confidence"] / 100.0,  # FastAI returns percentage
+            metadata=DetectionMetadata(
+                wav_file_path=wav_name,
+                file_duration_s=0.0,  # Dummy value
+                processing_time_s=0.0  # Dummy value
+            )
+        )
 
         print("\nGenerating fastai file prediction reference:")
         print(f"Source: {wav_name}")
-        print(f"Segments: {len(result['local_predictions'])}")
-        print(f"Global prediction: {result['global_prediction']}")
-        print(f"Global confidence: {result['global_confidence']:.2f}")
+        print(f"Segments: {len(detection_result.local_predictions)}")
+        print(f"Global prediction: {detection_result.global_prediction}")
+        print(f"Global confidence: {detection_result.global_confidence:.4f}")
 
-        reference_file = reference_dir / f"{wav_name}_file_preds_reference.pt"
-        torch.save(references, reference_file)
+        # Save as JSON using asdict
+        reference_file = reference_dir / f"{wav_name}_file_preds_reference.json"
+
+        with open(reference_file, 'w') as f:
+            json.dump(asdict(detection_result), f, indent=2)
+
         print(f"\nSaved reference to: {reference_file}")
 
 
@@ -283,57 +304,21 @@ class TestParityChecks:
         assert len(mismatches) == 0, f"Parity failures:\n" + "\n".join(mismatches)
 
     def test_file_predictions_match_fastai(
-        self, model_dir, reference_dir, sample_1min_wav, numerical_tolerance, v1_config
+        self, model_v1, file_prediction_references, sample_1min_wav, numerical_tolerance
     ):
         """
         Compare model_v1 full-file detection against saved fastai reference.
 
         Tests the complete pipeline end-to-end.
         """
-        wav_name = Path(sample_1min_wav).stem
-        reference_file = reference_dir / f"{wav_name}_file_preds_reference.pt"
+        from tests.utils import diff_detection_results
 
-        if not reference_file.exists():
-            pytest.skip(
-                f"Reference file not found: {reference_file}. "
-                "Run test_generate_file_predictions_reference first."
-            )
+        result_v1 = model_v1.detect_srkw_from_file(sample_1min_wav)
+        result_ref = file_prediction_references
+        atol = numerical_tolerance["atol"]
 
-        model_path = model_dir / "model_v1.pt"
-        if not model_path.exists():
-            pytest.skip(f"Checkpoint not found: {model_path}. Run extraction script first.")
+        print(f"\nComparing model_v1 vs fastai for: {result_ref['metadata']['wav_file_path']}")
 
-        # Load model_v1
-        model = OrcaHelloSRKWDetectorV1.from_checkpoint(str(model_path), v1_config)
-
-        # Run model_v1 inference
-        result = model.detect_from_file(sample_1min_wav)
-
-        # Load fastai reference
-        references = torch.load(reference_file, weights_only=False)
-
-        print("\nComparing model_v1 file predictions to fastai reference:")
-        print(f"Source: {references['source_wav']}")
-        print()
-
-        # Compare local predictions
-        local_preds_match = result.local_predictions == references["local_predictions"]
-        local_confs_close = all(
-            abs(v1 - fa) <= numerical_tolerance["atol"]
-            for v1, fa in zip(result.local_confidences, references["local_confidences"])
-        )
-
-        # Compare global prediction
-        global_pred_match = result.global_prediction == references["global_prediction"]
-        global_conf_diff = abs(result.global_confidence - references["global_confidence"])
-        global_conf_match = global_conf_diff <= numerical_tolerance["atol"]
-
-        print(f"Local predictions match: {local_preds_match}")
-        print(f"Local confidences match: {local_confs_close}")
-        print(f"Global prediction: model_v1={result.global_prediction}, fastai={references['global_prediction']} [{'PASS' if global_pred_match else 'FAIL'}]")
-        print(f"Global confidence: model_v1={result.global_confidence:.6f}, fastai={references['global_confidence']:.6f}, diff={global_conf_diff:.2e} [{'PASS' if global_conf_match else 'FAIL'}]")
-
-        assert local_preds_match, "Local predictions do not match"
-        assert local_confs_close, "Local confidences do not match within tolerance"
-        assert global_pred_match, "Global prediction does not match"
-        assert global_conf_match, f"Global confidence differs by {global_conf_diff:.2e}"
+        diff = diff_detection_results(result_v1, result_ref, abs_tolerance=atol)
+        diff.assert_segment_preds(abs_tolerance=atol, name="file_preds")
+        diff.assert_global_preds(abs_tolerance=atol, name="file_preds")

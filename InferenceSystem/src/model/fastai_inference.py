@@ -109,12 +109,13 @@ def extract_segments(audioPath, sampleDict, destnPath, suffix):
 
 
 class FastAIModel():
-    def __init__(self, model_path, model_name="stg2-rn18.pkl", threshold=0.5, min_num_positive_calls_threshold=3, batch_size=32, use_gpu=False):
+    def __init__(self, model_path, model_name="stg2-rn18.pkl", threshold=0.5, min_num_positive_calls_threshold=3, batch_size=32, use_gpu=False, smooth_predictions=True):
         self.model = load_model(model_path, model_name)
         self.threshold = threshold
         self.min_num_positive_calls_threshold = min_num_positive_calls_threshold
         self.batch_size = batch_size
         self.use_gpu = use_gpu
+        self.smooth_predictions = smooth_predictions  # If False, skip rolling average smoothing
         
         # Move model to appropriate device once during initialization
         if self.use_gpu and torch.cuda.is_available():
@@ -218,27 +219,36 @@ class FastAIModel():
             prediction = prediction.sort_values(
                 ['start_time_s']).reset_index(drop=True)
 
-            # Rolling Window (to average at per second level)
-            submission = pd.DataFrame(
-                    {
-                        'wav_filename': Path(wav_file_path).name,
-                        'duration_s': 1.0,
-                        'confidence': list(prediction.rolling(2)['confidence'].mean().values)
-                    }
-                ).reset_index().rename(columns={'index': 'start_time_s'})
+            if self.smooth_predictions:
+                # Rolling Window (to average at per second level)
+                submission = pd.DataFrame(
+                        {
+                            'wav_filename': Path(wav_file_path).name,
+                            'duration_s': 1.0,
+                            'confidence': list(prediction.rolling(2)['confidence'].mean().values)
+                        }
+                    ).reset_index().rename(columns={'index': 'start_time_s'})
 
-            # Updating first row
-            submission.loc[0, 'confidence'] = prediction.confidence[0]
+                # Updating first row
+                submission.loc[0, 'confidence'] = prediction.confidence[0]
 
-            # Adding last row
-            lastLine = pd.DataFrame({
-                'wav_filename': Path(wav_file_path).name,
-                'start_time_s': [submission.start_time_s.max()+1],
-                'duration_s': 1.0,
-                'confidence': [prediction.confidence[prediction.shape[0]-1]]
+                # Adding last row
+                lastLine = pd.DataFrame({
+                    'wav_filename': Path(wav_file_path).name,
+                    'start_time_s': [submission.start_time_s.max()+1],
+                    'duration_s': 1.0,
+                    'confidence': [prediction.confidence[prediction.shape[0]-1]]
+                    })
+                submission = pd.concat([submission, lastLine], ignore_index=True)
+                submission = submission[['wav_filename', 'start_time_s', 'duration_s', 'confidence']]
+            else:
+                # No smoothing - use raw per-segment predictions directly
+                submission = pd.DataFrame({
+                    'wav_filename': Path(wav_file_path).name,
+                    'start_time_s': prediction['start_time_s'],
+                    'duration_s': 2.0,  # Each segment is 2 seconds
+                    'confidence': prediction['confidence']
                 })
-            submission = pd.concat([submission, lastLine], ignore_index=True)
-            submission = submission[['wav_filename', 'start_time_s', 'duration_s', 'confidence']]
 
             # Initialize output JSON
             result_json = {}
