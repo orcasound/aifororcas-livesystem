@@ -48,9 +48,23 @@ class InferenceConfig:
     window_s: float = 2.0
     window_hop_s: float = 1.0
     max_batch_size: int = 8
-    local_conf_threshold: float = 0.5
-    global_pred_threshold: int = 3
     strict_segments: bool = True
+
+
+@dataclass
+class GlobalPredictionConfig:
+    """Configuration for aggregating segment predictions into global prediction.
+
+    Attributes:
+        aggregation_strategy: "mean_thresholded" or "mean_top_k"
+        mean_top_k: top segments to average for global_confidence (mean_top_k)
+        pred_local_threshold: for local binary predictions (0-1), and selecting segments to average for global_confidence (mean_thresholded)
+        pred_global_threshold: applied to global_confidence for binary global_prediction (0-1)
+    """
+    aggregation_strategy: str = "mean_top_k"
+    mean_top_k: int = 3
+    pred_local_threshold: float = 0.5
+    pred_global_threshold: float = 0.6
 
 
 @dataclass
@@ -60,12 +74,14 @@ class DetectorInferenceConfig:
     spectrogram: SpectrogramConfig = None
     model: ModelConfig = None
     inference: InferenceConfig = None
+    global_prediction: GlobalPredictionConfig = None
 
     def __post_init__(self):
         self.audio = self.audio or AudioConfig()
         self.spectrogram = self.spectrogram or SpectrogramConfig()
         self.model = self.model or ModelConfig()
         self.inference = self.inference or InferenceConfig()
+        self.global_prediction = self.global_prediction or GlobalPredictionConfig()
 
     @classmethod
     def from_dict(cls, d: Dict) -> "DetectorInferenceConfig":
@@ -75,6 +91,7 @@ class DetectorInferenceConfig:
             spectrogram=_from_dict(SpectrogramConfig, d.get("spectrogram", {})),
             model=_from_dict(ModelConfig, d.get("model", {})),
             inference=_from_dict(InferenceConfig, d.get("inference", {})),
+            global_prediction=_from_dict(GlobalPredictionConfig, d.get("global_prediction", {})),
         )
 
     @classmethod
@@ -115,13 +132,13 @@ class DetectionMetadata:
 @dataclass
 class DetectionResult:
     """
-    Detection result matching the fastai inference output format.
+    Detection result from SRKW detector.
 
     Attributes:
         local_predictions: List of binary predictions (0/1) for each time segment
-        local_confidences: List of confidence scores for each time segment
+        local_confidences: List of confidence scores (0-1) for each time segment
         global_prediction: Binary prediction (0/1) indicating if orca calls were detected
-        global_confidence: Mean confidence score across positive detections (0-100)
+        global_confidence: Aggregated confidence score (0-1)
         metadata: Source file info and performance metrics
     """
     local_predictions: List[int]
