@@ -130,6 +130,19 @@ def audio_references(reference_dir, sample_1min_wav):
     return torch.load(reference_file, weights_only=False)
 
 
+@pytest.fixture
+def segment_prediction_references(reference_dir, sample_1min_wav):
+    """Load pre-generated fastai segment prediction references, skip if missing."""
+    wav_name = Path(sample_1min_wav).stem
+    reference_file = reference_dir / f"{wav_name}_segment_preds_reference.pt"
+    if not reference_file.exists():
+        pytest.skip(
+            f"Reference file not found: {reference_file}. "
+            "Run test_generate_segment_predictions_reference first."
+        )
+    return torch.load(reference_file, weights_only=False)
+
+
 def pytest_addoption(parser):
     """Add custom command-line options"""
     parser.addoption(
@@ -180,6 +193,6 @@ def model_v1(v1_config):
     """Create OrcaHelloSRKWDetectorV1 model instance with default config"""
     from model_v1.inference import OrcaHelloSRKWDetectorV1
 
-    model = OrcaHelloSRKWDetectorV1(v1_config)
+    model = OrcaHelloSRKWDetectorV1.from_pretrained("orcasound/orcahello-srkw-detector-v1", config=v1_config)
     model.eval()
     return model

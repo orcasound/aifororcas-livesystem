@@ -3,7 +3,8 @@ Model Inference Tests - Verify OrcaHelloSRKWDetectorV1 matches fastai
 
 Test structure:
 - TestOrcaHelloSRKWDetectorUnit: Unit tests for model class
-- TestPredictCallParity: Parity tests comparing predict_call() to fastai
+- TestReferenceGeneration: Generate FastAI reference outputs (run in inference-venv)
+- TestParityChecks: Compare model_v1 against FastAI references (run in model-v1-venv)
 """
 
 import sys
@@ -104,121 +105,235 @@ class TestOrcaHelloSRKWDetectorUnit:
         assert output.shape == (1, 2)
 
 
-class TestPredictCallParity:
+class TestReferenceGeneration:
     """
-    Parity tests comparing predict_call() output between fastai and model_v1.
+    Generate FastAI reference outputs for parity testing.
 
-    Uses fixed spectrograms as input to isolate model behavior from audio preprocessing.
+    Run these tests in inference-venv (which has fastai) to create reference files.
+    These references are then used by TestParityChecks (run in model-v1-venv).
     """
 
-    def test_generate_reference(self, model_dir, reference_dir, fastai_available):
+    def test_generate_segment_predictions_reference(
+        self, model_dir, reference_dir, sample_1min_wav, fastai_available
+    ):
         """
-        Generate reference outputs from fastai model for parity testing.
+        Generate fastai reference predictions for per-segment inference.
 
-        Run this test in inference-venv (which has fastai) to create reference files.
+        Uses audio preprocessing reference outputs (mel spectrograms) as input.
+
         The reference file contains:
-        - spectrograms: dict of synthetic spectrogram tensors
-        - predictions: dict of fastai prediction values for each spectrogram
+        - segment_predictions: dict mapping segment_N to fastai confidence score
+        - source_wav: name of WAV file used for audio reference
         """
         if not fastai_available:
             pytest.skip("fastai not available - run in inference-venv to generate references")
 
         # Late import for fastai-specific test
-        from fastai.basic_train import load_learner
+        from model.fastai_inference import FastAIModel
+        from audio.data import AudioItem
+
+        # Load audio preprocessing reference
+        wav_name = Path(sample_1min_wav).stem
+        audio_ref_file = reference_dir / f"{wav_name}_audio_reference.pt"
+        if not audio_ref_file.exists():
+            pytest.skip(
+                f"Audio reference not found: {audio_ref_file}. "
+                "Run test_generate_reference_outputs in test_audio_preprocessing.py first."
+            )
+
+        audio_ref = torch.load(audio_ref_file, weights_only=False)
 
         # Load fastai model
-        learner = load_learner(str(model_dir), "model.pkl")
-
-        # Create synthetic spectrograms (same shape as real inputs)
-        # Shape: (1, n_mels=256, time_frames=313) - what fastai expects
-        torch.manual_seed(42)  # Reproducible
-        spectrograms = {
-            f"synthetic_{i}": torch.randn(1, 256, 313)
-            for i in range(5)
-        }
+        fastai_model = FastAIModel(
+            model_path=str(model_dir),
+            model_name="model.pkl"
+        )
 
         references = {
-            "spectrograms": {},
-            "predictions": {},
+            "segment_predictions": {},
+            "source_wav": wav_name,
         }
 
-        print("\nGenerating fastai reference predictions:")
-        for name, spectro in spectrograms.items():
-            # Save spectrogram
-            references["spectrograms"][name] = spectro.clone()
+        print("\nGenerating fastai segment predictions:")
+        print(f"Source: {wav_name}")
+        print(f"Segments: {len(audio_ref)}")
+        print()
+
+        for seg_key in sorted(audio_ref.keys()):
+            # Get standardized mel spectrogram (1, 256, 312)
+            mel_spectro = audio_ref[seg_key]["mel_standardized"]
+
+            # Create AudioItem for fastai prediction
+            # AudioItem wraps the spectrogram tensor
+            audio_item = AudioItem(mel_spectro, None)
 
             # Get fastai prediction
-            # FastAI learner.model expects (batch, channels, height, width)
-            # and returns logits
-            learner.model.eval()
-            with torch.no_grad():
-                logits = learner.model(spectro.unsqueeze(0))  # Add batch dim
-                probs = F.softmax(logits, dim=1)
-                # FastAI classes are ['negative', 'positive']
-                # Class index 1 is "positive" (call detected)
-                call_prob = probs[0, 1].item()
+            # fastai_model.model.predict() returns (category, tensor_index, probabilities)
+            # We want probabilities[1] which is the "positive" class
+            pred_result = fastai_model.model.predict(audio_item)
+            call_prob = pred_result[2][1].item()
 
-            references["predictions"][name] = call_prob
-            print(f"  {name}: {call_prob:.6f}")
+            references["segment_predictions"][seg_key] = call_prob
+            print(f"  {seg_key}: {call_prob:.6f}")
 
-        # Also store the class order for verification
-        if hasattr(learner.data, 'classes'):
-            references["classes"] = learner.data.classes
-            print(f"\nFastAI classes: {learner.data.classes}")
+        # Store class order for verification
+        if hasattr(fastai_model.model.data, 'classes'):
+            references["classes"] = fastai_model.model.data.classes
+            print(f"\nFastAI classes: {fastai_model.model.data.classes}")
 
-        reference_file = reference_dir / "model_parity_reference.pt"
+        reference_file = reference_dir / f"{wav_name}_segment_preds_reference.pt"
         torch.save(references, reference_file)
         print(f"\nSaved reference to: {reference_file}")
 
-    def test_predict_call_matches_fastai(self, model_dir, reference_dir, numerical_tolerance, v1_config):
+    def test_generate_file_predictions_reference(
+        self, model_dir, reference_dir, sample_1min_wav, fastai_available
+    ):
         """
-        Compare predict_call() against saved fastai reference.
+        Generate fastai reference predictions for full-file inference.
 
-        Uses saved spectrograms to ensure we test model parity, not audio preprocessing.
+        The reference file contains:
+        - local_predictions: list of binary predictions per segment
+        - local_confidences: list of confidence scores per segment
+        - global_prediction: binary prediction for the file
+        - global_confidence: aggregated confidence score
+        - source_wav: name of WAV file
         """
-        reference_file = reference_dir / "model_parity_reference.pt"
+        if not fastai_available:
+            pytest.skip("fastai not available - run in inference-venv to generate references")
+
+        # Late import for fastai-specific test
+        from model.fastai_inference import FastAIModel
+
+        # Run fastai inference on the WAV file
+        model = FastAIModel(
+            model_path=str(model_dir),
+            model_name="model.pkl",
+            threshold=0.5,
+            min_num_positive_calls_threshold=3
+        )
+
+        result = model.predict(sample_1min_wav)
+
+        wav_name = Path(sample_1min_wav).stem
+
+        references = {
+            "local_predictions": result["local_predictions"],
+            "local_confidences": result["local_confidences"],
+            "global_prediction": result["global_prediction"],
+            "global_confidence": result["global_confidence"],
+            "source_wav": wav_name,
+        }
+
+        print("\nGenerating fastai file prediction reference:")
+        print(f"Source: {wav_name}")
+        print(f"Segments: {len(result['local_predictions'])}")
+        print(f"Global prediction: {result['global_prediction']}")
+        print(f"Global confidence: {result['global_confidence']:.2f}")
+
+        reference_file = reference_dir / f"{wav_name}_file_preds_reference.pt"
+        torch.save(references, reference_file)
+        print(f"\nSaved reference to: {reference_file}")
+
+
+class TestParityChecks:
+    """
+    Compare model_v1 outputs against FastAI references.
+
+    Run these tests in model-v1-venv after generating references in inference-venv.
+    """
+
+    def test_segment_predictions_match_fastai(
+        self, model_v1, audio_references, segment_prediction_references, numerical_tolerance
+    ):
+        """
+        Compare model_v1 segment predictions against saved fastai reference.
+
+        Uses audio preprocessing reference spectrograms as input to test
+        per-segment inference parity.
+        """
+        mismatches = []
+
+        print("\nComparing model_v1 segment predictions to fastai reference:")
+        print(f"Source: {segment_prediction_references['source_wav']}")
+        print()
+
+        for seg_key in sorted(audio_references.keys()):
+            mel_spectro = audio_references[seg_key]["mel_standardized"]  # (1, 256, 312)
+
+            # Add batch dimension: (1, 256, 312) -> (1, 1, 256, 312)
+            mel_batch = mel_spectro.unsqueeze(0)
+            model_v1_prob = model_v1.predict_call(mel_batch).item()
+
+            # Get fastai reference
+            fastai_prob = segment_prediction_references["segment_predictions"][seg_key]
+
+            diff = abs(model_v1_prob - fastai_prob)
+            status = "PASS" if diff <= numerical_tolerance["atol"] else "FAIL"
+
+            print(f"  {seg_key}: model_v1={model_v1_prob:.6f}, fastai={fastai_prob:.6f}, diff={diff:.2e} [{status}]")
+
+            if diff > numerical_tolerance["atol"]:
+                mismatches.append(
+                    f"{seg_key}: model_v1={model_v1_prob:.6f}, fastai={fastai_prob:.6f}, diff={diff:.2e}"
+                )
+
+        if "classes" in segment_prediction_references:
+            print(f"\nNote: FastAI classes were {segment_prediction_references['classes']}")
+
+        assert len(mismatches) == 0, f"Parity failures:\n" + "\n".join(mismatches)
+
+    def test_file_predictions_match_fastai(
+        self, model_dir, reference_dir, sample_1min_wav, numerical_tolerance, v1_config
+    ):
+        """
+        Compare model_v1 full-file detection against saved fastai reference.
+
+        Tests the complete pipeline end-to-end.
+        """
+        wav_name = Path(sample_1min_wav).stem
+        reference_file = reference_dir / f"{wav_name}_file_preds_reference.pt"
 
         if not reference_file.exists():
-            pytest.skip(f"Reference file not found: {reference_file}. Run test_generate_reference first.")
+            pytest.skip(
+                f"Reference file not found: {reference_file}. "
+                "Run test_generate_file_predictions_reference first."
+            )
 
         model_path = model_dir / "model_v1.pt"
         if not model_path.exists():
             pytest.skip(f"Checkpoint not found: {model_path}. Run extraction script first.")
 
-        # Load references
-        references = torch.load(reference_file, weights_only=False)
-
         # Load model_v1
         model = OrcaHelloSRKWDetectorV1.from_checkpoint(str(model_path), v1_config)
 
-        mismatches = []
+        # Run model_v1 inference
+        result = model.detect_from_file(sample_1min_wav)
 
-        print("\nComparing predict_call() to fastai reference:")
-        for name in references["spectrograms"]:
-            # Get spectrogram
-            spectro = references["spectrograms"][name]
+        # Load fastai reference
+        references = torch.load(reference_file, weights_only=False)
 
-            # Add batch dimension if needed: (1, 256, 313) -> (1, 1, 256, 313)
-            if spectro.dim() == 3:
-                spectro = spectro.unsqueeze(0)
+        print("\nComparing model_v1 file predictions to fastai reference:")
+        print(f"Source: {references['source_wav']}")
+        print()
 
-            # Get model_v1 prediction
-            model_v1_prob = model.predict_call(spectro).item()
+        # Compare local predictions
+        local_preds_match = result.local_predictions == references["local_predictions"]
+        local_confs_close = all(
+            abs(v1 - fa) <= numerical_tolerance["atol"]
+            for v1, fa in zip(result.local_confidences, references["local_confidences"])
+        )
 
-            # Get fastai reference
-            fastai_prob = references["predictions"][name]
+        # Compare global prediction
+        global_pred_match = result.global_prediction == references["global_prediction"]
+        global_conf_diff = abs(result.global_confidence - references["global_confidence"])
+        global_conf_match = global_conf_diff <= numerical_tolerance["atol"]
 
-            diff = abs(model_v1_prob - fastai_prob)
-            status = "PASS" if diff <= numerical_tolerance["atol"] else "FAIL"
+        print(f"Local predictions match: {local_preds_match}")
+        print(f"Local confidences match: {local_confs_close}")
+        print(f"Global prediction: model_v1={result.global_prediction}, fastai={references['global_prediction']} [{'PASS' if global_pred_match else 'FAIL'}]")
+        print(f"Global confidence: model_v1={result.global_confidence:.6f}, fastai={references['global_confidence']:.6f}, diff={global_conf_diff:.2e} [{'PASS' if global_conf_match else 'FAIL'}]")
 
-            print(f"  {name}: model_v1={model_v1_prob:.6f}, fastai={fastai_prob:.6f}, diff={diff:.2e} [{status}]")
-
-            if diff > numerical_tolerance["atol"]:
-                mismatches.append(
-                    f"{name}: model_v1={model_v1_prob:.6f}, fastai={fastai_prob:.6f}, diff={diff:.2e}"
-                )
-
-        if "classes" in references:
-            print(f"\nNote: FastAI classes were {references['classes']}")
-
-        assert len(mismatches) == 0, f"Parity failures:\n" + "\n".join(mismatches)
+        assert local_preds_match, "Local predictions do not match"
+        assert local_confs_close, "Local confidences do not match within tolerance"
+        assert global_pred_match, "Global prediction does not match"
+        assert global_conf_match, f"Global confidence differs by {global_conf_diff:.2e}"
