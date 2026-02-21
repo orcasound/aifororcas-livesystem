@@ -160,3 +160,26 @@ def debug_dir(request):
         debug_dir.mkdir(parents=True, exist_ok=True)
         return debug_dir
     return None
+
+
+@pytest.fixture
+def model_dir():
+    """Return path to model directory"""
+    model_dir = Path(__file__).parent.parent / "model"
+    return model_dir
+
+
+@pytest.fixture
+def numerical_tolerance():
+    """Return numerical tolerance for parity tests"""
+    return {"atol": 1e-5, "rtol": 1e-5}
+
+
+@pytest.fixture
+def model_v1(v1_config):
+    """Create OrcaHelloSRKWDetectorV1 model instance with default config"""
+    from model_v1.inference import OrcaHelloSRKWDetectorV1
+
+    model = OrcaHelloSRKWDetectorV1(v1_config)
+    model.eval()
+    return model

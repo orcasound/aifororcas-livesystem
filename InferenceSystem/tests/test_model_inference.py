@@ -6,117 +6,87 @@ Test structure:
 - TestPredictCallParity: Parity tests comparing predict_call() to fastai
 """
 
+import sys
+from pathlib import Path
+
+import numpy as np
 import pytest
 import torch
-import numpy as np
-from pathlib import Path
-import sys
+import torch.nn.functional as F
 
-# Add src to path
+from model_v1.inference import OrcaHelloSRKWDetectorV1
+
+# Add src to path (for when tests are run directly)
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 
 class TestOrcaHelloSRKWDetectorUnit:
     """Unit tests for OrcaHelloSRKWDetectorV1 model class"""
 
-    def test_model_creation(self, v1_config):
+    def test_model_creation(self, model_v1):
         """Test model instantiation"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
-        model = OrcaHelloSRKWDetectorV1(v1_config)
-        assert model is not None
-        assert model.num_classes == 2
+        assert model_v1 is not None
+        assert model_v1.num_classes == 2
         # FastAI classes are ['negative', 'positive'], so class 1 is "positive"
-        assert model.call_class_index == 1
+        assert model_v1.call_class_index == 1
 
     def test_model_creation_defaults(self):
         """Test model with empty config uses defaults"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
         model = OrcaHelloSRKWDetectorV1({})
         assert model.num_classes == 2
         assert model.call_class_index == 1
 
-    def test_forward_pass_shape(self, v1_config):
+    def test_forward_pass_shape(self, model_v1):
         """Test forward() returns (batch, num_classes) logits"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
-        model = OrcaHelloSRKWDetectorV1(v1_config)
-        model.eval()
-
         # Standard input shape: (batch, 1, n_mels=256, time_frames=313)
         x = torch.randn(1, 1, 256, 313)
 
         with torch.no_grad():
-            output = model(x)
+            output = model_v1(x)
 
         assert output.shape == (1, 2), f"Expected (1, 2), got {output.shape}"
 
-    def test_forward_pass_batch(self, v1_config):
+    def test_forward_pass_batch(self, model_v1):
         """Test forward() with batch > 1"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
-        model = OrcaHelloSRKWDetectorV1(v1_config)
-        model.eval()
-
         x = torch.randn(4, 1, 256, 313)
 
         with torch.no_grad():
-            output = model(x)
+            output = model_v1(x)
 
         assert output.shape == (4, 2), f"Expected (4, 2), got {output.shape}"
 
-    def test_predict_call_shape(self, v1_config):
+    def test_predict_call_shape(self, model_v1):
         """Test predict_call() returns (batch,) probabilities"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
-        model = OrcaHelloSRKWDetectorV1(v1_config)
-        model.eval()
-
         x = torch.randn(1, 1, 256, 313)
-        prob = model.predict_call(x)
+        prob = model_v1.predict_call(x)
 
         # predict_call returns scalar for batch=1 due to squeeze()
         assert prob.dim() == 0 or prob.shape == (1,), f"Expected scalar or (1,), got {prob.shape}"
 
-    def test_predict_call_batch(self, v1_config):
+    def test_predict_call_batch(self, model_v1):
         """Test predict_call() with batch > 1"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
-        model = OrcaHelloSRKWDetectorV1(v1_config)
-        model.eval()
-
         x = torch.randn(4, 1, 256, 313)
-        probs = model.predict_call(x)
+        probs = model_v1.predict_call(x)
 
         assert probs.shape == (4,), f"Expected (4,), got {probs.shape}"
 
-    def test_predict_call_range(self, v1_config):
+    def test_predict_call_range(self, model_v1):
         """Test predict_call() returns values in [0, 1]"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
-        model = OrcaHelloSRKWDetectorV1(v1_config)
-        model.eval()
-
         # Run multiple random inputs
         for _ in range(5):
             x = torch.randn(4, 1, 256, 313)
-            probs = model.predict_call(x)
+            probs = model_v1.predict_call(x)
 
             assert (probs >= 0).all(), f"Found negative probability: {probs}"
             assert (probs <= 1).all(), f"Found probability > 1: {probs}"
 
     def test_from_checkpoint_missing_file(self, v1_config):
         """Test from_checkpoint() raises error for missing file"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
         with pytest.raises(FileNotFoundError):
             OrcaHelloSRKWDetectorV1.from_checkpoint("/nonexistent/path/model.pt", v1_config)
 
     def test_from_checkpoint(self, model_dir, v1_config):
         """Test loading from checkpoint file"""
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
-
         model_path = model_dir / "model_v1.pt"
         if not model_path.exists():
             pytest.skip(f"Checkpoint not found: {model_path}. Run extraction script first.")
@@ -153,8 +123,8 @@ class TestPredictCallParity:
         if not fastai_available:
             pytest.skip("fastai not available - run in inference-venv to generate references")
 
+        # Late import for fastai-specific test
         from fastai.basic_train import load_learner
-        import torch.nn.functional as F
 
         # Load fastai model
         learner = load_learner(str(model_dir), "model.pkl")
@@ -214,8 +184,6 @@ class TestPredictCallParity:
         model_path = model_dir / "model_v1.pt"
         if not model_path.exists():
             pytest.skip(f"Checkpoint not found: {model_path}. Run extraction script first.")
-
-        from model_v1.inference import OrcaHelloSRKWDetectorV1
 
         # Load references
         references = torch.load(reference_file, weights_only=False)
