@@ -129,6 +129,7 @@ class TestReferenceGeneration:
             pytest.skip("fastai not available - run in inference-venv to generate references")
 
         # Late import for fastai-specific test
+        import json
         from model.fastai_inference import FastAIModel
         from audio.data import AudioItem
 
@@ -178,11 +179,13 @@ class TestReferenceGeneration:
 
         # Store class order for verification
         if hasattr(fastai_model.model.data, 'classes'):
-            references["classes"] = fastai_model.model.data.classes
+            references["classes"] = list(fastai_model.model.data.classes)
             print(f"\nFastAI classes: {fastai_model.model.data.classes}")
 
-        reference_file = reference_dir / f"{wav_name}_segment_preds_reference.pt"
-        torch.save(references, reference_file)
+        # Save as JSON
+        reference_file = reference_dir / f"{wav_name}_segment_preds_reference.json"
+        with open(reference_file, 'w') as f:
+            json.dump(references, f, indent=2)
         print(f"\nSaved reference to: {reference_file}")
 
     def test_generate_file_predictions_reference(
