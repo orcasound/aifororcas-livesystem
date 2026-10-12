@@ -113,7 +113,6 @@ namespace OrcaHello.Console.DataMigration.Services
 
                     if (newItem == null)
                     {
-                        System.Console.WriteLine($"Skipping record #{recordCount} (id: {item.id}): missing location name or unrecognized review state.");
                         continue;
                     }
 
@@ -141,6 +140,7 @@ namespace OrcaHello.Console.DataMigration.Services
         {
             if (string.IsNullOrWhiteSpace(item.location?.name))
             {
+                System.Console.WriteLine($"Skipping record (id: {item.id}): missing location name.");
                 return null;
             }
 
@@ -208,6 +208,7 @@ namespace OrcaHello.Console.DataMigration.Services
             // state blank, which the live API also rejects.
             if (string.IsNullOrWhiteSpace(state))
             {
+                System.Console.WriteLine($"Skipping record (id: {item.id}): unrecognized review state.");
                 return null;
             }
 
