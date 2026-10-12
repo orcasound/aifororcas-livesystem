@@ -113,7 +113,7 @@ namespace OrcaHello.Console.DataMigration.Services
 
                     if (newItem == null)
                     {
-                        System.Console.WriteLine($"Skipping record #{recordCount} (id: {item.id}): missing location name.");
+                        System.Console.WriteLine($"Skipping record #{recordCount} (id: {item.id}): missing location name or unrecognized review state.");
                         continue;
                     }
 
@@ -134,7 +134,8 @@ namespace OrcaHello.Console.DataMigration.Services
 
         /// <summary>
         /// Converts a record from the old schema to the new schema, or returns null if the
-        /// record is missing a location name (and so can't satisfy the live API's validation).
+        /// record is missing a location name or has no recognizable review state (and so
+        /// can't satisfy the live API's validation).
         /// </summary>
         public static Metadata2? ConvertToNewSchema(Metadata item)
         {
@@ -180,25 +181,37 @@ namespace OrcaHello.Console.DataMigration.Services
             // We are moving to a single field to indicate the state of the
             // item (Unreviewed, Positive, Negative, Unknown)
 
+            string state = string.Empty;
+
             if (!item.reviewed)
             {
-                newItem.state = "Unreviewed";
+                state = "Unreviewed";
             }
 
             if (item.reviewed && item.SRKWFound == "yes")
             {
-                newItem.state = "Positive";
+                state = "Positive";
             }
 
             if (item.reviewed && item.SRKWFound == "no")
             {
-                newItem.state = "Negative";
+                state = "Negative";
             }
 
             if (item.reviewed && item.SRKWFound == "don't know")
             {
-                newItem.state = "Unknown";
+                state = "Unknown";
             }
+
+            // A reviewed record whose SRKWFound doesn't match any of the above
+            // (unexpected casing, a legacy value, etc.) would otherwise leave
+            // state blank, which the live API also rejects.
+            if (string.IsNullOrWhiteSpace(state))
+            {
+                return null;
+            }
+
+            newItem.state = state;
 
             return newItem;
         }

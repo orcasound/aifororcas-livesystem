@@ -24,6 +24,22 @@ namespace OrcaHello.Console.DataMigration.Tests.Unit
         }
 
         [TestMethod]
+        public void ReviewedWithUnrecognizedSRKWFound_ConvertToNewSchema_Expect_Null()
+        {
+            var item = new Metadata
+            {
+                id = "1",
+                location = new Location { name = "Lime Kiln" },
+                reviewed = true,
+                SRKWFound = "maybe"
+            };
+
+            var result = DatabaseMigrationService.ConvertToNewSchema(item);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
         public void ValidLocation_ConvertToNewSchema_Expect_MappedFields()
         {
             var item = new Metadata
