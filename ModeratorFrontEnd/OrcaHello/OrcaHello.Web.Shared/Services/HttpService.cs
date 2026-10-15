@@ -125,13 +125,13 @@ namespace OrcaHello.Web.Shared.Services
             await ValidationService.ValidateHttpResponseAsync(responseMessage);
         }
 
+        // This can return null by design (e.g. an empty or "null" response body). Callers'
+        // ValidateResponse<T> (Service.Guards.cs) expects that and throws its own
+        // Null*ResponseException.
         private async Task<T> Deserialize<T>(HttpResponseMessage httpResponseMessage)
         {
             var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
-            var returnObject = System.Text.Json.JsonSerializer.Deserialize<T>(responseString, _jsonSerializeOptions);
-
-            return returnObject ?? throw new InvalidOperationException(
-                $"Failed to deserialize response into type '{typeof(T).Name}'.");
+            return System.Text.Json.JsonSerializer.Deserialize<T>(responseString, _jsonSerializeOptions)!;
         }
 
     }
