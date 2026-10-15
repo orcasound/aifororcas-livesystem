@@ -125,7 +125,7 @@ namespace OrcaHello.Web.Shared.Services
             await ValidationService.ValidateHttpResponseAsync(responseMessage);
         }
 
-        // This can return null by design (e.g. a literal "null" response body). Callers'
+        // This can return null by design (e.g., a literal "null" response body). Callers'
         // ValidateResponse<T> (Service.Guards.cs) expects that and throws its own
         // Null*ResponseException.
         private async Task<T> Deserialize<T>(HttpResponseMessage httpResponseMessage)
